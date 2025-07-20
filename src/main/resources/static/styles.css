@@ -1,0 +1,6 @@
+#column-header-row {
+    cursor: grab;
+}
+#column-header-row th {
+    user-select: none;
+}
