@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>New Interest Rate</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
     <style>
         .section-header {
             background-color: #f8f9fa;
@@ -36,6 +37,69 @@
             padding: 8px 16px;
             border-radius: 4px;
             cursor: pointer;
+        }
+
+        /* Rich Text Editor Styling */
+        .rich-text-container {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            background: white;
+        }
+
+        .ql-toolbar {
+            border: none;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .ql-container {
+            border: none;
+            font-family: inherit;
+        }
+
+        .ql-editor {
+            min-height: 150px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .ql-snow .ql-tooltip {
+            z-index: 1060;
+        }
+
+        /* Custom toolbar styling */
+        .ql-toolbar.ql-snow {
+            background: #f8f9fa;
+        }
+
+        /* Format buttons styling */
+        .format-toolbar {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px 4px 0 0;
+            padding: 8px 12px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .format-btn {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .format-btn:hover {
+            background: #e9ecef;
+        }
+
+        .format-btn.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
         }
     </style>
 </head>
@@ -133,8 +197,9 @@
 
         <!-- Text Section -->
         <div class="card mb-4">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">Text Section</h6>
+                <small class="text-muted">Rich text editor with formatting options</small>
             </div>
             <div class="card-body">
                 <div class="mb-3">
@@ -145,8 +210,10 @@
 
                 <div class="mb-3">
                     <label for="textDescription" class="form-label">Text Description</label>
-                    <textarea id="textDescription" name="textDescription" class="form-control" rows="4"
-                              placeholder="Enter detailed description here. This text will be displayed in the more info section."></textarea>
+                    <div class="rich-text-container">
+                        <div id="textDescriptionEditor" style="min-height: 200px;"></div>
+                    </div>
+                    <textarea id="textDescription" name="textDescription" style="display: none;"></textarea>
                 </div>
             </div>
         </div>
@@ -159,7 +226,50 @@
     </form>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
 <script>
+    // Initialize Quill editor for main text description
+    const quill = new Quill('#textDescriptionEditor', {
+        theme: 'snow',
+        placeholder: 'Enter detailed description here. Use the toolbar above to format your text...',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline', 'strike'],
+                ['blockquote', 'code-block'],
+                [{ 'header': 1 }, { 'header': 2 }],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'script': 'sub'}, { 'script': 'super' }],
+                [{ 'indent': '-1'}, { 'indent': '+1' }],
+                [{ 'direction': 'rtl' }],
+                [{ 'size': ['small', false, 'large', 'huge'] }],
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'font': [] }],
+                [{ 'align': [] }],
+                ['clean'],
+                ['link']
+            ]
+        }
+    });
+
+    // Update hidden textarea when content changes
+    quill.on('text-change', function() {
+        const html = quill.root.innerHTML;
+        document.getElementById('textDescription').value = html;
+    });
+
+
+    function handlePaste(event) {
+        event.preventDefault();
+        const text = (event.originalEvent || event).clipboardData.getData('text/plain');
+        document.execCommand('insertText', false, text);
+    }
+
+    function updateHiddenInput(editor) {
+        const hiddenInput = editor.parentElement.querySelector('input[type="hidden"]');
+        hiddenInput.value = editor.innerHTML;
+    }
+
     function addTableRow() {
         const tableRows = document.getElementById('tableRows');
         const newRow = document.createElement('div');
@@ -171,8 +281,16 @@
                            placeholder="Label" />
                 </div>
                 <div class="col-md-8">
-                    <input type="text" name="tableRowDescriptions[]" class="form-control form-control-sm"
-                           placeholder="Full text description" />
+                    <div class="rich-text-row">
+                        <div class="format-toolbar">
+                            <button type="button" class="format-btn" onclick="formatText(this, 'bold')" title="Bold"><b>B</b></button>
+                            <button type="button" class="format-btn" onclick="formatText(this, 'italic')" title="Italic"><i>I</i></button>
+                            <button type="button" class="format-btn" onclick="formatText(this, 'underline')" title="Underline"><u>U</u></button>
+                            <span style="color: #6c757d; font-size: 12px;">Rich text formatting</span>
+                        </div>
+
+                        <input type="hidden" name="tableRowDescriptions[]" />
+                    </div>
                 </div>
                 <div class="col-md-1">
                     <button type="button" class="remove-row-btn" onclick="removeTableRow(this)" title="Remove row">×</button>
@@ -190,6 +308,17 @@
             alert('At least one row is required');
         }
     }
+
+
+
+    // Before form submission, ensure all rich text content is captured
+    document.querySelector('form').addEventListener('submit', function() {
+        // Update main text description
+        const html = quill.root.innerHTML;
+        document.getElementById('textDescription').value = html;
+
+
+    });
 </script>
 
 </body>
