@@ -8,11 +8,16 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ColumnLabel {
+public class InterestRateFieldValue {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
     private Long id;
-    private String columnKey;
-    private String label;
+
+    private String value;
+
+    @ManyToOne
+    private InterestRate interestRate;
+
+    @ManyToOne
+    private GlobalField globalField;
 }

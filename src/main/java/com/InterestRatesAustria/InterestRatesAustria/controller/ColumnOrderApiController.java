@@ -18,7 +18,7 @@ public class ColumnOrderApiController {
     @PostMapping("/column-order")
     public ResponseEntity<?> saveOrder(@RequestBody List<String> order) {
         ColumnOrder saved = new ColumnOrder(order);
-        saved.setId(1L); // use user ID if needed
+        saved.setId(1L);
         columnOrderRepository.save(saved);
         return ResponseEntity.ok().build();
     }
@@ -26,9 +26,9 @@ public class ColumnOrderApiController {
     @GetMapping("/column-order")
     public ResponseEntity<List<String>> getOrder() {
         return ResponseEntity.ok(
-            columnOrderRepository.findById(1L)
-                .map(ColumnOrder::getColumnKeys)
-                .orElse(List.of("interestRate", "duration", "provider", "paymentFrequency", "interestType", "actions"))
+                columnOrderRepository.findById(1L)
+                        .map(ColumnOrder::getColumnKeys)
+                        .orElse(List.of("interestRate", "duration", "provider", "paymentFrequency", "interestType", "actions"))
         );
     }
 }

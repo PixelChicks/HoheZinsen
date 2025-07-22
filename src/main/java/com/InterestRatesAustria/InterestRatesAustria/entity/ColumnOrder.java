@@ -9,7 +9,9 @@ import java.util.List;
 @Data
 @Getter
 @Setter
-@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ColumnOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,24 +21,7 @@ public class ColumnOrder {
     @ElementCollection
     private List<String> columnKeys;
 
-    public ColumnOrder() {}
     public ColumnOrder(List<String> columnKeys) {
-        this.columnKeys = columnKeys;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public List<String> getColumnKeys() {
-        return columnKeys;
-    }
-
-    public void setColumnKeys(List<String> columnKeys) {
         this.columnKeys = columnKeys;
     }
 }

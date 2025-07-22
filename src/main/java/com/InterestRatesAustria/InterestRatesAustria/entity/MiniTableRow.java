@@ -5,10 +5,9 @@ import lombok.*;
 
 @Entity
 @Data
-@Getter
-@Setter
-@ToString
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class MiniTableRow {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,28 +16,4 @@ public class MiniTableRow {
 
     private String label;
     private String description;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
-    public void setLabel(String label) {
-        this.label = label;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 }
