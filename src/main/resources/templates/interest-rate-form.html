@@ -101,6 +101,23 @@
             color: white;
             border-color: #007bff;
         }
+
+        .simple-editor {
+            border: 1px solid #dee2e6;
+            border-radius: 0 0 4px 4px;
+            min-height: 10px;
+            padding: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+        }
+
+        .simple-editor:focus {
+            outline: none;
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -181,8 +198,21 @@
                                            placeholder="Label" />
                                 </div>
                                 <div class="col-md-8">
-                                    <input type="text" name="tableRowDescriptions[]" class="form-control form-control-sm"
-                                           placeholder="Full text description" />
+                                    <div class="rich-text-row">
+                                        <div class="format-toolbar">
+                                            <button type="button" class="format-btn" onclick="formatText(this, 'bold')" title="Bold"><b>B</b></button>
+                                            <button type="button" class="format-btn" onclick="formatText(this, 'italic')" title="Italic"><i>I</i></button>
+                                            <button type="button" class="format-btn" onclick="formatText(this, 'underline')" title="Underline"><u>U</u></button>
+                                            <span style="color: #6c757d; font-size: 12px;">Rich text formatting</span>
+                                        </div>
+                                        <div class="simple-editor"
+                                             contenteditable="true"
+                                             data-name="tableRowDescriptions[]"
+                                             placeholder="Full text description with formatting..."
+                                             onpaste="handlePaste(event)"
+                                             onblur="updateHiddenInput(this)"></div>
+                                        <input type="hidden" name="tableRowDescriptions[]" />
+                                    </div>
                                 </div>
                                 <div class="col-md-1">
                                     <button type="button" class="remove-row-btn" onclick="removeTableRow(this)" title="Remove row">×</button>
@@ -258,6 +288,18 @@
         document.getElementById('textDescription').value = html;
     });
 
+    // Simple rich text functions for table rows
+    function formatText(button, command) {
+        const editor = button.closest('.rich-text-row').querySelector('.simple-editor');
+        editor.focus();
+        document.execCommand(command, false, null);
+
+        // Toggle active state
+        button.classList.toggle('active');
+
+        // Update hidden input
+        updateHiddenInput(editor);
+    }
 
     function handlePaste(event) {
         event.preventDefault();
@@ -288,7 +330,12 @@
                             <button type="button" class="format-btn" onclick="formatText(this, 'underline')" title="Underline"><u>U</u></button>
                             <span style="color: #6c757d; font-size: 12px;">Rich text formatting</span>
                         </div>
-
+                        <div class="simple-editor"
+                             contenteditable="true"
+                             data-name="tableRowDescriptions[]"
+                             placeholder="Full text description with formatting..."
+                             onpaste="handlePaste(event)"
+                             onblur="updateHiddenInput(this)"></div>
                         <input type="hidden" name="tableRowDescriptions[]" />
                     </div>
                 </div>
@@ -309,7 +356,15 @@
         }
     }
 
-
+    // Initialize all existing contenteditable areas
+    document.addEventListener('DOMContentLoaded', function() {
+        const editors = document.querySelectorAll('.simple-editor');
+        editors.forEach(editor => {
+            editor.addEventListener('input', function() {
+                updateHiddenInput(this);
+            });
+        });
+    });
 
     // Before form submission, ensure all rich text content is captured
     document.querySelector('form').addEventListener('submit', function() {
@@ -317,7 +372,11 @@
         const html = quill.root.innerHTML;
         document.getElementById('textDescription').value = html;
 
-
+        // Update all table row descriptions
+        const editors = document.querySelectorAll('.simple-editor');
+        editors.forEach(editor => {
+            updateHiddenInput(editor);
+        });
     });
 </script>
 
