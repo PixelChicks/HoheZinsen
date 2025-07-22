@@ -35,6 +35,10 @@ public class InterestRateController {
         List<InterestRate> interestRates = interestRateRepository.findAll();
         List<GlobalField> globalFields = globalFieldRepository.findAll();
 
+        List<InterestRateDTO> interestRateDTOs = interestRates.stream()
+                .map(InterestRateDTO::fromEntity)
+                .collect(Collectors.toList());
+
         Map<Long, Map<Long, String>> rateFieldValuesMap = new HashMap<>();
 
         for (InterestRate rate : interestRates) {
@@ -46,7 +50,7 @@ public class InterestRateController {
             rateFieldValuesMap.put(rate.getId(), fieldValues);
         }
 
-        model.addAttribute("interestRates", interestRates);
+        model.addAttribute("interestRates", interestRateDTOs);
         model.addAttribute("globalFields", globalFields);
         model.addAttribute("rateFieldValuesMap", rateFieldValuesMap);
         model.addAttribute("newField", new GlobalField());
@@ -63,7 +67,7 @@ public class InterestRateController {
             InterestRateFieldValue fv = new InterestRateFieldValue();
             fv.setInterestRate(rate);
             fv.setGlobalField(field);
-            fv.setValue(""); // default blank
+            fv.setValue("");
             fieldValueRepository.save(fv);
         }
 

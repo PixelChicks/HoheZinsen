@@ -12,132 +12,187 @@
             user-select: none;
         }
 
-        .more-info-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-        }
-
-        .more-info-content {
-            position: relative;
+        .rate-card {
             background: white;
-            margin: 2% auto;
-            padding: 0;
-            width: 90%;
-            max-width: 800px;
-            border-radius: 8px;
-            max-height: 90vh;
-            overflow-y: auto;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin: 10px 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
 
-        .more-info-header {
-            background: linear-gradient(135deg, #28a745, #20c997);
-            color: white;
-            padding: 15px 20px;
-            border-radius: 8px 8px 0 0;
+        .rate-header {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-bottom: 1px solid #dee2e6;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .close-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 0;
-            width: 30px;
-            height: 30px;
+        .rate-main-info {
             display: flex;
             align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: background-color 0.2s;
+            gap: 20px;
         }
 
-        .close-btn:hover {
-            background-color: rgba(255, 255, 255, 0.2);
+        .rate-percentage {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #00b894;
+            margin: 0;
         }
 
-        .rate-info-section {
-            background: #f8f9fa;
-            padding: 15px;
-            border-bottom: 1px solid #dee2e6;
+        .rate-percentage-symbol {
+            font-size: 1.5rem;
+            color: #00b894;
+            vertical-align: top;
         }
 
-        .rate-badges {
+        .rate-details {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .rate-detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .rate-detail-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 2px;
+        }
+
+        .rate-provider {
+            background: #dc3545;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .rate-actions {
             display: flex;
             gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 10px;
         }
 
-        .rate-badge {
-            background: white;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .rate-badge.primary {
-            background: #007bff;
+        .btn-mehr-info {
+            background: #17a2b8;
             color: white;
-            font-weight: bold;
-            font-size: 1.1em;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .mini-table {
-            background: white;
-            border: 1px solid #dee2e6;
+        .btn-mehr-info:hover {
+            background: #138496;
+        }
+
+        .btn-angebot {
+            background: #00b894;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-angebot:hover {
+            background: #00a085;
+        }
+
+        .rate-expanded-content {
+            display: none;
+            padding: 0;
+        }
+
+        .rate-expanded-content.show {
+            display: block;
+        }
+
+        .expanded-section {
+            padding: 20px;
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        .expanded-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #00b894;
+        }
+
+        .info-table {
+            background: #f8f9fa;
             border-radius: 6px;
             overflow: hidden;
         }
 
-        .mini-table-row {
+        .info-table-row {
             display: flex;
-            border-bottom: 1px solid #f1f1f1;
+            border-bottom: 1px solid #dee2e6;
         }
 
-        .mini-table-row:last-child {
+        .info-table-row:last-child {
             border-bottom: none;
         }
 
-        .mini-table-label {
-            background: #f8f9fa;
+        .info-table-label {
+            background: #e9ecef;
             padding: 12px 15px;
             font-weight: 600;
-            min-width: 150px;
-            border-right: 1px solid #dee2e6;
+            min-width: 200px;
             color: #495057;
+            border-right: 1px solid #dee2e6;
         }
 
-        .mini-table-value {
+        .info-table-value {
             padding: 12px 15px;
             flex: 1;
             color: #6c757d;
         }
 
-        .text-section {
+        .text-content {
             background: #f8f9fa;
-            border: 1px solid #dee2e6;
             border-radius: 6px;
             padding: 20px;
             line-height: 1.6;
+            color: #495057;
         }
 
-        .section-title {
+        .close-btn {
+            background: none;
+            border: none;
+            color: #6c757d;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+            background: #e9ecef;
             color: #495057;
-            font-weight: 600;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #28a745;
         }
 
         .mehr-info-btn {
@@ -146,7 +201,7 @@
             border: none;
             padding: 6px 12px;
             border-radius: 4px;
-            font-size: 0.85em;
+            font-size: 0.85rem;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -278,132 +333,170 @@
     </div>
 </div>
 
-<!-- More Info Modal -->
-<div id="moreInfoModal" class="more-info-modal">
-    <div class="more-info-content">
-        <div class="more-info-header">
-            <h4 id="modalTitle">Interest Rate Details</h4>
-            <button class="close-btn" onclick="closeMoreInfo()">&times;</button>
-        </div>
-
-        <div class="rate-info-section">
-            <h5 id="modalRateTitle">Rate Information</h5>
-            <div class="rate-badges" id="modalRateBadges">
-                <!-- Rate badges will be populated here -->
-            </div>
-        </div>
-
-        <div class="p-4">
-            <!-- Table Section -->
-            <div id="modalTableSection" style="display: none;">
-                <h5 class="section-title" id="modalTableTitle"></h5>
-                <div class="mini-table mb-4" id="modalTable">
-                    <!-- Table rows will be populated here -->
-                </div>
-            </div>
-
-            <!-- Text Section -->
-            <div id="modalTextSection" style="display: none;">
-                <h5 class="section-title" id="modalTextTitle"></h5>
-                <div class="text-section" id="modalTextContent">
-                    <!-- Text content will be populated here -->
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script th:inline="javascript">
     // Pass server data to JavaScript
-    const interestRatesData = /*[[${interestRates}]]*/ [];
+    const interestRatesData = /*[[${interestRates}]]*/ [
+        // Mock data for demonstration
+        {
+            id: 1,
+            interestRate: "8,00",
+            duration: "3 years",
+            provider: "IMMOBILIENKREDITE",
+            paymentFrequency: "monthly",
+            interestType: "24,000€",
+            moreInfo: {
+                tableTitle: "Table Section Title",
+                miniTableRows: [
+                    { label: "Label", description: "Full text description" },
+                    { label: "Label", description: "Full text description" },
+                    { label: "Label", description: "Full text description" },
+                    { label: "Label", description: "Full text description" }
+                ],
+                textTitle: "Text Section Title",
+                textDescription: "Example text - Einlagen inklusive aufgelaufener Zinserträge sind bis zu einem Betrag von 100.000 EUR je Kunde und je Bank gesetzlich durch den italienischen Einlagensicherungsfonds abgesichert. Innerhalb der Europäischen Union sind die Mindestanforderungen in allen Mitgliedsstaaten harmonisiert durch die Richtlinie 94/19/EG, 2009/14/EG und 2014/49/EU. Zu beachten ist, dass sich diese Absicherung auf die gesamten Einlagen eines Kunden bei einer Bank bezieht. Dies ist dann relevant, wenn nicht nur über den WeltSparen vermittelte Einlagen eines Kunden bei einer bestimmten Bank angelegt werden, sondern noch weitere Einlagen dieses Kunden bei der jeweiligen Bank angelegt wurden."
+            }
+        },
+        {
+            id: 2,
+            interestRate: "6,50",
+            duration: "5 years",
+            provider: "IMMOBILIENKREDITE",
+            paymentFrequency: "End of period",
+            interestType: "Variable",
+            moreInfo: {
+                tableTitle: "Rate Details",
+                miniTableRows: [
+                    { label: "Minimum Deposit", description: "1,000€" },
+                    { label: "Maximum Deposit", description: "100,000€" }
+                ],
+                textTitle: "Terms and Conditions",
+                textDescription: "This is a variable rate product with end-of-period payment structure."
+            }
+        },
+        {
+            id: 3,
+            interestRate: "2,90",
+            duration: "5 years",
+            provider: "IMMOBILIENKREDITE",
+            paymentFrequency: "End of period",
+            interestType: "1450€",
+            moreInfo: null
+        }
+    ];
+
+    let currentExpandedCard = null;
 
     function showMoreInfo(rateId) {
         const rate = interestRatesData.find(r => r.id === rateId);
         if (!rate || !rate.moreInfo) return;
 
-        const modal = document.getElementById('moreInfoModal');
+        // Close any currently expanded card
+        if (currentExpandedCard && currentExpandedCard !== rateId) {
+            closeExpandedCard(currentExpandedCard);
+        }
+
+        // Check if card already exists
+        let existingCard = document.getElementById(`rateCard_${rateId}`);
+        if (existingCard) {
+            existingCard.remove();
+            if (currentExpandedCard === rateId) {
+                currentExpandedCard = null;
+                return;
+            }
+        }
+
+        // Find the table row that was clicked
+        const tableRows = document.querySelectorAll('tbody tr');
+        let targetRow = null;
+
+        tableRows.forEach(row => {
+            const button = row.querySelector('.mehr-info-btn');
+            if (button && button.onclick && button.onclick.toString().includes(`showMoreInfo(${rateId})`)) {
+                targetRow = row;
+            }
+        });
+
+        if (!targetRow) return;
+
+        // Create new card
+        const card = createRateCard(rate);
+
+        // Create a new table row to hold the card
+        const cardRow = document.createElement('tr');
+        cardRow.id = `rateCardRow_${rateId}`;
+        cardRow.innerHTML = `<td colspan="100%" style="padding: 0; background: transparent;"></td>`;
+
+        // Insert the card into the cell
+        cardRow.firstChild.appendChild(card);
+
+        // Insert the card row after the clicked row
+        targetRow.parentNode.insertBefore(cardRow, targetRow.nextSibling);
+
+        // Scroll to the card
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        currentExpandedCard = rateId;
+    }
+
+    function createRateCard(rate) {
+        const card = document.createElement('div');
+        card.className = 'rate-card';
+        card.id = `rateCard_${rate.id}`;
+
         const moreInfo = rate.moreInfo;
 
-        // Set modal title
-        document.getElementById('modalTitle').textContent = `${rate.provider} - Interest Rate Details`;
+        let tableHTML = '';
+        if (moreInfo.tableTitle && moreInfo.miniTableRows && moreInfo.miniTableRows.length > 0) {
+            tableHTML = `
+                <div class="expanded-section">
+                    <h5 class="section-title">${moreInfo.tableTitle}</h5>
+                    <div class="info-table">
+                        ${moreInfo.miniTableRows.map(row => `
+                            <div class="info-table-row">
+                                <div class="info-table-label">${row.label || ''}</div>
+                                <div class="info-table-value">${row.description || ''}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
 
-        // Populate rate badges
-        const badgesContainer = document.getElementById('modalRateBadges');
-        badgesContainer.innerHTML = `
-            <div class="rate-badge primary">${rate.interestRate}</div>
-            <div class="rate-badge">${rate.duration}</div>
-            <div class="rate-badge">${rate.provider}</div>
-            <div class="rate-badge">${rate.paymentFrequency || 'N/A'}</div>
-            <div class="rate-badge">${rate.interestType || 'N/A'}</div>
+        let textHTML = '';
+        if (moreInfo.textTitle || moreInfo.textDescription) {
+            textHTML = `
+                <div class="expanded-section">
+                    ${moreInfo.textTitle ? `<h5 class="section-title">${moreInfo.textTitle}</h5>` : ''}
+                    <div class="text-content">${moreInfo.textDescription || ''}</div>
+                </div>
+            `;
+        }
+
+        card.innerHTML = `
+
+            <div class="rate-expanded-content show">
+                ${tableHTML}
+                ${textHTML}
+            </div>
         `;
 
-        // Show/hide table section
-        const tableSection = document.getElementById('modalTableSection');
-        const tableTitle = document.getElementById('modalTableTitle');
-        const modalTable = document.getElementById('modalTable');
+        return card;
+    }
 
-        if (moreInfo.tableTitle && moreInfo.miniTableRows && moreInfo.miniTableRows.length > 0) {
-            tableTitle.textContent = moreInfo.tableTitle;
-
-            let tableHTML = '';
-            moreInfo.miniTableRows.forEach(row => {
-                if (row.label || row.description) {
-                    tableHTML += `
-                        <div class="mini-table-row">
-                            <div class="mini-table-label">${row.label || ''}</div>
-                            <div class="mini-table-value">${row.description || ''}</div>
-                        </div>
-                    `;
-                }
-            });
-
-            modalTable.innerHTML = tableHTML;
-            tableSection.style.display = 'block';
-        } else {
-            tableSection.style.display = 'none';
-        }
-
-        // Show/hide text section
-        const textSection = document.getElementById('modalTextSection');
-        const textTitle = document.getElementById('modalTextTitle');
-        const textContent = document.getElementById('modalTextContent');
-
-        if (moreInfo.textTitle || moreInfo.textDescription) {
-            if (moreInfo.textTitle) {
-                textTitle.textContent = moreInfo.textTitle;
-                textTitle.style.display = 'block';
-            } else {
-                textTitle.style.display = 'none';
+    function closeExpandedCard(rateId) {
+        const cardRow = document.getElementById(`rateCardRow_${rateId}`);
+        if (cardRow) {
+            cardRow.remove();
+            if (currentExpandedCard === rateId) {
+                currentExpandedCard = null;
             }
-
-            textContent.textContent = moreInfo.textDescription || '';
-            textSection.style.display = 'block';
-        } else {
-            textSection.style.display = 'none';
         }
-
-        // Show modal
-        modal.style.display = 'block';
-        document.body.style.overflow = 'hidden';
     }
 
-    function closeMoreInfo() {
-        const modal = document.getElementById('moreInfoModal');
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-
-    // Close modal when clicking outside
-    document.getElementById('moreInfoModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeMoreInfo();
-        }
-    });
-
-    // Close modal with Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeMoreInfo();
+    // Close expanded card when clicking outside
+    document.addEventListener('click', function(e) {
+        if (currentExpandedCard && !e.target.closest('.rate-card') && !e.target.closest('.mehr-info-btn')) {
+            // Don't auto-close, let user explicitly close
         }
     });
 </script>
