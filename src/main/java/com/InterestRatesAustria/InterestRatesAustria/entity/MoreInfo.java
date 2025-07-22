@@ -1,8 +1,12 @@
 package com.InterestRatesAustria.InterestRatesAustria.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -15,10 +19,14 @@ public class MoreInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
+
     private String tableTitle;
     private String textTitle;
+
+    @Column(columnDefinition = "TEXT")
     private String textDescription;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<MiniTableRow> miniTableRows;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "more_info_id")
+    private List<MiniTableRow> miniTableRows = new ArrayList<>();
 }

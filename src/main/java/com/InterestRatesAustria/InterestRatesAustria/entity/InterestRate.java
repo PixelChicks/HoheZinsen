@@ -1,7 +1,10 @@
 package com.InterestRatesAustria.InterestRatesAustria.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,9 +26,10 @@ public class InterestRate {
     private String paymentFrequency;
     private String interestType;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "more_info_id")
     private MoreInfo moreInfo;
 
-    @OneToMany(mappedBy = "interestRate", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "interestRate", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<InterestRateFieldValue> fieldValues = new ArrayList<>();
 }

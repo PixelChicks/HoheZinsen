@@ -4,6 +4,40 @@
     <meta charset="UTF-8">
     <title>New Interest Rate</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .section-header {
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 10px 15px;
+            margin: 20px 0 10px 0;
+            border-radius: 4px;
+        }
+        .mini-table-row {
+            background-color: #f8f9fa;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+        .remove-row-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .add-row-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body class="bg-light">
 <div class="container py-5">
@@ -12,36 +46,43 @@
 
     <form th:action="@{/interest-rate/create}" th:object="${interestRate}" method="post" class="mt-4">
 
+        <!-- Basic Interest Rate Fields -->
+        <div class="section-header">
+            <h5 class="mb-0">Basic Information</h5>
+        </div>
+
         <div class="row g-3 mb-3">
             <div class="col-md-4">
-                <label class="form-label">Interest Rate</label>
-                <input type="text" th:field="*{interestRate}" class="form-control" required />
+                <label class="form-label">Interest Rate *</label>
+                <input type="text" th:field="*{interestRate}" class="form-control" required placeholder="e.g. 8,00%" />
             </div>
 
             <div class="col-md-4">
-                <label class="form-label">Duration</label>
-                <input type="text" th:field="*{duration}" class="form-control" required />
+                <label class="form-label">Duration *</label>
+                <input type="text" th:field="*{duration}" class="form-control" required placeholder="e.g. 3 years" />
             </div>
 
             <div class="col-md-4">
-                <label class="form-label">Provider</label>
-                <input type="text" th:field="*{provider}" class="form-control" required />
+                <label class="form-label">Provider *</label>
+                <input type="text" th:field="*{provider}" class="form-control" required placeholder="e.g. IMMOBILIENRENTE" />
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">Payment Frequency</label>
-                <input type="text" th:field="*{paymentFrequency}" class="form-control" />
+                <input type="text" th:field="*{paymentFrequency}" class="form-control" placeholder="e.g. monthly" />
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">Interest Type</label>
-                <input type="text" th:field="*{interestType}" class="form-control" />
+                <input type="text" th:field="*{interestType}" class="form-control" placeholder="e.g. 24.000€" />
             </div>
         </div>
 
-        <hr />
+        <!-- Extra Fields -->
+        <div class="section-header" th:if="${globalFields != null && !globalFields.empty}">
+            <h5 class="mb-0">Additional Fields</h5>
+        </div>
 
-        <h5>Extra Fields</h5>
         <div class="row g-3 mb-3" th:each="field : ${globalFields}">
             <div class="col-md-6">
                 <label th:for="${'extra_' + field.id}" th:text="${field.label}" class="form-label"></label>
@@ -49,11 +90,107 @@
             </div>
         </div>
 
+        <!-- More Info Section -->
+        <div class="section-header">
+            <h5 class="mb-0">Additional Information</h5>
+        </div>
+
+        <!-- Table Section -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">Table Section</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="tableTitle" class="form-label">Table Section Title</label>
+                    <input type="text" id="tableTitle" name="tableTitle" class="form-control"
+                           placeholder="e.g. Table Section Title" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Table Rows</label>
+                    <div id="tableRows">
+                        <div class="mini-table-row">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-md-3">
+                                    <input type="text" name="tableRowLabels[]" class="form-control form-control-sm"
+                                           placeholder="Label" />
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="text" name="tableRowDescriptions[]" class="form-control form-control-sm"
+                                           placeholder="Full text description" />
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" class="remove-row-btn" onclick="removeTableRow(this)" title="Remove row">×</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="add-row-btn mt-2" onclick="addTableRow()">+ Add Row</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Text Section -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">Text Section</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="textTitle" class="form-label">Text Section Title</label>
+                    <input type="text" id="textTitle" name="textTitle" class="form-control"
+                           placeholder="e.g. Text Section Title" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="textDescription" class="form-label">Text Description</label>
+                    <textarea id="textDescription" name="textDescription" class="form-control" rows="4"
+                              placeholder="Enter detailed description here. This text will be displayed in the more info section."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
         <div class="mt-4">
-            <button class="btn btn-success">Create Interest Rate</button>
-            <a th:href="@{ / }" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-success btn-lg">Create Interest Rate</button>
+            <a th:href="@{/}" class="btn btn-secondary btn-lg ms-2">Cancel</a>
         </div>
     </form>
 </div>
+
+<script>
+    function addTableRow() {
+        const tableRows = document.getElementById('tableRows');
+        const newRow = document.createElement('div');
+        newRow.className = 'mini-table-row';
+        newRow.innerHTML = `
+            <div class="row g-2 align-items-center">
+                <div class="col-md-3">
+                    <input type="text" name="tableRowLabels[]" class="form-control form-control-sm"
+                           placeholder="Label" />
+                </div>
+                <div class="col-md-8">
+                    <input type="text" name="tableRowDescriptions[]" class="form-control form-control-sm"
+                           placeholder="Full text description" />
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="remove-row-btn" onclick="removeTableRow(this)" title="Remove row">×</button>
+                </div>
+            </div>
+        `;
+        tableRows.appendChild(newRow);
+    }
+
+    function removeTableRow(button) {
+        const tableRows = document.getElementById('tableRows');
+        if (tableRows.children.length > 1) {
+            button.closest('.mini-table-row').remove();
+        } else {
+            alert('At least one row is required');
+        }
+    }
+</script>
+
 </body>
 </html>

@@ -1,11 +1,7 @@
 package com.InterestRatesAustria.InterestRatesAustria.controller;
 
-import com.InterestRatesAustria.InterestRatesAustria.entity.GlobalField;
-import com.InterestRatesAustria.InterestRatesAustria.entity.InterestRate;
-import com.InterestRatesAustria.InterestRatesAustria.entity.InterestRateFieldValue;
-import com.InterestRatesAustria.InterestRatesAustria.repository.GlobalFieldRepository;
-import com.InterestRatesAustria.InterestRatesAustria.repository.InterestRateFieldValueRepository;
-import com.InterestRatesAustria.InterestRatesAustria.repository.InterestRateRepository;
+import com.InterestRatesAustria.InterestRatesAustria.entity.*;
+import com.InterestRatesAustria.InterestRatesAustria.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,6 +10,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +25,10 @@ public class InterestRateController {
     private GlobalFieldRepository globalFieldRepository;
     @Autowired
     private InterestRateFieldValueRepository fieldValueRepository;
+    @Autowired
+    private MoreInfoRepository moreInfoRepository;
+    @Autowired
+    private MiniTableRowRepository miniTableRowRepository;
 
     @GetMapping("/")
     public String showRates(Model model) {
@@ -52,7 +53,6 @@ public class InterestRateController {
 
         return "index";
     }
-
 
     @PostMapping("/fields/add")
     public String addGlobalField(@ModelAttribute GlobalField field) {
@@ -107,6 +107,50 @@ public class InterestRateController {
                 fv.setValue(value);
                 fieldValueRepository.save(fv);
             }
+        }
+
+        String tableTitle = requestParams.get("tableTitle");
+        String textTitle = requestParams.get("textTitle");
+        String textDescription = requestParams.get("textDescription");
+
+        if (tableTitle != null || textTitle != null || textDescription != null) {
+            MoreInfo moreInfo = new MoreInfo();
+            moreInfo.setTableTitle(tableTitle);
+            moreInfo.setTextTitle(textTitle);
+            moreInfo.setTextDescription(textDescription);
+
+            List<MiniTableRow> miniTableRows = new ArrayList<>();
+            String[] tableRowLabels = requestParams.get("tableRowLabels[]") != null ?
+                    requestParams.get("tableRowLabels[]").split(",") : new String[0];
+            String[] tableRowDescriptions = requestParams.get("tableRowDescriptions[]") != null ?
+                    requestParams.get("tableRowDescriptions[]").split(",") : new String[0];
+
+            List<String> labels = new ArrayList<>();
+            List<String> descriptions = new ArrayList<>();
+
+            for (Map.Entry<String, String> entry : requestParams.entrySet()) {
+                if (entry.getKey().equals("tableRowLabels[]")) {
+                    labels.add(entry.getValue());
+                } else if (entry.getKey().equals("tableRowDescriptions[]")) {
+                    descriptions.add(entry.getValue());
+                }
+            }
+
+            int minSize = Math.min(labels.size(), descriptions.size());
+            for (int i = 0; i < minSize; i++) {
+                if (!labels.get(i).trim().isEmpty() || !descriptions.get(i).trim().isEmpty()) {
+                    MiniTableRow row = new MiniTableRow();
+                    row.setLabel(labels.get(i).trim());
+                    row.setDescription(descriptions.get(i).trim());
+                    miniTableRows.add(row);
+                }
+            }
+
+            moreInfo.setMiniTableRows(miniTableRows);
+            MoreInfo savedMoreInfo = moreInfoRepository.save(moreInfo);
+
+            saved.setMoreInfo(savedMoreInfo);
+            interestRateRepository.save(saved);
         }
 
         return "redirect:/";
