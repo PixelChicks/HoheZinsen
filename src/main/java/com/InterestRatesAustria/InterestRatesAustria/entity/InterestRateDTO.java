@@ -8,21 +8,11 @@ import java.util.stream.Collectors;
 @Data
 public class InterestRateDTO {
     private Long id;
-    private String interestRate;
-    private String duration;
-    private String provider;
-    private String paymentFrequency;
-    private String interestType;
     private MoreInfoDTO moreInfo;
 
     public static InterestRateDTO fromEntity(InterestRate entity) {
         InterestRateDTO dto = new InterestRateDTO();
         dto.setId(entity.getId());
-        dto.setInterestRate(entity.getInterestRate());
-        dto.setDuration(entity.getDuration());
-        dto.setProvider(entity.getProvider());
-        dto.setPaymentFrequency(entity.getPaymentFrequency());
-        dto.setInterestType(entity.getInterestType());
 
         if (entity.getMoreInfo() != null) {
             dto.setMoreInfo(MoreInfoDTO.fromEntity(entity.getMoreInfo()));

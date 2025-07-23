@@ -153,25 +153,4 @@ public class InterestRateController {
 
         return "redirect:/";
     }
-
-
-    @PostMapping("/interest-rates/update")
-    public String updateInterestRateField(@RequestParam Long rateId,
-                                          @RequestParam String fieldName,
-                                          @RequestParam String value) {
-
-        InterestRate rate = interestRateRepository.findById(rateId).orElseThrow();
-
-        switch (fieldName) {
-            case "interestRate" -> rate.setInterestRate(value);
-            case "duration" -> rate.setDuration(value);
-            case "provider" -> rate.setProvider(value);
-            case "paymentFrequency" -> rate.setPaymentFrequency(value);
-            case "interestType" -> rate.setInterestType(value);
-            default -> throw new IllegalArgumentException("Invalid field name: " + fieldName);
-        }
-
-        interestRateRepository.save(rate);
-        return "redirect:/";
-    }
 }

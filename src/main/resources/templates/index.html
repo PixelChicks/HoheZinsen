@@ -247,65 +247,14 @@
         <table class="table table-bordered table-striped text-center align-middle">
             <thead class="table-dark">
             <tr id="column-header-row">
-                <th>Interest Rate</th>
-                <th>Duration</th>
-                <th>Provider</th>
-                <th>Frequency</th>
-                <th>Type</th>
                 <!-- Dynamic Headers -->
                 <th th:each="field : ${globalFields}" th:text="${field.label}"></th>
-                <th>Actions</th>
+                <th></th>
             </tr>
             </thead>
 
             <tbody>
             <tr th:each="rate : ${interestRates}">
-                <!-- Editable built-in fields -->
-                <td>
-                    <form th:action="@{/interest-rates/update}" method="post" class="d-flex justify-content-center">
-                        <input type="hidden" name="rateId" th:value="${rate.id}" />
-                        <input type="hidden" name="fieldName" value="interestRate" />
-                        <input type="text" name="value" th:value="${rate.interestRate}"
-                               class="form-control form-control-sm text-center" style="width: 100px;" />
-                    </form>
-                </td>
-
-                <td>
-                    <form th:action="@{/interest-rates/update}" method="post" class="d-flex justify-content-center">
-                        <input type="hidden" name="rateId" th:value="${rate.id}" />
-                        <input type="hidden" name="fieldName" value="duration" />
-                        <input type="text" name="value" th:value="${rate.duration}"
-                               class="form-control form-control-sm text-center" style="width: 100px;" />
-                    </form>
-                </td>
-
-                <td>
-                    <form th:action="@{/interest-rates/update}" method="post" class="d-flex justify-content-center">
-                        <input type="hidden" name="rateId" th:value="${rate.id}" />
-                        <input type="hidden" name="fieldName" value="provider" />
-                        <input type="text" name="value" th:value="${rate.provider}"
-                               class="form-control form-control-sm text-center" style="width: 120px;" />
-                    </form>
-                </td>
-
-                <td>
-                    <form th:action="@{/interest-rates/update}" method="post" class="d-flex justify-content-center">
-                        <input type="hidden" name="rateId" th:value="${rate.id}" />
-                        <input type="hidden" name="fieldName" value="paymentFrequency" />
-                        <input type="text" name="value" th:value="${rate.paymentFrequency}"
-                               class="form-control form-control-sm text-center" style="width: 100px;" />
-                    </form>
-                </td>
-
-                <td>
-                    <form th:action="@{/interest-rates/update}" method="post" class="d-flex justify-content-center">
-                        <input type="hidden" name="rateId" th:value="${rate.id}" />
-                        <input type="hidden" name="fieldName" value="interestType" />
-                        <input type="text" name="value" th:value="${rate.interestType}"
-                               class="form-control form-control-sm text-center" style="width: 100px;" />
-                    </form>
-                </td>
-
                 <!-- Dynamic fields -->
                 <td th:each="field : ${globalFields}">
                     <form th:action="@{/field-values/update}" method="post" class="d-flex justify-content-center">
@@ -339,11 +288,6 @@
         // Mock data for demonstration
         {
             id: 1,
-            interestRate: "8,00",
-            duration: "3 years",
-            provider: "IMMOBILIENKREDITE",
-            paymentFrequency: "monthly",
-            interestType: "24,000€",
             moreInfo: {
                 tableTitle: "Table Section Title",
                 miniTableRows: [
@@ -358,11 +302,7 @@
         },
         {
             id: 2,
-            interestRate: "6,50",
-            duration: "5 years",
-            provider: "IMMOBILIENKREDITE",
-            paymentFrequency: "End of period",
-            interestType: "Variable",
+
             moreInfo: {
                 tableTitle: "Rate Details",
                 miniTableRows: [
@@ -375,11 +315,7 @@
         },
         {
             id: 3,
-            interestRate: "2,90",
-            duration: "5 years",
-            provider: "IMMOBILIENKREDITE",
-            paymentFrequency: "End of period",
-            interestType: "1450€",
+
             moreInfo: null
         }
     ];

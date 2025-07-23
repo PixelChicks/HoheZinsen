@@ -20,12 +20,6 @@ public class InterestRate {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    private String interestRate;
-    private String duration;
-    private String provider;
-    private String paymentFrequency;
-    private String interestType;
-
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "more_info_id")
     private MoreInfo moreInfo;

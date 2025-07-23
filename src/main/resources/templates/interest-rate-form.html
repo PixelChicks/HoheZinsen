@@ -132,38 +132,6 @@
             <h5 class="mb-0">Basic Information</h5>
         </div>
 
-        <div class="row g-3 mb-3">
-            <div class="col-md-4">
-                <label class="form-label">Interest Rate *</label>
-                <input type="text" th:field="*{interestRate}" class="form-control" required placeholder="e.g. 8,00%" />
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Duration *</label>
-                <input type="text" th:field="*{duration}" class="form-control" required placeholder="e.g. 3 years" />
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Provider *</label>
-                <input type="text" th:field="*{provider}" class="form-control" required placeholder="e.g. IMMOBILIENRENTE" />
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Payment Frequency</label>
-                <input type="text" th:field="*{paymentFrequency}" class="form-control" placeholder="e.g. monthly" />
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Interest Type</label>
-                <input type="text" th:field="*{interestType}" class="form-control" placeholder="e.g. 24.000€" />
-            </div>
-        </div>
-
-        <!-- Extra Fields -->
-        <div class="section-header" th:if="${globalFields != null && !globalFields.empty}">
-            <h5 class="mb-0">Additional Fields</h5>
-        </div>
-
         <div class="row g-3 mb-3" th:each="field : ${globalFields}">
             <div class="col-md-6">
                 <label th:for="${'extra_' + field.id}" th:text="${field.label}" class="form-label"></label>
