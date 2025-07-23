@@ -74,6 +74,21 @@ public class InterestRateController {
         return "redirect:/";
     }
 
+    @PostMapping("/fields/update")
+    public String updateGlobalField(@RequestParam Long fieldId,
+                                    @RequestParam String fieldKey,
+                                    @RequestParam String label) {
+
+        GlobalField field = globalFieldRepository.findById(fieldId)
+                .orElseThrow(() -> new RuntimeException("Field not found with id: " + fieldId));
+
+        field.setFieldKey(fieldKey);
+        field.setLabel(label);
+        globalFieldRepository.save(field);
+
+        return "redirect:/";
+    }
+
     @PostMapping("/field-values/update")
     public String updateFieldValue(@RequestParam Long rateId,
                                    @RequestParam Long fieldId,

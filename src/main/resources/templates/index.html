@@ -217,6 +217,110 @@
             transform: none;
             box-shadow: none;
         }
+
+        /* Header editing styles */
+        .header-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .header-text {
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .header-text:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .edit-header-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-size: 11px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .header-container:hover .edit-header-btn {
+            opacity: 1;
+        }
+
+        .edit-header-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .header-edit-form {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            min-width: 300px;
+            display: none;
+        }
+
+        .header-edit-form.show {
+            display: block;
+        }
+
+        .form-row {
+            margin-bottom: 10px;
+        }
+
+        .form-row label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 4px;
+        }
+
+        .form-row input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 12px;
+        }
+
+        .form-buttons button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .save-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .cancel-btn {
+            background: #6c757d;
+            color: white;
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -247,8 +351,35 @@
         <table class="table table-bordered table-striped text-center align-middle">
             <thead class="table-dark">
             <tr id="column-header-row">
-                <!-- Dynamic Headers -->
-                <th th:each="field : ${globalFields}" th:text="${field.label}"></th>
+                <!-- Dynamic Headers with Edit Functionality -->
+                <th th:each="field : ${globalFields}">
+                    <div class="header-container">
+                        <span class="header-text" th:text="${field.label}"></span>
+                        <button type="button" class="edit-header-btn" th:onclick="'showEditForm(' + ${field.id} + ')'">✎</button>
+
+                        <!-- Edit Form -->
+                        <div th:id="'editForm_' + ${field.id}" class="header-edit-form">
+                            <form th:action="@{/fields/update}" method="post">
+                                <input type="hidden" name="fieldId" th:value="${field.id}" />
+
+                                <div class="form-row">
+                                    <label>Field Key:</label>
+                                    <input type="text" name="fieldKey" th:value="${field.fieldKey}" required />
+                                </div>
+
+                                <div class="form-row">
+                                    <label>Display Label:</label>
+                                    <input type="text" name="label" th:value="${field.label}" required />
+                                </div>
+
+                                <div class="form-buttons">
+                                    <button type="submit" class="save-btn">Save</button>
+                                    <button type="button" class="cancel-btn" th:onclick="'hideEditForm(' + ${field.id} + ')'">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </th>
                 <th></th>
             </tr>
             </thead>
@@ -321,6 +452,48 @@
     ];
 
     let currentExpandedCard = null;
+    let currentEditForm = null;
+
+    // Header editing functions
+    function showEditForm(fieldId) {
+        // Hide any currently open edit form
+        if (currentEditForm && currentEditForm !== fieldId) {
+            hideEditForm(currentEditForm);
+        }
+
+        const form = document.getElementById(`editForm_${fieldId}`);
+        form.classList.add('show');
+        currentEditForm = fieldId;
+
+        // Focus on the first input
+        const firstInput = form.querySelector('input[type="text"]');
+        if (firstInput) {
+            firstInput.focus();
+            firstInput.select();
+        }
+    }
+
+    function hideEditForm(fieldId) {
+        const form = document.getElementById(`editForm_${fieldId}`);
+        form.classList.remove('show');
+        if (currentEditForm === fieldId) {
+            currentEditForm = null;
+        }
+    }
+
+    // Close edit forms when clicking outside
+    document.addEventListener('click', function(e) {
+        if (currentEditForm && !e.target.closest('.header-container') && !e.target.closest('.header-edit-form')) {
+            hideEditForm(currentEditForm);
+        }
+    });
+
+    // Prevent form closure when clicking inside the form
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.header-edit-form')) {
+            e.stopPropagation();
+        }
+    });
 
     function showMoreInfo(rateId) {
         const rate = interestRatesData.find(r => r.id === rateId);
@@ -409,7 +582,6 @@
         }
 
         card.innerHTML = `
-
             <div class="rate-expanded-content show">
                 ${tableHTML}
                 ${textHTML}
