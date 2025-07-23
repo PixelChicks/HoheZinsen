@@ -125,7 +125,7 @@
 
     <h2>Create New Interest Rate</h2>
 
-    <form th:action="@{/interest-rate/create}" th:object="${interestRate}" method="post" class="mt-4">
+    <form class="mt-4" method="post" th:action="@{/interest-rate/create}" th:object="${interestRate}">
 
         <!-- Basic Interest Rate Fields -->
         <div class="section-header">
@@ -134,8 +134,8 @@
 
         <div class="row g-3 mb-3" th:each="field : ${globalFields}">
             <div class="col-md-6">
-                <label th:for="${'extra_' + field.id}" th:text="${field.label}" class="form-label"></label>
-                <input type="text" th:name="${'extra_' + field.id}" class="form-control" />
+                <label class="form-label" th:for="${'extra_' + field.id}" th:text="${field.label}"></label>
+                <input class="form-control" th:name="${'extra_' + field.id}" type="text"/>
             </div>
         </div>
 
@@ -151,9 +151,9 @@
             </div>
             <div class="card-body">
                 <div class="mb-3">
-                    <label for="tableTitle" class="form-label">Table Section Title</label>
-                    <input type="text" id="tableTitle" name="tableTitle" class="form-control"
-                           placeholder="e.g. Table Section Title" />
+                    <label class="form-label" for="tableTitle">Table Section Title</label>
+                    <input class="form-control" id="tableTitle" name="tableTitle" placeholder="e.g. Table Section Title"
+                           type="text"/>
                 </div>
 
                 <div class="mb-3">
@@ -162,33 +162,40 @@
                         <div class="mini-table-row">
                             <div class="row g-2 align-items-center">
                                 <div class="col-md-3">
-                                    <input type="text" name="tableRowLabels[]" class="form-control form-control-sm"
-                                           placeholder="Label" />
+                                    <input class="form-control form-control-sm" name="tableRowLabels[]" placeholder="Label"
+                                           type="text"/>
                                 </div>
                                 <div class="col-md-8">
                                     <div class="rich-text-row">
                                         <div class="format-toolbar">
-                                            <button type="button" class="format-btn" onclick="formatText(this, 'bold')" title="Bold"><b>B</b></button>
-                                            <button type="button" class="format-btn" onclick="formatText(this, 'italic')" title="Italic"><i>I</i></button>
-                                            <button type="button" class="format-btn" onclick="formatText(this, 'underline')" title="Underline"><u>U</u></button>
+                                            <button class="format-btn" onclick="formatText(this, 'bold')" title="Bold"
+                                                    type="button"><b>B</b></button>
+                                            <button class="format-btn" onclick="formatText(this, 'italic')"
+                                                    title="Italic" type="button"><i>I</i>
+                                            </button>
+                                            <button class="format-btn" onclick="formatText(this, 'underline')"
+                                                    title="Underline" type="button"><u>U</u>
+                                            </button>
                                             <span style="color: #6c757d; font-size: 12px;">Rich text formatting</span>
                                         </div>
                                         <div class="simple-editor"
                                              contenteditable="true"
                                              data-name="tableRowDescriptions[]"
-                                             placeholder="Full text description with formatting..."
+                                             onblur="updateHiddenInput(this)"
                                              onpaste="handlePaste(event)"
-                                             onblur="updateHiddenInput(this)"></div>
-                                        <input type="hidden" name="tableRowDescriptions[]" />
+                                             placeholder="Full text description with formatting..."></div>
+                                        <input name="tableRowDescriptions[]" type="hidden"/>
                                     </div>
                                 </div>
                                 <div class="col-md-1">
-                                    <button type="button" class="remove-row-btn" onclick="removeTableRow(this)" title="Remove row">×</button>
+                                    <button class="remove-row-btn" onclick="removeTableRow(this)" title="Remove row"
+                                            type="button">×
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <button type="button" class="add-row-btn mt-2" onclick="addTableRow()">+ Add Row</button>
+                    <button class="add-row-btn mt-2" onclick="addTableRow()" type="button">+ Add Row</button>
                 </div>
             </div>
         </div>
@@ -201,13 +208,13 @@
             </div>
             <div class="card-body">
                 <div class="mb-3">
-                    <label for="textTitle" class="form-label">Text Section Title</label>
-                    <input type="text" id="textTitle" name="textTitle" class="form-control"
-                           placeholder="e.g. Text Section Title" />
+                    <label class="form-label" for="textTitle">Text Section Title</label>
+                    <input class="form-control" id="textTitle" name="textTitle" placeholder="e.g. Text Section Title"
+                           type="text"/>
                 </div>
 
                 <div class="mb-3">
-                    <label for="textDescription" class="form-label">Text Description</label>
+                    <label class="form-label" for="textDescription">Text Description</label>
                     <div class="rich-text-container">
                         <div id="textDescriptionEditor" style="min-height: 200px;"></div>
                     </div>
@@ -218,8 +225,8 @@
 
         <!-- Action Buttons -->
         <div class="mt-4">
-            <button type="submit" class="btn btn-success btn-lg">Create Interest Rate</button>
-            <a th:href="@{/}" class="btn btn-secondary btn-lg ms-2">Cancel</a>
+            <button class="btn btn-success btn-lg" type="submit">Create Interest Rate</button>
+            <a class="btn btn-secondary btn-lg ms-2" th:href="@{/}">Cancel</a>
         </div>
     </form>
 </div>

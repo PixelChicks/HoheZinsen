@@ -61,6 +61,7 @@ public class InterestRateController {
         // Set sort order to be last
         Integer maxSortOrder = globalFieldRepository.findMaxSortOrder();
         field.setSortOrder(maxSortOrder + 1);
+        field.setFieldKey(field.getLabel().toLowerCase().replaceAll("\\s+", ""));
 
         globalFieldRepository.save(field);
 
@@ -78,13 +79,12 @@ public class InterestRateController {
 
     @PostMapping("/fields/update")
     public String updateGlobalField(@RequestParam Long fieldId,
-                                    @RequestParam String fieldKey,
                                     @RequestParam String label) {
 
         GlobalField field = globalFieldRepository.findById(fieldId)
                 .orElseThrow(() -> new RuntimeException("Field not found with id: " + fieldId));
 
-        field.setFieldKey(fieldKey);
+        field.setFieldKey(label.toLowerCase().replaceAll("\\s+", ""));
         field.setLabel(label);
         globalFieldRepository.save(field);
 

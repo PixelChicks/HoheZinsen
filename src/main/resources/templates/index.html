@@ -421,9 +421,6 @@
     <form class="mb-4" method="post" th:action="@{/fields/add}" th:object="${newField}">
         <div class="row g-2">
             <div class="col-md-4">
-                <input class="form-control" placeholder="Field Key (e.g. maxDeposit)" th:field="*{fieldKey}"/>
-            </div>
-            <div class="col-md-4">
                 <input class="form-control" placeholder="Label (e.g. Max Deposit)" th:field="*{label}"/>
             </div>
             <div class="col-md-4">
@@ -459,11 +456,6 @@
                         <div class="header-edit-form" th:id="'editForm_' + ${field.id}">
                             <form method="post" th:action="@{/fields/update}">
                                 <input name="fieldId" th:value="${field.id}" type="hidden"/>
-
-                                <div class="form-row">
-                                    <label>Field Key:</label>
-                                    <input name="fieldKey" required th:value="${field.fieldKey}" type="text"/>
-                                </div>
 
                                 <div class="form-row">
                                     <label>Display Label:</label>
@@ -592,7 +584,119 @@
             showDropIndicator(target, event);
         }
     }
+    function showMoreInfo(rateId) {
+        const rate = interestRatesData.find(r => r.id === rateId);
+        if (!rate || !rate.moreInfo) return;
 
+        // Close any currently expanded card
+        if (currentExpandedCard && currentExpandedCard !== rateId) {
+            closeExpandedCard(currentExpandedCard);
+        }
+
+        // Check if card already exists
+        let existingCard = document.getElementById(`rateCard_${rateId}`);
+        if (existingCard) {
+            existingCard.remove();
+            if (currentExpandedCard === rateId) {
+                currentExpandedCard = null;
+                return;
+            }
+        }
+
+        // Find the table row that was clicked
+        const tableRows = document.querySelectorAll('tbody tr');
+        let targetRow = null;
+
+        tableRows.forEach(row => {
+            const button = row.querySelector('.mehr-info-btn');
+            if (button && button.onclick && button.onclick.toString().includes(`showMoreInfo(${rateId})`)) {
+                targetRow = row;
+            }
+        });
+
+        if (!targetRow) return;
+
+        // Create new card
+        const card = createRateCard(rate);
+
+        // Create a new table row to hold the card
+        const cardRow = document.createElement('tr');
+        cardRow.id = `rateCardRow_${rateId}`;
+        cardRow.innerHTML = `<td colspan="100%" style="padding: 0; background: transparent;"></td>`;
+
+        // Insert the card into the cell
+        cardRow.firstChild.appendChild(card);
+
+        // Insert the card row after the clicked row
+        targetRow.parentNode.insertBefore(cardRow, targetRow.nextSibling);
+
+        // Scroll to the card
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        currentExpandedCard = rateId;
+    }
+
+     function createRateCard(rate) {
+        const card = document.createElement('div');
+        card.className = 'rate-card';
+        card.id = `rateCard_${rate.id}`;
+
+        const moreInfo = rate.moreInfo;
+
+        let tableHTML = '';
+        if (moreInfo.tableTitle && moreInfo.miniTableRows && moreInfo.miniTableRows.length > 0) {
+            tableHTML = `
+                <div class="expanded-section">
+                    <h5 class="section-title">${moreInfo.tableTitle}</h5>
+                    <div class="info-table">
+                        ${moreInfo.miniTableRows.map(row => `
+                            <div class="info-table-row">
+                                <div class="info-table-label">${row.label || ''}</div>
+                                <div class="info-table-value">${row.description || ''}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        let textHTML = '';
+        if (moreInfo.textTitle || moreInfo.textDescription) {
+            textHTML = `
+                <div class="expanded-section">
+                    ${moreInfo.textTitle ? `<h5 class="section-title">${moreInfo.textTitle}</h5>` : ''}
+                    <div class="text-content">${moreInfo.textDescription || ''}</div>
+                </div>
+            `;
+        }
+
+        card.innerHTML = `
+
+            <div class="rate-expanded-content show">
+                ${tableHTML}
+                ${textHTML}
+            </div>
+        `;
+
+        return card;
+    }
+
+    function closeExpandedCard(rateId) {
+        const cardRow = document.getElementById(`rateCardRow_${rateId}`);
+        if (cardRow) {
+            cardRow.remove();
+            if (currentExpandedCard === rateId) {
+                currentExpandedCard = null;
+            }
+        }
+    }
+
+    // Close expanded card when clicking outside
+    document.addEventListener('click', function(e) {
+        if (currentExpandedCard && !e.target.closest('.rate-card') && !e.target.closest('.mehr-info-btn')) {
+            // Don't auto-close, let user explicitly close
+        }
+    });
     function handleDrop(event) {
         event.preventDefault();
 
@@ -738,7 +842,6 @@
             currentEditForm = null;
         }
     });
-</script>
 </script>
 
 </body>
