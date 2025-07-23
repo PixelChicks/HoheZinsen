@@ -3,12 +3,10 @@ package com.InterestRatesAustria.InterestRatesAustria.controller;
 import com.InterestRatesAustria.InterestRatesAustria.entity.*;
 import com.InterestRatesAustria.InterestRatesAustria.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +31,7 @@ public class InterestRateController {
     @GetMapping("/")
     public String showRates(Model model) {
         List<InterestRate> interestRates = interestRateRepository.findAll();
-        List<GlobalField> globalFields = globalFieldRepository.findAll();
+        List<GlobalField> globalFields = globalFieldRepository.findAllByOrderBySortOrderAsc();
 
         List<InterestRateDTO> interestRateDTOs = interestRates.stream()
                 .map(InterestRateDTO::fromEntity)
@@ -60,6 +58,10 @@ public class InterestRateController {
 
     @PostMapping("/fields/add")
     public String addGlobalField(@ModelAttribute GlobalField field) {
+        // Set sort order to be last
+        Integer maxSortOrder = globalFieldRepository.findMaxSortOrder();
+        field.setSortOrder(maxSortOrder + 1);
+
         globalFieldRepository.save(field);
 
         List<InterestRate> rates = interestRateRepository.findAll();
@@ -89,6 +91,23 @@ public class InterestRateController {
         return "redirect:/";
     }
 
+    @PostMapping("/fields/reorder")
+    @ResponseBody
+    public ResponseEntity<String> reorderFields(@RequestBody List<Long> fieldIds) {
+        try {
+            for (int i = 0; i < fieldIds.size(); i++) {
+                Long fieldId = fieldIds.get(i);
+                GlobalField field = globalFieldRepository.findById(fieldId)
+                        .orElseThrow(() -> new RuntimeException("Field not found with id: " + fieldId));
+                field.setSortOrder(i + 1);
+                globalFieldRepository.save(field);
+            }
+            return ResponseEntity.ok("Order updated successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error updating order: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/field-values/update")
     public String updateFieldValue(@RequestParam Long rateId,
                                    @RequestParam Long fieldId,
@@ -105,7 +124,7 @@ public class InterestRateController {
     @GetMapping("/interest-rate/new")
     public String showCreateForm(Model model) {
         model.addAttribute("interestRate", new InterestRate());
-        model.addAttribute("globalFields", globalFieldRepository.findAll());
+        model.addAttribute("globalFields", globalFieldRepository.findAllByOrderBySortOrderAsc());
         return "interest-rate-form";
     }
 
@@ -120,7 +139,7 @@ public class InterestRateController {
         InterestRate saved = interestRateRepository.save(interestRate);
 
         // Save extra fields
-        List<GlobalField> allFields = globalFieldRepository.findAll();
+        List<GlobalField> allFields = globalFieldRepository.findAllByOrderBySortOrderAsc();
         for (GlobalField field : allFields) {
             String key = "extra_" + field.getId();
             if (requestParams.containsKey(key)) {

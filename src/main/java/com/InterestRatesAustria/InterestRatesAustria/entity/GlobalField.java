@@ -21,4 +21,5 @@ public class GlobalField {
 
     private String fieldKey;   // e.g. "maxDeposit"
     private String label;      // e.g. "Max Deposit"
+    private Integer sortOrder; // New field for column ordering
 }

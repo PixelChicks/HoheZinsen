@@ -321,24 +321,110 @@
             background: #6c757d;
             color: white;
         }
+
+        /* Drag and drop styles */
+        .draggable-column {
+            cursor: move;
+            position: relative;
+        }
+
+        .drag-handle {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            padding: 0 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .draggable-column:hover .drag-handle {
+            opacity: 1;
+        }
+
+        .drag-over {
+            background: rgba(0, 123, 255, 0.1) !important;
+            border-left: 3px solid #007bff !important;
+        }
+
+        .dragging {
+            opacity: 0.5;
+            transform: rotate(2deg);
+        }
+
+        /* Column drop indicator */
+        .drop-indicator {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #007bff;
+            z-index: 1000;
+            display: none;
+        }
+
+        .drop-indicator.show {
+            display: block;
+        }
+
+        /* Save order button */
+        .save-order-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 10px;
+            display: none;
+            cursor: pointer;
+        }
+
+        .save-order-btn.show {
+            display: inline-block;
+        }
+
+        .order-changed-indicator {
+            background: #ffc107;
+            color: #000;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-left: 10px;
+            display: none;
+        }
+
+        .order-changed-indicator.show {
+            display: inline-block;
+        }
     </style>
 </head>
 <body class="bg-light">
 <div class="container py-4">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Interest Rate Offers</h2>
-        <a href="/interest-rate/new" class="btn btn-primary">+ Add New Interest Rate</a>
+        <div class="d-flex align-items-center">
+            <h2>Interest Rate Offers</h2>
+            <span class="order-changed-indicator" id="orderChangedIndicator">
+                Order changed - click save to persist
+            </span>
+            <button class="save-order-btn" id="saveOrderBtn" onclick="saveColumnOrder()">
+                Save Order
+            </button>
+        </div>
+        <a class="btn btn-primary" href="/interest-rate/new">+ Add New Interest Rate</a>
     </div>
 
     <!-- Form to Add a New Global Field -->
-    <form th:action="@{/fields/add}" th:object="${newField}" method="post" class="mb-4">
+    <form class="mb-4" method="post" th:action="@{/fields/add}" th:object="${newField}">
         <div class="row g-2">
             <div class="col-md-4">
-                <input th:field="*{fieldKey}" class="form-control" placeholder="Field Key (e.g. maxDeposit)" />
+                <input class="form-control" placeholder="Field Key (e.g. maxDeposit)" th:field="*{fieldKey}"/>
             </div>
             <div class="col-md-4">
-                <input th:field="*{label}" class="form-control" placeholder="Label (e.g. Max Deposit)" />
+                <input class="form-control" placeholder="Label (e.g. Max Deposit)" th:field="*{label}"/>
             </div>
             <div class="col-md-4">
                 <button class="btn btn-primary w-100">Add Field</button>
@@ -348,62 +434,78 @@
 
     <!-- Interest Rate Table -->
     <div class="table-responsive">
-        <table class="table table-bordered table-striped text-center align-middle">
+        <table class="table table-bordered table-striped text-center align-middle" id="mainTable">
             <thead class="table-dark">
             <tr id="column-header-row">
-                <!-- Dynamic Headers with Edit Functionality -->
-                <th th:each="field : ${globalFields}">
+                <!-- Dynamic Headers with Edit Functionality and Drag Handle -->
+                <th class="draggable-column"
+                    draggable="true"
+                    ondragend="handleDragEnd(event)"
+                    ondragover="handleDragOver(event)"
+                    ondragstart="handleDragStart(event)"
+                    ondrop="handleDrop(event)"
+                    th:data-field-id="${field.id}"
+                    th:each="field, iterStat : ${globalFields}">
+
+                    <div class="drag-handle">⋮⋮</div>
+
                     <div class="header-container">
                         <span class="header-text" th:text="${field.label}"></span>
-                        <button type="button" class="edit-header-btn" th:onclick="'showEditForm(' + ${field.id} + ')'">✎</button>
+                        <button class="edit-header-btn" th:onclick="'showEditForm(' + ${field.id} + ')'" type="button">
+                            ✎
+                        </button>
 
                         <!-- Edit Form -->
-                        <div th:id="'editForm_' + ${field.id}" class="header-edit-form">
-                            <form th:action="@{/fields/update}" method="post">
-                                <input type="hidden" name="fieldId" th:value="${field.id}" />
+                        <div class="header-edit-form" th:id="'editForm_' + ${field.id}">
+                            <form method="post" th:action="@{/fields/update}">
+                                <input name="fieldId" th:value="${field.id}" type="hidden"/>
 
                                 <div class="form-row">
                                     <label>Field Key:</label>
-                                    <input type="text" name="fieldKey" th:value="${field.fieldKey}" required />
+                                    <input name="fieldKey" required th:value="${field.fieldKey}" type="text"/>
                                 </div>
 
                                 <div class="form-row">
                                     <label>Display Label:</label>
-                                    <input type="text" name="label" th:value="${field.label}" required />
+                                    <input name="label" required th:value="${field.label}" type="text"/>
                                 </div>
 
                                 <div class="form-buttons">
-                                    <button type="submit" class="save-btn">Save</button>
-                                    <button type="button" class="cancel-btn" th:onclick="'hideEditForm(' + ${field.id} + ')'">Cancel</button>
+                                    <button class="save-btn" type="submit">Save</button>
+                                    <button class="cancel-btn" th:onclick="'hideEditForm(' + ${field.id} + ')'"
+                                            type="button">Cancel
+                                    </button>
                                 </div>
                             </form>
                         </div>
                     </div>
                 </th>
-                <th></th>
+                <th class="no-drag"></th>
             </tr>
             </thead>
 
             <tbody>
             <tr th:each="rate : ${interestRates}">
                 <!-- Dynamic fields -->
-                <td th:each="field : ${globalFields}">
-                    <form th:action="@{/field-values/update}" method="post" class="d-flex justify-content-center">
-                        <input type="hidden" name="rateId" th:value="${rate.id}" />
-                        <input type="hidden" name="fieldId" th:value="${field.id}" />
-                        <input type="text"
+                <td class="data-cell"
+                    th:data-field-id="${field.id}"
+                    th:each="field : ${globalFields}">
+                    <form class="d-flex justify-content-center" method="post" th:action="@{/field-values/update}">
+                        <input name="rateId" th:value="${rate.id}" type="hidden"/>
+                        <input name="fieldId" th:value="${field.id}" type="hidden"/>
+                        <input class="form-control form-control-sm text-center"
                                name="value"
+                               style="width: 100px;"
                                th:value="${rateFieldValuesMap[rate.id]?.get(field.id)}"
-                               class="form-control form-control-sm text-center"
-                               style="width: 100px;" />
+                               type="text"/>
                     </form>
                 </td>
 
                 <!-- Actions -->
                 <td>
                     <button class="mehr-info-btn"
-                            th:onclick="'showMoreInfo(' + ${rate.id} + ')'"
                             th:disabled="${rate.moreInfo == null}"
+                            th:onclick="'showMoreInfo(' + ${rate.id} + ')'"
                             th:text="${rate.moreInfo != null ? 'MEHR INFO' : 'No Info'}">
                     </button>
                 </td>
@@ -412,6 +514,9 @@
         </table>
     </div>
 </div>
+
+<!-- Drop indicator -->
+<div class="drop-indicator" id="dropIndicator"></div>
 
 <script th:inline="javascript">
     // Pass server data to JavaScript
@@ -433,7 +538,6 @@
         },
         {
             id: 2,
-
             moreInfo: {
                 tableTitle: "Rate Details",
                 miniTableRows: [
@@ -446,167 +550,195 @@
         },
         {
             id: 3,
-
             moreInfo: null
         }
     ];
 
     let currentExpandedCard = null;
     let currentEditForm = null;
+    let draggedElement = null;
+    let orderChanged = false;
+    let originalOrder = [];
 
-    // Header editing functions
-    function showEditForm(fieldId) {
-        // Hide any currently open edit form
-        if (currentEditForm && currentEditForm !== fieldId) {
-            hideEditForm(currentEditForm);
+    // Initialize original order on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        captureOriginalOrder();
+    });
+
+    function captureOriginalOrder() {
+        const headers = document.querySelectorAll('.draggable-column');
+        originalOrder = Array.from(headers).map(header => header.dataset.fieldId);
+    }
+
+    // Drag and Drop functionality
+    function handleDragStart(event) {
+        draggedElement = event.target;
+        event.target.classList.add('dragging');
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/html', event.target.outerHTML);
+    }
+
+    function handleDragOver(event) {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'move';
+
+        const target = event.target.closest('.draggable-column');
+        if (target && target !== draggedElement) {
+            // Remove existing drag-over class
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            target.classList.add('drag-over');
+
+            // Show drop indicator
+            showDropIndicator(target, event);
+        }
+    }
+
+    function handleDrop(event) {
+        event.preventDefault();
+
+        const target = event.target.closest('.draggable-column');
+        if (target && target !== draggedElement) {
+            const draggedFieldId = draggedElement.dataset.fieldId;
+            const targetFieldId = target.dataset.fieldId;
+
+            // Move the column
+            moveColumn(draggedFieldId, targetFieldId);
+
+            // Mark order as changed
+            markOrderChanged();
         }
 
-        const form = document.getElementById(`editForm_${fieldId}`);
-        form.classList.add('show');
-        currentEditForm = fieldId;
+        // Clean up
+        cleanup();
+    }
 
-        // Focus on the first input
-        const firstInput = form.querySelector('input[type="text"]');
-        if (firstInput) {
-            firstInput.focus();
-            firstInput.select();
+    function handleDragEnd(event) {
+        cleanup();
+    }
+
+    function cleanup() {
+        if (draggedElement) {
+            draggedElement.classList.remove('dragging');
+        }
+        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+        hideDropIndicator();
+        draggedElement = null;
+    }
+
+    function moveColumn(draggedFieldId, targetFieldId) {
+        const headerRow = document.getElementById("column-header-row");
+        const headers = Array.from(headerRow.querySelectorAll(".draggable-column"));
+
+        const draggedIndex = headers.findIndex(h => h.dataset.fieldId === draggedFieldId);
+        const targetIndex = headers.findIndex(h => h.dataset.fieldId === targetFieldId);
+
+        if (draggedIndex === -1 || targetIndex === -1 || draggedIndex === targetIndex) return;
+
+        // Move header
+        const draggedHeader = headers[draggedIndex];
+        if (targetIndex < draggedIndex) {
+            headerRow.insertBefore(draggedHeader, headers[targetIndex]);
+        } else {
+            headerRow.insertBefore(draggedHeader, headers[targetIndex].nextSibling);
+        }
+
+        // Move data cells for each row
+        const rows = document.querySelectorAll("#mainTable tbody tr");
+        rows.forEach(row => {
+            const cells = Array.from(row.querySelectorAll(".data-cell"));
+            const draggedCell = cells[draggedIndex];
+            if (!draggedCell) return;
+
+            if (targetIndex < draggedIndex) {
+                row.insertBefore(draggedCell, cells[targetIndex]);
+            } else {
+                row.insertBefore(draggedCell, cells[targetIndex].nextSibling);
+            }
+        });
+    }
+
+    function markOrderChanged() {
+        orderChanged = true;
+        document.getElementById("saveOrderBtn").classList.add("show");
+        document.getElementById("orderChangedIndicator").classList.add("show");
+    }
+
+    function saveColumnOrder() {
+        const headers = document.querySelectorAll(".draggable-column");
+        const newOrder = Array.from(headers).map(header => header.dataset.fieldId);
+
+        fetch('/fields/reorder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': getCsrfToken()
+            },
+            body: JSON.stringify(newOrder)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Failed to save order");
+            }
+            return response.text();
+        })
+        .then(data => {
+            orderChanged = false;
+            document.getElementById("saveOrderBtn").classList.remove("show");
+            document.getElementById("orderChangedIndicator").classList.remove("show");
+            console.log(data);
+        })
+        .catch(error => {
+            alert("Error saving order: " + error.message);
+        });
+    }
+
+    // Optional: CSRF token extraction if needed for Spring Security
+    function getCsrfToken() {
+        const tokenMeta = document.querySelector('meta[name="_csrf"]');
+        return tokenMeta ? tokenMeta.getAttribute('content') : '';
+    }
+
+    function showDropIndicator(target, event) {
+        const indicator = document.getElementById("dropIndicator");
+        const rect = target.getBoundingClientRect();
+        indicator.style.left = `${rect.left}px`;
+        indicator.style.top = `${rect.top}px`;
+        indicator.style.height = `${rect.height}px`;
+        indicator.classList.add("show");
+    }
+
+    function hideDropIndicator() {
+        document.getElementById("dropIndicator").classList.remove("show");
+    }
+
+    // Show/hide edit form logic
+    function showEditForm(fieldId) {
+        if (currentEditForm) {
+            currentEditForm.classList.remove('show');
+        }
+        const form = document.getElementById('editForm_' + fieldId);
+        if (form) {
+            form.classList.add('show');
+            currentEditForm = form;
         }
     }
 
     function hideEditForm(fieldId) {
-        const form = document.getElementById(`editForm_${fieldId}`);
-        form.classList.remove('show');
-        if (currentEditForm === fieldId) {
+        const form = document.getElementById('editForm_' + fieldId);
+        if (form) {
+            form.classList.remove('show');
+        }
+        currentEditForm = null;
+    }
+
+    // Handle outside click to close header edit form
+    document.addEventListener('click', function(e) {
+        if (currentEditForm && !currentEditForm.contains(e.target) && !e.target.classList.contains('edit-header-btn')) {
+            currentEditForm.classList.remove('show');
             currentEditForm = null;
         }
-    }
-
-    // Close edit forms when clicking outside
-    document.addEventListener('click', function(e) {
-        if (currentEditForm && !e.target.closest('.header-container') && !e.target.closest('.header-edit-form')) {
-            hideEditForm(currentEditForm);
-        }
     });
-
-    // Prevent form closure when clicking inside the form
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.header-edit-form')) {
-            e.stopPropagation();
-        }
-    });
-
-    function showMoreInfo(rateId) {
-        const rate = interestRatesData.find(r => r.id === rateId);
-        if (!rate || !rate.moreInfo) return;
-
-        // Close any currently expanded card
-        if (currentExpandedCard && currentExpandedCard !== rateId) {
-            closeExpandedCard(currentExpandedCard);
-        }
-
-        // Check if card already exists
-        let existingCard = document.getElementById(`rateCard_${rateId}`);
-        if (existingCard) {
-            existingCard.remove();
-            if (currentExpandedCard === rateId) {
-                currentExpandedCard = null;
-                return;
-            }
-        }
-
-        // Find the table row that was clicked
-        const tableRows = document.querySelectorAll('tbody tr');
-        let targetRow = null;
-
-        tableRows.forEach(row => {
-            const button = row.querySelector('.mehr-info-btn');
-            if (button && button.onclick && button.onclick.toString().includes(`showMoreInfo(${rateId})`)) {
-                targetRow = row;
-            }
-        });
-
-        if (!targetRow) return;
-
-        // Create new card
-        const card = createRateCard(rate);
-
-        // Create a new table row to hold the card
-        const cardRow = document.createElement('tr');
-        cardRow.id = `rateCardRow_${rateId}`;
-        cardRow.innerHTML = `<td colspan="100%" style="padding: 0; background: transparent;"></td>`;
-
-        // Insert the card into the cell
-        cardRow.firstChild.appendChild(card);
-
-        // Insert the card row after the clicked row
-        targetRow.parentNode.insertBefore(cardRow, targetRow.nextSibling);
-
-        // Scroll to the card
-        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-        currentExpandedCard = rateId;
-    }
-
-    function createRateCard(rate) {
-        const card = document.createElement('div');
-        card.className = 'rate-card';
-        card.id = `rateCard_${rate.id}`;
-
-        const moreInfo = rate.moreInfo;
-
-        let tableHTML = '';
-        if (moreInfo.tableTitle && moreInfo.miniTableRows && moreInfo.miniTableRows.length > 0) {
-            tableHTML = `
-                <div class="expanded-section">
-                    <h5 class="section-title">${moreInfo.tableTitle}</h5>
-                    <div class="info-table">
-                        ${moreInfo.miniTableRows.map(row => `
-                            <div class="info-table-row">
-                                <div class="info-table-label">${row.label || ''}</div>
-                                <div class="info-table-value">${row.description || ''}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        let textHTML = '';
-        if (moreInfo.textTitle || moreInfo.textDescription) {
-            textHTML = `
-                <div class="expanded-section">
-                    ${moreInfo.textTitle ? `<h5 class="section-title">${moreInfo.textTitle}</h5>` : ''}
-                    <div class="text-content">${moreInfo.textDescription || ''}</div>
-                </div>
-            `;
-        }
-
-        card.innerHTML = `
-            <div class="rate-expanded-content show">
-                ${tableHTML}
-                ${textHTML}
-            </div>
-        `;
-
-        return card;
-    }
-
-    function closeExpandedCard(rateId) {
-        const cardRow = document.getElementById(`rateCardRow_${rateId}`);
-        if (cardRow) {
-            cardRow.remove();
-            if (currentExpandedCard === rateId) {
-                currentExpandedCard = null;
-            }
-        }
-    }
-
-    // Close expanded card when clicking outside
-    document.addEventListener('click', function(e) {
-        if (currentExpandedCard && !e.target.closest('.rate-card') && !e.target.closest('.mehr-info-btn')) {
-            // Don't auto-close, let user explicitly close
-        }
-    });
+</script>
 </script>
 
 </body>
