@@ -95,11 +95,16 @@ public class InterestRateController {
     }
 
     @PostMapping("/interest-rate/create")
-    public String createInterestRate(@ModelAttribute InterestRate interestRate,
-                                     @RequestParam Map<String, String> requestParams) {
+    public String createInterestRate(
+            @ModelAttribute InterestRate interestRate,
+            @RequestParam Map<String, String> requestParams,
+            @RequestParam(name = "tableRowLabels[]", required = false) List<String> tableRowLabels,
+            @RequestParam(name = "tableRowDescriptions[]", required = false) List<String> tableRowDescriptions
+    ) {
 
         InterestRate saved = interestRateRepository.save(interestRate);
 
+        // Save extra fields
         List<GlobalField> allFields = globalFieldRepository.findAll();
         for (GlobalField field : allFields) {
             String key = "extra_" + field.getId();
@@ -124,29 +129,18 @@ public class InterestRateController {
             moreInfo.setTextDescription(textDescription);
 
             List<MiniTableRow> miniTableRows = new ArrayList<>();
-            String[] tableRowLabels = requestParams.get("tableRowLabels[]") != null ?
-                    requestParams.get("tableRowLabels[]").split(",") : new String[0];
-            String[] tableRowDescriptions = requestParams.get("tableRowDescriptions[]") != null ?
-                    requestParams.get("tableRowDescriptions[]").split(",") : new String[0];
 
-            List<String> labels = new ArrayList<>();
-            List<String> descriptions = new ArrayList<>();
-
-            for (Map.Entry<String, String> entry : requestParams.entrySet()) {
-                if (entry.getKey().equals("tableRowLabels[]")) {
-                    labels.add(entry.getValue());
-                } else if (entry.getKey().equals("tableRowDescriptions[]")) {
-                    descriptions.add(entry.getValue());
-                }
-            }
-
-            int minSize = Math.min(labels.size(), descriptions.size());
-            for (int i = 0; i < minSize; i++) {
-                if (!labels.get(i).trim().isEmpty() || !descriptions.get(i).trim().isEmpty()) {
-                    MiniTableRow row = new MiniTableRow();
-                    row.setLabel(labels.get(i).trim());
-                    row.setDescription(descriptions.get(i).trim());
-                    miniTableRows.add(row);
+            if (tableRowLabels != null && tableRowDescriptions != null) {
+                int size = Math.min(tableRowLabels.size(), tableRowDescriptions.size());
+                for (int i = 0; i < size; i++) {
+                    String label = tableRowLabels.get(i).trim();
+                    String desc = tableRowDescriptions.get(i).trim();
+                    if (!label.isEmpty() || !desc.isEmpty()) {
+                        MiniTableRow row = new MiniTableRow();
+                        row.setLabel(label);
+                        row.setDescription(desc);
+                        miniTableRows.add(row);
+                    }
                 }
             }
 
@@ -159,6 +153,7 @@ public class InterestRateController {
 
         return "redirect:/";
     }
+
 
     @PostMapping("/interest-rates/update")
     public String updateInterestRateField(@RequestParam Long rateId,
