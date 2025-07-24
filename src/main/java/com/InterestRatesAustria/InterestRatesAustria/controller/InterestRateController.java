@@ -138,4 +138,26 @@ public class InterestRateController {
             return ResponseEntity.badRequest().body("Error deleting interest rate: " + e.getMessage());
         }
     }
+
+    @PostMapping("/fields/delete/{id}")
+    @ResponseBody
+    public ResponseEntity<String> deleteGlobalField(@PathVariable Long id) {
+        try {
+            interestRateService.deleteGlobalField(id);
+            return ResponseEntity.ok("Field deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error deleting field: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/fields/{id}")
+    @ResponseBody
+    public ResponseEntity<String> deleteGlobalFieldRest(@PathVariable Long id) {
+        try {
+            interestRateService.deleteGlobalField(id);
+            return ResponseEntity.ok("Field deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error deleting field: " + e.getMessage());
+        }
+    }
 }

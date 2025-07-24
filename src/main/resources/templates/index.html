@@ -44,6 +44,28 @@
             background: #c82333;
         }
 
+        /* Field delete button styling */
+        .delete-field-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-size: 11px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            margin-left: 5px;
+        }
+
+        .header-container:hover .delete-field-btn {
+            opacity: 1;
+        }
+
+        .delete-field-btn:hover {
+            background: #c82333;
+        }
+
         .delete-confirmation-modal {
             position: fixed;
             top: 0;
@@ -61,7 +83,7 @@
             background: white;
             padding: 30px;
             border-radius: 8px;
-            max-width: 400px;
+            max-width: 500px;
             text-align: center;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
@@ -105,6 +127,20 @@
             background: #dc3545;
             color: white;
         }
+
+        .field-info {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #007bff;
+        }
+
+        .warning-text {
+            color: #dc3545;
+            font-weight: 600;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -140,7 +176,7 @@
         <table class="table table-bordered table-striped text-center align-middle" id="mainTable">
             <thead class="table-dark">
             <tr id="column-header-row">
-                <!-- Dynamic Headers with Edit Functionality and Drag Handle -->
+                <!-- Dynamic Headers with Edit, Delete Functionality and Drag Handle -->
                 <th class="draggable-column"
                     draggable="true"
                     ondragend="handleDragEnd(event)"
@@ -157,6 +193,15 @@
                         <button class="edit-header-btn" th:onclick="'showEditForm(' + ${field.id} + ')'" type="button">
                             ✎
                         </button>
+                        <button class="delete-field-btn"
+                                th:data-id="${field.id}"
+                                th:data-label="${field.label}"
+                                onclick="handleFieldDeleteClick(this)"
+                                type="button"
+                                title="Delete this field">
+                            🗑
+                        </button>
+
 
                         <!-- Edit Form -->
                         <div class="header-edit-form" th:id="'editForm_' + ${field.id}">
@@ -225,7 +270,28 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
+<!-- Field Delete Confirmation Modal -->
+<div class="delete-confirmation-modal" id="fieldDeleteConfirmationModal">
+    <div class="delete-confirmation-content">
+        <h5>⚠️ Delete Field</h5>
+        <div class="field-info">
+            <p><strong>Field:</strong> <span id="fieldToDeleteName">Field Name</span></p>
+            <p><strong>ID:</strong> <span id="fieldToDeleteId">Field ID</span></p>
+        </div>
+        <p>Are you sure you want to delete this field (column)?</p>
+        <div class="warning-text">
+            ⚠️ This will permanently remove the field and ALL associated data for every interest rate!
+        </div>
+        <p><strong>This action cannot be undone.</strong></p>
+
+        <div class="delete-confirmation-buttons">
+            <button class="btn btn-danger" id="confirmFieldDeleteBtn">Yes, Delete Field</button>
+            <button class="btn btn-secondary" onclick="hideFieldDeleteConfirmation()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Interest Rate Delete Confirmation Modal -->
 <div class="delete-confirmation-modal" id="deleteConfirmationModal">
     <div class="delete-confirmation-content">
         <h5>⚠️ Confirm Deletion</h5>
@@ -249,7 +315,7 @@
 
 <!-- Delete notification -->
 <div class="delete-notification" id="deleteNotification">
-    Interest rate deleted successfully!
+    Action completed successfully!
 </div>
 
 <script th:inline="javascript">
@@ -262,6 +328,7 @@
     let orderChanged = false;
     let originalOrder = [];
     let pendingDeleteId = null;
+    let pendingFieldDeleteId = null;
 
     // Section drag and drop variables
     let draggedSection = null;
@@ -277,7 +344,71 @@
         originalOrder = Array.from(headers).map(header => header.dataset.fieldId);
     }
 
-    // Delete functionality
+    function handleFieldDeleteClick(button) {
+        const fieldId = button.dataset.id;
+        const fieldLabel = button.dataset.label;
+        showFieldDeleteConfirmation(fieldId, fieldLabel);
+    }
+
+    // Field delete functionality
+    function showFieldDeleteConfirmation(fieldId, fieldLabel) {
+        pendingFieldDeleteId = fieldId;
+        document.getElementById('fieldToDeleteName').textContent = fieldLabel;
+        document.getElementById('fieldToDeleteId').textContent = fieldId;
+        document.getElementById('fieldDeleteConfirmationModal').style.display = 'flex';
+
+        // Set up the confirm button click handler
+        document.getElementById('confirmFieldDeleteBtn').onclick = function() {
+            deleteGlobalField(fieldId);
+        };
+    }
+
+    function hideFieldDeleteConfirmation() {
+        document.getElementById('fieldDeleteConfirmationModal').style.display = 'none';
+        pendingFieldDeleteId = null;
+    }
+
+    function deleteGlobalField(fieldId) {
+        // Show loading state
+        const confirmBtn = document.getElementById('confirmFieldDeleteBtn');
+        const originalText = confirmBtn.textContent;
+        confirmBtn.textContent = 'Deleting...';
+        confirmBtn.disabled = true;
+
+        fetch(`/fields/delete/${fieldId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to delete field');
+            }
+            return response.text();
+        })
+        .then(data => {
+            // Hide the confirmation modal
+            hideFieldDeleteConfirmation();
+
+            // Show success notification
+            showDeleteNotification('Field deleted successfully! Page will reload...', false);
+
+            // Reload the page after a short delay to show the updated table
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        })
+        .catch(error => {
+            // Reset button
+            confirmBtn.textContent = originalText;
+            confirmBtn.disabled = false;
+
+            showDeleteNotification('Error deleting field: ' + error.message, true);
+        });
+    }
+
+    // Interest rate delete functionality (existing)
     function showDeleteConfirmation(rateId) {
         pendingDeleteId = rateId;
         document.getElementById('deleteConfirmationModal').style.display = 'flex';
@@ -354,14 +485,20 @@
         }, 3000);
     }
 
-    // Close modal when clicking outside
+    // Close modals when clicking outside
     document.getElementById('deleteConfirmationModal').addEventListener('click', function(e) {
         if (e.target === this) {
             hideDeleteConfirmation();
         }
     });
 
-    // Drag and Drop functionality for columns
+    document.getElementById('fieldDeleteConfirmationModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            hideFieldDeleteConfirmation();
+        }
+    });
+
+    // Drag and Drop functionality for columns (existing code)
     function handleDragStart(event) {
         draggedElement = event.target;
         event.target.classList.add('dragging');
@@ -384,7 +521,7 @@
         }
     }
 
-    // Section drag and drop functions
+    // Section drag and drop functions (existing code)
     function handleSectionDragStart(event, sectionType, rateId) {
         draggedSection = {
             element: event.target.closest('.expanded-section'),

@@ -6,6 +6,7 @@ import com.InterestRatesAustria.InterestRatesAustria.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,17 +20,19 @@ public class InterestRateService {
     private final GlobalFieldRepository globalFieldRepository;
     private final InterestRateFieldValueRepository fieldValueRepository;
     private final MoreInfoRepository moreInfoRepository;
+    private final InterestRateFieldValueRepository interestRateFieldValueRepository;
     private final MiniTableRowRepository miniTableRowRepository;
 
     public InterestRateService(InterestRateRepository interestRateRepository,
                                GlobalFieldRepository globalFieldRepository,
                                InterestRateFieldValueRepository fieldValueRepository,
-                               MoreInfoRepository moreInfoRepository,
+                               MoreInfoRepository moreInfoRepository, InterestRateFieldValueRepository interestRateFieldValueRepository,
                                MiniTableRowRepository miniTableRowRepository) {
         this.interestRateRepository = interestRateRepository;
         this.globalFieldRepository = globalFieldRepository;
         this.fieldValueRepository = fieldValueRepository;
         this.moreInfoRepository = moreInfoRepository;
+        this.interestRateFieldValueRepository = interestRateFieldValueRepository;
         this.miniTableRowRepository = miniTableRowRepository;
     }
 
@@ -56,7 +59,7 @@ public class InterestRateService {
     }
 
     public List<GlobalField> getAllGlobalFieldsOrdered() {
-        return globalFieldRepository.findAllByOrderBySortOrderAsc();
+        return globalFieldRepository.findAllActiveByOrderBySortOrderAsc();
     }
 
     public Map<Long, Map<Long, String>> getRateFieldValuesMap(List<InterestRate> rates) {
@@ -122,7 +125,7 @@ public class InterestRateService {
     public void createInterestRate(InterestRate interestRate, Map<String, String> requestParams, List<String> tableRowLabels, List<String> tableRowDescriptions) {
         InterestRate saved = interestRateRepository.save(interestRate);
 
-        List<GlobalField> allFields = globalFieldRepository.findAllByOrderBySortOrderAsc();
+        List<GlobalField> allFields = globalFieldRepository.findAllActiveByOrderBySortOrderAsc();
         for (GlobalField field : allFields) {
             String key = "extra_" + field.getId();
             if (requestParams.containsKey(key)) {
@@ -160,7 +163,7 @@ public class InterestRateService {
     public void updateInterestRate(Long id, InterestRate updatedRate, Map<String, String> requestParams, List<String> tableRowLabels, List<String> tableRowDescriptions) {
         InterestRate existingRate = getInterestRateById(id);
 
-        List<GlobalField> allFields = globalFieldRepository.findAllByOrderBySortOrderAsc();
+        List<GlobalField> allFields = globalFieldRepository.findAllActiveByOrderBySortOrderAsc();
         for (GlobalField field : allFields) {
             String key = "extra_" + field.getId();
             if (requestParams.containsKey(key)) {
@@ -243,5 +246,12 @@ public class InterestRateService {
         }
 
         return miniTableRows;
+    }
+
+    public void deleteGlobalField(Long fieldId) {
+        GlobalField field = globalFieldRepository.findById(fieldId)
+                .orElseThrow(() -> new RuntimeException("Field not found with id: " + fieldId));
+        field.setDeletedAt(LocalDateTime.now());
+        globalFieldRepository.save(field);
     }
 }
