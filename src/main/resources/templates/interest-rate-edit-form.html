@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Interest Rate</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .edit-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .edit-header {
+            background: linear-gradient(135deg, #ffc107, #ff8f00);
+            color: #000;
+            padding: 25px 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .edit-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20px;
+            width: 100px;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(15deg);
+        }
+
+        .edit-header h1 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .edit-badge {
+            background: rgba(0, 0, 0, 0.15);
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .edit-meta {
+            margin-top: 10px;
+            opacity: 0.8;
+            font-size: 0.95rem;
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-left: 5px solid #ffc107;
+            padding: 15px 20px;
+            margin: 25px 0 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-header h5 {
+            margin: 0;
+            color: #495057;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .field-group {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .field-group:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .field-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .field-value {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #ffc107;
+            box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+        }
+
+        .mini-table-row {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .mini-table-row:hover {
+            border-color: #ffc107;
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.15);
+        }
+
+        .remove-row-btn {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .remove-row-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+        }
+
+        .add-row-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-row-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        /* Rich Text Editor Styling */
+        .rich-text-container {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            background: white;
+            overflow: hidden;
+            transition: border-color 0.3s ease;
+        }
+
+        .rich-text-container:focus-within {
+            border-color: #ffc107;
+        }
+
+        .ql-toolbar {
+            border: none;
+            border-bottom: 2px solid #e9ecef;
+            background: #f8f9fa;
+        }
+
+        .ql-container {
+            border: none;
+            font-family: inherit;
+        }
+
+        .ql-editor {
+            min-height: 180px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .format-toolbar {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 1px solid #dee2e6;
+            border-radius: 8px 8px 0 0;
+            padding: 10px 15px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .format-btn {
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .format-btn:hover {
+            background: #e9ecef;
+            transform: translateY(-1px);
+        }
+
+        .format-btn.active {
+            background: #ffc107;
+            color: #000;
+            border-color: #ffc107;
+        }
+
+        .simple-editor {
+            border: 1px solid #dee2e6;
+            border-radius: 0 0 8px 8px;
+            min-height: 120px;
+            padding: 15px;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+        }
+
+        .simple-editor:focus {
+            outline: none;
+            border-color: #ffc107;
+            box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+        }
+
+        .action-buttons {
+            background: #f8f9fa;
+            padding: 25px 30px;
+            border-top: 2px solid #e9ecef;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn-update {
+            background: linear-gradient(135deg, #ffc107, #ff8f00);
+            color: #000;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-update:hover {
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 193, 7, 0.3);
+            background: linear-gradient(135deg, #ff8f00, #ffc107);
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-cancel:hover {
+            color: white;
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px dashed #dee2e6;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info-card .card-header {
+            background: linear-gradient(135deg, #2196f3, #1976d2);
+            color: white;
+            border-radius: 10px 10px 0 0;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .edit-header h1 {
+                font-size: 1.5rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .field-group {
+                padding: 15px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container py-4">
+    <div class="edit-container">
+        <div class="edit-header">
+            <h1>
+                <i class="bi bi-pencil-square"></i>
+                Edit Interest Rate
+                <span class="edit-badge">ID: [[${interestRate.id}]]</span>
+            </h1>
+            <div class="edit-meta">
+                <i class="bi bi-info-circle"></i>
+                Modify the interest rate details below and click "Update" to save changes
+            </div>
+        </div>
+
+        <form id="editForm" class="form-container" method="post" th:action="@{/interest-rate/update/{id}(id=${interestRate.id})}" th:object="${interestRate}">
+
+            <!-- Basic Interest Rate Fields -->
+            <div class="section-header">
+                <h5>
+                    <i class="bi bi-info-circle-fill"></i>
+                    Basic Information
+                </h5>
+            </div>
+
+            <div class="row g-3" th:each="field : ${globalFields}">
+                <div class="col-md-6">
+                    <div class="field-group">
+                        <label class="field-label" th:for="${'extra_' + field.id}">
+                            <i class="bi bi-tag-fill"></i>
+                            [[${field.label}]]
+                        </label>
+                        <div class="field-value" th:if="${fieldValues?.get(field.id) != null and !#strings.isEmpty(fieldValues.get(field.id))}">
+                            Current value: <strong>[[${fieldValues.get(field.id)}]]</strong>
+                        </div>
+                        <input class="form-control"
+                               th:name="${'extra_' + field.id}"
+                               th:value="${fieldValues?.get(field.id) ?: ''}"
+                               th:placeholder="${'Enter ' + field.label}"
+                               type="text"/>
+                    </div>
+                </div>
+            </div>
+
+            <!-- More Info Section -->
+            <div class="section-header">
+                <h5>
+                    <i class="bi bi-journal-text"></i>
+                    Additional Information
+                </h5>
+            </div>
+
+            <!-- Table Section -->
+            <div class="info-card card">
+                <div class="card-header d-flex align-items-center">
+                    <i class="bi bi-table me-2"></i>
+                    <h6 class="mb-0">Table Section</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="field-label" for="tableTitle">
+                            <i class="bi bi-type-h1"></i>
+                            Table Section Title
+                        </label>
+                        <div class="field-value" th:if="${interestRate.moreInfo?.tableTitle != null and !#strings.isEmpty(interestRate.moreInfo.tableTitle)}">
+                            Current: <strong>[[${interestRate.moreInfo.tableTitle}]]</strong>
+                        </div>
+                        <input class="form-control"
+                               id="tableTitle"
+                               name="tableTitle"
+                               placeholder="e.g. Interest Rate Details"
+                               th:value="${interestRate.moreInfo?.tableTitle ?: ''}"
+                               type="text"/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="field-label">
+                            <i class="bi bi-list-ul"></i>
+                            Table Rows
+                        </label>
+                        <div id="tableRows">
+                            <!-- Existing table rows or empty state -->
+                            <div th:if="${interestRate.moreInfo?.miniTableRows != null and !interestRate.moreInfo.miniTableRows.isEmpty()}">
+                                <div class="mini-table-row" th:each="row, iterStat : ${interestRate.moreInfo.miniTableRows}">
+                                    <button class="remove-row-btn" onclick="removeTableRow(this)" title="Remove row" type="button">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                    <div class="row g-3 align-items-start">
+                                        <div class="col-md-3">
+                                            <label class="form-label small">Label</label>
+                                            <input class="form-control"
+                                                   name="tableRowLabels[]"
+                                                   placeholder="Row label"
+                                                   th:value="${row.label ?: ''}"
+                                                   type="text"/>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <label class="form-label small">Description</label>
+                                            <div class="rich-text-row">
+                                                <div class="format-toolbar">
+                                                    <button class="format-btn" onclick="formatText(this, 'bold')" title="Bold" type="button">
+                                                        <i class="bi bi-type-bold"></i>
+                                                    </button>
+                                                    <button class="format-btn" onclick="formatText(this, 'italic')" title="Italic" type="button">
+                                                        <i class="bi bi-type-italic"></i>
+                                                    </button>
+                                                    <button class="format-btn" onclick="formatText(this, 'underline')" title="Underline" type="button">
+                                                        <i class="bi bi-type-underline"></i>
+                                                    </button>
+                                                    <span style="color: #6c757d; font-size: 12px;">Rich text formatting</span>
+                                                </div>
+                                                <div class="simple-editor"
+                                                     contenteditable="true"
+                                                     data-name="tableRowDescriptions[]"
+                                                     onblur="updateHiddenInput(this)"
+                                                     onpaste="handlePaste(event)"
+                                                     placeholder="Full text description with formatting..."
+                                                     th:utext="${row.description ?: ''}"></div>
+                                                <input name="tableRowDescriptions[]"
+                                                       th:value="${row.description ?: ''}"
+                                                       type="hidden"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Empty state when no rows exist -->
+                            <div class="empty-state" th:if="${interestRate.moreInfo?.miniTableRows == null or interestRate.moreInfo.miniTableRows.isEmpty()}">
+                                <i class="bi bi-table"></i>
+                                <h6>No table rows yet</h6>
+                                <p>Click "Add Row" below to create your first table row</p>
+                            </div>
+                        </div>
+
+                        <button class="add-row-btn mt-3" onclick="addTableRow()" type="button">
+                            <i class="bi bi-plus-circle"></i>
+                            Add Row
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Text Section -->
+            <div class="info-card card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-text-paragraph me-2"></i>
+                        <h6 class="mb-0">Text Section</h6>
+                    </div>
+                    <small class="text-light">Rich text editor with formatting options</small>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="field-label" for="textTitle">
+                            <i class="bi bi-type-h2"></i>
+                            Text Section Title
+                        </label>
+                        <div class="field-value" th:if="${interestRate.moreInfo?.textTitle != null and !#strings.isEmpty(interestRate.moreInfo.textTitle)}">
+                            Current: <strong>[[${interestRate.moreInfo.textTitle}]]</strong>
+                        </div>
+                        <input class="form-control"
+                               id="textTitle"
+                               name="textTitle"
+                               placeholder="e.g. Additional Details"
+                               th:value="${interestRate.moreInfo?.textTitle ?: ''}"
+                               type="text"/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="field-label" for="textDescription">
+                            <i class="bi bi-textarea-t"></i>
+                            Text Description
+                        </label>
+                        <div class="rich-text-container">
+                            <div id="textDescriptionEditor" style="min-height: 200px;"></div>
+                        </div>
+                        <textarea id="textDescription"
+                                  name="textDescription"
+                                  style="display: none;"
+                                  th:text="${interestRate.moreInfo?.textDescription ?: ''}"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn-update" form="editForm" type="submit">
+                    <i class="bi bi-check-circle"></i>
+                    Update Interest Rate
+                </button>
+                <a class="btn-cancel" th:href="@{/}">
+                    <i class="bi bi-x-circle"></i>
+                    Cancel
+                </a>
+                <a class="btn-delete"
+                   th:href="@{/interest-rate/delete/{id}(id=${interestRate.id})}"
+                   onclick="return confirm('⚠️ Are you sure you want to delete this interest rate?\n\nThis action cannot be undone and will permanently remove all associated data.')">
+                    <i class="bi bi-trash"></i>
+                    Delete
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
+<script th:inline="javascript">
+    // Get existing text description content
+    const existingTextDescription = /*[[${interestRate.moreInfo?.textDescription}]]*/ '';
+
+    // Initialize Quill editor for main text description
+    const quill = new Quill('#textDescriptionEditor', {
+        theme: 'snow',
+        placeholder: 'Enter detailed description here. Use the toolbar above to format your text...',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline', 'strike'],
+                ['blockquote', 'code-block'],
+                [{ 'header': 1 }, { 'header': 2 }],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'script': 'sub'}, { 'script': 'super' }],
+                [{ 'indent': '-1'}, { 'indent': '+1' }],
+                [{ 'direction': 'rtl' }],
+                [{ 'size': ['small', false, 'large', 'huge'] }],
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'font': [] }],
+                [{ 'align': [] }],
+                ['clean'],
+                ['link']
+            ]
+        }
+    });
+
+    // Set existing content in Quill editor
+    if (existingTextDescription) {
+        quill.root.innerHTML = existingTextDescription;
+    }
+
+    // Update hidden textarea when content changes
+    quill.on('text-change', function() {
+        const html = quill.root.innerHTML;
+        document.getElementById('textDescription').value = html;
+    });
+
+    // Simple rich text functions for table rows
+    function formatText(button, command) {
+        const editor = button.closest('.rich-text-row').querySelector('.simple-editor');
+        editor.focus();
+        document.execCommand(command, false, null);
+
+        // Toggle active state
+        button.classList.toggle('active');
+
+        // Update hidden input
+        updateHiddenInput(editor);
+    }
+
+    function handlePaste(event) {
+        event.preventDefault();
+        const text = (event.originalEvent || event).clipboardData.getData('text/plain');
+        document.execCommand('insertText', false, text);
+    }
+
+    function updateHiddenInput(editor) {
+        const hiddenInput = editor.parentElement.querySelector('input[type="hidden"]');
+        hiddenInput.value = editor.innerHTML;
+    }
+
+    function addTableRow() {
+        const tableRows = document.getElementById('tableRows');
+
+        // Remove empty state if it exists
+        const emptyState = tableRows.querySelector('.empty-state');
+        if (emptyState) {
+            emptyState.remove();
+        }
+
+        const newRow = document.createElement('div');
+        newRow.className = 'mini-table-row';
+        newRow.innerHTML = `
+            <button type="button" class="remove-row-btn" onclick="removeTableRow(this)" title="Remove row">
+                <i class="bi bi-x"></i>
+            </button>
+            <div class="row g-3 align-items-start">
+                <div class="col-md-3">
+                    <label class="form-label small">Label</label>
+                    <input type="text" name="tableRowLabels[]" class="form-control" placeholder="Row label" />
+                </div>
+                <div class="col-md-9">
+                    <label class="form-label small">Description</label>
+                    <div class="rich-text-row">
+                        <div class="format-toolbar">
+                            <button type="button" class="format-btn" onclick="formatText(this, 'bold')" title="Bold">
+                                <i class="bi bi-type-bold"></i>
+                            </button>
+                            <button type="button" class="format-btn" onclick="formatText(this, 'italic')" title="Italic">
+                                <i class="bi bi-type-italic"></i>
+                            </button>
+                            <button type="button" class="format-btn" onclick="formatText(this, 'underline')" title="Underline">
+                                <i class="bi bi-type-underline"></i>
+                            </button>
+                            <span style="color: #6c757d; font-size: 12px;">Rich text formatting</span>
+                        </div>
+                        <div class="simple-editor"
+                             contenteditable="true"
+                             data-name="tableRowDescriptions[]"
+                             placeholder="Full text description with formatting..."
+                             onpaste="handlePaste(event)"
+                             onblur="updateHiddenInput(this)"></div>
+                        <input type="hidden" name="tableRowDescriptions[]" />
+                    </div>
+                </div>
+            </div>
+        `;
+        tableRows.appendChild(newRow);
+    }
+
+    function removeTableRow(button) {
+        const tableRows = document.getElementById('tableRows');
+        const miniTableRows = tableRows.querySelectorAll('.mini-table-row');
+
+        if (miniTableRows.length > 1) {
+            button.closest('.mini-table-row').remove();
+        } else {
+            // If removing the last row, show empty state
+            button.closest('.mini-table-row').remove();
+            const emptyState = document.createElement('div');
+            emptyState.className = 'empty-state';
+            emptyState.innerHTML = `
+                <i class="bi bi-table"></i>
+                <h6>No table rows</h6>
+                <p>Click "Add Row" below to add a new table row</p>
+            `;
+            tableRows.appendChild(emptyState);
+        }
+    }
+
+    // Fix form attribute
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set form id
+        document.querySelector('form').id = 'editForm';
+
+        // Initialize all existing contenteditable areas
+        const editors = document.querySelectorAll('.simple-editor');
+        editors.forEach(editor => {
+            // Set up event listeners
+            editor.addEventListener('input', function() {
+                updateHiddenInput(this);
+            });
+
+            // Initialize hidden input with existing content
+            updateHiddenInput(editor);
+        });
+    });
+
+    // Before form submission, ensure all rich text content is captured
+    document.querySelector('form').addEventListener('submit', function() {
+        // Update main text description
+        const html = quill.root.innerHTML;
+        document.getElementById('textDescription').value = html;
+
+        // Update all table row descriptions
+        const editors = document.querySelectorAll('.simple-editor');
+        editors.forEach(editor => {
+            updateHiddenInput(editor);
+        });
+    });
+</script>
+
+</body>
+</html>

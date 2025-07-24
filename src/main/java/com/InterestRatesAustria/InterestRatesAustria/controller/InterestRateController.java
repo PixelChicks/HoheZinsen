@@ -107,7 +107,7 @@ public class InterestRateController {
         model.addAttribute("fieldValues", fieldValues);
         model.addAttribute("isEdit", true);
 
-        return "interest-rate-form";
+        return "interest-rate-edit-form";
     }
 
     @PostMapping("/interest-rate/update/{id}")
