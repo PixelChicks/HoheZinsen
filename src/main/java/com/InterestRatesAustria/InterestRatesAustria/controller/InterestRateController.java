@@ -58,7 +58,6 @@ public class InterestRateController {
 
     @PostMapping("/fields/add")
     public String addGlobalField(@ModelAttribute GlobalField field) {
-        // Set sort order to be last
         Integer maxSortOrder = globalFieldRepository.findMaxSortOrder();
         field.setSortOrder(maxSortOrder + 1);
         field.setFieldKey(field.getLabel().toLowerCase().replaceAll("\\s+", ""));
@@ -108,6 +107,26 @@ public class InterestRateController {
         }
     }
 
+    @PostMapping("/more-info/reorder-sections")
+    @ResponseBody
+    public ResponseEntity<String> reorderSections(@RequestParam Long rateId,
+                                                  @RequestBody List<String> sectionOrder) {
+        try {
+            InterestRate rate = interestRateRepository.findById(rateId)
+                    .orElseThrow(() -> new RuntimeException("Interest rate not found with id: " + rateId));
+
+            if (rate.getMoreInfo() != null) {
+                rate.getMoreInfo().setSectionOrderList(sectionOrder);
+                moreInfoRepository.save(rate.getMoreInfo());
+                return ResponseEntity.ok("Section order updated successfully");
+            } else {
+                return ResponseEntity.badRequest().body("No more info found for this rate");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error updating section order: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/field-values/update")
     public String updateFieldValue(@RequestParam Long rateId,
                                    @RequestParam Long fieldId,
@@ -138,7 +157,6 @@ public class InterestRateController {
 
         InterestRate saved = interestRateRepository.save(interestRate);
 
-        // Save extra fields
         List<GlobalField> allFields = globalFieldRepository.findAllByOrderBySortOrderAsc();
         for (GlobalField field : allFields) {
             String key = "extra_" + field.getId();
@@ -161,22 +179,9 @@ public class InterestRateController {
             moreInfo.setTableTitle(tableTitle);
             moreInfo.setTextTitle(textTitle);
             moreInfo.setTextDescription(textDescription);
+            moreInfo.setSectionOrder("table,text");
 
-            List<MiniTableRow> miniTableRows = new ArrayList<>();
-
-            if (tableRowLabels != null && tableRowDescriptions != null) {
-                int size = Math.min(tableRowLabels.size(), tableRowDescriptions.size());
-                for (int i = 0; i < size; i++) {
-                    String label = tableRowLabels.get(i).trim();
-                    String desc = tableRowDescriptions.get(i).trim();
-                    if (!label.isEmpty() || !desc.isEmpty()) {
-                        MiniTableRow row = new MiniTableRow();
-                        row.setLabel(label);
-                        row.setDescription(desc);
-                        miniTableRows.add(row);
-                    }
-                }
-            }
+            List<MiniTableRow> miniTableRows = getMiniTableRows(tableRowLabels, tableRowDescriptions);
 
             moreInfo.setMiniTableRows(miniTableRows);
             MoreInfo savedMoreInfo = moreInfoRepository.save(moreInfo);
@@ -186,5 +191,24 @@ public class InterestRateController {
         }
 
         return "redirect:/";
+    }
+
+    private static List<MiniTableRow> getMiniTableRows(List<String> tableRowLabels, List<String> tableRowDescriptions) {
+        List<MiniTableRow> miniTableRows = new ArrayList<>();
+
+        if (tableRowLabels != null && tableRowDescriptions != null) {
+            int size = Math.min(tableRowLabels.size(), tableRowDescriptions.size());
+            for (int i = 0; i < size; i++) {
+                String label = tableRowLabels.get(i).trim();
+                String desc = tableRowDescriptions.get(i).trim();
+                if (!label.isEmpty() || !desc.isEmpty()) {
+                    MiniTableRow row = new MiniTableRow();
+                    row.setLabel(label);
+                    row.setDescription(desc);
+                    miniTableRows.add(row);
+                }
+            }
+        }
+        return miniTableRows;
     }
 }

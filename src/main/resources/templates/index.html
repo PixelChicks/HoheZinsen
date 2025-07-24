@@ -126,6 +126,30 @@
         .expanded-section {
             padding: 20px;
             border-bottom: 1px solid #f1f1f1;
+            position: relative;
+            background: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        .expanded-section.draggable-section {
+            cursor: grab;
+            border: 2px dashed transparent;
+        }
+
+        .expanded-section.draggable-section:hover {
+            border-color: #dee2e6;
+        }
+
+        .expanded-section.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+            transform: rotate(1deg);
+            z-index: 1000;
+        }
+
+        .expanded-section.drag-over {
+            border-color: #007bff !important;
+            background: rgba(0, 123, 255, 0.05) !important;
         }
 
         .expanded-section:last-child {
@@ -139,6 +163,30 @@
             margin-bottom: 15px;
             padding-bottom: 8px;
             border-bottom: 2px solid #00b894;
+        }
+
+        .section-drag-handle {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #6c757d;
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            cursor: grab;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+
+        .expanded-section:hover .section-drag-handle {
+            opacity: 1;
+        }
+
+        .section-drag-handle:hover {
+            background: #f8f9fa;
+            color: #495057;
         }
 
         .info-table {
@@ -399,6 +447,31 @@
         .order-changed-indicator.show {
             display: inline-block;
         }
+
+        /* Section reorder notification */
+        .section-order-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 2000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .section-order-notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .section-order-notification.error {
+            background: #dc3545;
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -510,47 +583,24 @@
 <!-- Drop indicator -->
 <div class="drop-indicator" id="dropIndicator"></div>
 
+<!-- Section order notification -->
+<div class="section-order-notification" id="sectionOrderNotification">
+    Section order updated successfully!
+</div>
+
 <script th:inline="javascript">
     // Pass server data to JavaScript
-    const interestRatesData = /*[[${interestRates}]]*/ [
-        // Mock data for demonstration
-        {
-            id: 1,
-            moreInfo: {
-                tableTitle: "Table Section Title",
-                miniTableRows: [
-                    { label: "Label", description: "Full text description" },
-                    { label: "Label", description: "Full text description" },
-                    { label: "Label", description: "Full text description" },
-                    { label: "Label", description: "Full text description" }
-                ],
-                textTitle: "Text Section Title",
-                textDescription: "Example text - Einlagen inklusive aufgelaufener Zinserträge sind bis zu einem Betrag von 100.000 EUR je Kunde und je Bank gesetzlich durch den italienischen Einlagensicherungsfonds abgesichert. Innerhalb der Europäischen Union sind die Mindestanforderungen in allen Mitgliedsstaaten harmonisiert durch die Richtlinie 94/19/EG, 2009/14/EG und 2014/49/EU. Zu beachten ist, dass sich diese Absicherung auf die gesamten Einlagen eines Kunden bei einer Bank bezieht. Dies ist dann relevant, wenn nicht nur über den WeltSparen vermittelte Einlagen eines Kunden bei einer bestimmten Bank angelegt werden, sondern noch weitere Einlagen dieses Kunden bei der jeweiligen Bank angelegt wurden."
-            }
-        },
-        {
-            id: 2,
-            moreInfo: {
-                tableTitle: "Rate Details",
-                miniTableRows: [
-                    { label: "Minimum Deposit", description: "1,000€" },
-                    { label: "Maximum Deposit", description: "100,000€" }
-                ],
-                textTitle: "Terms and Conditions",
-                textDescription: "This is a variable rate product with end-of-period payment structure."
-            }
-        },
-        {
-            id: 3,
-            moreInfo: null
-        }
-    ];
+    const interestRatesData = /*[[${interestRates}]]*/ [];
 
     let currentExpandedCard = null;
     let currentEditForm = null;
     let draggedElement = null;
     let orderChanged = false;
     let originalOrder = [];
+
+    // Section drag and drop variables
+    let draggedSection = null;
+    let currentRateId = null;
 
     // Initialize original order on page load
     document.addEventListener('DOMContentLoaded', function() {
@@ -562,7 +612,7 @@
         originalOrder = Array.from(headers).map(header => header.dataset.fieldId);
     }
 
-    // Drag and Drop functionality
+    // Drag and Drop functionality for columns
     function handleDragStart(event) {
         draggedElement = event.target;
         event.target.classList.add('dragging');
@@ -584,6 +634,106 @@
             showDropIndicator(target, event);
         }
     }
+
+    // Section drag and drop functions
+    function handleSectionDragStart(event, sectionType, rateId) {
+        draggedSection = {
+            element: event.target.closest('.expanded-section'),
+            type: sectionType,
+            rateId: rateId
+        };
+        draggedSection.element.classList.add('dragging');
+        currentRateId = rateId;
+        event.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleSectionDragOver(event) {
+        event.preventDefault();
+        const target = event.target.closest('.expanded-section');
+        if (target && draggedSection && target !== draggedSection.element &&
+            target.closest(`#rateCard_${currentRateId}`)) {
+
+            // Remove existing drag-over class
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            target.classList.add('drag-over');
+        }
+    }
+
+    function handleSectionDrop(event, targetType, rateId) {
+        event.preventDefault();
+
+        if (draggedSection && draggedSection.rateId === rateId && draggedSection.type !== targetType) {
+            const sourceElement = draggedSection.element;
+            const targetElement = event.target.closest('.expanded-section');
+
+            if (sourceElement && targetElement) {
+                // Swap the sections
+                const parent = sourceElement.parentElement;
+                const nextSibling = targetElement.nextSibling;
+
+                parent.insertBefore(targetElement, sourceElement);
+                if (nextSibling) {
+                    parent.insertBefore(sourceElement, nextSibling);
+                } else {
+                    parent.appendChild(sourceElement);
+                }
+
+                // Update the order in the database
+                const newOrder = draggedSection.type === 'table' ? ['text', 'table'] : ['table', 'text'];
+                saveSectionOrder(rateId, newOrder);
+            }
+        }
+
+        // Clean up
+        cleanupSectionDrag();
+    }
+
+    function handleSectionDragEnd(event) {
+        cleanupSectionDrag();
+    }
+
+    function cleanupSectionDrag() {
+        if (draggedSection) {
+            draggedSection.element.classList.remove('dragging');
+        }
+        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+        draggedSection = null;
+        currentRateId = null;
+    }
+
+    function saveSectionOrder(rateId, newOrder) {
+        fetch(`/more-info/reorder-sections?rateId=${rateId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newOrder)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Failed to save section order");
+            }
+            return response.text();
+        })
+        .then(data => {
+            showSectionOrderNotification("Section order updated successfully!", false);
+        })
+        .catch(error => {
+            showSectionOrderNotification("Error saving section order: " + error.message, true);
+        });
+    }
+
+    function showSectionOrderNotification(message, isError) {
+        const notification = document.getElementById('sectionOrderNotification');
+        notification.textContent = message;
+        notification.classList.toggle('error', isError);
+        notification.classList.add('show');
+
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+    }
+
     function showMoreInfo(rateId) {
         const rate = interestRatesData.find(r => r.id === rateId);
         if (!rate || !rate.moreInfo) return;
@@ -643,10 +793,23 @@
 
         const moreInfo = rate.moreInfo;
 
-        let tableHTML = '';
-        if (moreInfo.tableTitle && moreInfo.miniTableRows && moreInfo.miniTableRows.length > 0) {
-            tableHTML = `
-                <div class="expanded-section">
+        // Get the section order from the data, default to ['table', 'text']
+        const sectionOrder = moreInfo.sectionOrder || ['table', 'text'];
+
+        // Create section content
+        const createTableSection = () => {
+            if (!moreInfo.tableTitle || !moreInfo.miniTableRows || moreInfo.miniTableRows.length === 0) {
+                return '';
+            }
+            return `
+                <div class="expanded-section draggable-section"
+                     draggable="true"
+                     data-section-type="table"
+                     ondragstart="handleSectionDragStart(event, 'table', ${rate.id})"
+                     ondragover="handleSectionDragOver(event)"
+                     ondrop="handleSectionDrop(event, 'table', ${rate.id})"
+                     ondragend="handleSectionDragEnd(event)">
+                    <div class="section-drag-handle" title="Drag to reorder">⋮⋮</div>
                     <h5 class="section-title">${moreInfo.tableTitle}</h5>
                     <div class="info-table">
                         ${moreInfo.miniTableRows.map(row => `
@@ -658,23 +821,40 @@
                     </div>
                 </div>
             `;
-        }
+        };
 
-        let textHTML = '';
-        if (moreInfo.textTitle || moreInfo.textDescription) {
-            textHTML = `
-                <div class="expanded-section">
+        const createTextSection = () => {
+            if (!moreInfo.textTitle && !moreInfo.textDescription) {
+                return '';
+            }
+            return `
+                <div class="expanded-section draggable-section"
+                     draggable="true"
+                     data-section-type="text"
+                     ondragstart="handleSectionDragStart(event, 'text', ${rate.id})"
+                     ondragover="handleSectionDragOver(event)"
+                     ondrop="handleSectionDrop(event, 'text', ${rate.id})"
+                     ondragend="handleSectionDragEnd(event)">
+                    <div class="section-drag-handle" title="Drag to reorder">⋮⋮</div>
                     ${moreInfo.textTitle ? `<h5 class="section-title">${moreInfo.textTitle}</h5>` : ''}
                     <div class="text-content">${moreInfo.textDescription || ''}</div>
                 </div>
             `;
-        }
+        };
+
+        // Build sections in the correct order
+        let sectionsHTML = '';
+        sectionOrder.forEach(sectionType => {
+            if (sectionType === 'table') {
+                sectionsHTML += createTableSection();
+            } else if (sectionType === 'text') {
+                sectionsHTML += createTextSection();
+            }
+        });
 
         card.innerHTML = `
-
             <div class="rate-expanded-content show">
-                ${tableHTML}
-                ${textHTML}
+                ${sectionsHTML}
             </div>
         `;
 
@@ -691,12 +871,6 @@
         }
     }
 
-    // Close expanded card when clicking outside
-    document.addEventListener('click', function(e) {
-        if (currentExpandedCard && !e.target.closest('.rate-card') && !e.target.closest('.mehr-info-btn')) {
-            // Don't auto-close, let user explicitly close
-        }
-    });
     function handleDrop(event) {
         event.preventDefault();
 
@@ -843,6 +1017,5 @@
         }
     });
 </script>
-
 </body>
 </html>

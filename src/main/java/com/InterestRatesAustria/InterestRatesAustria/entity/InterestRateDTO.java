@@ -26,6 +26,7 @@ public class InterestRateDTO {
         private String tableTitle;
         private String textTitle;
         private String textDescription;
+        private List<String> sectionOrder;
         private List<MiniTableRowDTO> miniTableRows;
 
         public static MoreInfoDTO fromEntity(MoreInfo entity) {
@@ -33,6 +34,7 @@ public class InterestRateDTO {
             dto.setTableTitle(entity.getTableTitle());
             dto.setTextTitle(entity.getTextTitle());
             dto.setTextDescription(entity.getTextDescription());
+            dto.setSectionOrder(entity.getSectionOrderList());
 
             if (entity.getMiniTableRows() != null) {
                 dto.setMiniTableRows(
