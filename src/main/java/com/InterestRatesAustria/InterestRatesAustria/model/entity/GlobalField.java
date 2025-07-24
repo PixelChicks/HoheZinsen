@@ -1,4 +1,4 @@
-package com.InterestRatesAustria.InterestRatesAustria.entity;
+package com.InterestRatesAustria.InterestRatesAustria.model.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

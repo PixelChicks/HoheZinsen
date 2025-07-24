@@ -1,5 +1,8 @@
-package com.InterestRatesAustria.InterestRatesAustria.entity;
+package com.InterestRatesAustria.InterestRatesAustria.model.dto;
 
+import com.InterestRatesAustria.InterestRatesAustria.model.entity.InterestRate;
+import com.InterestRatesAustria.InterestRatesAustria.model.entity.MiniTableRow;
+import com.InterestRatesAustria.InterestRatesAustria.model.entity.MoreInfo;
 import lombok.Data;
 
 import java.util.List;

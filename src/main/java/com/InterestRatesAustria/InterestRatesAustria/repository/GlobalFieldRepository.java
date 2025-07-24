@@ -1,6 +1,6 @@
 package com.InterestRatesAustria.InterestRatesAustria.repository;
 
-import com.InterestRatesAustria.InterestRatesAustria.entity.GlobalField;
+import com.InterestRatesAustria.InterestRatesAustria.model.entity.GlobalField;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
