@@ -4,6 +4,7 @@ import com.InterestRatesAustria.InterestRatesAustria.model.dto.InterestRateDTO;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.*;
 import com.InterestRatesAustria.InterestRatesAustria.repository.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,18 +16,21 @@ import java.util.stream.Collectors;
 public class InterestRateService {
 
     private final InterestRateRepository interestRateRepository;
-
     private final GlobalFieldRepository globalFieldRepository;
-
     private final InterestRateFieldValueRepository fieldValueRepository;
-
     private final MoreInfoRepository moreInfoRepository;
+    private final MiniTableRowRepository miniTableRowRepository;
 
-    public InterestRateService(InterestRateRepository interestRateRepository, GlobalFieldRepository globalFieldRepository, InterestRateFieldValueRepository fieldValueRepository, MoreInfoRepository moreInfoRepository) {
+    public InterestRateService(InterestRateRepository interestRateRepository,
+                               GlobalFieldRepository globalFieldRepository,
+                               InterestRateFieldValueRepository fieldValueRepository,
+                               MoreInfoRepository moreInfoRepository,
+                               MiniTableRowRepository miniTableRowRepository) {
         this.interestRateRepository = interestRateRepository;
         this.globalFieldRepository = globalFieldRepository;
         this.fieldValueRepository = fieldValueRepository;
         this.moreInfoRepository = moreInfoRepository;
+        this.miniTableRowRepository = miniTableRowRepository;
     }
 
     public List<InterestRateDTO> getAllInterestRateDTOs() {
@@ -35,6 +39,20 @@ public class InterestRateService {
 
     public List<InterestRate> getAllInterestRates() {
         return interestRateRepository.findAll();
+    }
+
+    public InterestRate getInterestRateById(Long id) {
+        return interestRateRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Interest rate not found with id: " + id));
+    }
+
+    public Map<Long, String> getFieldValuesForRate(Long rateId) {
+        InterestRate rate = getInterestRateById(rateId);
+        return rate.getFieldValues().stream()
+                .collect(Collectors.toMap(
+                        fv -> fv.getGlobalField().getId(),
+                        InterestRateFieldValue::getValue
+                ));
     }
 
     public List<GlobalField> getAllGlobalFieldsOrdered() {
@@ -64,7 +82,6 @@ public class InterestRateService {
             fv.setValue("");
             fieldValueRepository.save(fv);
         });
-
     }
 
     public void updateGlobalField(Long fieldId, String label) {
@@ -137,7 +154,75 @@ public class InterestRateService {
             saved.setMoreInfo(savedMoreInfo);
             interestRateRepository.save(saved);
         }
+    }
 
+    @Transactional
+    public void updateInterestRate(Long id, InterestRate updatedRate, Map<String, String> requestParams, List<String> tableRowLabels, List<String> tableRowDescriptions) {
+        InterestRate existingRate = getInterestRateById(id);
+
+        List<GlobalField> allFields = globalFieldRepository.findAllByOrderBySortOrderAsc();
+        for (GlobalField field : allFields) {
+            String key = "extra_" + field.getId();
+            if (requestParams.containsKey(key)) {
+                String value = requestParams.get(key);
+
+                InterestRateFieldValue fieldValue = fieldValueRepository
+                        .findByInterestRateIdAndGlobalFieldId(id, field.getId())
+                        .orElse(new InterestRateFieldValue());
+
+                fieldValue.setInterestRate(existingRate);
+                fieldValue.setGlobalField(field);
+                fieldValue.setValue(value);
+                fieldValueRepository.save(fieldValue);
+            }
+        }
+
+        String tableTitle = requestParams.get("tableTitle");
+        String textTitle = requestParams.get("textTitle");
+        String textDescription = requestParams.get("textDescription");
+
+        if (tableTitle != null || textTitle != null || textDescription != null) {
+            MoreInfo moreInfo = existingRate.getMoreInfo();
+            if (moreInfo == null) {
+                moreInfo = new MoreInfo();
+                moreInfo.setSectionOrder("table,text");
+            }
+
+            moreInfo.setTableTitle(tableTitle);
+            moreInfo.setTextTitle(textTitle);
+            moreInfo.setTextDescription(textDescription);
+
+            if (moreInfo.getMiniTableRows() != null) {
+                moreInfo.getMiniTableRows().clear();
+            }
+
+            List<MiniTableRow> miniTableRows = getMiniTableRows(tableRowLabels, tableRowDescriptions);
+            moreInfo.setMiniTableRows(miniTableRows);
+
+            MoreInfo savedMoreInfo = moreInfoRepository.save(moreInfo);
+            existingRate.setMoreInfo(savedMoreInfo);
+            interestRateRepository.save(existingRate);
+        } else {
+            if (existingRate.getMoreInfo() != null) {
+                Long moreInfoId = existingRate.getMoreInfo().getId();
+                existingRate.setMoreInfo(null);
+                interestRateRepository.save(existingRate);
+                moreInfoRepository.deleteById(moreInfoId);
+            }
+        }
+    }
+
+    @Transactional
+    public void deleteInterestRate(Long id) {
+        InterestRate rate = getInterestRateById(id);
+
+        fieldValueRepository.deleteAll(rate.getFieldValues());
+
+        if (rate.getMoreInfo() != null) {
+            moreInfoRepository.delete(rate.getMoreInfo());
+        }
+
+        interestRateRepository.delete(rate);
     }
 
     private List<MiniTableRow> getMiniTableRows(List<String> tableRowLabels, List<String> tableRowDescriptions) {

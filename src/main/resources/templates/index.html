@@ -5,6 +5,107 @@
     <title>Interest Rate Offers</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-edit {
+            background: #ffc107;
+            color: #000;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-edit:hover {
+            background: #e0a800;
+            color: #000;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        .delete-confirmation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .delete-confirmation-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .delete-confirmation-content h5 {
+            color: #dc3545;
+            margin-bottom: 15px;
+        }
+
+        .delete-confirmation-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .delete-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 2001;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .delete-notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .delete-notification.success {
+            background: #28a745;
+            color: white;
+        }
+
+        .delete-notification.error {
+            background: #dc3545;
+            color: white;
+        }
+    </style>
 </head>
 <body class="bg-light">
 <div class="container py-4">
@@ -77,7 +178,7 @@
                         </div>
                     </div>
                 </th>
-                <th class="no-drag"></th>
+                <th class="no-drag">Actions</th>
             </tr>
             </thead>
 
@@ -100,15 +201,41 @@
 
                 <!-- Actions -->
                 <td>
-                    <button class="mehr-info-btn"
-                            th:disabled="${rate.moreInfo == null}"
-                            th:onclick="'showMoreInfo(' + ${rate.id} + ')'"
-                            th:text="${rate.moreInfo != null ? 'MEHR INFO' : 'No Info'}">
-                    </button>
+                    <div class="action-buttons">
+                        <button class="mehr-info-btn"
+                                th:disabled="${rate.moreInfo == null}"
+                                th:onclick="'showMoreInfo(' + ${rate.id} + ')'"
+                                th:text="${rate.moreInfo != null ? 'MEHR INFO' : 'No Info'}">
+                        </button>
+
+                        <a class="btn-edit" th:href="@{/interest-rate/edit/{id}(id=${rate.id})}" title="Edit Interest Rate">
+                            ✎ Edit
+                        </a>
+
+                        <button class="btn-delete"
+                                th:onclick="'showDeleteConfirmation(' + ${rate.id} + ')'"
+                                title="Delete Interest Rate">
+                            🗑 Delete
+                        </button>
+                    </div>
                 </td>
             </tr>
             </tbody>
         </table>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="delete-confirmation-modal" id="deleteConfirmationModal">
+    <div class="delete-confirmation-content">
+        <h5>⚠️ Confirm Deletion</h5>
+        <p>Are you sure you want to delete this interest rate?</p>
+        <p><strong>This action cannot be undone.</strong></p>
+
+        <div class="delete-confirmation-buttons">
+            <button class="btn btn-danger" id="confirmDeleteBtn">Yes, Delete</button>
+            <button class="btn btn-secondary" onclick="hideDeleteConfirmation()">Cancel</button>
+        </div>
     </div>
 </div>
 
@@ -120,6 +247,11 @@
     Section order updated successfully!
 </div>
 
+<!-- Delete notification -->
+<div class="delete-notification" id="deleteNotification">
+    Interest rate deleted successfully!
+</div>
+
 <script th:inline="javascript">
     // Pass server data to JavaScript
     const interestRatesData = /*[[${interestRates}]]*/ [];
@@ -129,6 +261,7 @@
     let draggedElement = null;
     let orderChanged = false;
     let originalOrder = [];
+    let pendingDeleteId = null;
 
     // Section drag and drop variables
     let draggedSection = null;
@@ -143,6 +276,90 @@
         const headers = document.querySelectorAll('.draggable-column');
         originalOrder = Array.from(headers).map(header => header.dataset.fieldId);
     }
+
+    // Delete functionality
+    function showDeleteConfirmation(rateId) {
+        pendingDeleteId = rateId;
+        document.getElementById('deleteConfirmationModal').style.display = 'flex';
+
+        // Set up the confirm button click handler
+        document.getElementById('confirmDeleteBtn').onclick = function() {
+            deleteInterestRate(rateId);
+        };
+    }
+
+    function hideDeleteConfirmation() {
+        document.getElementById('deleteConfirmationModal').style.display = 'none';
+        pendingDeleteId = null;
+    }
+
+    function deleteInterestRate(rateId) {
+        fetch(`/interest-rate/${rateId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to delete interest rate');
+            }
+            return response.text();
+        })
+        .then(data => {
+            // Hide the confirmation modal
+            hideDeleteConfirmation();
+
+            // Show success notification
+            showDeleteNotification('Interest rate deleted successfully!', false);
+
+            // Remove the row from the table
+            removeInterestRateRow(rateId);
+
+            // Close any expanded card for this rate
+            closeExpandedCard(rateId);
+        })
+        .catch(error => {
+            hideDeleteConfirmation();
+            showDeleteNotification('Error deleting interest rate: ' + error.message, true);
+        });
+    }
+
+    function removeInterestRateRow(rateId) {
+        // Find and remove the main table row
+        const tableRows = document.querySelectorAll('#mainTable tbody tr');
+        tableRows.forEach(row => {
+            const rateIdInput = row.querySelector('input[name="rateId"]');
+            if (rateIdInput && rateIdInput.value == rateId) {
+                row.remove();
+            }
+        });
+
+        // Remove from interestRatesData array
+        const index = interestRatesData.findIndex(rate => rate.id === rateId);
+        if (index > -1) {
+            interestRatesData.splice(index, 1);
+        }
+    }
+
+    function showDeleteNotification(message, isError) {
+        const notification = document.getElementById('deleteNotification');
+        notification.textContent = message;
+        notification.classList.toggle('error', isError);
+        notification.classList.toggle('success', !isError);
+        notification.classList.add('show');
+
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('deleteConfirmationModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            hideDeleteConfirmation();
+        }
+    });
 
     // Drag and Drop functionality for columns
     function handleDragStart(event) {
