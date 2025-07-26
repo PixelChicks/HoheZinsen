@@ -26,26 +26,19 @@ public class InterestRateController {
             @ModelAttribute InterestRate interestRate,
             @RequestParam Map<String, String> requestParams) {
 
-        // Parse multiple table sections from request params
+        System.out.println("Create request params: " + requestParams);
+
         Map<String, List<String>> tableSectionData = new HashMap<>();
         Map<String, String> textSectionData = new HashMap<>();
 
-        // Group parameters by section
         for (Map.Entry<String, String> entry : requestParams.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
 
-            if (key.startsWith("tableTitle_") || key.startsWith("tableRowLabels_") || key.startsWith("tableRowDescriptions_")) {
-                String sectionId = extractSectionId(key);
-                if (key.startsWith("tableRowLabels_") || key.startsWith("tableRowDescriptions_")) {
-                    // Handle arrays
-                    String[] values = requestParams.get(key).split(",");
-                    tableSectionData.put(key, List.of(values));
-                } else {
-                    tableSectionData.put(key, List.of(value));
-                }
-            } else if (key.startsWith("textTitle_") || key.startsWith("textContent_")) {
-                textSectionData.put(key, value);
+            if (key.startsWith("tableTitle_") || key.startsWith("tableRowLabels_") ||
+                    key.startsWith("tableRowDescriptions_") || key.startsWith("textTitle_") ||
+                    key.startsWith("textContent_")) {
+                System.out.println("Processing: " + key + " = " + value);
             }
         }
 
@@ -59,27 +52,8 @@ public class InterestRateController {
             @ModelAttribute InterestRate interestRate,
             @RequestParam Map<String, String> requestParams) {
 
-        // Parse multiple sections similar to create method
         Map<String, List<String>> tableSectionData = new HashMap<>();
         Map<String, String> textSectionData = new HashMap<>();
-
-        // Group parameters by section (same logic as create)
-        for (Map.Entry<String, String> entry : requestParams.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-
-            if (key.startsWith("tableTitle_") || key.startsWith("tableRowLabels_") || key.startsWith("tableRowDescriptions_")) {
-                String sectionId = extractSectionId(key);
-                if (key.startsWith("tableRowLabels_") || key.startsWith("tableRowDescriptions_")) {
-                    String[] values = requestParams.get(key).split(",");
-                    tableSectionData.put(key, List.of(values));
-                } else {
-                    tableSectionData.put(key, List.of(value));
-                }
-            } else if (key.startsWith("textTitle_") || key.startsWith("textContent_")) {
-                textSectionData.put(key, value);
-            }
-        }
 
         interestRateService.updateInterestRate(id, interestRate, requestParams, tableSectionData, textSectionData);
         return "redirect:/";
@@ -127,15 +101,17 @@ public class InterestRateController {
     public ResponseEntity<String> reorderSections(@RequestParam Long rateId,
                                                   @RequestBody List<String> sectionOrder) {
         try {
+            System.out.println("Reordering sections for rate " + rateId + " with order: " + sectionOrder);
             interestRateService.updateSectionOrder(rateId, sectionOrder);
             return ResponseEntity.ok("Section order updated successfully");
         } catch (Exception e) {
+            System.err.println("Error reordering sections: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().body("Error updating section order: " + e.getMessage());
         }
     }
 
     private String extractSectionId(String key) {
-        // Extract section ID from keys like "tableTitle_1", "textContent_2", etc.
         String[] parts = key.split("_");
         return parts.length > 1 ? parts[parts.length - 1] : "1";
     }

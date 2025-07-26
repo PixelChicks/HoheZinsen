@@ -139,26 +139,6 @@ public class InterestRateService {
         interestRateRepository.delete(rate);
     }
 
-    private List<MiniTableRow> getMiniTableRows(List<String> tableRowLabels, List<String> tableRowDescriptions) {
-        List<MiniTableRow> miniTableRows = new ArrayList<>();
-
-        if (tableRowLabels != null && tableRowDescriptions != null) {
-            int size = Math.min(tableRowLabels.size(), tableRowDescriptions.size());
-            for (int i = 0; i < size; i++) {
-                String label = tableRowLabels.get(i).trim();
-                String desc = tableRowDescriptions.get(i).trim();
-                if (!label.isEmpty() || !desc.isEmpty()) {
-                    MiniTableRow row = new MiniTableRow();
-                    row.setLabel(label);
-                    row.setDescription(desc);
-                    miniTableRows.add(row);
-                }
-            }
-        }
-
-        return miniTableRows;
-    }
-
     public void deleteGlobalField(Long fieldId) {
         GlobalField field = globalFieldRepository.findById(fieldId)
                 .orElseThrow(() -> new RuntimeException("Field not found with id: " + fieldId));
@@ -172,7 +152,6 @@ public class InterestRateService {
                                    Map<String, String> textSectionData) {
         InterestRate saved = interestRateRepository.save(interestRate);
 
-        // Handle basic field values
         List<GlobalField> allFields = globalFieldRepository.findAllActiveByOrderBySortOrderAsc();
         for (GlobalField field : allFields) {
             String key = "extra_" + field.getId();
@@ -186,77 +165,171 @@ public class InterestRateService {
             }
         }
 
-        // Handle multiple sections
-        if (!tableSectionData.isEmpty() || !textSectionData.isEmpty()) {
+        if (hasAnySectionData(requestParams, tableSectionData, textSectionData)) {
             MoreInfo moreInfo = new MoreInfo();
-
-            // Save MoreInfo first to get ID
             MoreInfo savedMoreInfo = moreInfoRepository.save(moreInfo);
 
             List<String> sectionOrder = new ArrayList<>();
 
-            // Create table sections
-            int tableIndex = 1;
-            for (Map.Entry<String, List<String>> entry : tableSectionData.entrySet()) {
-                if (entry.getKey().startsWith("tableTitle_")) {
-                    String sectionId = entry.getKey().replace("tableTitle_", "");
-                    String title = entry.getValue().get(0);
+            processTableSections(requestParams, savedMoreInfo, sectionOrder);
 
-                    if (title != null && !title.trim().isEmpty()) {
-                        String sectionIdentifier = "table-" + tableIndex;
+            processTextSections(requestParams, savedMoreInfo, sectionOrder);
 
-                        TableSection tableSection = new TableSection();
-                        tableSection.setTitle(title);
-                        tableSection.setSectionIdentifier(sectionIdentifier);
-                        tableSection.setMoreInfo(savedMoreInfo);
-
-                        // Add table rows
-                        List<String> labels = tableSectionData.get("tableRowLabels_" + sectionId);
-                        List<String> descriptions = tableSectionData.get("tableRowDescriptions_" + sectionId);
-
-                        if (labels != null && descriptions != null) {
-                            List<MiniTableRow> miniTableRows = createMiniTableRows(labels, descriptions);
-                            tableSection.setMiniTableRows(miniTableRows);
-                        }
-
-                        tableSectionRepository.save(tableSection);
-                        sectionOrder.add(sectionIdentifier);
-                        tableIndex++;
-                    }
-                }
-            }
-
-            // Create text sections
-            int textIndex = 1;
-            for (Map.Entry<String, String> entry : textSectionData.entrySet()) {
-                if (entry.getKey().startsWith("textTitle_")) {
-                    String sectionId = entry.getKey().replace("textTitle_", "");
-                    String title = entry.getValue();
-                    String content = textSectionData.get("textContent_" + sectionId);
-
-                    if ((title != null && !title.trim().isEmpty()) ||
-                            (content != null && !content.trim().isEmpty())) {
-                        String sectionIdentifier = "text-" + textIndex;
-
-                        TextSection textSection = new TextSection();
-                        textSection.setTitle(title);
-                        textSection.setContent(content);
-                        textSection.setSectionIdentifier(sectionIdentifier);
-                        textSection.setMoreInfo(savedMoreInfo);
-
-                        textSectionRepository.save(textSection);
-                        sectionOrder.add(sectionIdentifier);
-                        textIndex++;
-                    }
-                }
-            }
-
-            // Update section order
             savedMoreInfo.setSectionOrderList(sectionOrder);
             moreInfoRepository.save(savedMoreInfo);
 
             saved.setMoreInfo(savedMoreInfo);
             interestRateRepository.save(saved);
+        }
+    }
+
+    private boolean hasAnySectionData(Map<String, String> requestParams,
+                                      Map<String, List<String>> tableSectionData,
+                                      Map<String, String> textSectionData) {
+        for (String key : requestParams.keySet()) {
+            if (key.startsWith("tableTitle_") && !requestParams.get(key).trim().isEmpty()) {
+                return true;
+            }
+            if (key.startsWith("textTitle_") && !requestParams.get(key).trim().isEmpty()) {
+                return true;
+            }
+            if (key.startsWith("textContent_") && !requestParams.get(key).trim().isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void processTableSections(Map<String, String> requestParams, MoreInfo moreInfo, List<String> sectionOrder) {
+        Map<String, String> tableTitles = new HashMap<>();
+        Map<String, String> tableLabelsString = new HashMap<>();
+        Map<String, String> tableDescriptionsString = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : requestParams.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+
+            System.out.println("Processing key: " + key + ", value: " + value);
+
+            if (key.startsWith("tableTitle_")) {
+                String sectionId = key.replace("tableTitle_", "");
+                tableTitles.put(sectionId, value);
+                System.out.println("Found table title for section " + sectionId + ": " + value);
+            } else if (key.startsWith("tableRowLabels_")) {
+                String sectionId = key.replace("tableRowLabels_", "");
+                tableLabelsString.put(sectionId, value);
+                System.out.println("Found table labels for section " + sectionId + ": " + value);
+            } else if (key.startsWith("tableRowDescriptions_")) {
+                String sectionId = key.replace("tableRowDescriptions_", "");
+                tableDescriptionsString.put(sectionId, value);
+                System.out.println("Found table descriptions for section " + sectionId + ": " + value);
+            }
+        }
+
+        int tableIndex = 1;
+        for (Map.Entry<String, String> titleEntry : tableTitles.entrySet()) {
+            String sectionId = titleEntry.getKey();
+            String title = titleEntry.getValue();
+
+            System.out.println("Creating table section for sectionId: " + sectionId + ", title: " + title);
+
+            if (title != null && !title.trim().isEmpty()) {
+                String sectionIdentifier = "table-" + tableIndex;
+
+                TableSection tableSection = new TableSection();
+                tableSection.setTitle(title);
+                tableSection.setSectionIdentifier(sectionIdentifier);
+                tableSection.setMoreInfo(moreInfo);
+
+                TableSection savedTableSection = tableSectionRepository.save(tableSection);
+                System.out.println("Saved table section with ID: " + savedTableSection.getId());
+
+                String labelsString = tableLabelsString.get(sectionId);
+                String descriptionsString = tableDescriptionsString.get(sectionId);
+
+                System.out.println("Labels string: " + labelsString);
+                System.out.println("Descriptions string: " + descriptionsString);
+
+                if (labelsString != null && !labelsString.trim().isEmpty() &&
+                        descriptionsString != null && !descriptionsString.trim().isEmpty()) {
+
+                    String[] labels = labelsString.split(",");
+                    String[] descriptions = descriptionsString.split(",");
+
+                    System.out.println("Split labels array length: " + labels.length);
+                    System.out.println("Split descriptions array length: " + descriptions.length);
+
+                    List<MiniTableRow> miniTableRows = new ArrayList<>();
+                    int maxLength = Math.max(labels.length, descriptions.length);
+
+                    for (int i = 0; i < maxLength; i++) {
+                        String label = i < labels.length ? labels[i].trim() : "";
+                        String description = i < descriptions.length ? descriptions[i].trim() : "";
+
+                        System.out.println("Processing row " + i + " - Label: '" + label + "', Description: '" + description + "'");
+
+                        if (!label.isEmpty() || !description.isEmpty()) {
+                            MiniTableRow row = new MiniTableRow();
+                            row.setLabel(label);
+                            row.setDescription(description);
+                            row.setTableSectionId(savedTableSection.getId());
+
+                            MiniTableRow savedRow = miniTableRowRepository.save(row);
+                            miniTableRows.add(savedRow);
+
+                            System.out.println("Saved mini table row with ID: " + savedRow.getId() +
+                                    ", Label: '" + savedRow.getLabel() +
+                                    "', Description: '" + savedRow.getDescription() + "'");
+                        }
+                    }
+                    savedTableSection.setMiniTableRows(miniTableRows);
+                } else {
+                    System.out.println("No valid labels or descriptions found for section: " + sectionId);
+                }
+
+                sectionOrder.add(sectionIdentifier);
+                tableIndex++;
+            }
+        }
+    }
+
+    private void processTextSections(Map<String, String> requestParams, MoreInfo moreInfo, List<String> sectionOrder) {
+        Map<String, String> textTitles = new HashMap<>();
+        Map<String, String> textContents = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : requestParams.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+
+            if (key.startsWith("textTitle_")) {
+                String sectionId = key.replace("textTitle_", "");
+                textTitles.put(sectionId, value);
+            } else if (key.startsWith("textContent_")) {
+                String sectionId = key.replace("textContent_", "");
+                textContents.put(sectionId, value);
+            }
+        }
+
+        int textIndex = 1;
+        for (String sectionId : textTitles.keySet()) {
+            String title = textTitles.get(sectionId);
+            String content = textContents.get(sectionId);
+
+            if ((title != null && !title.trim().isEmpty()) ||
+                    (content != null && !content.trim().isEmpty())) {
+
+                String sectionIdentifier = "text-" + textIndex;
+
+                TextSection textSection = new TextSection();
+                textSection.setTitle(title);
+                textSection.setContent(content);
+                textSection.setSectionIdentifier(sectionIdentifier);
+                textSection.setMoreInfo(moreInfo);
+
+                textSectionRepository.save(textSection);
+                sectionOrder.add(sectionIdentifier);
+                textIndex++;
+            }
         }
     }
 
@@ -266,7 +339,6 @@ public class InterestRateService {
                                    Map<String, String> textSectionData) {
         InterestRate existingRate = getInterestRateById(id);
 
-        // Update basic field values
         List<GlobalField> allFields = globalFieldRepository.findAllActiveByOrderBySortOrderAsc();
         for (GlobalField field : allFields) {
             String key = "extra_" + field.getId();
@@ -282,26 +354,28 @@ public class InterestRateService {
             }
         }
 
-        // Handle sections update
         MoreInfo moreInfo = existingRate.getMoreInfo();
 
-        if (!tableSectionData.isEmpty() || !textSectionData.isEmpty()) {
+        if (hasAnySectionData(requestParams, tableSectionData, textSectionData)) {
             if (moreInfo == null) {
                 moreInfo = new MoreInfo();
                 moreInfo = moreInfoRepository.save(moreInfo);
             } else {
-                // Clear existing sections
                 tableSectionRepository.deleteByMoreInfoId(moreInfo.getId());
                 textSectionRepository.deleteByMoreInfoId(moreInfo.getId());
             }
 
-            // Recreate sections (similar to create method)
-            // ... (implementation similar to createInterestRate)
+            List<String> sectionOrder = new ArrayList<>();
+
+            processTableSections(requestParams, moreInfo, sectionOrder);
+            processTextSections(requestParams, moreInfo, sectionOrder);
+
+            moreInfo.setSectionOrderList(sectionOrder);
+            moreInfoRepository.save(moreInfo);
 
             existingRate.setMoreInfo(moreInfo);
             interestRateRepository.save(existingRate);
         } else if (moreInfo != null) {
-            // Remove all sections if none provided
             Long moreInfoId = moreInfo.getId();
             existingRate.setMoreInfo(null);
             interestRateRepository.save(existingRate);
@@ -320,7 +394,6 @@ public class InterestRateService {
             interestRateRepository.save(rate);
         }
 
-        // Generate next table identifier
         List<TableSection> existingTables = tableSectionRepository.findByMoreInfoId(moreInfo.getId());
         int nextIndex = existingTables.size() + 1;
         String sectionIdentifier = "table-" + nextIndex;
@@ -332,8 +405,10 @@ public class InterestRateService {
 
         tableSectionRepository.save(tableSection);
 
-        // Update section order
         List<String> currentOrder = moreInfo.getSectionOrderList();
+        if (currentOrder == null) {
+            currentOrder = new ArrayList<>();
+        }
         currentOrder.add(sectionIdentifier);
         moreInfo.setSectionOrderList(currentOrder);
         moreInfoRepository.save(moreInfo);
@@ -350,7 +425,6 @@ public class InterestRateService {
             interestRateRepository.save(rate);
         }
 
-        // Generate next text identifier
         List<TextSection> existingTexts = textSectionRepository.findByMoreInfoId(moreInfo.getId());
         int nextIndex = existingTexts.size() + 1;
         String sectionIdentifier = "text-" + nextIndex;
@@ -363,8 +437,10 @@ public class InterestRateService {
 
         textSectionRepository.save(textSection);
 
-        // Update section order
         List<String> currentOrder = moreInfo.getSectionOrderList();
+        if (currentOrder == null) {
+            currentOrder = new ArrayList<>();
+        }
         currentOrder.add(sectionIdentifier);
         moreInfo.setSectionOrderList(currentOrder);
         moreInfoRepository.save(moreInfo);
@@ -384,30 +460,11 @@ public class InterestRateService {
                     .ifPresent(textSectionRepository::delete);
         }
 
-        // Update section order
         List<String> currentOrder = moreInfo.getSectionOrderList();
-        currentOrder.remove(sectionIdentifier);
-        moreInfo.setSectionOrderList(currentOrder);
-        moreInfoRepository.save(moreInfo);
-    }
-
-    private List<MiniTableRow> createMiniTableRows(List<String> labels, List<String> descriptions) {
-        List<MiniTableRow> miniTableRows = new ArrayList<>();
-
-        if (labels != null && descriptions != null) {
-            int size = Math.min(labels.size(), descriptions.size());
-            for (int i = 0; i < size; i++) {
-                String label = labels.get(i).trim();
-                String desc = descriptions.get(i).trim();
-                if (!label.isEmpty() || !desc.isEmpty()) {
-                    MiniTableRow row = new MiniTableRow();
-                    row.setLabel(label);
-                    row.setDescription(desc);
-                    miniTableRows.add(row);
-                }
-            }
+        if (currentOrder != null) {
+            currentOrder.remove(sectionIdentifier);
+            moreInfo.setSectionOrderList(currentOrder);
+            moreInfoRepository.save(moreInfo);
         }
-
-        return miniTableRows;
     }
 }
