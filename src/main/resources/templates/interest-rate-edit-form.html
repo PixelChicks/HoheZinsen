@@ -7,7 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        /* Same styles as create form */
         .edit-container {
             background: white;
             border-radius: 15px;
@@ -87,19 +86,30 @@
             gap: 8px;
         }
 
-        .section-type-badge {
-            background: linear-gradient(135deg, #ffc107, #ff8f00);
-            color: #000;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
+        .drag-handle {
+            cursor: move;
+            color: #6c757d;
+            font-size: 1.2rem;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.2s;
         }
 
-        .section-type-badge.text-section {
-            background: linear-gradient(135deg, #28a745, #1e7e34);
+        .drag-handle:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .section-type-badge {
+            background: linear-gradient(135deg, #007bff, #0056b3);
             color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            position: absolute;
+            top: 15px;
+            left: 15px;
         }
 
         .remove-section-btn {
@@ -122,17 +132,6 @@
             box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
         }
 
-        .add-section-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin: 25px 0;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border: 2px dashed #dee2e6;
-        }
-
         .add-section-btn {
             background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
@@ -145,20 +144,12 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            margin: 10px 5px;
         }
 
         .add-section-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
-        }
-
-        .add-section-btn.add-text {
-            background: linear-gradient(135deg, #ffc107, #ff8f00);
-            color: #000;
-        }
-
-        .add-section-btn.add-text:hover {
-            box-shadow: 0 6px 15px rgba(255, 193, 7, 0.3);
         }
 
         .mini-table-row {
@@ -172,8 +163,8 @@
         }
 
         .mini-table-row:hover {
-            border-color: #ffc107;
-            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.15);
+            border-color: #007bff;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
         }
 
         .remove-row-btn {
@@ -181,9 +172,9 @@
             color: white;
             border: none;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            font-size: 14px;
+            width: 25px;
+            height: 25px;
+            font-size: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
             position: absolute;
@@ -200,19 +191,19 @@
             background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
+            padding: 8px 16px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .add-row-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
         }
 
         .rich-text-container {
@@ -224,7 +215,7 @@
         }
 
         .rich-text-container:focus-within {
-            border-color: #ffc107;
+            border-color: #007bff;
         }
 
         .ql-toolbar {
@@ -239,7 +230,7 @@
         }
 
         .ql-editor {
-            min-height: 180px;
+            min-height: 150px;
             font-size: 14px;
             line-height: 1.6;
         }
@@ -271,15 +262,15 @@
         }
 
         .format-btn.active {
-            background: #ffc107;
-            color: #000;
-            border-color: #ffc107;
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
         }
 
         .simple-editor {
             border: 1px solid #dee2e6;
             border-radius: 0 0 8px 8px;
-            min-height: 120px;
+            min-height: 100px;
             padding: 15px;
             font-family: inherit;
             font-size: 14px;
@@ -289,69 +280,39 @@
 
         .simple-editor:focus {
             outline: none;
-            border-color: #ffc107;
-            box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
         }
 
-        .action-buttons {
+        .sections-container {
+            min-height: 200px;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
             background: #f8f9fa;
-            padding: 25px 30px;
-            border-top: 2px solid #e9ecef;
-            display: flex;
-            gap: 15px;
-            align-items: center;
+            position: relative;
         }
 
-        .btn-update {
-            background: linear-gradient(135deg, #ffc107, #ff8f00);
-            color: #000;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .empty-sections-message {
+            text-align: center;
+            color: #6c757d;
+            padding: 40px 20px;
         }
 
-        .btn-update:hover {
-            color: #000;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(255, 193, 7, 0.3);
-            background: linear-gradient(135deg, #ff8f00, #ffc107);
+        .empty-sections-message i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
         }
 
-        .btn-cancel {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .drag-over {
+            border-color: #007bff !important;
+            background: rgba(0, 123, 255, 0.05);
         }
 
-        .btn-cancel:hover {
-            color: white;
-            background: #5a6268;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(108, 117, 125, 0.3);
-        }
-
-        .form-control {
-            border-radius: 8px;
-            border: 2px solid #e9ecef;
-            transition: all 0.3s ease;
-        }
-
-        .form-control:focus {
-            border-color: #ffc107;
-            box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+        .dragging {
+            opacity: 0.5;
+            transform: rotate(2deg);
         }
 
         .field-group {
@@ -383,70 +344,53 @@
             margin-bottom: 5px;
         }
 
-        .section-drag-handle {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            color: #6c757d;
-            cursor: move;
-            font-size: 14px;
-            opacity: 0.7;
-            transition: opacity 0.2s;
+        .action-buttons {
+            background: #f8f9fa;
+            padding: 25px 30px;
+            border-top: 2px solid #e9ecef;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-top: 30px;
+            border-radius: 0 0 15px 15px;
         }
 
-        .dynamic-section:hover .section-drag-handle {
-            opacity: 1;
+        .form-control {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
         }
 
-        .empty-sections-placeholder {
-            text-align: center;
-            padding: 40px 20px;
-            color: #6c757d;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border-radius: 10px;
-            border: 2px dashed #dee2e6;
-            margin: 20px 0;
-        }
-
-        .empty-sections-placeholder i {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            opacity: 0.5;
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
         }
 
         @media (max-width: 768px) {
-            .edit-header h1 {
-                font-size: 1.5rem;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-
-            .field-group {
+            .dynamic-section {
                 padding: 15px;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .add-section-buttons {
-                flex-direction: column;
             }
 
             .section-controls {
                 position: relative;
                 top: auto;
                 right: auto;
+                justify-content: center;
                 margin-bottom: 15px;
-                justify-content: flex-end;
+            }
+
+            .section-type-badge {
+                position: relative;
+                top: auto;
+                left: auto;
+                display: inline-block;
+                margin-bottom: 10px;
             }
         }
     </style>
 </head>
-<body>
-<div class="container py-4">
+<body class="bg-light">
+<div class="container py-5">
     <div class="edit-container">
         <div class="edit-header">
             <h1>
@@ -454,10 +398,7 @@
                 Edit Interest Rate
                 <span class="edit-badge">ID: [[${interestRate.id}]]</span>
             </h1>
-            <div class="edit-meta">
-                <i class="bi bi-info-circle"></i>
-                Modify the interest rate details below and click "Update" to save changes
-            </div>
+            <p class="text-muted mt-2">Modify the interest rate details below and click "Update" to save changes</p>
         </div>
 
         <form id="editForm" class="form-container" method="post" th:action="@{/interest-rate/update/{id}(id=${interestRate.id})}" th:object="${interestRate}">
@@ -470,7 +411,7 @@
                 </h5>
             </div>
 
-            <div class="row g-3" th:each="field : ${globalFields}">
+            <div class="row g-3 mb-4" th:each="field : ${globalFields}">
                 <div class="col-md-6">
                     <div class="field-group">
                         <label class="field-label" th:for="${'extra_' + field.id}">
@@ -492,152 +433,152 @@
             <!-- Dynamic Sections -->
             <div class="section-header">
                 <h5>
-                    <i class="bi bi-journal-text"></i>
+                    <i class="bi bi-layers-fill"></i>
                     Additional Information Sections
                 </h5>
             </div>
 
-            <div id="dynamicSections">
+            <div class="sections-container" id="sectionsContainer">
                 <!-- Existing Table Sections -->
                 <div th:if="${interestRate.moreInfo?.tableSections != null and !interestRate.moreInfo.tableSections.isEmpty()}">
-                    <div class="dynamic-section" th:each="tableSection, iterStat : ${interestRate.moreInfo.tableSections}" th:id="'existingTableSection_' + ${tableSection.id}">
-                        <div class="section-drag-handle" title="Drag to reorder">⋮⋮</div>
+                    <div class="dynamic-section" data-section-type="table" th:each="tableSection, iterStat : ${interestRate.moreInfo.tableSections}" th:attr="data-section-id='table_' + ${tableSection.sectionIdentifier}" draggable="true">
+                        <div class="section-type-badge">
+                            <i class="bi bi-table"></i> Table Section
+                        </div>
                         <div class="section-controls">
-                            <span class="section-type-badge">Table Section</span>
-                            <button type="button" class="remove-section-btn" th:onclick="'removeSection(\'existingTableSection_' + ${tableSection.id} + '\')'" title="Remove section">
+                            <div class="drag-handle" title="Drag to reorder">
+                                <i class="bi bi-grip-vertical"></i>
+                            </div>
+                            <button type="button" class="remove-section-btn" onclick="removeSection(this)" title="Remove section">
                                 <i class="bi bi-x"></i>
                             </button>
                         </div>
 
-                        <div class="mb-3" style="margin-top: 20px;">
-                            <label class="field-label">
-                                <i class="bi bi-type-h1"></i>
-                                Table Section Title
-                            </label>
-                            <div class="field-value" th:if="${tableSection.title != null and !#strings.isEmpty(tableSection.title)}">
-                                Current: <strong>[[${tableSection.title}]]</strong>
+                        <div style="margin-top: 40px;">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-type-h1"></i>
+                                    Table Title
+                                </label>
+                                <div class="field-value" th:if="${tableSection.title != null and !#strings.isEmpty(tableSection.title)}">
+                                    Current: <strong>[[${tableSection.title}]]</strong>
+                                </div>
+                                <input type="text" th:name="'tableTitle_' + ${tableSection.sectionIdentifier}" class="form-control"
+                                       th:value="${tableSection.title ?: ''}"
+                                       placeholder="e.g. Interest Rate Details" />
                             </div>
-                            <input class="form-control"
-                                   th:name="'tableTitle_' + ${tableSection.sectionIdentifier}"
-                                   th:value="${tableSection.title ?: ''}"
-                                   placeholder="e.g. Interest Rate Details"
-                                   type="text"/>
-                        </div>
 
-                        <div class="mb-3">
-                            <label class="field-label">
-                                <i class="bi bi-list-ul"></i>
-                                Table Rows
-                            </label>
-                            <div th:id="'tableRows_' + ${tableSection.sectionIdentifier}" class="table-rows-container">
-                                <div class="mini-table-row" th:each="row, rowStat : ${tableSection.miniTableRows}">
-                                    <button class="remove-row-btn" onclick="removeTableRow(this)" title="Remove row" type="button">
-                                        <i class="bi bi-x"></i>
-                                    </button>
-                                    <div class="row g-3 align-items-start">
-                                        <div class="col-md-3">
-                                            <label class="form-label small">Label</label>
-                                            <input class="form-control"
-                                                   th:name="'tableRowLabels_' + ${tableSection.sectionIdentifier} + '[]'"
-                                                   placeholder="Row label"
-                                                   th:value="${row.label ?: ''}"
-                                                   type="text"/>
-                                        </div>
-                                        <div class="col-md-9">
-                                            <label class="form-label small">Description</label>
-                                            <div class="rich-text-row">
-                                                <div class="format-toolbar">
-                                                    <button class="format-btn" onclick="formatText(this, 'bold')" title="Bold" type="button">
-                                                        <i class="bi bi-type-bold"></i>
-                                                    </button>
-                                                    <button class="format-btn" onclick="formatText(this, 'italic')" title="Italic" type="button">
-                                                        <i class="bi bi-type-italic"></i>
-                                                    </button>
-                                                    <button class="format-btn" onclick="formatText(this, 'underline')" title="Underline" type="button">
-                                                        <i class="bi bi-type-underline"></i>
-                                                    </button>
-                                                    <span style="color: #6c757d; font-size: 12px;">Rich text formatting</span>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-list-ul"></i>
+                                    Table Rows
+                                </label>
+                                <div th:attr="data-section=${tableSection.sectionIdentifier}" class="table-rows-container">
+                                    <div class="mini-table-row" th:each="row, rowStat : ${tableSection.miniTableRows}">
+                                        <button type="button" class="remove-row-btn" onclick="removeTableRow(this)" title="Remove row">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                        <div class="row g-3 align-items-start" style="margin-top: 20px;">
+                                            <div class="col-md-3">
+                                                <label class="form-label small">Label</label>
+                                                <input type="text" th:name="'tableRowLabels_' + ${tableSection.sectionIdentifier}" class="form-control form-control-sm"
+                                                       th:value="${row.label ?: ''}"
+                                                       placeholder="Row label" />
+                                            </div>
+                                            <div class="col-md-9">
+                                                <label class="form-label small">Description</label>
+                                                <div class="rich-text-row">
+                                                    <div class="format-toolbar">
+                                                        <button type="button" class="format-btn" onclick="formatText(this, 'bold')" title="Bold">
+                                                            <i class="bi bi-type-bold"></i>
+                                                        </button>
+                                                        <button type="button" class="format-btn" onclick="formatText(this, 'italic')" title="Italic">
+                                                            <i class="bi bi-type-italic"></i>
+                                                        </button>
+                                                        <button type="button" class="format-btn" onclick="formatText(this, 'underline')" title="Underline">
+                                                            <i class="bi bi-type-underline"></i>
+                                                        </button>
+                                                        <span style="color: #6c757d; font-size: 12px;">Rich text formatting</span>
+                                                    </div>
+                                                    <div class="simple-editor"
+                                                         contenteditable="true"
+                                                         placeholder="Full text description with formatting..."
+                                                         onpaste="handlePaste(event)"
+                                                         onblur="updateHiddenInput(this)"
+                                                         th:utext="${row.description ?: ''}"></div>
+                                                    <input type="hidden" th:name="'tableRowDescriptions_' + ${tableSection.sectionIdentifier}" th:value="${row.description ?: ''}" />
                                                 </div>
-                                                <div class="simple-editor"
-                                                     contenteditable="true"
-                                                     onblur="updateHiddenInput(this)"
-                                                     onpaste="handlePaste(event)"
-                                                     placeholder="Full text description with formatting..."
-                                                     th:utext="${row.description ?: ''}"></div>
-                                                <input th:name="'tableRowDescriptions_' + ${tableSection.sectionIdentifier} + '[]'"
-                                                       th:value="${row.description ?: ''}"
-                                                       type="hidden"/>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                                <button type="button" class="add-row-btn mt-2" th:attr="data-section-id=${tableSection.sectionIdentifier}" onclick="addTableRowFromButton(this)">
+                                    <i class="bi bi-plus-circle"></i>
+                                    Add Row
+                                </button>
                             </div>
-
-                            <button class="add-row-btn mt-3" th:onclick="'addTableRow(\'tableRows_' + ${tableSection.sectionIdentifier} + '\', \'' + ${tableSection.sectionIdentifier} + '\')'" type="button">
-                                <i class="bi bi-plus-circle"></i>
-                                Add Row
-                            </button>
                         </div>
                     </div>
                 </div>
 
                 <!-- Existing Text Sections -->
                 <div th:if="${interestRate.moreInfo?.textSections != null and !interestRate.moreInfo.textSections.isEmpty()}">
-                    <div class="dynamic-section" th:each="textSection, iterStat : ${interestRate.moreInfo.textSections}" th:id="'existingTextSection_' + ${textSection.id}">
-                        <div class="section-drag-handle" title="Drag to reorder">⋮⋮</div>
+                    <div class="dynamic-section" data-section-type="text" th:each="textSection, iterStat : ${interestRate.moreInfo.textSections}" th:attr="data-section-id='text_' + ${textSection.sectionIdentifier}" draggable="true">
+                        <div class="section-type-badge">
+                            <i class="bi bi-text-paragraph"></i> Text Section
+                        </div>
                         <div class="section-controls">
-                            <span class="section-type-badge text-section">Text Section</span>
-                            <button type="button" class="remove-section-btn" th:onclick="'removeSection(\'existingTextSection_' + ${textSection.id} + '\')'" title="Remove section">
+                            <div class="drag-handle" title="Drag to reorder">
+                                <i class="bi bi-grip-vertical"></i>
+                            </div>
+                            <button type="button" class="remove-section-btn" onclick="removeSection(this)" title="Remove section">
                                 <i class="bi bi-x"></i>
                             </button>
                         </div>
 
-                        <div class="mb-3" style="margin-top: 20px;">
-                            <label class="field-label">
-                                <i class="bi bi-type-h2"></i>
-                                Text Section Title
-                            </label>
-                            <div class="field-value" th:if="${textSection.title != null and !#strings.isEmpty(textSection.title)}">
-                                Current: <strong>[[${textSection.title}]]</strong>
+                        <div style="margin-top: 40px;">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-type-h2"></i>
+                                    Text Title
+                                </label>
+                                <div class="field-value" th:if="${textSection.title != null and !#strings.isEmpty(textSection.title)}">
+                                    Current: <strong>[[${textSection.title}]]</strong>
+                                </div>
+                                <input type="text" th:name="'textTitle_' + ${textSection.sectionIdentifier}" class="form-control"
+                                       th:value="${textSection.title ?: ''}"
+                                       placeholder="e.g. Additional Details" />
                             </div>
-                            <input class="form-control"
-                                   th:name="'textTitle_' + ${textSection.sectionIdentifier}"
-                                   th:value="${textSection.title ?: ''}"
-                                   placeholder="e.g. Additional Details"
-                                   type="text"/>
-                        </div>
 
-                        <div class="mb-3">
-                            <label class="field-label">
-                                <i class="bi bi-textarea-t"></i>
-                                Text Content
-                            </label>
-                            <div class="rich-text-container">
-                                <div th:id="'textEditor_' + ${textSection.sectionIdentifier}" style="min-height: 200px;"></div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-textarea-t"></i>
+                                    Text Content
+                                </label>
+                                <div class="rich-text-container">
+                                    <div th:id="'textEditor_' + ${textSection.sectionIdentifier}" style="min-height: 200px;"></div>
+                                </div>
+                                <textarea th:name="'textContent_' + ${textSection.sectionIdentifier}" style="display: none;" th:text="${textSection.content ?: ''}"></textarea>
                             </div>
-                            <textarea th:id="'textContent_' + ${textSection.sectionIdentifier}"
-                                      th:name="'textContent_' + ${textSection.sectionIdentifier}"
-                                      style="display: none;"
-                                      th:text="${textSection.content ?: ''}"></textarea>
                         </div>
                     </div>
                 </div>
 
-                <!-- Empty state when no sections exist -->
-                <div class="empty-sections-placeholder" id="emptySectionsPlaceholder" th:if="${interestRate.moreInfo == null or (interestRate.moreInfo.tableSections.isEmpty() and interestRate.moreInfo.textSections.isEmpty())}">
+                <!-- Empty message when no sections exist -->
+                <div class="empty-sections-message" id="emptySectionsMessage" th:if="${interestRate.moreInfo == null or (interestRate.moreInfo.tableSections.isEmpty() and interestRate.moreInfo.textSections.isEmpty())}">
                     <i class="bi bi-plus-square"></i>
-                    <h5>No sections added yet</h5>
-                    <p>Use the buttons below to add table or text sections to provide detailed information about this interest rate.</p>
+                    <h6>No sections added yet</h6>
+                    <p>Click the buttons below to add table or text sections</p>
                 </div>
             </div>
 
             <!-- Add Section Buttons -->
-            <div class="add-section-buttons">
+            <div class="d-flex justify-content-center gap-3 my-4">
                 <button type="button" class="add-section-btn" onclick="addTableSection()">
                     <i class="bi bi-table"></i>
                     Add Table Section
                 </button>
-                <button type="button" class="add-section-btn add-text" onclick="addTextSection()">
+                <button type="button" class="add-section-btn" onclick="addTextSection()">
                     <i class="bi bi-text-paragraph"></i>
                     Add Text Section
                 </button>
@@ -645,11 +586,11 @@
 
             <!-- Action Buttons -->
             <div class="action-buttons">
-                <button class="btn-update" form="editForm" type="submit">
+                <button class="btn btn-success btn-lg" type="submit">
                     <i class="bi bi-check-circle"></i>
                     Update Interest Rate
                 </button>
-                <a class="btn-cancel" th:href="@{/}">
+                <a class="btn btn-secondary btn-lg ms-2" th:href="@{/}">
                     <i class="bi bi-x-circle"></i>
                     Cancel
                 </a>
@@ -659,86 +600,175 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
-<script th:inline="javascript">
+<script>
     let sectionCounter = 1000; // Start high to avoid conflicts with existing sections
     let quillEditors = new Map();
 
-    // Get existing sections data
-    const existingTableSections = /*[[${interestRate.moreInfo?.tableSections}]]*/ [];
-    const existingTextSections = /*[[${interestRate.moreInfo?.textSections}]]*/ [];
+    // Enhanced form submission handler - same as create form
+    document.getElementById('editForm')
+        .addEventListener('submit', function (e) {
+            console.log('=== FORM SUBMISSION STARTED ===');
 
-    function hideEmptyPlaceholder() {
-        const placeholder = document.getElementById('emptySectionsPlaceholder');
-        if (placeholder) {
-            placeholder.style.display = 'none';
-        }
-    }
-
-    function showEmptyPlaceholder() {
-        const sectionsContainer = document.getElementById('dynamicSections');
-        const hasVisibleSections = sectionsContainer.querySelector('.dynamic-section');
-
-        if (!hasVisibleSections) {
-            const placeholder = document.getElementById('emptySectionsPlaceholder');
-            if (placeholder) {
-                placeholder.style.display = 'block';
-            }
-        }
-    }
-
-    // Initialize existing Quill editors
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize Quill editors for existing text sections
-        existingTextSections.forEach(function(textSection) {
-            const editorId = '#textEditor_' + textSection.sectionIdentifier;
-            const textareaId = 'textContent_' + textSection.sectionIdentifier;
-
-            if (document.querySelector(editorId)) {
-                const quill = initializeQuillEditor(editorId, textareaId);
-
-                // Set existing content
-                const existingContent = textSection.content || '';
-                if (existingContent) {
-                    quill.root.innerHTML = existingContent;
+            // Update all Quill editors
+            quillEditors.forEach((quill, counter) => {
+                const textarea = document.querySelector(`textarea[name="textContent_${counter}"]`);
+                if (textarea) {
+                    textarea.value = quill.root.innerHTML;
+                    console.log(`Updated Quill editor ${counter}:`, textarea.value.substring(0, 100) + '...');
                 }
-
-                quillEditors.set(textSection.sectionIdentifier, quill);
-            }
-        });
-
-        // Initialize all existing contenteditable areas
-        const editors = document.querySelectorAll('.simple-editor');
-        editors.forEach(editor => {
-            editor.addEventListener('input', function() {
-                updateHiddenInput(this);
             });
-            // Initialize hidden input with existing content
-            updateHiddenInput(editor);
+
+            // Update all simple editors (table row descriptions)
+            document.querySelectorAll('.simple-editor')
+                .forEach(editor => {
+                    updateHiddenInput(editor);
+                });
+
+            // Process each table section individually
+            document.querySelectorAll('.dynamic-section[data-section-type="table"]')
+                .forEach(section => {
+                    const sectionId = section.dataset.sectionId.split('_')[1];
+                    console.log(`\n=== PROCESSING TABLE SECTION: ${sectionId} ===`);
+
+                    // Collect all labels for this section
+                    const labelInputs = section.querySelectorAll(`input[name="tableRowLabels_${sectionId}"]`);
+                    console.log(`Found ${labelInputs.length} label inputs`);
+
+                    const labels = [];
+                    labelInputs.forEach((input, index) => {
+                        console.log(`Label ${index} (${input.type}): "${input.value}"`);
+                        if (input.value && input.value.trim()) {
+                            if (input.value.includes(',')) {
+                                const splitValues = input.value.split(',');
+                                splitValues.forEach(val => {
+                                    if (val.trim()) labels.push(val.trim());
+                                });
+                            } else {
+                                labels.push(input.value.trim());
+                            }
+                        }
+                    });
+
+                    // Collect all descriptions for this section
+                    const descInputs = section.querySelectorAll(`input[name="tableRowDescriptions_${sectionId}"]`);
+                    console.log(`Found ${descInputs.length} description inputs`);
+
+                    const descriptions = [];
+                    descInputs.forEach((input, index) => {
+                        console.log(`Description ${index} (${input.type}): "${input.value}"`);
+                        if (input.value && input.value.trim()) {
+                            if (input.value.includes(',')) {
+                                const splitValues = input.value.split(',');
+                                splitValues.forEach(val => {
+                                    if (val.trim()) descriptions.push(val.trim());
+                                });
+                            } else {
+                                descriptions.push(input.value.trim());
+                            }
+                        }
+                    });
+
+                    console.log(`Collected ${labels.length} labels:`, labels);
+                    console.log(`Collected ${descriptions.length} descriptions:`, descriptions);
+
+                    // Remove existing individual inputs to avoid conflicts
+                    labelInputs.forEach(input => input.remove());
+                    descInputs.forEach(input => input.remove());
+
+                    // Create combined comma-separated inputs only if we have data
+                    if (labels.length > 0) {
+                        const labelsInput = document.createElement('input');
+                        labelsInput.type = 'hidden';
+                        labelsInput.name = `tableRowLabels_${sectionId}`;
+                        labelsInput.value = labels.join(',');
+                        section.appendChild(labelsInput);
+                        console.log(`✓ Created combined labels input: "${labelsInput.value}"`);
+                    }
+
+                    if (descriptions.length > 0) {
+                        const descriptionsInput = document.createElement('input');
+                        descriptionsInput.type = 'hidden';
+                        descriptionsInput.name = `tableRowDescriptions_${sectionId}`;
+                        descriptionsInput.value = descriptions.join(',');
+                        section.appendChild(descriptionsInput);
+                        console.log(`✓ Created combined descriptions input: "${descriptionsInput.value}"`);
+                    }
+                });
+
+            // Final check - log all form data that will be submitted
+            console.log('\n=== FINAL FORM DATA ===');
+            const formData = new FormData(this);
+            for (let [key, value] of formData.entries()) {
+                if (key.includes('table')) {
+                    console.log(`${key}: ${value}`);
+                }
+            }
+
+            console.log('=== FORM SUBMISSION COMPLETE ===');
         });
 
-        // Hide empty placeholder if sections exist
-        if (existingTableSections.length > 0 || existingTextSections.length > 0) {
-            hideEmptyPlaceholder();
-        }
-    });
+    function addTextSection() {
+        sectionCounter++;
+        const sectionId = `text_${sectionCounter}`;
+        const editorId = `textEditor_${sectionCounter}`;
 
-    function initializeQuillEditor(editorSelector, textareaId) {
-        const quill = new Quill(editorSelector, {
+        hideEmptyMessage();
+
+        const sectionHtml = `
+            <div class="dynamic-section" data-section-type="text" data-section-id="${sectionId}" draggable="true">
+                <div class="section-type-badge">
+                    <i class="bi bi-text-paragraph"></i> Text Section
+                </div>
+                <div class="section-controls">
+                    <div class="drag-handle" title="Drag to reorder">
+                        <i class="bi bi-grip-vertical"></i>
+                    </div>
+                    <button type="button" class="remove-section-btn" onclick="removeSection(this)" title="Remove section">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+
+                <div style="margin-top: 40px;">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-type-h2"></i>
+                            Text Title
+                        </label>
+                        <input type="text" name="textTitle_${sectionCounter}" class="form-control"
+                               placeholder="e.g. Additional Details" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-textarea-t"></i>
+                            Text Content
+                        </label>
+                        <div class="rich-text-container">
+                            <div id="${editorId}" style="min-height: 200px;"></div>
+                        </div>
+                        <textarea name="textContent_${sectionCounter}" style="display: none;"></textarea>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('sectionsContainer')
+            .insertAdjacentHTML('beforeend', sectionHtml);
+
+        // Initialize Quill editor for this text section
+        const quill = new Quill(`#${editorId}`, {
             theme: 'snow',
-            placeholder: 'Enter detailed description here. Use the toolbar above to format your text...',
+            placeholder: 'Enter detailed content here. Use the toolbar to format your text...',
             modules: {
                 toolbar: [
                     ['bold', 'italic', 'underline', 'strike'],
                     ['blockquote', 'code-block'],
                     [{ 'header': 1 }, { 'header': 2 }],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    [{ 'script': 'sub'}, { 'script': 'super' }],
-                    [{ 'indent': '-1'}, { 'indent': '+1' }],
-                    [{ 'direction': 'rtl' }],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                    [{ 'script': 'sub' }, { 'script': 'super' }],
+                    [{ 'indent': '-1' }, { 'indent': '+1' }],
                     [{ 'size': ['small', false, 'large', 'huge'] }],
-                    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
                     [{ 'color': [] }, { 'background': [] }],
-                    [{ 'font': [] }],
                     [{ 'align': [] }],
                     ['clean'],
                     ['link']
@@ -746,199 +776,242 @@
             }
         });
 
-        // Update hidden textarea when content changes
-        quill.on('text-change', function() {
-            const html = quill.root.innerHTML;
-            document.getElementById(textareaId).value = html;
+        // Store editor reference and set up content sync
+        quillEditors.set(sectionCounter, quill);
+
+        quill.on('text-change', function () {
+            const textarea = document.querySelector(`textarea[name="textContent_${sectionCounter}"]`);
+            textarea.value = quill.root.innerHTML;
         });
 
-        return quill;
+        setupSectionDragAndDrop();
     }
 
     function addTableSection() {
-        hideEmptyPlaceholder();
+        sectionCounter++;
+        const sectionId = `table_${sectionCounter}`;
 
-        const sectionsContainer = document.getElementById('dynamicSections');
-        const sectionId = sectionCounter++;
-        const sectionIdentifier = 'new-table-' + sectionId;
+        hideEmptyMessage();
 
-        const sectionDiv = document.createElement('div');
-        sectionDiv.className = 'dynamic-section';
-        sectionDiv.id = `tableSection_${sectionId}`;
-        sectionDiv.innerHTML = `
-            <div class="section-drag-handle" title="Drag to reorder">⋮⋮</div>
-            <div class="section-controls">
-                <span class="section-type-badge">Table Section</span>
-                <button type="button" class="remove-section-btn" onclick="removeSection('tableSection_${sectionId}')" title="Remove section">
-                    <i class="bi bi-x"></i>
-                </button>
-            </div>
+        const sectionHtml = `
+            <div class="dynamic-section" data-section-type="table" data-section-id="${sectionId}" draggable="true">
+                <div class="section-type-badge">
+                    <i class="bi bi-table"></i> Table Section
+                </div>
+                <div class="section-controls">
+                    <div class="drag-handle" title="Drag to reorder">
+                        <i class="bi bi-grip-vertical"></i>
+                    </div>
+                    <button type="button" class="remove-section-btn" onclick="removeSection(this)" title="Remove section">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
 
-            <div class="mb-3" style="margin-top: 20px;">
-                <label class="field-label">
-                    <i class="bi bi-type-h1"></i>
-                    Table Section Title
-                </label>
-                <input type="text" name="tableTitle_${sectionIdentifier}" class="form-control"
-                       placeholder="e.g., Interest Rate Details" required />
-            </div>
+                <div style="margin-top: 40px;">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-type-h1"></i>
+                            Table Title
+                        </label>
+                        <input type="text" name="tableTitle_${sectionCounter}" class="form-control"
+                               placeholder="e.g. Interest Rate Details" />
+                    </div>
 
-            <div class="mb-3">
-                <label class="field-label">
-                    <i class="bi bi-list-ul"></i>
-                    Table Rows
-                </label>
-                <div class="table-rows-container" id="tableRows_${sectionIdentifier}">
-                    <div class="mini-table-row">
-                        <button type="button" class="remove-row-btn" onclick="removeTableRow(this)" title="Remove row">
-                            <i class="bi bi-x"></i>
-                        </button>
-                        <div class="row g-3 align-items-start">
-                            <div class="col-md-3">
-                                <label class="form-label small">Label</label>
-                                <input type="text" name="tableRowLabels_${sectionIdentifier}[]" class="form-control"
-                                       placeholder="Row label" />
-                            </div>
-                            <div class="col-md-9">
-                                <label class="form-label small">Description</label>
-                                <div class="rich-text-row">
-                                    <div class="format-toolbar">
-                                        <button type="button" class="format-btn" onclick="formatText(this, 'bold')" title="Bold">
-                                            <i class="bi bi-type-bold"></i>
-                                        </button>
-                                        <button type="button" class="format-btn" onclick="formatText(this, 'italic')" title="Italic">
-                                            <i class="bi bi-type-italic"></i>
-                                        </button>
-                                        <button type="button" class="format-btn" onclick="formatText(this, 'underline')" title="Underline">
-                                            <i class="bi bi-type-underline"></i>
-                                        </button>
-                                        <span style="color: #6c757d; font-size: 12px;">Rich text formatting</span>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-list-ul"></i>
+                            Table Rows
+                        </label>
+                        <div class="table-rows-container" data-section="${sectionCounter}">
+                            <div class="mini-table-row">
+                                <button type="button" class="remove-row-btn" onclick="removeTableRow(this)" title="Remove row">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                                <div class="row g-3 align-items-start" style="margin-top: 20px;">
+                                    <div class="col-md-3">
+                                        <label class="form-label small">Label</label>
+                                        <input type="text" name="tableRowLabels_${sectionCounter}" class="form-control form-control-sm" placeholder="Row label" />
                                     </div>
-                                    <div class="simple-editor"
-                                         contenteditable="true"
-                                         placeholder="Full text description with formatting..."
-                                         onpaste="handlePaste(event)"
-                                         onblur="updateHiddenInput(this)"></div>
-                                    <input type="hidden" name="tableRowDescriptions_${sectionIdentifier}[]" />
+                                    <div class="col-md-9">
+                                        <label class="form-label small">Description</label>
+                                        <div class="rich-text-row">
+                                            <div class="format-toolbar">
+                                                <button type="button" class="format-btn" onclick="formatText(this, 'bold')" title="Bold">
+                                                    <i class="bi bi-type-bold"></i>
+                                                </button>
+                                                <button type="button" class="format-btn" onclick="formatText(this, 'italic')" title="Italic">
+                                                    <i class="bi bi-type-italic"></i>
+                                                </button>
+                                                <button type="button" class="format-btn" onclick="formatText(this, 'underline')" title="Underline">
+                                                    <i class="bi bi-type-underline"></i>
+                                                </button>
+                                                <span style="color: #6c757d; font-size: 12px;">Rich text formatting</span>
+                                            </div>
+                                            <div class="simple-editor"
+                                                 contenteditable="true"
+                                                 placeholder="Full text description with formatting..."
+                                                 onpaste="handlePaste(event)"
+                                                 onblur="updateHiddenInput(this)"></div>
+                                            <input type="hidden" name="tableRowDescriptions_${sectionCounter}" />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        <button type="button" class="add-row-btn mt-2" onclick="addTableRow(${sectionCounter})">
+                            <i class="bi bi-plus-circle"></i>
+                            Add Row
+                        </button>
                     </div>
                 </div>
-                <button type="button" class="add-row-btn mt-3" onclick="addTableRow('tableRows_${sectionIdentifier}', '${sectionIdentifier}')">
-                    <i class="bi bi-plus-circle"></i>
-                    Add Row
-                </button>
             </div>
         `;
 
-        sectionsContainer.appendChild(sectionDiv);
-        makeSectionDraggable(sectionDiv);
+        document.getElementById('sectionsContainer')
+            .insertAdjacentHTML('beforeend', sectionHtml);
+        setupSectionDragAndDrop();
     }
 
-    function addTextSection() {
-        hideEmptyPlaceholder();
+    // Enhanced addTableRow function - same as create form
+    function addTableRow(sectionCounter) {
+        console.log(`Adding table row to section ${sectionCounter}`);
 
-        const sectionsContainer = document.getElementById('dynamicSections');
-        const sectionId = sectionCounter++;
-        const sectionIdentifier = 'new-text-' + sectionId;
+        const container = document.querySelector(`[data-section="${sectionCounter}"]`);
+        if (!container) {
+            console.error(`Container not found for section ${sectionCounter}`);
+            return;
+        }
 
-        const sectionDiv = document.createElement('div');
-        sectionDiv.className = 'dynamic-section';
-        sectionDiv.id = `textSection_${sectionId}`;
-        sectionDiv.innerHTML = `
-            <div class="section-drag-handle" title="Drag to reorder">⋮⋮</div>
-            <div class="section-controls">
-                <span class="section-type-badge text-section">Text Section</span>
-                <button type="button" class="remove-section-btn" onclick="removeSection('textSection_${sectionId}')" title="Remove section">
+        const currentRows = container.querySelectorAll('.mini-table-row')
+            .length;
+        console.log(`Current rows in section ${sectionCounter}: ${currentRows}`);
+
+        const newRowHtml = `
+            <div class="mini-table-row">
+                <button type="button" class="remove-row-btn" onclick="removeTableRow(this)" title="Remove row">
                     <i class="bi bi-x"></i>
                 </button>
-            </div>
-
-            <div class="mb-3" style="margin-top: 20px;">
-                <label class="field-label">
-                    <i class="bi bi-type-h2"></i>
-                    Text Section Title
-                </label>
-                <input type="text" name="textTitle_${sectionIdentifier}" class="form-control"
-                       placeholder="e.g., Additional Details" />
-            </div>
-
-            <div class="mb-3">
-                <label class="field-label">
-                    <i class="bi bi-textarea-t"></i>
-                    Text Content
-                </label>
-                <div class="rich-text-container">
-                    <div id="textEditor_${sectionIdentifier}" style="min-height: 200px;"></div>
-                </div>
-                <textarea name="textContent_${sectionIdentifier}" id="textContent_${sectionIdentifier}" style="display: none;"></textarea>
-            </div>
-        `;
-
-        sectionsContainer.appendChild(sectionDiv);
-
-        // Initialize Quill editor for this new text section
-        const quill = initializeQuillEditor(`#textEditor_${sectionIdentifier}`, `textContent_${sectionIdentifier}`);
-        quillEditors.set(sectionIdentifier, quill);
-
-        makeSectionDraggable(sectionDiv);
-    }
-
-    function removeSection(sectionId) {
-        const section = document.getElementById(sectionId);
-        if (section) {
-            // Remove Quill editor if it's a text section
-            const sectionIdNum = sectionId.split('_')[1];
-            if (quillEditors.has(sectionIdNum)) {
-                quillEditors.delete(sectionIdNum);
-            }
-
-            section.remove();
-            showEmptyPlaceholder();
-        }
-    }
-
-    function addTableRow(containerId, sectionIdentifier) {
-        const container = document.getElementById(containerId);
-        const newRow = document.createElement('div');
-        newRow.className = 'mini-table-row';
-        newRow.innerHTML = `
-            <button type="button" class="remove-row-btn" onclick="removeTableRow(this)" title="Remove row">
-                <i class="bi bi-x"></i>
-            </button>
-            <div class="row g-3 align-items-start">
-                <div class="col-md-3">
-                    <label class="form-label small">Label</label>
-                    <input type="text" name="tableRowLabels_${sectionIdentifier}[]" class="form-control"
-                           placeholder="Row label" />
-                </div>
-                <div class="col-md-9">
-                    <label class="form-label small">Description</label>
-                    <div class="rich-text-row">
-                        <div class="format-toolbar">
-                            <button type="button" class="format-btn" onclick="formatText(this, 'bold')" title="Bold">
-                                <i class="bi bi-type-bold"></i>
-                            </button>
-                            <button type="button" class="format-btn" onclick="formatText(this, 'italic')" title="Italic">
-                                <i class="bi bi-type-italic"></i>
-                            </button>
-                            <button type="button" class="format-btn" onclick="formatText(this, 'underline')" title="Underline">
-                                <i class="bi bi-type-underline"></i>
-                            </button>
-                            <span style="color: #6c757d; font-size: 12px;">Rich text formatting</span>
+                <div class="row g-3 align-items-start" style="margin-top: 20px;">
+                    <div class="col-md-3">
+                        <label class="form-label small">Label</label>
+                        <input type="text" name="tableRowLabels_${sectionCounter}" class="form-control form-control-sm" placeholder="Row label" />
+                    </div>
+                    <div class="col-md-9">
+                        <label class="form-label small">Description</label>
+                        <div class="rich-text-row">
+                            <div class="format-toolbar">
+                                <button type="button" class="format-btn" onclick="formatText(this, 'bold')" title="Bold">
+                                    <i class="bi bi-type-bold"></i>
+                                </button>
+                                <button type="button" class="format-btn" onclick="formatText(this, 'italic')" title="Italic">
+                                    <i class="bi bi-type-italic"></i>
+                                </button>
+                                <button type="button" class="format-btn" onclick="formatText(this, 'underline')" title="Underline">
+                                    <i class="bi bi-type-underline"></i>
+                                </button>
+                                <span style="color: #6c757d; font-size: 12px;">Rich text formatting</span>
+                            </div>
+                            <div class="simple-editor"
+                                 contenteditable="true"
+                                 placeholder="Full text description with formatting..."
+                                 onpaste="handlePaste(event)"
+                                 onblur="updateHiddenInput(this)"></div>
+                            <input type="hidden" name="tableRowDescriptions_${sectionCounter}" />
                         </div>
-                        <div class="simple-editor"
-                             contenteditable="true"
-                             placeholder="Full text description with formatting..."
-                             onpaste="handlePaste(event)"
-                             onblur="updateHiddenInput(this)"></div>
-                        <input type="hidden" name="tableRowDescriptions_${sectionIdentifier}[]" />
                     </div>
                 </div>
             </div>
         `;
-        container.appendChild(newRow);
+        container.insertAdjacentHTML('beforeend', newRowHtml);
+
+        const newRowCount = container.querySelectorAll('.mini-table-row')
+            .length;
+        console.log(`After adding row, section ${sectionCounter} now has ${newRowCount} rows`);
+
+        // Debug: List all current input names in this section
+        const allInputs = container.querySelectorAll('input');
+        console.log(`All inputs in section ${sectionCounter}:`, Array.from(allInputs)
+            .map(input => `${input.name} (${input.type})`));
+    }
+
+    // Helper function to handle add row button clicks from existing sections
+    function addTableRowFromButton(button) {
+        const sectionId = button.getAttribute('data-section-id');
+        console.log(`Adding row to existing section: ${sectionId}`);
+
+        // Find the container for this section
+        const section = button.closest('.dynamic-section');
+        const container = section.querySelector('.table-rows-container');
+
+        if (!container) {
+            console.error(`Container not found for section ${sectionId}`);
+            return;
+        }
+
+        const currentRows = container.querySelectorAll('.mini-table-row')
+            .length;
+        console.log(`Current rows in section ${sectionId}: ${currentRows}`);
+
+        const newRowHtml = `
+            <div class="mini-table-row">
+                <button type="button" class="remove-row-btn" onclick="removeTableRow(this)" title="Remove row">
+                    <i class="bi bi-x"></i>
+                </button>
+                <div class="row g-3 align-items-start" style="margin-top: 20px;">
+                    <div class="col-md-3">
+                        <label class="form-label small">Label</label>
+                        <input type="text" name="tableRowLabels_${sectionId}" class="form-control form-control-sm" placeholder="Row label" />
+                    </div>
+                    <div class="col-md-9">
+                        <label class="form-label small">Description</label>
+                        <div class="rich-text-row">
+                            <div class="format-toolbar">
+                                <button type="button" class="format-btn" onclick="formatText(this, 'bold')" title="Bold">
+                                    <i class="bi bi-type-bold"></i>
+                                </button>
+                                <button type="button" class="format-btn" onclick="formatText(this, 'italic')" title="Italic">
+                                    <i class="bi bi-type-italic"></i>
+                                </button>
+                                <button type="button" class="format-btn" onclick="formatText(this, 'underline')" title="Underline">
+                                    <i class="bi bi-type-underline"></i>
+                                </button>
+                                <span style="color: #6c757d; font-size: 12px;">Rich text formatting</span>
+                            </div>
+                            <div class="simple-editor"
+                                 contenteditable="true"
+                                 placeholder="Full text description with formatting..."
+                                 onpaste="handlePaste(event)"
+                                 onblur="updateHiddenInput(this)"></div>
+                            <input type="hidden" name="tableRowDescriptions_${sectionId}" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', newRowHtml);
+
+        const newRowCount = container.querySelectorAll('.mini-table-row')
+            .length;
+        console.log(`After adding row, section ${sectionId} now has ${newRowCount} rows`);
+    }
+
+    function removeSection(button) {
+        const section = button.closest('.dynamic-section');
+        const sectionId = section.dataset.sectionId;
+
+        // Remove Quill editor if it's a text section
+        if (sectionId && sectionId.startsWith('text_')) {
+            const counter = sectionId.split('_')[1];
+            quillEditors.delete(parseInt(counter));
+        }
+
+        section.remove();
+
+        // Show empty message if no sections left
+        if (document.querySelectorAll('.dynamic-section')
+            .length === 0) {
+            showEmptyMessage();
+        }
     }
 
     function removeTableRow(button) {
@@ -946,27 +1019,41 @@
         const rows = container.querySelectorAll('.mini-table-row');
 
         if (rows.length > 1) {
-            button.closest('.mini-table-row').remove();
+            button.closest('.mini-table-row')
+                .remove();
         } else {
-            alert('At least one row is required for each table section');
+            alert('At least one row is required per table section');
         }
     }
 
+    function hideEmptyMessage() {
+        const emptyMessage = document.getElementById('emptySectionsMessage');
+        if (emptyMessage) {
+            emptyMessage.style.display = 'none';
+        }
+    }
+
+    function showEmptyMessage() {
+        const emptyMessage = document.getElementById('emptySectionsMessage');
+        if (emptyMessage) {
+            emptyMessage.style.display = 'block';
+        }
+    }
+
+    // Rich text formatting functions
     function formatText(button, command) {
-        const editor = button.closest('.rich-text-row').querySelector('.simple-editor');
+        const editor = button.closest('.rich-text-row')
+            .querySelector('.simple-editor');
         editor.focus();
         document.execCommand(command, false, null);
-
-        // Toggle active state
         button.classList.toggle('active');
-
-        // Update hidden input
         updateHiddenInput(editor);
     }
 
     function handlePaste(event) {
         event.preventDefault();
-        const text = (event.originalEvent || event).clipboardData.getData('text/plain');
+        const text = (event.originalEvent || event)
+            .clipboardData.getData('text/plain');
         document.execCommand('insertText', false, text);
     }
 
@@ -977,78 +1064,143 @@
         }
     }
 
-    function makeSectionDraggable(section) {
-        section.draggable = true;
+    // Drag and Drop functionality
+    function setupSectionDragAndDrop() {
+        const sections = document.querySelectorAll('.dynamic-section');
 
-        section.addEventListener('dragstart', function(e) {
-            e.dataTransfer.setData('text/plain', '');
-            section.classList.add('dragging');
+        sections.forEach(section => {
+            section.addEventListener('dragstart', handleSectionDragStart);
+            section.addEventListener('dragend', handleSectionDragEnd);
+            section.addEventListener('dragover', handleSectionDragOver);
+            section.addEventListener('drop', handleSectionDrop);
         });
+    }
 
-        section.addEventListener('dragend', function(e) {
-            section.classList.remove('dragging');
-        });
+    let draggedSection = null;
 
-        section.addEventListener('dragover', function(e) {
-            e.preventDefault();
-        });
+    function handleSectionDragStart(e) {
+        draggedSection = this;
+        this.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+    }
 
-        section.addEventListener('drop', function(e) {
-            e.preventDefault();
-            const dragging = document.querySelector('.dragging');
-            if (dragging && dragging !== section) {
-                const container = section.parentNode;
-                const afterElement = getDragAfterElement(container, e.clientY);
-                if (afterElement == null) {
-                    container.appendChild(dragging);
-                } else {
-                    container.insertBefore(dragging, afterElement);
-                }
+    function handleSectionDragEnd(e) {
+        this.classList.remove('dragging');
+        document.querySelectorAll('.drag-over')
+            .forEach(el => el.classList.remove('drag-over'));
+        draggedSection = null;
+    }
+
+    function handleSectionDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+
+        if (this !== draggedSection) {
+            this.classList.add('drag-over');
+        }
+    }
+
+    function handleSectionDrop(e) {
+        e.preventDefault();
+        this.classList.remove('drag-over');
+
+        if (this !== draggedSection) {
+            const container = document.getElementById('sectionsContainer');
+            const afterElement = getDragAfterElement(container, e.clientY);
+
+            if (afterElement == null) {
+                container.appendChild(draggedSection);
+            } else {
+                container.insertBefore(draggedSection, afterElement);
             }
-        });
+        }
     }
 
     function getDragAfterElement(container, y) {
         const draggableElements = [...container.querySelectorAll('.dynamic-section:not(.dragging)')];
 
         return draggableElements.reduce((closest, child) => {
-            const box = child.getBoundingClientRect();
-            const offset = y - box.top - box.height / 2;
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
 
-            if (offset < 0 && offset > closest.offset) {
-                return { offset: offset, element: child };
-            } else {
-                return closest;
-            }
-        }, { offset: Number.NEGATIVE_INFINITY }).element;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY })
+            .element;
     }
 
-    // Before form submission, ensure all rich text content is captured
-    document.getElementById('editForm').addEventListener('submit', function() {
-        // Update all Quill editors
-        quillEditors.forEach((quill, sectionIdentifier) => {
-            const html = quill.root.innerHTML;
-            const textarea = document.getElementById(`textContent_${sectionIdentifier}`);
-            if (textarea) {
-                textarea.value = html;
+    // Initialize existing Quill editors and set up event listeners
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize Quill editors for existing text sections
+        const existingTextSections = document.querySelectorAll('[data-section-type="text"]');
+        existingTextSections.forEach(section => {
+            const sectionId = section.dataset.sectionId;
+            if (sectionId) {
+                const identifier = sectionId.split('_')[1];
+                const editorElement = document.getElementById(`textEditor_${identifier}`);
+                const textareaElement = document.querySelector(`textarea[name="textContent_${identifier}"]`);
+
+                if (editorElement && textareaElement) {
+                    const quill = new Quill(`#textEditor_${identifier}`, {
+                        theme: 'snow',
+                        placeholder: 'Enter detailed content here. Use the toolbar to format your text...',
+                        modules: {
+                            toolbar: [
+                                ['bold', 'italic', 'underline', 'strike'],
+                                ['blockquote', 'code-block'],
+                                [{ 'header': 1 }, { 'header': 2 }],
+                                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                [{ 'script': 'sub' }, { 'script': 'super' }],
+                                [{ 'indent': '-1' }, { 'indent': '+1' }],
+                                [{ 'size': ['small', false, 'large', 'huge'] }],
+                                [{ 'color': [] }, { 'background': [] }],
+                                [{ 'align': [] }],
+                                ['clean'],
+                                ['link']
+                            ]
+                        }
+                    });
+
+                    // Set existing content
+                    if (textareaElement.value) {
+                        quill.root.innerHTML = textareaElement.value;
+                    }
+
+                    // Store editor reference and set up content sync
+                    quillEditors.set(identifier, quill);
+
+                    quill.on('text-change', function () {
+                        textareaElement.value = quill.root.innerHTML;
+                    });
+                }
             }
         });
 
-        // Update all simple editors
-        const editors = document.querySelectorAll('.simple-editor');
-        editors.forEach(editor => {
-            updateHiddenInput(editor);
+        // Set up event listeners for simple editors
+        document.addEventListener('input', function (e) {
+            if (e.target.classList.contains('simple-editor')) {
+                updateHiddenInput(e.target);
+            }
         });
-    });
 
-    // Make existing sections draggable
-    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize existing simple editors
+        document.querySelectorAll('.simple-editor')
+            .forEach(editor => {
+                updateHiddenInput(editor);
+            });
+
+        // Setup drag and drop for existing sections
+        setupSectionDragAndDrop();
+
+        // Hide empty message if sections exist
         const existingSections = document.querySelectorAll('.dynamic-section');
-        existingSections.forEach(section => {
-            makeSectionDraggable(section);
-        });
+        if (existingSections.length > 0) {
+            hideEmptyMessage();
+        }
     });
 </script>
-
 </body>
 </html>

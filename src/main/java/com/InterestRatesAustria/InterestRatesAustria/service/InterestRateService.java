@@ -7,10 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -293,46 +290,6 @@ public class InterestRateService {
         }
     }
 
-    private void processTextSections(Map<String, String> requestParams, MoreInfo moreInfo, List<String> sectionOrder) {
-        Map<String, String> textTitles = new HashMap<>();
-        Map<String, String> textContents = new HashMap<>();
-
-        for (Map.Entry<String, String> entry : requestParams.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-
-            if (key.startsWith("textTitle_")) {
-                String sectionId = key.replace("textTitle_", "");
-                textTitles.put(sectionId, value);
-            } else if (key.startsWith("textContent_")) {
-                String sectionId = key.replace("textContent_", "");
-                textContents.put(sectionId, value);
-            }
-        }
-
-        int textIndex = 1;
-        for (String sectionId : textTitles.keySet()) {
-            String title = textTitles.get(sectionId);
-            String content = textContents.get(sectionId);
-
-            if ((title != null && !title.trim().isEmpty()) ||
-                    (content != null && !content.trim().isEmpty())) {
-
-                String sectionIdentifier = "text-" + textIndex;
-
-                TextSection textSection = new TextSection();
-                textSection.setTitle(title);
-                textSection.setContent(content);
-                textSection.setSectionIdentifier(sectionIdentifier);
-                textSection.setMoreInfo(moreInfo);
-
-                textSectionRepository.save(textSection);
-                sectionOrder.add(sectionIdentifier);
-                textIndex++;
-            }
-        }
-    }
-
     @Transactional
     public void updateInterestRate(Long id, InterestRate updatedRate, Map<String, String> requestParams,
                                    Map<String, List<String>> tableSectionData,
@@ -360,9 +317,9 @@ public class InterestRateService {
             if (moreInfo == null) {
                 moreInfo = new MoreInfo();
                 moreInfo = moreInfoRepository.save(moreInfo);
+                existingRate.setMoreInfo(moreInfo);
             } else {
-                tableSectionRepository.deleteByMoreInfoId(moreInfo.getId());
-                textSectionRepository.deleteByMoreInfoId(moreInfo.getId());
+                clearExistingSections(moreInfo);
             }
 
             List<String> sectionOrder = new ArrayList<>();
@@ -371,15 +328,78 @@ public class InterestRateService {
             processTextSections(requestParams, moreInfo, sectionOrder);
 
             moreInfo.setSectionOrderList(sectionOrder);
-            moreInfoRepository.save(moreInfo);
+            moreInfo = moreInfoRepository.save(moreInfo);
 
             existingRate.setMoreInfo(moreInfo);
             interestRateRepository.save(existingRate);
         } else if (moreInfo != null) {
-            Long moreInfoId = moreInfo.getId();
             existingRate.setMoreInfo(null);
             interestRateRepository.save(existingRate);
-            moreInfoRepository.deleteById(moreInfoId);
+
+            clearExistingSections(moreInfo);
+            moreInfoRepository.deleteById(moreInfo.getId());
+        }
+    }
+
+    private void clearExistingSections(MoreInfo moreInfo) {
+        if (moreInfo.getTableSections() != null) {
+            moreInfo.getTableSections().clear();
+        }
+        if (moreInfo.getTextSections() != null) {
+            moreInfo.getTextSections().clear();
+        }
+
+        moreInfoRepository.saveAndFlush(moreInfo);
+
+        tableSectionRepository.deleteByMoreInfoId(moreInfo.getId());
+        textSectionRepository.deleteByMoreInfoId(moreInfo.getId());
+
+        tableSectionRepository.flush();
+        textSectionRepository.flush();
+    }
+
+    private void processTextSections(Map<String, String> requestParams, MoreInfo moreInfo, List<String> sectionOrder) {
+        if (moreInfo.getTextSections() == null) {
+            moreInfo.setTextSections(new ArrayList<>());
+        }
+
+        Map<String, String> textTitles = new HashMap<>();
+        Map<String, String> textContents = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : requestParams.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+
+            if (key.startsWith("textTitle_")) {
+                String sectionId = key.substring("textTitle_".length());
+                textTitles.put(sectionId, value);
+            } else if (key.startsWith("textContent_")) {
+                String sectionId = key.substring("textContent_".length());
+                textContents.put(sectionId, value);
+            }
+        }
+
+        Set<String> processedSections = new HashSet<>();
+        processedSections.addAll(textTitles.keySet());
+        processedSections.addAll(textContents.keySet());
+
+        for (String sectionId : processedSections) {
+            TextSection textSection = new TextSection();
+            textSection.setSectionIdentifier(sectionId);
+            textSection.setMoreInfo(moreInfo);
+
+            String title = textTitles.get(sectionId);
+            String content = textContents.get(sectionId);
+
+            if ((title != null && !title.trim().isEmpty()) ||
+                    (content != null && !content.trim().isEmpty())) {
+
+                textSection.setTitle(title);
+                textSection.setContent(content);
+
+                moreInfo.getTextSections().add(textSection);
+                sectionOrder.add("text_" + sectionId);
+            }
         }
     }
 
