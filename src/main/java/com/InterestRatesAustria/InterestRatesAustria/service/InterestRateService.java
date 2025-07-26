@@ -3,6 +3,7 @@ package com.InterestRatesAustria.InterestRatesAustria.service;
 import com.InterestRatesAustria.InterestRatesAustria.model.dto.InterestRateDTO;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.*;
 import com.InterestRatesAustria.InterestRatesAustria.repository.*;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -327,7 +328,6 @@ public class InterestRateService {
             processTableSections(requestParams, moreInfo, sectionOrder);
             processTextSections(requestParams, moreInfo, sectionOrder);
 
-            moreInfo.setSectionOrderList(sectionOrder);
             moreInfo = moreInfoRepository.save(moreInfo);
 
             existingRate.setMoreInfo(moreInfo);
@@ -359,49 +359,79 @@ public class InterestRateService {
     }
 
     private void processTextSections(Map<String, String> requestParams, MoreInfo moreInfo, List<String> sectionOrder) {
-        if (moreInfo.getTextSections() == null) {
-            moreInfo.setTextSections(new ArrayList<>());
-        }
-
-        Map<String, String> textTitles = new HashMap<>();
-        Map<String, String> textContents = new HashMap<>();
+        Map<String, String> textTitles = new LinkedHashMap<>();
+        Map<String, String> textContents = new LinkedHashMap<>();
 
         for (Map.Entry<String, String> entry : requestParams.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
 
+            System.out.println("Processing key: " + key + ", value: " + value);
+
             if (key.startsWith("textTitle_")) {
-                String sectionId = key.substring("textTitle_".length());
+                String sectionId = key.replace("textTitle_", "");
                 textTitles.put(sectionId, value);
+                System.out.println("Found text title for section " + sectionId + ": " + value);
             } else if (key.startsWith("textContent_")) {
-                String sectionId = key.substring("textContent_".length());
+                String sectionId = key.replace("textContent_", "");
                 textContents.put(sectionId, value);
+                System.out.println("Found text content for section " + sectionId + ": " + value);
             }
         }
 
-        Set<String> processedSections = new HashSet<>();
-        processedSections.addAll(textTitles.keySet());
-        processedSections.addAll(textContents.keySet());
+        int textIndex = 1;
+        List<TextSection> existingTextSections = textSectionRepository.findByMoreInfoId(moreInfo.getId());
+        if (!existingTextSections.isEmpty()) {
+            textIndex = existingTextSections.stream()
+                    .mapToInt(section -> {
+                        String identifier = section.getSectionIdentifier();
+                        if (identifier != null && identifier.startsWith("text-")) {
+                            try {
+                                return Integer.parseInt(identifier.replace("text-", ""));
+                            } catch (NumberFormatException e) {
+                                return 0;
+                            }
+                        }
+                        return 0;
+                    })
+                    .max()
+                    .orElse(0) + 1;
+        }
 
-        for (String sectionId : processedSections) {
-            TextSection textSection = new TextSection();
-            textSection.setSectionIdentifier(sectionId);
-            textSection.setMoreInfo(moreInfo);
+        for (Map.Entry<String, String> titleEntry : textTitles.entrySet()) {
+            String sectionId = titleEntry.getKey();
+            String title = titleEntry.getValue();
 
-            String title = textTitles.get(sectionId);
-            String content = textContents.get(sectionId);
+            System.out.println("Creating text section for sectionId: " + sectionId + ", title: " + title);
 
-            if ((title != null && !title.trim().isEmpty()) ||
-                    (content != null && !content.trim().isEmpty())) {
+            if (title != null && !title.trim().isEmpty()) {
+                String sectionIdentifier = "text-" + textIndex;
 
+                TextSection textSection = new TextSection();
                 textSection.setTitle(title);
-                textSection.setContent(content);
+                textSection.setSectionIdentifier(sectionIdentifier);
+                textSection.setMoreInfo(moreInfo);
 
-                moreInfo.getTextSections().add(textSection);
-                sectionOrder.add("text_" + sectionId);
+                TextSection savedTextSection = textSectionRepository.save(textSection);
+                System.out.println("Saved text section with ID: " + savedTextSection.getId());
+
+                String contentString = textContents.get(sectionId);
+                System.out.println("Content string: " + contentString);
+
+                if (contentString != null && !contentString.trim().isEmpty()) {
+                    textSection.setContent(contentString);
+                    textSectionRepository.save(textSection);
+                    System.out.println("Updated text section content for ID: " + savedTextSection.getId());
+                } else {
+                    System.out.println("No valid content found for section: " + sectionId);
+                }
+
+                sectionOrder.add(sectionIdentifier);
+                textIndex++;
             }
         }
     }
+
 
     public void addTableSection(Long rateId, String title) {
         InterestRate rate = getInterestRateById(rateId);
@@ -466,7 +496,7 @@ public class InterestRateService {
         moreInfoRepository.save(moreInfo);
     }
 
-    public void deleteSection(Long rateId, String sectionIdentifier) {
+    public void deleteSection(Long rateId, String sectionIdentifier){
         InterestRate rate = getInterestRateById(rateId);
         MoreInfo moreInfo = rate.getMoreInfo();
 

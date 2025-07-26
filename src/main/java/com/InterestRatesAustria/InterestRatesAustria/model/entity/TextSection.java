@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -28,4 +30,7 @@ public class TextSection {
     @ManyToOne
     @JoinColumn(name = "more_info_id")
     private MoreInfo moreInfo;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 }
