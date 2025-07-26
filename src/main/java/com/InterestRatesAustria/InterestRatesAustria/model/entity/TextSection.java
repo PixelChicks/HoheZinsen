@@ -11,15 +11,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MiniTableRow {
+public class TextSection {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    private String label;
-    private String description;
+    private String title;
+    
+    @Column(columnDefinition = "TEXT")
+    private String content;
+    
+    @Column(name = "section_identifier") // e.g., "text-1", "text-2"
+    private String sectionIdentifier;
 
-    @Column(name = "table_section_id")
-    private Long tableSectionId; // Foreign key to TableSection
+    @ManyToOne
+    @JoinColumn(name = "more_info_id")
+    private MoreInfo moreInfo;
 }

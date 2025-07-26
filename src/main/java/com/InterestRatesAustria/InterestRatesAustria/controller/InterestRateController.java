@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,125 @@ public class InterestRateController {
 
     public InterestRateController(InterestRateService interestRateService) {
         this.interestRateService = interestRateService;
+    }
+
+    @PostMapping("/interest-rate/create")
+    public String createInterestRate(
+            @ModelAttribute InterestRate interestRate,
+            @RequestParam Map<String, String> requestParams) {
+
+        // Parse multiple table sections from request params
+        Map<String, List<String>> tableSectionData = new HashMap<>();
+        Map<String, String> textSectionData = new HashMap<>();
+
+        // Group parameters by section
+        for (Map.Entry<String, String> entry : requestParams.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+
+            if (key.startsWith("tableTitle_") || key.startsWith("tableRowLabels_") || key.startsWith("tableRowDescriptions_")) {
+                String sectionId = extractSectionId(key);
+                if (key.startsWith("tableRowLabels_") || key.startsWith("tableRowDescriptions_")) {
+                    // Handle arrays
+                    String[] values = requestParams.get(key).split(",");
+                    tableSectionData.put(key, List.of(values));
+                } else {
+                    tableSectionData.put(key, List.of(value));
+                }
+            } else if (key.startsWith("textTitle_") || key.startsWith("textContent_")) {
+                textSectionData.put(key, value);
+            }
+        }
+
+        interestRateService.createInterestRate(interestRate, requestParams, tableSectionData, textSectionData);
+        return "redirect:/";
+    }
+
+    @PostMapping("/interest-rate/update/{id}")
+    public String updateInterestRate(
+            @PathVariable Long id,
+            @ModelAttribute InterestRate interestRate,
+            @RequestParam Map<String, String> requestParams) {
+
+        // Parse multiple sections similar to create method
+        Map<String, List<String>> tableSectionData = new HashMap<>();
+        Map<String, String> textSectionData = new HashMap<>();
+
+        // Group parameters by section (same logic as create)
+        for (Map.Entry<String, String> entry : requestParams.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+
+            if (key.startsWith("tableTitle_") || key.startsWith("tableRowLabels_") || key.startsWith("tableRowDescriptions_")) {
+                String sectionId = extractSectionId(key);
+                if (key.startsWith("tableRowLabels_") || key.startsWith("tableRowDescriptions_")) {
+                    String[] values = requestParams.get(key).split(",");
+                    tableSectionData.put(key, List.of(values));
+                } else {
+                    tableSectionData.put(key, List.of(value));
+                }
+            } else if (key.startsWith("textTitle_") || key.startsWith("textContent_")) {
+                textSectionData.put(key, value);
+            }
+        }
+
+        interestRateService.updateInterestRate(id, interestRate, requestParams, tableSectionData, textSectionData);
+        return "redirect:/";
+    }
+
+    @PostMapping("/sections/add-table")
+    @ResponseBody
+    public ResponseEntity<String> addTableSection(@RequestParam Long rateId,
+                                                  @RequestParam String title) {
+        try {
+            interestRateService.addTableSection(rateId, title);
+            return ResponseEntity.ok("Table section added successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error adding table section: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/sections/add-text")
+    @ResponseBody
+    public ResponseEntity<String> addTextSection(@RequestParam Long rateId,
+                                                 @RequestParam String title,
+                                                 @RequestParam String content) {
+        try {
+            interestRateService.addTextSection(rateId, title, content);
+            return ResponseEntity.ok("Text section added successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error adding text section: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/sections/{sectionIdentifier}")
+    @ResponseBody
+    public ResponseEntity<String> deleteSection(@RequestParam Long rateId,
+                                                @PathVariable String sectionIdentifier) {
+        try {
+            interestRateService.deleteSection(rateId, sectionIdentifier);
+            return ResponseEntity.ok("Section deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error deleting section: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/sections/reorder")
+    @ResponseBody
+    public ResponseEntity<String> reorderSections(@RequestParam Long rateId,
+                                                  @RequestBody List<String> sectionOrder) {
+        try {
+            interestRateService.updateSectionOrder(rateId, sectionOrder);
+            return ResponseEntity.ok("Section order updated successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error updating section order: " + e.getMessage());
+        }
+    }
+
+    private String extractSectionId(String key) {
+        // Extract section ID from keys like "tableTitle_1", "textContent_2", etc.
+        String[] parts = key.split("_");
+        return parts.length > 1 ? parts[parts.length - 1] : "1";
     }
 
     @GetMapping("/")
@@ -59,18 +179,6 @@ public class InterestRateController {
         }
     }
 
-    @PostMapping("/more-info/reorder-sections")
-    @ResponseBody
-    public ResponseEntity<String> reorderSections(@RequestParam Long rateId,
-                                                  @RequestBody List<String> sectionOrder) {
-        try {
-            interestRateService.updateSectionOrder(rateId, sectionOrder);
-            return ResponseEntity.ok("Section order updated successfully");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error updating section order: " + e.getMessage());
-        }
-    }
-
     @PostMapping("/field-values/update")
     public String updateFieldValue(@RequestParam Long rateId,
                                    @RequestParam Long fieldId,
@@ -86,17 +194,6 @@ public class InterestRateController {
         return "interest-rate-form";
     }
 
-    @PostMapping("/interest-rate/create")
-    public String createInterestRate(
-            @ModelAttribute InterestRate interestRate,
-            @RequestParam Map<String, String> requestParams,
-            @RequestParam(name = "tableRowLabels[]", required = false) List<String> tableRowLabels,
-            @RequestParam(name = "tableRowDescriptions[]", required = false) List<String> tableRowDescriptions
-    ) {
-        interestRateService.createInterestRate(interestRate, requestParams, tableRowLabels, tableRowDescriptions);
-        return "redirect:/";
-    }
-
     @GetMapping("/interest-rate/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model) {
         InterestRate interestRate = interestRateService.getInterestRateById(id);
@@ -108,18 +205,6 @@ public class InterestRateController {
         model.addAttribute("isEdit", true);
 
         return "interest-rate-edit-form";
-    }
-
-    @PostMapping("/interest-rate/update/{id}")
-    public String updateInterestRate(
-            @PathVariable Long id,
-            @ModelAttribute InterestRate interestRate,
-            @RequestParam Map<String, String> requestParams,
-            @RequestParam(name = "tableRowLabels[]", required = false) List<String> tableRowLabels,
-            @RequestParam(name = "tableRowDescriptions[]", required = false) List<String> tableRowDescriptions
-    ) {
-        interestRateService.updateInterestRate(id, interestRate, requestParams, tableRowLabels, tableRowDescriptions);
-        return "redirect:/";
     }
 
     @PostMapping("/interest-rate/delete/{id}")

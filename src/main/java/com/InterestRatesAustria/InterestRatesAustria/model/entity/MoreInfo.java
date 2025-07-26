@@ -20,23 +20,19 @@ public class MoreInfo {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    private String tableTitle;
-    private String textTitle;
-
-    @Column(columnDefinition = "TEXT")
-    private String textDescription;
-
-    // Store section order - "table,text" / "text,table"
-    @Column(name = "section_order")
+    // Store section order as JSON-like string: "table-1,text-1,table-2,text-2"
+    @Column(name = "section_order", columnDefinition = "TEXT")
     private String sectionOrder;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "more_info_id")
-    private List<MiniTableRow> miniTableRows = new ArrayList<>();
+    @OneToMany(mappedBy = "moreInfo", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private List<TableSection> tableSections = new ArrayList<>();
+
+    @OneToMany(mappedBy = "moreInfo", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private List<TextSection> textSections = new ArrayList<>();
 
     public List<String> getSectionOrderList() {
         if (sectionOrder == null || sectionOrder.trim().isEmpty()) {
-            return List.of("table", "text"); // Default order
+            return new ArrayList<>();
         }
         return List.of(sectionOrder.split(","));
     }

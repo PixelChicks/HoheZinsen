@@ -5,23 +5,132 @@
     <title>New Interest Rate</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         .section-header {
-            background-color: #f8f9fa;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             border-left: 4px solid #007bff;
-            padding: 10px 15px;
-            margin: 20px 0 10px 0;
-            border-radius: 4px;
+            padding: 15px 20px;
+            margin: 25px 0 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
+
+        .section-header h5 {
+            margin: 0;
+            color: #495057;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dynamic-section {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .dynamic-section:hover {
+            border-color: #007bff;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+        }
+
+        .section-controls {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .drag-handle {
+            cursor: move;
+            color: #6c757d;
+            font-size: 1.2rem;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .drag-handle:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .remove-section-btn {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .remove-section-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+        }
+
+        .add-section-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 5px;
+        }
+
+        .add-section-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .section-type-badge {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            position: absolute;
+            top: 15px;
+            left: 15px;
+        }
+
         .mini-table-row {
-            background-color: #f8f9fa;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            border: 1px solid #dee2e6;
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            position: relative;
+            transition: all 0.3s ease;
         }
+
+        .mini-table-row:hover {
+            border-color: #007bff;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+        }
+
         .remove-row-btn {
-            background-color: #dc3545;
+            background: linear-gradient(135deg, #dc3545, #c82333);
             color: white;
             border: none;
             border-radius: 50%;
@@ -29,26 +138,53 @@
             height: 25px;
             font-size: 12px;
             cursor: pointer;
+            transition: all 0.3s ease;
+            position: absolute;
+            top: 10px;
+            right: 10px;
         }
+
+        .remove-row-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+        }
+
         .add-row-btn {
-            background-color: #28a745;
+            background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
             border: none;
             padding: 8px 16px;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .add-row-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
         }
 
         /* Rich Text Editor Styling */
         .rich-text-container {
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
             background: white;
+            overflow: hidden;
+            transition: border-color 0.3s ease;
+        }
+
+        .rich-text-container:focus-within {
+            border-color: #007bff;
         }
 
         .ql-toolbar {
             border: none;
-            border-bottom: 1px solid #dee2e6;
+            border-bottom: 2px solid #e9ecef;
+            background: #f8f9fa;
         }
 
         .ql-container {
@@ -59,41 +195,33 @@
         .ql-editor {
             min-height: 150px;
             font-size: 14px;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
-        .ql-snow .ql-tooltip {
-            z-index: 1060;
-        }
-
-        /* Custom toolbar styling */
-        .ql-toolbar.ql-snow {
-            background: #f8f9fa;
-        }
-
-        /* Format buttons styling */
         .format-toolbar {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             border: 1px solid #dee2e6;
-            border-radius: 4px 4px 0 0;
-            padding: 8px 12px;
+            border-radius: 8px 8px 0 0;
+            padding: 10px 15px;
             display: flex;
-            gap: 10px;
+            gap: 12px;
             align-items: center;
         }
 
         .format-btn {
             background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 3px;
-            padding: 4px 8px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            padding: 6px 10px;
             font-size: 12px;
             cursor: pointer;
             transition: all 0.2s;
+            font-weight: 600;
         }
 
         .format-btn:hover {
             background: #e9ecef;
+            transform: translateY(-1px);
         }
 
         .format-btn.active {
@@ -104,175 +232,415 @@
 
         .simple-editor {
             border: 1px solid #dee2e6;
-            border-radius: 0 0 4px 4px;
-            min-height: 10px;
-            padding: 12px;
+            border-radius: 0 0 8px 8px;
+            min-height: 100px;
+            padding: 15px;
             font-family: inherit;
             font-size: 14px;
-            line-height: 1.5;
+            line-height: 1.6;
             resize: vertical;
         }
 
         .simple-editor:focus {
             outline: none;
-            border-color: #86b7fe;
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        }
+
+        .sections-container {
+            min-height: 200px;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            background: #f8f9fa;
+            position: relative;
+        }
+
+        .empty-sections-message {
+            text-align: center;
+            color: #6c757d;
+            padding: 40px 20px;
+        }
+
+        .empty-sections-message i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .drag-over {
+            border-color: #007bff !important;
+            background: rgba(0, 123, 255, 0.05);
+        }
+
+        .dragging {
+            opacity: 0.5;
+            transform: rotate(2deg);
+        }
+
+        @media (max-width: 768px) {
+            .dynamic-section {
+                padding: 15px;
+            }
+
+            .section-controls {
+                position: relative;
+                top: auto;
+                right: auto;
+                justify-content: center;
+                margin-bottom: 15px;
+            }
+
+            .section-type-badge {
+                position: relative;
+                top: auto;
+                left: auto;
+                display: inline-block;
+                margin-bottom: 10px;
+            }
         }
     </style>
 </head>
 <body class="bg-light">
 <div class="container py-5">
-
-    <h2>Create New Interest Rate</h2>
-
-    <form class="mt-4" method="post" th:action="@{/interest-rate/create}" th:object="${interestRate}">
-
-        <!-- Basic Interest Rate Fields -->
-        <div class="section-header">
-            <h5 class="mb-0">Basic Information</h5>
+    <div class="create-container">
+        <div class="create-header">
+            <h2 class="mb-0">
+                <i class="bi bi-plus-circle-fill"></i>
+                Create New Interest Rate
+            </h2>
+            <p class="text-muted mt-2">Fill in the basic information and add multiple sections as needed</p>
         </div>
 
-        <div class="row g-3 mb-3" th:each="field : ${globalFields}">
-            <div class="col-md-6">
-                <label class="form-label" th:for="${'extra_' + field.id}" th:text="${field.label}"></label>
-                <input class="form-control" th:name="${'extra_' + field.id}" type="text"/>
+        <form id="createForm" method="post" th:action="@{/interest-rate/create}" th:object="${interestRate}">
+
+            <!-- Basic Interest Rate Fields -->
+            <div class="section-header">
+                <h5>
+                    <i class="bi bi-info-circle-fill"></i>
+                    Basic Information
+                </h5>
             </div>
-        </div>
 
-        <!-- More Info Section -->
-        <div class="section-header">
-            <h5 class="mb-0">Additional Information</h5>
-        </div>
-
-        <!-- Table Section -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h6 class="mb-0">Table Section</h6>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label class="form-label" for="tableTitle">Table Section Title</label>
-                    <input class="form-control" id="tableTitle" name="tableTitle" placeholder="e.g. Table Section Title"
-                           type="text"/>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Table Rows</label>
-                    <div id="tableRows">
-                        <div class="mini-table-row">
-                            <div class="row g-2 align-items-center">
-                                <div class="col-md-3">
-                                    <input class="form-control form-control-sm" name="tableRowLabels[]" placeholder="Label"
-                                           type="text"/>
-                                </div>
-                                <div class="col-md-8">
-                                    <div class="rich-text-row">
-                                        <div class="format-toolbar">
-                                            <button class="format-btn" onclick="formatText(this, 'bold')" title="Bold"
-                                                    type="button"><b>B</b></button>
-                                            <button class="format-btn" onclick="formatText(this, 'italic')"
-                                                    title="Italic" type="button"><i>I</i>
-                                            </button>
-                                            <button class="format-btn" onclick="formatText(this, 'underline')"
-                                                    title="Underline" type="button"><u>U</u>
-                                            </button>
-                                            <span style="color: #6c757d; font-size: 12px;">Rich text formatting</span>
-                                        </div>
-                                        <div class="simple-editor"
-                                             contenteditable="true"
-                                             data-name="tableRowDescriptions[]"
-                                             onblur="updateHiddenInput(this)"
-                                             onpaste="handlePaste(event)"
-                                             placeholder="Full text description with formatting..."></div>
-                                        <input name="tableRowDescriptions[]" type="hidden"/>
-                                    </div>
-                                </div>
-                                <div class="col-md-1">
-                                    <button class="remove-row-btn" onclick="removeTableRow(this)" title="Remove row"
-                                            type="button">×
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+            <div class="row g-3 mb-4" th:each="field : ${globalFields}">
+                <div class="col-md-6">
+                    <div class="field-group">
+                        <label class="field-label" th:for="${'extra_' + field.id}">
+                            <i class="bi bi-tag-fill"></i>
+                            [[${field.label}]]
+                        </label>
+                        <input class="form-control"
+                               th:name="${'extra_' + field.id}"
+                               th:placeholder="${'Enter ' + field.label}"
+                               type="text"/>
                     </div>
-                    <button class="add-row-btn mt-2" onclick="addTableRow()" type="button">+ Add Row</button>
                 </div>
             </div>
-        </div>
 
-        <!-- Text Section -->
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0">Text Section</h6>
-                <small class="text-muted">Rich text editor with formatting options</small>
+            <!-- Dynamic Sections -->
+            <div class="section-header">
+                <h5>
+                    <i class="bi bi-layers-fill"></i>
+                    Additional Information Sections
+                </h5>
             </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label class="form-label" for="textTitle">Text Section Title</label>
-                    <input class="form-control" id="textTitle" name="textTitle" placeholder="e.g. Text Section Title"
-                           type="text"/>
-                </div>
 
-                <div class="mb-3">
-                    <label class="form-label" for="textDescription">Text Description</label>
-                    <div class="rich-text-container">
-                        <div id="textDescriptionEditor" style="min-height: 200px;"></div>
-                    </div>
-                    <textarea id="textDescription" name="textDescription" style="display: none;"></textarea>
+            <div class="sections-container" id="sectionsContainer">
+                <div class="empty-sections-message" id="emptySectionsMessage">
+                    <i class="bi bi-plus-square"></i>
+                    <h6>No sections added yet</h6>
+                    <p>Click the buttons below to add table or text sections</p>
                 </div>
             </div>
-        </div>
 
-        <!-- Action Buttons -->
-        <div class="mt-4">
-            <button class="btn btn-success btn-lg" type="submit">Create Interest Rate</button>
-            <a class="btn btn-secondary btn-lg ms-2" th:href="@{/}">Cancel</a>
-        </div>
-    </form>
+            <!-- Add Section Buttons -->
+            <div class="d-flex justify-content-center gap-3 my-4">
+                <button type="button" class="add-section-btn" onclick="addTableSection()">
+                    <i class="bi bi-table"></i>
+                    Add Table Section
+                </button>
+                <button type="button" class="add-section-btn" onclick="addTextSection()">
+                    <i class="bi bi-text-paragraph"></i>
+                    Add Text Section
+                </button>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-success btn-lg" type="submit">
+                    <i class="bi bi-check-circle"></i>
+                    Create Interest Rate
+                </button>
+                <a class="btn btn-secondary btn-lg ms-2" th:href="@{/}">
+                    <i class="bi bi-x-circle"></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
 <script>
-    // Initialize Quill editor for main text description
-    const quill = new Quill('#textDescriptionEditor', {
-        theme: 'snow',
-        placeholder: 'Enter detailed description here. Use the toolbar above to format your text...',
-        modules: {
-            toolbar: [
-                ['bold', 'italic', 'underline', 'strike'],
-                ['blockquote', 'code-block'],
-                [{ 'header': 1 }, { 'header': 2 }],
-                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                [{ 'script': 'sub'}, { 'script': 'super' }],
-                [{ 'indent': '-1'}, { 'indent': '+1' }],
-                [{ 'direction': 'rtl' }],
-                [{ 'size': ['small', false, 'large', 'huge'] }],
-                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                [{ 'color': [] }, { 'background': [] }],
-                [{ 'font': [] }],
-                [{ 'align': [] }],
-                ['clean'],
-                ['link']
-            ]
+    let sectionCounter = 0;
+    let quillEditors = new Map();
+
+    // Add drag and drop functionality for sections
+    let draggedSection = null;
+
+    function addTableSection() {
+        sectionCounter++;
+        const sectionId = `table_${sectionCounter}`;
+
+        hideEmptyMessage();
+
+        const sectionHtml = `
+            <div class="dynamic-section" data-section-type="table" data-section-id="${sectionId}" draggable="true">
+                <div class="section-type-badge">
+                    <i class="bi bi-table"></i> Table Section
+                </div>
+                <div class="section-controls">
+                    <div class="drag-handle" title="Drag to reorder">
+                        <i class="bi bi-grip-vertical"></i>
+                    </div>
+                    <button type="button" class="remove-section-btn" onclick="removeSection(this)" title="Remove section">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+
+                <div style="margin-top: 40px;">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-type-h1"></i>
+                            Table Title
+                        </label>
+                        <input type="text" name="tableTitle_${sectionCounter}" class="form-control"
+                               placeholder="e.g. Interest Rate Details" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-list-ul"></i>
+                            Table Rows
+                        </label>
+                        <div class="table-rows-container" data-section="${sectionCounter}">
+                            <div class="mini-table-row">
+                                <button type="button" class="remove-row-btn" onclick="removeTableRow(this)" title="Remove row">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                                <div class="row g-3 align-items-start" style="margin-top: 20px;">
+                                    <div class="col-md-3">
+                                        <label class="form-label small">Label</label>
+                                        <input type="text" name="tableRowLabels_${sectionCounter}[]" class="form-control form-control-sm" placeholder="Row label" />
+                                    </div>
+                                    <div class="col-md-9">
+                                        <label class="form-label small">Description</label>
+                                        <div class="rich-text-row">
+                                            <div class="format-toolbar">
+                                                <button type="button" class="format-btn" onclick="formatText(this, 'bold')" title="Bold">
+                                                    <i class="bi bi-type-bold"></i>
+                                                </button>
+                                                <button type="button" class="format-btn" onclick="formatText(this, 'italic')" title="Italic">
+                                                    <i class="bi bi-type-italic"></i>
+                                                </button>
+                                                <button type="button" class="format-btn" onclick="formatText(this, 'underline')" title="Underline">
+                                                    <i class="bi bi-type-underline"></i>
+                                                </button>
+                                                <span style="color: #6c757d; font-size: 12px;">Rich text formatting</span>
+                                            </div>
+                                            <div class="simple-editor"
+                                                 contenteditable="true"
+                                                 placeholder="Full text description with formatting..."
+                                                 onpaste="handlePaste(event)"
+                                                 onblur="updateHiddenInput(this)"></div>
+                                            <input type="hidden" name="tableRowDescriptions_${sectionCounter}[]" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="add-row-btn mt-2" onclick="addTableRow(${sectionCounter})">
+                            <i class="bi bi-plus-circle"></i>
+                            Add Row
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('sectionsContainer').insertAdjacentHTML('beforeend', sectionHtml);
+        setupSectionDragAndDrop();
+    }
+
+    function addTextSection() {
+        sectionCounter++;
+        const sectionId = `text_${sectionCounter}`;
+        const editorId = `textEditor_${sectionCounter}`;
+
+        hideEmptyMessage();
+
+        const sectionHtml = `
+            <div class="dynamic-section" data-section-type="text" data-section-id="${sectionId}" draggable="true">
+                <div class="section-type-badge">
+                    <i class="bi bi-text-paragraph"></i> Text Section
+                </div>
+                <div class="section-controls">
+                    <div class="drag-handle" title="Drag to reorder">
+                        <i class="bi bi-grip-vertical"></i>
+                    </div>
+                    <button type="button" class="remove-section-btn" onclick="removeSection(this)" title="Remove section">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+
+                <div style="margin-top: 40px;">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-type-h2"></i>
+                            Text Title
+                        </label>
+                        <input type="text" name="textTitle_${sectionCounter}" class="form-control"
+                               placeholder="e.g. Additional Details" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-textarea-t"></i>
+                            Text Content
+                        </label>
+                        <div class="rich-text-container">
+                            <div id="${editorId}" style="min-height: 200px;"></div>
+                        </div>
+                        <textarea name="textContent_${sectionCounter}" style="display: none;"></textarea>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('sectionsContainer').insertAdjacentHTML('beforeend', sectionHtml);
+
+        // Initialize Quill editor for this text section
+        const quill = new Quill(`#${editorId}`, {
+            theme: 'snow',
+            placeholder: 'Enter detailed content here. Use the toolbar to format your text...',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline', 'strike'],
+                    ['blockquote', 'code-block'],
+                    [{ 'header': 1 }, { 'header': 2 }],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'script': 'sub'}, { 'script': 'super' }],
+                    [{ 'indent': '-1'}, { 'indent': '+1' }],
+                    [{ 'size': ['small', false, 'large', 'huge'] }],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'align': [] }],
+                    ['clean'],
+                    ['link']
+                ]
+            }
+        });
+
+        // Store editor reference and set up content sync
+        quillEditors.set(sectionCounter, quill);
+
+        quill.on('text-change', function() {
+            const textarea = document.querySelector(`textarea[name="textContent_${sectionCounter}"]`);
+            textarea.value = quill.root.innerHTML;
+        });
+
+        setupSectionDragAndDrop();
+    }
+
+    function removeSection(button) {
+        const section = button.closest('.dynamic-section');
+        const sectionId = section.dataset.sectionId;
+
+        // Remove Quill editor if it's a text section
+        if (sectionId.startsWith('text_')) {
+            const counter = sectionId.split('_')[1];
+            quillEditors.delete(parseInt(counter));
         }
-    });
 
-    // Update hidden textarea when content changes
-    quill.on('text-change', function() {
-        const html = quill.root.innerHTML;
-        document.getElementById('textDescription').value = html;
-    });
+        section.remove();
 
-    // Simple rich text functions for table rows
+        // Show empty message if no sections left
+        if (document.querySelectorAll('.dynamic-section').length === 0) {
+            showEmptyMessage();
+        }
+    }
+
+    function addTableRow(sectionCounter) {
+        const container = document.querySelector(`[data-section="${sectionCounter}"]`);
+        const newRowHtml = `
+            <div class="mini-table-row">
+                <button type="button" class="remove-row-btn" onclick="removeTableRow(this)" title="Remove row">
+                    <i class="bi bi-x"></i>
+                </button>
+                <div class="row g-3 align-items-start" style="margin-top: 20px;">
+                    <div class="col-md-3">
+                        <label class="form-label small">Label</label>
+                        <input type="text" name="tableRowLabels_${sectionCounter}[]" class="form-control form-control-sm" placeholder="Row label" />
+                    </div>
+                    <div class="col-md-9">
+                        <label class="form-label small">Description</label>
+                        <div class="rich-text-row">
+                            <div class="format-toolbar">
+                                <button type="button" class="format-btn" onclick="formatText(this, 'bold')" title="Bold">
+                                    <i class="bi bi-type-bold"></i>
+                                </button>
+                                <button type="button" class="format-btn" onclick="formatText(this, 'italic')" title="Italic">
+                                    <i class="bi bi-type-italic"></i>
+                                </button>
+                                <button type="button" class="format-btn" onclick="formatText(this, 'underline')" title="Underline">
+                                    <i class="bi bi-type-underline"></i>
+                                </button>
+                                <span style="color: #6c757d; font-size: 12px;">Rich text formatting</span>
+                            </div>
+                            <div class="simple-editor"
+                                 contenteditable="true"
+                                 placeholder="Full text description with formatting..."
+                                 onpaste="handlePaste(event)"
+                                 onblur="updateHiddenInput(this)"></div>
+                            <input type="hidden" name="tableRowDescriptions_${sectionCounter}[]" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', newRowHtml);
+    }
+
+    function removeTableRow(button) {
+        const container = button.closest('.table-rows-container');
+        const rows = container.querySelectorAll('.mini-table-row');
+
+        if (rows.length > 1) {
+            button.closest('.mini-table-row').remove();
+        } else {
+            alert('At least one row is required per table section');
+        }
+    }
+
+    function hideEmptyMessage() {
+        const emptyMessage = document.getElementById('emptySectionsMessage');
+        if (emptyMessage) {
+            emptyMessage.style.display = 'none';
+        }
+    }
+
+    function showEmptyMessage() {
+        const emptyMessage = document.getElementById('emptySectionsMessage');
+        if (emptyMessage) {
+            emptyMessage.style.display = 'block';
+        }
+    }
+
+    // Rich text formatting functions
     function formatText(button, command) {
         const editor = button.closest('.rich-text-row').querySelector('.simple-editor');
         editor.focus();
         document.execCommand(command, false, null);
-
-        // Toggle active state
         button.classList.toggle('active');
-
-        // Update hidden input
         updateHiddenInput(editor);
     }
 
@@ -287,73 +655,95 @@
         hiddenInput.value = editor.innerHTML;
     }
 
-    function addTableRow() {
-        const tableRows = document.getElementById('tableRows');
-        const newRow = document.createElement('div');
-        newRow.className = 'mini-table-row';
-        newRow.innerHTML = `
-            <div class="row g-2 align-items-center">
-                <div class="col-md-3">
-                    <input type="text" name="tableRowLabels[]" class="form-control form-control-sm"
-                           placeholder="Label" />
-                </div>
-                <div class="col-md-8">
-                    <div class="rich-text-row">
-                        <div class="format-toolbar">
-                            <button type="button" class="format-btn" onclick="formatText(this, 'bold')" title="Bold"><b>B</b></button>
-                            <button type="button" class="format-btn" onclick="formatText(this, 'italic')" title="Italic"><i>I</i></button>
-                            <button type="button" class="format-btn" onclick="formatText(this, 'underline')" title="Underline"><u>U</u></button>
-                            <span style="color: #6c757d; font-size: 12px;">Rich text formatting</span>
-                        </div>
-                        <div class="simple-editor"
-                             contenteditable="true"
-                             data-name="tableRowDescriptions[]"
-                             placeholder="Full text description with formatting..."
-                             onpaste="handlePaste(event)"
-                             onblur="updateHiddenInput(this)"></div>
-                        <input type="hidden" name="tableRowDescriptions[]" />
-                    </div>
-                </div>
-                <div class="col-md-1">
-                    <button type="button" class="remove-row-btn" onclick="removeTableRow(this)" title="Remove row">×</button>
-                </div>
-            </div>
-        `;
-        tableRows.appendChild(newRow);
+    // Drag and Drop functionality
+    function setupSectionDragAndDrop() {
+        const sections = document.querySelectorAll('.dynamic-section');
+
+        sections.forEach(section => {
+            section.addEventListener('dragstart', handleSectionDragStart);
+            section.addEventListener('dragend', handleSectionDragEnd);
+            section.addEventListener('dragover', handleSectionDragOver);
+            section.addEventListener('drop', handleSectionDrop);
+        });
     }
 
-    function removeTableRow(button) {
-        const tableRows = document.getElementById('tableRows');
-        if (tableRows.children.length > 1) {
-            button.closest('.mini-table-row').remove();
-        } else {
-            alert('At least one row is required');
+    function handleSectionDragStart(e) {
+        draggedSection = this;
+        this.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleSectionDragEnd(e) {
+        this.classList.remove('dragging');
+        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+        draggedSection = null;
+    }
+
+    function handleSectionDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+
+        if (this !== draggedSection) {
+            this.classList.add('drag-over');
         }
     }
 
-    // Initialize all existing contenteditable areas
-    document.addEventListener('DOMContentLoaded', function() {
-        const editors = document.querySelectorAll('.simple-editor');
-        editors.forEach(editor => {
-            editor.addEventListener('input', function() {
-                updateHiddenInput(this);
-            });
+    function handleSectionDrop(e) {
+        e.preventDefault();
+        this.classList.remove('drag-over');
+
+        if (this !== draggedSection) {
+            const container = document.getElementById('sectionsContainer');
+            const afterElement = getDragAfterElement(container, e.clientY);
+
+            if (afterElement == null) {
+                container.appendChild(draggedSection);
+            } else {
+                container.insertBefore(draggedSection, afterElement);
+            }
+        }
+    }
+
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.dynamic-section:not(.dragging)')];
+
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    // Form submission handler
+    document.getElementById('createForm').addEventListener('submit', function(e) {
+        // Update all Quill editors
+        quillEditors.forEach((quill, counter) => {
+            const textarea = document.querySelector(`textarea[name="textContent_${counter}"]`);
+            if (textarea) {
+                textarea.value = quill.root.innerHTML;
+            }
         });
-    });
 
-    // Before form submission, ensure all rich text content is captured
-    document.querySelector('form').addEventListener('submit', function() {
-        // Update main text description
-        const html = quill.root.innerHTML;
-        document.getElementById('textDescription').value = html;
-
-        // Update all table row descriptions
-        const editors = document.querySelectorAll('.simple-editor');
-        editors.forEach(editor => {
+        // Update all simple editors
+        document.querySelectorAll('.simple-editor').forEach(editor => {
             updateHiddenInput(editor);
         });
     });
-</script>
 
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set up event listeners for simple editors
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('simple-editor')) {
+                updateHiddenInput(e.target);
+            }
+        });
+    });
+</script>
 </body>
 </html>

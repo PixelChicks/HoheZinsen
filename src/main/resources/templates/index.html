@@ -6,6 +6,118 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/styles.css">
     <style>
+        .section-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.expanded-section:hover .section-controls {
+    opacity: 1;
+}
+
+.section-type-indicator {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.text-section .section-type-indicator {
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+}
+
+.delete-section-btn {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-section-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+.section-management-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 20px;
+    padding: 15px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 8px;
+    border: 2px dashed #dee2e6;
+}
+
+.add-section-btn {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.add-section-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.add-section-btn.text-btn {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+}
+
+.add-section-btn.text-btn:hover {
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.section-drag-handle {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: #6c757d;
+    cursor: move;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.expanded-section:hover .section-drag-handle {
+    opacity: 1;
+}
+
+.expanded-section.dragging {
+    opacity: 0.5;
+    transform: rotate(2deg);
+}
+
+.expanded-section.drag-over {
+    border: 2px dashed #007bff;
+    background: rgba(0, 123, 255, 0.1);
+}
         .action-buttons {
             display: flex;
             gap: 5px;
@@ -522,61 +634,173 @@
     }
 
     // Section drag and drop functions (existing code)
-    function handleSectionDragStart(event, sectionType, rateId) {
-        draggedSection = {
-            element: event.target.closest('.expanded-section'),
-            type: sectionType,
-            rateId: rateId
-        };
-        draggedSection.element.classList.add('dragging');
-        currentRateId = rateId;
-        event.dataTransfer.effectAllowed = 'move';
+    function handleSectionDragStart(event, sectionIdentifier, rateId) {
+    draggedSection = {
+        element: event.target.closest('.expanded-section'),
+        identifier: sectionIdentifier,
+        rateId: rateId
+    };
+    draggedSection.element.classList.add('dragging');
+    currentRateId = rateId;
+    event.dataTransfer.effectAllowed = 'move';
+}
+
+function handleSectionDragOver(event) {
+    event.preventDefault();
+    const target = event.target.closest('.expanded-section');
+    if (target && draggedSection && target !== draggedSection.element &&
+        target.closest(`#rateCard_${currentRateId}`)) {
+
+        // Remove existing drag-over class
+        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+        target.classList.add('drag-over');
     }
+}
 
-    function handleSectionDragOver(event) {
-        event.preventDefault();
-        const target = event.target.closest('.expanded-section');
-        if (target && draggedSection && target !== draggedSection.element &&
-            target.closest(`#rateCard_${currentRateId}`)) {
+function handleSectionDrop(event, targetIdentifier, rateId) {
+    event.preventDefault();
 
-            // Remove existing drag-over class
-            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-            target.classList.add('drag-over');
-        }
-    }
+    if (draggedSection && draggedSection.rateId === rateId && draggedSection.identifier !== targetIdentifier) {
+        const sourceElement = draggedSection.element;
+        const targetElement = event.target.closest('.expanded-section');
 
-    function handleSectionDrop(event, targetType, rateId) {
-        event.preventDefault();
+        if (sourceElement && targetElement) {
+            // Swap the sections
+            const parent = sourceElement.parentElement;
+            const nextSibling = targetElement.nextSibling;
 
-        if (draggedSection && draggedSection.rateId === rateId && draggedSection.type !== targetType) {
-            const sourceElement = draggedSection.element;
-            const targetElement = event.target.closest('.expanded-section');
-
-            if (sourceElement && targetElement) {
-                // Swap the sections
-                const parent = sourceElement.parentElement;
-                const nextSibling = targetElement.nextSibling;
-
-                parent.insertBefore(targetElement, sourceElement);
-                if (nextSibling) {
-                    parent.insertBefore(sourceElement, nextSibling);
-                } else {
-                    parent.appendChild(sourceElement);
-                }
-
-                // Update the order in the database
-                const newOrder = draggedSection.type === 'table' ? ['text', 'table'] : ['table', 'text'];
-                saveSectionOrder(rateId, newOrder);
+            parent.insertBefore(targetElement, sourceElement);
+            if (nextSibling) {
+                parent.insertBefore(sourceElement, nextSibling);
+            } else {
+                parent.appendChild(sourceElement);
             }
+
+            // Get new order from DOM
+            const newOrder = Array.from(parent.querySelectorAll('[data-section-id]'))
+                .map(el => el.getAttribute('data-section-id'));
+
+            // Update the order in the database
+            saveSectionOrder(rateId, newOrder);
         }
-
-        // Clean up
-        cleanupSectionDrag();
     }
 
-    function handleSectionDragEnd(event) {
-        cleanupSectionDrag();
+    // Clean up
+    cleanupSectionDrag();
+}
+function showAddTableSectionForm(rateId) {
+    const title = prompt('Enter table section title:');
+    if (title && title.trim()) {
+        addTableSectionToRate(rateId, title.trim());
     }
+}
+
+function showAddTextSectionForm(rateId) {
+    const title = prompt('Enter text section title:');
+    if (title && title.trim()) {
+        const content = prompt('Enter text content:');
+        addTextSectionToRate(rateId, title.trim(), content || '');
+    }
+}
+
+function addTableSectionToRate(rateId, title) {
+    fetch('/sections/add-table', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `rateId=${rateId}&title=${encodeURIComponent(title)}`
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Failed to add table section");
+        }
+        return response.text();
+    })
+    .then(data => {
+        showSectionOrderNotification("Table section added successfully!", false);
+        // Refresh the expanded card
+        closeExpandedCard(rateId);
+        setTimeout(() => showMoreInfo(rateId), 500);
+    })
+    .catch(error => {
+        showSectionOrderNotification("Error adding table section: " + error.message, true);
+    });
+}
+
+function addTextSectionToRate(rateId, title, content) {
+    fetch('/sections/add-text', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `rateId=${rateId}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Failed to add text section");
+        }
+        return response.text();
+    })
+    .then(data => {
+        showSectionOrderNotification("Text section added successfully!", false);
+        // Refresh the expanded card
+        closeExpandedCard(rateId);
+        setTimeout(() => showMoreInfo(rateId), 500);
+    })
+    .catch(error => {
+        showSectionOrderNotification("Error adding text section: " + error.message, true);
+    });
+}
+
+function deleteSection(rateId, sectionIdentifier) {
+    if (confirm('Are you sure you want to delete this section? This action cannot be undone.')) {
+        fetch(`/sections/${sectionIdentifier}?rateId=${rateId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Failed to delete section");
+            }
+            return response.text();
+        })
+        .then(data => {
+            showSectionOrderNotification("Section deleted successfully!", false);
+            // Refresh the expanded card
+            closeExpandedCard(rateId);
+            setTimeout(() => showMoreInfo(rateId), 500);
+        })
+        .catch(error => {
+            showSectionOrderNotification("Error deleting section: " + error.message, true);
+        });
+    }
+}
+
+function saveSectionOrder(rateId, newOrder) {
+    fetch('/sections/reorder', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newOrder) + `?rateId=${rateId}`
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Failed to save section order");
+        }
+        return response.text();
+    })
+    .then(data => {
+        showSectionOrderNotification("Section order updated successfully!", false);
+    })
+    .catch(error => {
+        showSectionOrderNotification("Error saving section order: " + error.message, true);
+    });
+}
+
 
     function cleanupSectionDrag() {
         if (draggedSection) {
@@ -672,80 +896,148 @@
         currentExpandedCard = rateId;
     }
 
-     function createRateCard(rate) {
-        const card = document.createElement('div');
-        card.className = 'rate-card';
-        card.id = `rateCard_${rate.id}`;
 
-        const moreInfo = rate.moreInfo;
+function createRateCard(rate) {
+    const card = document.createElement('div');
+    card.className = 'rate-card';
+    card.id = `rateCard_${rate.id}`;
 
-        // Get the section order from the data, default to ['table', 'text']
-        const sectionOrder = moreInfo.sectionOrder || ['table', 'text'];
+    const moreInfo = rate.moreInfo;
+    if (!moreInfo) return card;
 
-        // Create section content
-        const createTableSection = () => {
-            if (!moreInfo.tableTitle || !moreInfo.miniTableRows || moreInfo.miniTableRows.length === 0) {
-                return '';
-            }
-            return `
-                <div class="expanded-section draggable-section"
-                     draggable="true"
-                     data-section-type="table"
-                     ondragstart="handleSectionDragStart(event, 'table', ${rate.id})"
-                     ondragover="handleSectionDragOver(event)"
-                     ondrop="handleSectionDrop(event, 'table', ${rate.id})"
-                     ondragend="handleSectionDragEnd(event)">
-                    <div class="section-drag-handle" title="Drag to reorder">⋮⋮</div>
-                    <h5 class="section-title">${moreInfo.tableTitle}</h5>
-                    <div class="info-table">
-                        ${moreInfo.miniTableRows.map(row => `
-                            <div class="info-table-row">
-                                <div class="info-table-label">${row.label || ''}</div>
-                                <div class="info-table-value">${row.description || ''}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        };
+    // Get the section order from the data, default to empty array
+    const sectionOrder = moreInfo.sectionOrder || [];
 
-        const createTextSection = () => {
-            if (!moreInfo.textTitle && !moreInfo.textDescription) {
-                return '';
-            }
-            return `
-                <div class="expanded-section draggable-section"
-                     draggable="true"
-                     data-section-type="text"
-                     ondragstart="handleSectionDragStart(event, 'text', ${rate.id})"
-                     ondragover="handleSectionDragOver(event)"
-                     ondrop="handleSectionDrop(event, 'text', ${rate.id})"
-                     ondragend="handleSectionDragEnd(event)">
-                    <div class="section-drag-handle" title="Drag to reorder">⋮⋮</div>
-                    ${moreInfo.textTitle ? `<h5 class="section-title">${moreInfo.textTitle}</h5>` : ''}
-                    <div class="text-content" style="text-align: left;">${moreInfo.textDescription || ''}</div>
-                </div>
-            `;
-        };
+    // Create section content maps
+    const tableSectionsMap = new Map();
+    const textSectionsMap = new Map();
 
-        // Build sections in the correct order
-        let sectionsHTML = '';
-        sectionOrder.forEach(sectionType => {
-            if (sectionType === 'table') {
-                sectionsHTML += createTableSection();
-            } else if (sectionType === 'text') {
-                sectionsHTML += createTextSection();
-            }
+    // Map table sections by identifier
+    if (moreInfo.tableSections) {
+        moreInfo.tableSections.forEach(tableSection => {
+            tableSectionsMap.set(tableSection.sectionIdentifier, tableSection);
         });
+    }
 
-        card.innerHTML = `
-            <div class="rate-expanded-content show">
-                ${sectionsHTML}
+    // Map text sections by identifier
+    if (moreInfo.textSections) {
+        moreInfo.textSections.forEach(textSection => {
+            textSectionsMap.set(textSection.sectionIdentifier, textSection);
+        });
+    }
+
+    // Helper function to create table sections
+    const createTableSection = (tableSection) => {
+        if (!tableSection || !tableSection.title || !tableSection.miniTableRows || tableSection.miniTableRows.length === 0) {
+            return '';
+        }
+        return `
+            <div class="expanded-section draggable-section table-section"
+                 draggable="true"
+                 data-section-type="table"
+                 data-section-id="${tableSection.sectionIdentifier}"
+                 ondragstart="handleSectionDragStart(event, '${tableSection.sectionIdentifier}', ${rate.id})"
+                 ondragover="handleSectionDragOver(event)"
+                 ondrop="handleSectionDrop(event, '${tableSection.sectionIdentifier}', ${rate.id})"
+                 ondragend="handleSectionDragEnd(event)">
+                <div class="section-drag-handle" title="Drag to reorder">⋮⋮</div>
+                <div class="section-controls">
+                    <span class="section-type-indicator">Table</span>
+                    <button class="delete-section-btn" onclick="deleteSection(${rate.id}, '${tableSection.sectionIdentifier}')" title="Delete section">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+                <h5 class="section-title">${tableSection.title}</h5>
+                <div class="info-table">
+                    ${tableSection.miniTableRows.map(row => `
+                        <div class="info-table-row">
+                            <div class="info-table-label">${row.label || ''}</div>
+                            <div class="info-table-value">${row.description || ''}</div>
+                        </div>
+                    `).join('')}
+                </div>
             </div>
         `;
+    };
 
-        return card;
-    }
+    // Helper function to create text sections
+    const createTextSection = (textSection) => {
+        if (!textSection || (!textSection.title && !textSection.content)) {
+            return '';
+        }
+        return `
+            <div class="expanded-section draggable-section text-section"
+                 draggable="true"
+                 data-section-type="text"
+                 data-section-id="${textSection.sectionIdentifier}"
+                 ondragstart="handleSectionDragStart(event, '${textSection.sectionIdentifier}', ${rate.id})"
+                 ondragover="handleSectionDragOver(event)"
+                 ondrop="handleSectionDrop(event, '${textSection.sectionIdentifier}', ${rate.id})"
+                 ondragend="handleSectionDragEnd(event)">
+                <div class="section-drag-handle" title="Drag to reorder">⋮⋮</div>
+                <div class="section-controls">
+                    <span class="section-type-indicator">Text</span>
+                    <button class="delete-section-btn" onclick="deleteSection(${rate.id}, '${textSection.sectionIdentifier}')" title="Delete section">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+                ${textSection.title ? `<h5 class="section-title">${textSection.title}</h5>` : ''}
+                <div class="text-content" style="text-align: left;">${textSection.content || ''}</div>
+            </div>
+        `;
+    };
+
+    // Build sections in the correct order
+    let sectionsHTML = '';
+    sectionOrder.forEach(sectionIdentifier => {
+        if (sectionIdentifier.startsWith('table-')) {
+            const tableSection = tableSectionsMap.get(sectionIdentifier);
+            if (tableSection) {
+                sectionsHTML += createTableSection(tableSection);
+            }
+        } else if (sectionIdentifier.startsWith('text-')) {
+            const textSection = textSectionsMap.get(sectionIdentifier);
+            if (textSection) {
+                sectionsHTML += createTextSection(textSection);
+            }
+        }
+    });
+
+    // Add any sections not in the order (fallback)
+    tableSectionsMap.forEach((tableSection, identifier) => {
+        if (!sectionOrder.includes(identifier)) {
+            sectionsHTML += createTableSection(tableSection);
+        }
+    });
+
+    textSectionsMap.forEach((textSection, identifier) => {
+        if (!sectionOrder.includes(identifier)) {
+            sectionsHTML += createTextSection(textSection);
+        }
+    });
+
+    // Add section management buttons
+    const managementButtons = `
+        <div class="section-management-buttons">
+            <button class="add-section-btn table-btn" onclick="showAddTableSectionForm(${rate.id})" title="Add Table Section">
+                <i class="bi bi-table"></i> Add Table
+            </button>
+            <button class="add-section-btn text-btn" onclick="showAddTextSectionForm(${rate.id})" title="Add Text Section">
+                <i class="bi bi-text-paragraph"></i> Add Text
+            </button>
+        </div>
+    `;
+
+    card.innerHTML = `
+        <div class="rate-expanded-content show">
+            ${sectionsHTML}
+            ${managementButtons}
+        </div>
+    `;
+
+    return card;
+}
+
 
     function closeExpandedCard(rateId) {
         const cardRow = document.getElementById(`rateCardRow_${rateId}`);
