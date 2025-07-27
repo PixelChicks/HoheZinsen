@@ -86,20 +86,6 @@
             gap: 8px;
         }
 
-        .drag-handle {
-            cursor: move;
-            color: #6c757d;
-            font-size: 1.2rem;
-            padding: 5px;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
-
-        .drag-handle:hover {
-            background: #e9ecef;
-            color: #495057;
-        }
-
         .section-type-badge {
             background: linear-gradient(135deg, #007bff, #0056b3);
             color: white;
@@ -305,16 +291,6 @@
             opacity: 0.5;
         }
 
-        .drag-over {
-            border-color: #007bff !important;
-            background: rgba(0, 123, 255, 0.05);
-        }
-
-        .dragging {
-            opacity: 0.5;
-            transform: rotate(2deg);
-        }
-
         .field-group {
             background: #f8f9fa;
             border-radius: 10px;
@@ -441,14 +417,11 @@
             <div class="sections-container" id="sectionsContainer">
                 <!-- Existing Table Sections -->
                 <div th:if="${interestRate.moreInfo?.tableSections != null and !interestRate.moreInfo.tableSections.isEmpty()}">
-                    <div class="dynamic-section" data-section-type="table" th:each="tableSection, iterStat : ${interestRate.moreInfo.tableSections}" th:attr="data-section-id='table_' + ${tableSection.sectionIdentifier}" draggable="true">
+                    <div class="dynamic-section" data-section-type="table" th:each="tableSection, iterStat : ${interestRate.moreInfo.tableSections}" th:attr="data-section-id='table_' + ${tableSection.sectionIdentifier}">
                         <div class="section-type-badge">
                             <i class="bi bi-table"></i> Table Section
                         </div>
                         <div class="section-controls">
-                            <div class="drag-handle" title="Drag to reorder">
-                                <i class="bi bi-grip-vertical"></i>
-                            </div>
                             <button type="button" class="remove-section-btn" onclick="removeSection(this)" title="Remove section">
                                 <i class="bi bi-x"></i>
                             </button>
@@ -523,14 +496,11 @@
 
                 <!-- Existing Text Sections -->
                 <div th:if="${interestRate.moreInfo?.textSections != null and !interestRate.moreInfo.textSections.isEmpty()}">
-                    <div class="dynamic-section" data-section-type="text" th:each="textSection, iterStat : ${interestRate.moreInfo.textSections}" th:attr="data-section-id='text_' + ${textSection.sectionIdentifier}" draggable="true">
+                    <div class="dynamic-section" data-section-type="text" th:each="textSection, iterStat : ${interestRate.moreInfo.textSections}" th:attr="data-section-id='text_' + ${textSection.sectionIdentifier}">
                         <div class="section-type-badge">
                             <i class="bi bi-text-paragraph"></i> Text Section
                         </div>
                         <div class="section-controls">
-                            <div class="drag-handle" title="Drag to reorder">
-                                <i class="bi bi-grip-vertical"></i>
-                            </div>
                             <button type="button" class="remove-section-btn" onclick="removeSection(this)" title="Remove section">
                                 <i class="bi bi-x"></i>
                             </button>
@@ -601,15 +571,13 @@
 
 <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
 <script>
-    let sectionCounter = 1000; // Start high to avoid conflicts with existing sections
+    let sectionCounter = 1000;
     let quillEditors = new Map();
 
-    // Enhanced form submission handler - same as create form
     document.getElementById('editForm')
         .addEventListener('submit', function (e) {
             console.log('=== FORM SUBMISSION STARTED ===');
 
-            // Update all Quill editors
             quillEditors.forEach((quill, counter) => {
                 const textarea = document.querySelector(`textarea[name="textContent_${counter}"]`);
                 if (textarea) {
@@ -618,19 +586,16 @@
                 }
             });
 
-            // Update all simple editors (table row descriptions)
             document.querySelectorAll('.simple-editor')
                 .forEach(editor => {
                     updateHiddenInput(editor);
                 });
 
-            // Process each table section individually
             document.querySelectorAll('.dynamic-section[data-section-type="table"]')
                 .forEach(section => {
                     const sectionId = section.dataset.sectionId.split('_')[1];
                     console.log(`\n=== PROCESSING TABLE SECTION: ${sectionId} ===`);
 
-                    // Collect all labels for this section
                     const labelInputs = section.querySelectorAll(`input[name="tableRowLabels_${sectionId}"]`);
                     console.log(`Found ${labelInputs.length} label inputs`);
 
@@ -649,7 +614,6 @@
                         }
                     });
 
-                    // Collect all descriptions for this section
                     const descInputs = section.querySelectorAll(`input[name="tableRowDescriptions_${sectionId}"]`);
                     console.log(`Found ${descInputs.length} description inputs`);
 
@@ -671,11 +635,9 @@
                     console.log(`Collected ${labels.length} labels:`, labels);
                     console.log(`Collected ${descriptions.length} descriptions:`, descriptions);
 
-                    // Remove existing individual inputs to avoid conflicts
                     labelInputs.forEach(input => input.remove());
                     descInputs.forEach(input => input.remove());
 
-                    // Create combined comma-separated inputs only if we have data
                     if (labels.length > 0) {
                         const labelsInput = document.createElement('input');
                         labelsInput.type = 'hidden';
@@ -695,7 +657,6 @@
                     }
                 });
 
-            // Final check - log all form data that will be submitted
             console.log('\n=== FINAL FORM DATA ===');
             const formData = new FormData(this);
             for (let [key, value] of formData.entries()) {
@@ -715,14 +676,11 @@
         hideEmptyMessage();
 
         const sectionHtml = `
-            <div class="dynamic-section" data-section-type="text" data-section-id="${sectionId}" draggable="true">
+            <div class="dynamic-section" data-section-type="text" data-section-id="${sectionId}">
                 <div class="section-type-badge">
                     <i class="bi bi-text-paragraph"></i> Text Section
                 </div>
                 <div class="section-controls">
-                    <div class="drag-handle" title="Drag to reorder">
-                        <i class="bi bi-grip-vertical"></i>
-                    </div>
                     <button type="button" class="remove-section-btn" onclick="removeSection(this)" title="Remove section">
                         <i class="bi bi-x"></i>
                     </button>
@@ -755,7 +713,6 @@
         document.getElementById('sectionsContainer')
             .insertAdjacentHTML('beforeend', sectionHtml);
 
-        // Initialize Quill editor for this text section
         const quill = new Quill(`#${editorId}`, {
             theme: 'snow',
             placeholder: 'Enter detailed content here. Use the toolbar to format your text...',
@@ -776,15 +733,12 @@
             }
         });
 
-        // Store editor reference and set up content sync
         quillEditors.set(sectionCounter, quill);
 
         quill.on('text-change', function () {
             const textarea = document.querySelector(`textarea[name="textContent_${sectionCounter}"]`);
             textarea.value = quill.root.innerHTML;
         });
-
-        setupSectionDragAndDrop();
     }
 
     function addTableSection() {
@@ -794,14 +748,11 @@
         hideEmptyMessage();
 
         const sectionHtml = `
-            <div class="dynamic-section" data-section-type="table" data-section-id="${sectionId}" draggable="true">
+            <div class="dynamic-section" data-section-type="table" data-section-id="${sectionId}">
                 <div class="section-type-badge">
                     <i class="bi bi-table"></i> Table Section
                 </div>
                 <div class="section-controls">
-                    <div class="drag-handle" title="Drag to reorder">
-                        <i class="bi bi-grip-vertical"></i>
-                    </div>
                     <button type="button" class="remove-section-btn" onclick="removeSection(this)" title="Remove section">
                         <i class="bi bi-x"></i>
                     </button>
@@ -869,10 +820,8 @@
 
         document.getElementById('sectionsContainer')
             .insertAdjacentHTML('beforeend', sectionHtml);
-        setupSectionDragAndDrop();
     }
 
-    // Enhanced addTableRow function - same as create form
     function addTableRow(sectionCounter) {
         console.log(`Adding table row to section ${sectionCounter}`);
 
@@ -928,18 +877,15 @@
             .length;
         console.log(`After adding row, section ${sectionCounter} now has ${newRowCount} rows`);
 
-        // Debug: List all current input names in this section
         const allInputs = container.querySelectorAll('input');
         console.log(`All inputs in section ${sectionCounter}:`, Array.from(allInputs)
             .map(input => `${input.name} (${input.type})`));
     }
 
-    // Helper function to handle add row button clicks from existing sections
     function addTableRowFromButton(button) {
         const sectionId = button.getAttribute('data-section-id');
         console.log(`Adding row to existing section: ${sectionId}`);
 
-        // Find the container for this section
         const section = button.closest('.dynamic-section');
         const container = section.querySelector('.table-rows-container');
 
@@ -999,7 +945,6 @@
         const section = button.closest('.dynamic-section');
         const sectionId = section.dataset.sectionId;
 
-        // Remove Quill editor if it's a text section
         if (sectionId && sectionId.startsWith('text_')) {
             const counter = sectionId.split('_')[1];
             quillEditors.delete(parseInt(counter));
@@ -1007,7 +952,6 @@
 
         section.remove();
 
-        // Show empty message if no sections left
         if (document.querySelectorAll('.dynamic-section')
             .length === 0) {
             showEmptyMessage();
@@ -1040,7 +984,6 @@
         }
     }
 
-    // Rich text formatting functions
     function formatText(button, command) {
         const editor = button.closest('.rich-text-row')
             .querySelector('.simple-editor');
@@ -1064,77 +1007,8 @@
         }
     }
 
-    // Drag and Drop functionality
-    function setupSectionDragAndDrop() {
-        const sections = document.querySelectorAll('.dynamic-section');
-
-        sections.forEach(section => {
-            section.addEventListener('dragstart', handleSectionDragStart);
-            section.addEventListener('dragend', handleSectionDragEnd);
-            section.addEventListener('dragover', handleSectionDragOver);
-            section.addEventListener('drop', handleSectionDrop);
-        });
-    }
-
-    let draggedSection = null;
-
-    function handleSectionDragStart(e) {
-        draggedSection = this;
-        this.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-    }
-
-    function handleSectionDragEnd(e) {
-        this.classList.remove('dragging');
-        document.querySelectorAll('.drag-over')
-            .forEach(el => el.classList.remove('drag-over'));
-        draggedSection = null;
-    }
-
-    function handleSectionDragOver(e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-
-        if (this !== draggedSection) {
-            this.classList.add('drag-over');
-        }
-    }
-
-    function handleSectionDrop(e) {
-        e.preventDefault();
-        this.classList.remove('drag-over');
-
-        if (this !== draggedSection) {
-            const container = document.getElementById('sectionsContainer');
-            const afterElement = getDragAfterElement(container, e.clientY);
-
-            if (afterElement == null) {
-                container.appendChild(draggedSection);
-            } else {
-                container.insertBefore(draggedSection, afterElement);
-            }
-        }
-    }
-
-    function getDragAfterElement(container, y) {
-        const draggableElements = [...container.querySelectorAll('.dynamic-section:not(.dragging)')];
-
-        return draggableElements.reduce((closest, child) => {
-                const box = child.getBoundingClientRect();
-                const offset = y - box.top - box.height / 2;
-
-                if (offset < 0 && offset > closest.offset) {
-                    return { offset: offset, element: child };
-                } else {
-                    return closest;
-                }
-            }, { offset: Number.NEGATIVE_INFINITY })
-            .element;
-    }
-
-    // Initialize existing Quill editors and set up event listeners
     document.addEventListener('DOMContentLoaded', function () {
-        // Initialize Quill editors for existing text sections
+
         const existingTextSections = document.querySelectorAll('[data-section-type="text"]');
         existingTextSections.forEach(section => {
             const sectionId = section.dataset.sectionId;
@@ -1164,12 +1038,10 @@
                         }
                     });
 
-                    // Set existing content
                     if (textareaElement.value) {
                         quill.root.innerHTML = textareaElement.value;
                     }
 
-                    // Store editor reference and set up content sync
                     quillEditors.set(identifier, quill);
 
                     quill.on('text-change', function () {
@@ -1179,23 +1051,17 @@
             }
         });
 
-        // Set up event listeners for simple editors
         document.addEventListener('input', function (e) {
             if (e.target.classList.contains('simple-editor')) {
                 updateHiddenInput(e.target);
             }
         });
 
-        // Initialize existing simple editors
         document.querySelectorAll('.simple-editor')
             .forEach(editor => {
                 updateHiddenInput(editor);
             });
 
-        // Setup drag and drop for existing sections
-        setupSectionDragAndDrop();
-
-        // Hide empty message if sections exist
         const existingSections = document.querySelectorAll('.dynamic-section');
         if (existingSections.length > 0) {
             hideEmptyMessage();

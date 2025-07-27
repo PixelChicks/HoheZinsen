@@ -260,7 +260,6 @@
 	box-shadow: none;
 }
 
-/* Header editing styles */
 .header-container {
 	position: relative;
 	display: flex;
@@ -364,7 +363,6 @@
 	color: white;
 }
 
-/* Drag and drop styles */
 .draggable-column {
 	cursor: move;
 	position: relative;
@@ -396,7 +394,6 @@
 	transform: rotate(2deg);
 }
 
-/* Column drop indicator */
 .drop-indicator {
 	position: absolute;
 	top: 0;
@@ -411,7 +408,6 @@
 	display: block;
 }
 
-/* Save order button */
 .save-order-btn {
 	background: #28a745;
 	color: white;
@@ -442,7 +438,6 @@
 	display: inline-block;
 }
 
-/* Section reorder notification */
 .section-order-notification {
 	position: fixed;
 	top: 20px;
