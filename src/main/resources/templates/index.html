@@ -5,291 +5,6 @@
     <title>Interest Rate Offers</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/styles.css">
-    <style>
-        .section-controls {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.expanded-section:hover .section-controls {
-    opacity: 1;
-}
-
-.section-type-indicator {
-    background: linear-gradient(135deg, #007bff, #0056b3);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-}
-
-.text-section .section-type-indicator {
-    background: linear-gradient(135deg, #28a745, #1e7e34);
-}
-
-.delete-section-btn {
-    background: linear-gradient(135deg, #dc3545, #c82333);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.delete-section-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
-}
-
-.section-management-buttons {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    margin-top: 20px;
-    padding: 15px;
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    border-radius: 8px;
-    border: 2px dashed #dee2e6;
-}
-
-.add-section-btn {
-    background: linear-gradient(135deg, #28a745, #20c997);
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.add-section-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-}
-
-.add-section-btn.text-btn {
-    background: linear-gradient(135deg, #007bff, #0056b3);
-}
-
-.add-section-btn.text-btn:hover {
-    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
-}
-
-.section-drag-handle {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    color: #6c757d;
-    cursor: move;
-    font-size: 14px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.expanded-section:hover .section-drag-handle {
-    opacity: 1;
-}
-
-.expanded-section.dragging {
-    opacity: 0.5;
-    transform: rotate(2deg);
-    cursor: grabbing;
-}
-
-.expanded-section.drag-over {
-    border: 2px dashed #007bff;
-    background: rgba(0, 123, 255, 0.1);
-}
-
-.expanded-section {
-    position: relative;
-    cursor: grab;
-    transition: all 0.3s ease;
-}
-
-.expanded-section:active {
-    cursor: grabbing;
-}
-
-/* Section order notification */
-.section-order-notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 15px 20px;
-    border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    z-index: 2001;
-    opacity: 0;
-    transform: translateX(100%);
-    transition: all 0.3s ease;
-    background: #28a745;
-    color: white;
-}
-
-.section-order-notification.show {
-    opacity: 1;
-    transform: translateX(0);
-}
-
-.section-order-notification.error {
-    background: #dc3545;
-}
-        .action-buttons {
-            display: flex;
-            gap: 5px;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .btn-edit {
-            background: #ffc107;
-            color: #000;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-
-        .btn-edit:hover {
-            background: #e0a800;
-            color: #000;
-        }
-
-        .btn-delete {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-delete:hover {
-            background: #c82333;
-        }
-
-        /* Field delete button styling */
-        .delete-field-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            padding: 2px 6px;
-            font-size: 11px;
-            cursor: pointer;
-            opacity: 0;
-            transition: opacity 0.2s;
-            margin-left: 5px;
-        }
-
-        .header-container:hover .delete-field-btn {
-            opacity: 1;
-        }
-
-        .delete-field-btn:hover {
-            background: #c82333;
-        }
-
-        .delete-confirmation-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-
-        .delete-confirmation-content {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            max-width: 500px;
-            text-align: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .delete-confirmation-content h5 {
-            color: #dc3545;
-            margin-bottom: 15px;
-        }
-
-        .delete-confirmation-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        .delete-notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 2001;
-            opacity: 0;
-            transform: translateX(100%);
-            transition: all 0.3s ease;
-        }
-
-        .delete-notification.show {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        .delete-notification.success {
-            background: #28a745;
-            color: white;
-        }
-
-        .delete-notification.error {
-            background: #dc3545;
-            color: white;
-        }
-
-        .field-info {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 4px;
-            margin: 10px 0;
-            border-left: 4px solid #007bff;
-        }
-
-        .warning-text {
-            color: #dc3545;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-    </style>
 </head>
 <body class="bg-light">
 <div class="container py-4">
@@ -319,19 +34,19 @@
         </div>
     </form>
 
-    <!-- Interest Rate Table -->
     <div class="table-responsive">
-        <table class="table table-bordered table-striped text-center align-middle" id="mainTable">
-            <thead class="table-dark">
+        <table class="table table-sm" id="mainTable">
+            <thead class="table">
             <tr id="column-header-row">
-                <!-- Dynamic Headers with Edit, Delete Functionality and Drag Handle -->
-                <th class="draggable-column"
+                <th class="draggable-column sortable"
                     draggable="true"
                     ondragend="handleDragEnd(event)"
                     ondragover="handleDragOver(event)"
                     ondragstart="handleDragStart(event)"
                     ondrop="handleDrop(event)"
+                    onclick="sortTable(this, event)"
                     th:data-field-id="${field.id}"
+                    th:data-column-index="${iterStat.index}"
                     th:each="field, iterStat : ${globalFields}">
 
                     <div class="drag-handle">⋮⋮</div>
@@ -349,7 +64,6 @@
                                 title="Delete this field">
                             🗑
                         </button>
-
 
                         <!-- Edit Form -->
                         <div class="header-edit-form" th:id="'editForm_' + ${field.id}">
@@ -418,6 +132,7 @@
     </div>
 </div>
 
+<!-- Keep all your existing modals and notifications -->
 <!-- Field Delete Confirmation Modal -->
 <div class="delete-confirmation-modal" id="fieldDeleteConfirmationModal">
     <div class="delete-confirmation-content">
@@ -466,7 +181,11 @@
     Action completed successfully!
 </div>
 
+<!-- Include jQuery -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
 <script th:inline="javascript">
+    // Keep ALL your existing JavaScript exactly as it was
     const interestRatesData = /*[[${interestRates}]]*/ [];
 
     let currentExpandedCard = null;
@@ -476,14 +195,124 @@
     let originalOrder = [];
     let pendingDeleteId = null;
     let pendingFieldDeleteId = null;
-
     let draggedSection = null;
     let currentRateId = null;
+    let dataTable = null; // Remove DataTable reference
+    let currentSortColumn = null;
+    let currentSortDirection = null;
 
     document.addEventListener('DOMContentLoaded', function () {
         captureOriginalOrder();
+        initializeSortableHeaders();
     });
 
+    function initializeSortableHeaders() {
+        // Add sortable class to all draggable columns
+        const headers = document.querySelectorAll('.draggable-column');
+        headers.forEach(header => {
+            header.classList.add('sortable');
+        });
+    }
+
+    function sortTable(headerElement, event) {
+        // Prevent drag events from interfering
+        if (event && event.type === 'click' && headerElement.classList.contains('dragging')) {
+            return;
+        }
+
+        const columnIndex = parseInt(headerElement.dataset.columnIndex);
+        const table = document.getElementById('mainTable');
+        const tbody = table.getElementsByTagName('tbody')[0];
+        const rows = Array.from(tbody.getElementsByTagName('tr'));
+
+        // Determine sort direction
+        let sortDirection = 'asc';
+        if (currentSortColumn === columnIndex) {
+            sortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+        }
+
+        // Clear previous sort indicators
+        document.querySelectorAll('.sortable').forEach(th => {
+            th.classList.remove('sort-asc', 'sort-desc');
+        });
+
+        // Add sort indicator to current column
+        headerElement.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+
+        // Sort rows
+        rows.sort((a, b) => {
+            const aCell = a.getElementsByTagName('td')[columnIndex];
+            const bCell = b.getElementsByTagName('td')[columnIndex];
+
+            let aValue = '';
+            let bValue = '';
+
+            // Get the value from input if exists, otherwise use text content
+            const aInput = aCell.querySelector('input[name="value"]');
+            const bInput = bCell.querySelector('input[name="value"]');
+
+            if (aInput && bInput) {
+                aValue = aInput.value || '';
+                bValue = bInput.value || '';
+            } else {
+                aValue = aCell.textContent.trim();
+                bValue = bCell.textContent.trim();
+            }
+
+            // Try to parse as numbers for numeric sorting
+            const aNum = parseFloat(aValue);
+            const bNum = parseFloat(bValue);
+
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+                return sortDirection === 'asc' ? aNum - bNum : bNum - aNum;
+            } else {
+                // String comparison
+                return sortDirection === 'asc'
+                    ? aValue.localeCompare(bValue)
+                    : bValue.localeCompare(aValue);
+            }
+        });
+
+        // Re-append sorted rows
+        rows.forEach(row => tbody.appendChild(row));
+
+        // Update current sort state
+        currentSortColumn = columnIndex;
+        currentSortDirection = sortDirection;
+
+        // Update sort info
+        updateSortInfo(headerElement.textContent.trim(), sortDirection);
+    }
+
+    function updateSortInfo(columnName, direction) {
+        const sortInfo = document.getElementById('sortInfo');
+        if (columnName && direction) {
+            sortInfo.innerHTML = `Sorted by: <strong>${columnName}</strong> ${direction === 'asc' ? '↑' : '↓'}`;
+            sortInfo.style.background = 'linear-gradient(135deg, #e7f3ff, #cce7ff)';
+        } else {
+            sortInfo.textContent = 'Click column headers to sort ↕️';
+            sortInfo.style.background = 'white';
+        }
+    }
+
+    function resetSort() {
+        // Clear all sort indicators
+        document.querySelectorAll('.sortable').forEach(th => {
+            th.classList.remove('sort-asc', 'sort-desc');
+        });
+
+        // Reset sort state
+        currentSortColumn = null;
+        currentSortDirection = null;
+
+        // Update sort info
+        updateSortInfo();
+
+        // Reload the page to restore original order (or implement your own logic)
+        showDeleteNotification('Sort reset! Reload page to restore original order.', false);
+    }
+
+    // Keep all your existing functions but add DataTable integration where needed
     function captureOriginalOrder() {
         const headers = document.querySelectorAll('.draggable-column');
         originalOrder = Array.from(headers)
