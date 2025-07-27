@@ -59,61 +59,16 @@ public class InterestRateController {
         return "redirect:/";
     }
 
-    @PostMapping("/sections/add-table")
-    @ResponseBody
-    public ResponseEntity<String> addTableSection(@RequestParam Long rateId,
-                                                  @RequestParam String title) {
-        try {
-            interestRateService.addTableSection(rateId, title);
-            return ResponseEntity.ok("Table section added successfully");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error adding table section: " + e.getMessage());
-        }
-    }
-
-    @PostMapping("/sections/add-text")
-    @ResponseBody
-    public ResponseEntity<String> addTextSection(@RequestParam Long rateId,
-                                                 @RequestParam String title,
-                                                 @RequestParam String content) {
-        try {
-            interestRateService.addTextSection(rateId, title, content);
-            return ResponseEntity.ok("Text section added successfully");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error adding text section: " + e.getMessage());
-        }
-    }
-
-    @DeleteMapping("/sections/{sectionIdentifier}")
-    @ResponseBody
-    public ResponseEntity<String> deleteSection(@RequestParam Long rateId,
-                                                @PathVariable String sectionIdentifier) {
-        try {
-            interestRateService.deleteSection(rateId, sectionIdentifier);
-            return ResponseEntity.ok("Section deleted successfully");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error deleting section: " + e.getMessage());
-        }
-    }
-
     @PostMapping("/sections/reorder")
     @ResponseBody
     public ResponseEntity<String> reorderSections(@RequestParam Long rateId,
                                                   @RequestBody List<String> sectionOrder) {
         try {
-            System.out.println("Reordering sections for rate " + rateId + " with order: " + sectionOrder);
             interestRateService.updateSectionOrder(rateId, sectionOrder);
             return ResponseEntity.ok("Section order updated successfully");
         } catch (Exception e) {
-            System.err.println("Error reordering sections: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.badRequest().body("Error updating section order: " + e.getMessage());
         }
-    }
-
-    private String extractSectionId(String key) {
-        String[] parts = key.split("_");
-        return parts.length > 1 ? parts[parts.length - 1] : "1";
     }
 
     @GetMapping("/")

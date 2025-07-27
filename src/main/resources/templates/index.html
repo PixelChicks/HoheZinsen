@@ -901,97 +901,6 @@
             });
     }
 
-    function showAddTableSectionForm(rateId) {
-        const title = prompt('Enter table section title:');
-        if (title && title.trim()) {
-            addTableSectionToRate(rateId, title.trim());
-        }
-    }
-
-    function showAddTextSectionForm(rateId) {
-        const title = prompt('Enter text section title:');
-        if (title && title.trim()) {
-            const content = prompt('Enter text content:');
-            addTextSectionToRate(rateId, title.trim(), content || '');
-        }
-    }
-
-    function addTableSectionToRate(rateId, title) {
-        fetch('/sections/add-table', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `rateId=${rateId}&title=${encodeURIComponent(title)}`
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Failed to add table section");
-                }
-                return response.text();
-            })
-            .then(data => {
-                showSectionOrderNotification("Table section added successfully!", false);
-                // Refresh the expanded card
-                closeExpandedCard(rateId);
-                setTimeout(() => showMoreInfo(rateId), 500);
-            })
-            .catch(error => {
-                showSectionOrderNotification("Error adding table section: " + error.message, true);
-            });
-    }
-
-    function addTextSectionToRate(rateId, title, content) {
-        fetch('/sections/add-text', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `rateId=${rateId}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Failed to add text section");
-                }
-                return response.text();
-            })
-            .then(data => {
-                showSectionOrderNotification("Text section added successfully!", false);
-                // Refresh the expanded card
-                closeExpandedCard(rateId);
-                setTimeout(() => showMoreInfo(rateId), 500);
-            })
-            .catch(error => {
-                showSectionOrderNotification("Error adding text section: " + error.message, true);
-            });
-    }
-
-    function deleteSection(rateId, sectionIdentifier) {
-        if (confirm('Are you sure you want to delete this section? This action cannot be undone.')) {
-            fetch(`/sections/${sectionIdentifier}?rateId=${rateId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("Failed to delete section");
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    showSectionOrderNotification("Section deleted successfully!", false);
-                    // Refresh the expanded card
-                    closeExpandedCard(rateId);
-                    setTimeout(() => showMoreInfo(rateId), 500);
-                })
-                .catch(error => {
-                    showSectionOrderNotification("Error deleting section: " + error.message, true);
-                });
-        }
-    }
-
     function showSectionOrderNotification(message, isError) {
         const notification = document.getElementById('sectionOrderNotification');
         notification.textContent = message;
@@ -1105,9 +1014,6 @@
                         <div class="section-drag-handle" title="Drag to reorder">⋮⋮</div>
                         <div class="section-controls">
                             <span class="section-type-indicator">Table</span>
-                            <button class="delete-section-btn" onclick="deleteSection(${rate.id}, '${tableSection.sectionIdentifier}')" title="Delete section">
-                                <i class="bi bi-trash"></i>
-                            </button>
                         </div>
                         <h5 class="section-title">${tableSection.title}</h5>
                         <div class="info-table">
@@ -1139,9 +1045,6 @@
                         <div class="section-drag-handle" title="Drag to reorder">⋮⋮</div>
                         <div class="section-controls">
                             <span class="section-type-indicator">Text</span>
-                            <button class="delete-section-btn" onclick="deleteSection(${rate.id}, '${textSection.sectionIdentifier}')" title="Delete section">
-                                <i class="bi bi-trash"></i>
-                            </button>
                         </div>
                         ${textSection.title ? `<h5 class="section-title">${textSection.title}</h5>` : ''}
                         <div class="text-content" style="text-align: left;">${textSection.content || ''}</div>
@@ -1178,22 +1081,9 @@
             }
         });
 
-        // Add section management buttons
-        const managementButtons = `
-                <div class="section-management-buttons">
-                    <button class="add-section-btn table-btn" onclick="showAddTableSectionForm(${rate.id})" title="Add Table Section">
-                        <i class="bi bi-table"></i> Add Table
-                    </button>
-                    <button class="add-section-btn text-btn" onclick="showAddTextSectionForm(${rate.id})" title="Add Text Section">
-                        <i class="bi bi-text-paragraph"></i> Add Text
-                    </button>
-                </div>
-            `;
-
         card.innerHTML = `
                 <div class="rate-expanded-content show">
                     ${sectionsHTML}
-                    ${managementButtons}
                 </div>
             `;
 

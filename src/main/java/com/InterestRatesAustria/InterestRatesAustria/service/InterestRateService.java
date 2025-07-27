@@ -3,7 +3,6 @@ package com.InterestRatesAustria.InterestRatesAustria.service;
 import com.InterestRatesAustria.InterestRatesAustria.model.dto.InterestRateDTO;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.*;
 import com.InterestRatesAustria.InterestRatesAustria.repository.*;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -429,92 +428,6 @@ public class InterestRateService {
                 sectionOrder.add(sectionIdentifier);
                 textIndex++;
             }
-        }
-    }
-
-
-    public void addTableSection(Long rateId, String title) {
-        InterestRate rate = getInterestRateById(rateId);
-        MoreInfo moreInfo = rate.getMoreInfo();
-
-        if (moreInfo == null) {
-            moreInfo = new MoreInfo();
-            moreInfo = moreInfoRepository.save(moreInfo);
-            rate.setMoreInfo(moreInfo);
-            interestRateRepository.save(rate);
-        }
-
-        List<TableSection> existingTables = tableSectionRepository.findByMoreInfoId(moreInfo.getId());
-        int nextIndex = existingTables.size() + 1;
-        String sectionIdentifier = "table-" + nextIndex;
-
-        TableSection tableSection = new TableSection();
-        tableSection.setTitle(title);
-        tableSection.setSectionIdentifier(sectionIdentifier);
-        tableSection.setMoreInfo(moreInfo);
-
-        tableSectionRepository.save(tableSection);
-
-        List<String> currentOrder = moreInfo.getSectionOrderList();
-        if (currentOrder == null) {
-            currentOrder = new ArrayList<>();
-        }
-        currentOrder.add(sectionIdentifier);
-        moreInfo.setSectionOrderList(currentOrder);
-        moreInfoRepository.save(moreInfo);
-    }
-
-    public void addTextSection(Long rateId, String title, String content) {
-        InterestRate rate = getInterestRateById(rateId);
-        MoreInfo moreInfo = rate.getMoreInfo();
-
-        if (moreInfo == null) {
-            moreInfo = new MoreInfo();
-            moreInfo = moreInfoRepository.save(moreInfo);
-            rate.setMoreInfo(moreInfo);
-            interestRateRepository.save(rate);
-        }
-
-        List<TextSection> existingTexts = textSectionRepository.findByMoreInfoId(moreInfo.getId());
-        int nextIndex = existingTexts.size() + 1;
-        String sectionIdentifier = "text-" + nextIndex;
-
-        TextSection textSection = new TextSection();
-        textSection.setTitle(title);
-        textSection.setContent(content);
-        textSection.setSectionIdentifier(sectionIdentifier);
-        textSection.setMoreInfo(moreInfo);
-
-        textSectionRepository.save(textSection);
-
-        List<String> currentOrder = moreInfo.getSectionOrderList();
-        if (currentOrder == null) {
-            currentOrder = new ArrayList<>();
-        }
-        currentOrder.add(sectionIdentifier);
-        moreInfo.setSectionOrderList(currentOrder);
-        moreInfoRepository.save(moreInfo);
-    }
-
-    public void deleteSection(Long rateId, String sectionIdentifier){
-        InterestRate rate = getInterestRateById(rateId);
-        MoreInfo moreInfo = rate.getMoreInfo();
-
-        if (moreInfo == null) return;
-
-        if (sectionIdentifier.startsWith("table-")) {
-            tableSectionRepository.findBySectionIdentifier(sectionIdentifier)
-                    .ifPresent(tableSectionRepository::delete);
-        } else if (sectionIdentifier.startsWith("text-")) {
-            textSectionRepository.findBySectionIdentifier(sectionIdentifier)
-                    .ifPresent(textSectionRepository::delete);
-        }
-
-        List<String> currentOrder = moreInfo.getSectionOrderList();
-        if (currentOrder != null) {
-            currentOrder.remove(sectionIdentifier);
-            moreInfo.setSectionOrderList(currentOrder);
-            moreInfoRepository.save(moreInfo);
         }
     }
 }
