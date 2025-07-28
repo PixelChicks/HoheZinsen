@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interest Rate Offers</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/styles.css">
@@ -9,9 +10,9 @@
 <body class="bg-light">
 <div class="container py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div class="d-flex align-items-center">
-            <h2>Interest Rate Offers</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+        <div class="d-flex align-items-center flex-wrap">
+            <h2 class="me-3 mb-2 mb-md-0">Interest Rate Offers</h2>
             <span class="order-changed-indicator" id="orderChangedIndicator">
                 Order changed - click save to persist
             </span>
@@ -19,116 +20,130 @@
                 Save Order
             </button>
         </div>
-        <a class="btn btn-primary" href="/interest-rate/new">+ Add New Interest Rate</a>
+        <a class="btn btn-primary mt-2 mt-md-0" href="/interest-rate/new">+ Add New Interest Rate</a>
     </div>
 
     <!-- Form to Add a New Global Field -->
     <form class="mb-4" method="post" th:action="@{/fields/add}" th:object="${newField}">
         <div class="row g-2">
-            <div class="col-md-4">
+            <div class="col-md-6 col-lg-4">
                 <input class="form-control" placeholder="Label (e.g. Max Deposit)" th:field="*{label}"/>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-6 col-lg-4">
                 <button class="btn btn-primary w-100">Add Field</button>
             </div>
         </div>
     </form>
 
-    <div class="table-responsive">
-        <table class="table table-sm" id="mainTable">
-            <thead class="table">
-            <tr id="column-header-row">
-                <th class="draggable-column sortable"
-                    draggable="true"
-                    ondragend="handleDragEnd(event)"
-                    ondragover="handleDragOver(event)"
-                    ondragstart="handleDragStart(event)"
-                    ondrop="handleDrop(event)"
-                    onclick="sortTable(this, event)"
-                    th:data-field-id="${field.id}"
-                    th:data-column-index="${iterStat.index}"
-                    th:each="field, iterStat : ${globalFields}">
+    <!-- View Toggle for Mobile -->
+    <div class="view-toggle d-md-none">
+        <div class="btn-group" role="group" aria-label="View toggle">
+            <button type="button" class="btn btn-outline-primary active" id="stackedView">
+                📱 Card View
+            </button>
+            <button type="button" class="btn btn-outline-primary" id="scrollView">
+                📊 Table View
+            </button>
+        </div>
+    </div>
 
-                    <div class="drag-handle">⋮⋮</div>
+    <div class="table-container">
+        <div class="table-responsive" id="tableContainer">
+            <table class="table table-sm" id="mainTable">
+                <thead class="table">
+                <tr id="column-header-row">
+                    <th class="draggable-column sortable"
+                        draggable="true"
+                        ondragend="handleDragEnd(event)"
+                        ondragover="handleDragOver(event)"
+                        ondragstart="handleDragStart(event)"
+                        ondrop="handleDrop(event)"
+                        onclick="sortTable(this, event)"
+                        th:data-field-id="${field.id}"
+                        th:data-column-index="${iterStat.index}"
+                        th:each="field, iterStat : ${globalFields}">
 
-                    <div class="header-container">
-                        <span class="header-text" th:text="${field.label}"></span>
-                        <button class="edit-header-btn" th:onclick="'showEditForm(' + ${field.id} + ')'" type="button">
-                            ✎
-                        </button>
-                        <button class="delete-field-btn"
-                                th:data-id="${field.id}"
-                                th:data-label="${field.label}"
-                                onclick="handleFieldDeleteClick(this)"
-                                type="button"
-                                title="Delete this field">
-                            🗑
-                        </button>
+                        <div class="drag-handle">⋮⋮</div>
 
-                        <!-- Edit Form -->
-                        <div class="header-edit-form" th:id="'editForm_' + ${field.id}">
-                            <form method="post" th:action="@{/fields/update}">
-                                <input name="fieldId" th:value="${field.id}" type="hidden"/>
+                        <div class="header-container">
+                            <span class="header-text" th:text="${field.label}"></span>
+                            <button class="edit-header-btn" th:onclick="'showEditForm(' + ${field.id} + ')'" type="button">
+                                ✎
+                            </button>
+                            <button class="delete-field-btn"
+                                    th:data-id="${field.id}"
+                                    th:data-label="${field.label}"
+                                    onclick="handleFieldDeleteClick(this)"
+                                    type="button"
+                                    title="Delete this field">
+                                🗑
+                            </button>
 
-                                <div class="form-row">
-                                    <label>Display Label:</label>
-                                    <input name="label" required th:value="${field.label}" type="text"/>
-                                </div>
+                            <!-- Edit Form -->
+                            <div class="header-edit-form" th:id="'editForm_' + ${field.id}">
+                                <form method="post" th:action="@{/fields/update}">
+                                    <input name="fieldId" th:value="${field.id}" type="hidden"/>
 
-                                <div class="form-buttons">
-                                    <button class="save-btn" type="submit">Save</button>
-                                    <button class="cancel-btn" th:onclick="'hideEditForm(' + ${field.id} + ')'"
-                                            type="button">Cancel
-                                    </button>
-                                </div>
-                            </form>
+                                    <div class="form-row">
+                                        <label>Display Label:</label>
+                                        <input name="label" required th:value="${field.label}" type="text"/>
+                                    </div>
+
+                                    <div class="form-buttons">
+                                        <button class="save-btn" type="submit">Save</button>
+                                        <button class="cancel-btn" th:onclick="'hideEditForm(' + ${field.id} + ')'"
+                                                type="button">Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                    </div>
-                </th>
-                <th class="no-drag">Actions</th>
-            </tr>
-            </thead>
+                    </th>
+                    <th class="no-drag">Actions</th>
+                </tr>
+                </thead>
 
-            <tbody>
-            <tr th:each="rate : ${interestRates}">
-                <!-- Dynamic fields -->
-                <td class="data-cell"
-                    th:data-field-id="${field.id}"
-                    th:each="field : ${globalFields}">
-                    <form class="d-flex justify-content-center" method="post" th:action="@{/field-values/update}">
-                        <input name="rateId" th:value="${rate.id}" type="hidden"/>
-                        <input name="fieldId" th:value="${field.id}" type="hidden"/>
-                        <input class="form-control form-control-sm text-center"
-                               name="value"
-                               style="width: 100px;"
-                               th:value="${rateFieldValuesMap[rate.id]?.get(field.id)}"
-                               type="text"/>
-                    </form>
-                </td>
+                <tbody>
+                <tr th:each="rate : ${interestRates}">
+                    <!-- Dynamic fields -->
+                    <td class="data-cell"
+                        th:data-field-id="${field.id}"
+                        th:data-label="${field.label}"
+                        th:each="field : ${globalFields}">
+                        <form class="d-flex justify-content-center" method="post" th:action="@{/field-values/update}">
+                            <input name="rateId" th:value="${rate.id}" type="hidden"/>
+                            <input name="fieldId" th:value="${field.id}" type="hidden"/>
+                            <input class="form-control form-control-sm text-center"
+                                   name="value"
+                                   th:value="${rateFieldValuesMap[rate.id]?.get(field.id)}"
+                                   type="text"/>
+                        </form>
+                    </td>
 
-                <!-- Actions -->
-                <td>
-                    <div class="action-buttons">
-                        <button class="mehr-info-btn"
-                                th:disabled="${rate.moreInfo == null}"
-                                th:onclick="'showMoreInfo(' + ${rate.id} + ')'"
-                                th:text="${rate.moreInfo != null ? 'MEHR INFO' : 'No Info'}">
-                        </button>
+                    <!-- Actions -->
+                    <td data-label="Actions">
+                        <div class="action-buttons">
+                            <button class="mehr-info-btn"
+                                    th:disabled="${rate.moreInfo == null}"
+                                    th:onclick="'showMoreInfo(' + ${rate.id} + ')'"
+                                    th:text="${rate.moreInfo != null ? 'MEHR INFO' : 'No Info'}">
+                            </button>
 
-                        <a class="btn-edit" th:href="@{/interest-rate/edit/{id}(id=${rate.id})}" title="Edit Interest Rate">
-                            ✎ Edit
-                        </a>
+                            <a class="btn-edit" th:href="@{/interest-rate/edit/{id}(id=${rate.id})}" title="Edit Interest Rate">
+                                ✎ Edit
+                            </a>
 
-                        <button class="btn-delete"
-                                th:onclick="'showDeleteConfirmation(' + ${rate.id} + ')'"
-                                title="Delete Interest Rate">
-                            🗑 Delete
-                        </button>
-                    </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+                            <button class="btn-delete"
+                                    th:onclick="'showDeleteConfirmation(' + ${rate.id} + ')'"
+                                    title="Delete Interest Rate">
+                                🗑 Delete
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -171,11 +186,6 @@
 <!-- Drop indicator -->
 <div class="drop-indicator" id="dropIndicator"></div>
 
-<!-- Section order notification -->
-<div class="section-order-notification" id="sectionOrderNotification">
-    Section order updated successfully!
-</div>
-
 <!-- Delete notification -->
 <div class="delete-notification" id="deleteNotification">
     Action completed successfully!
@@ -204,7 +214,33 @@
     document.addEventListener('DOMContentLoaded', function () {
         captureOriginalOrder();
         initializeSortableHeaders();
+        initializeResponsiveToggle();
     });
+
+    function initializeResponsiveToggle() {
+        const stackedViewBtn = document.getElementById('stackedView');
+        const scrollViewBtn = document.getElementById('scrollView');
+        const tableContainer = document.getElementById('tableContainer');
+
+        if (stackedViewBtn && scrollViewBtn) {
+            stackedViewBtn.addEventListener('click', function() {
+                tableContainer.classList.add('mobile-stack');
+                stackedViewBtn.classList.add('active');
+                scrollViewBtn.classList.remove('active');
+            });
+
+            scrollViewBtn.addEventListener('click', function() {
+                tableContainer.classList.remove('mobile-stack');
+                scrollViewBtn.classList.add('active');
+                stackedViewBtn.classList.remove('active');
+            });
+
+            // Set default view for mobile
+            if (window.innerWidth <= 768) {
+                tableContainer.classList.add('mobile-stack');
+            }
+        }
+    }
 
     function initializeSortableHeaders() {
         // Add sortable class to all draggable columns
@@ -286,12 +322,14 @@
 
     function updateSortInfo(columnName, direction) {
         const sortInfo = document.getElementById('sortInfo');
-        if (columnName && direction) {
-            sortInfo.innerHTML = `Sorted by: <strong>${columnName}</strong> ${direction === 'asc' ? '↑' : '↓'}`;
-            sortInfo.style.background = 'linear-gradient(135deg, #e7f3ff, #cce7ff)';
-        } else {
-            sortInfo.textContent = 'Click column headers to sort ↕️';
-            sortInfo.style.background = 'white';
+        if (sortInfo) {
+            if (columnName && direction) {
+                sortInfo.innerHTML = `Sorted by: <strong>${columnName}</strong> ${direction === 'asc' ? '↑' : '↓'}`;
+                sortInfo.style.background = 'linear-gradient(135deg, #e7f3ff, #cce7ff)';
+            } else {
+                sortInfo.textContent = 'Click column headers to sort ↕️';
+                sortInfo.style.background = 'white';
+            }
         }
     }
 
@@ -722,24 +760,11 @@
                 }
                 return response.text();
             })
-            .then(data => {
-                showSectionOrderNotification("Section order updated successfully!", false);
-            })
             .catch(error => {
                 showSectionOrderNotification("Error saving section order: " + error.message, true);
             });
     }
 
-    function showSectionOrderNotification(message, isError) {
-        const notification = document.getElementById('sectionOrderNotification');
-        notification.textContent = message;
-        notification.classList.toggle('error', isError);
-        notification.classList.add('show');
-
-        setTimeout(() => {
-            notification.classList.remove('show');
-        }, 3000);
-    }
 
     function showMoreInfo(rateId) {
         const rate = interestRatesData.find(r => r.id === rateId);
@@ -954,6 +979,30 @@
         if (currentEditForm && !currentEditForm.contains(e.target) && !e.target.classList.contains('edit-header-btn')) {
             currentEditForm.classList.remove('show');
             currentEditForm = null;
+        }
+    });
+
+    // Handle window resize to update responsive view
+    window.addEventListener('resize', function() {
+        const tableContainer = document.getElementById('tableContainer');
+        const stackedViewBtn = document.getElementById('stackedView');
+        const scrollViewBtn = document.getElementById('scrollView');
+
+        if (window.innerWidth > 768) {
+            // Desktop view - remove mobile classes
+            tableContainer.classList.remove('mobile-stack');
+            if (stackedViewBtn) stackedViewBtn.style.display = 'none';
+            if (scrollViewBtn) scrollViewBtn.style.display = 'none';
+        } else {
+            // Mobile view - show toggle buttons
+            if (stackedViewBtn) stackedViewBtn.style.display = 'inline-block';
+            if (scrollViewBtn) scrollViewBtn.style.display = 'inline-block';
+
+            // Default to stacked view on mobile if not already set
+            if (!tableContainer.classList.contains('mobile-stack') &&
+                stackedViewBtn && stackedViewBtn.classList.contains('active')) {
+                tableContainer.classList.add('mobile-stack');
+            }
         }
     });
 </script>
