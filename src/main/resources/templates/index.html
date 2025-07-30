@@ -256,7 +256,6 @@
     }
 
     function sortTable(headerElement, event) {
-        // Prevent drag events from interfering
         if (event && event.type === 'click' && headerElement.classList.contains('dragging')) {
             return;
         }
@@ -264,31 +263,39 @@
         const columnIndex = parseInt(headerElement.dataset.columnIndex);
         const table = document.getElementById('mainTable');
         const tbody = table.getElementsByTagName('tbody')[0];
-        const rows = Array.from(tbody.getElementsByTagName('tr'));
 
-        // Determine sort direction
+        const allRows = Array.from(tbody.getElementsByTagName('tr'));
+        const dataRows = allRows.filter(row => !row.classList.contains('expanded-card-row') && !row.id.startsWith('rateCardRow_'));
+
+        const expandedCards = new Map();
+        allRows.forEach(row => {
+            if (row.id.startsWith('rateCardRow_')) {
+                const rateId = row.id.replace('rateCardRow_', '');
+                const previousRow = row.previousElementSibling;
+                if (previousRow) {
+                    expandedCards.set(previousRow, row);
+                }
+            }
+        });
+
         let sortDirection = 'asc';
         if (currentSortColumn === columnIndex) {
             sortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
         }
 
-        // Clear previous sort indicators
         document.querySelectorAll('.sortable').forEach(th => {
             th.classList.remove('sort-asc', 'sort-desc');
         });
 
-        // Add sort indicator to current column
         headerElement.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
 
-        // Sort rows
-        rows.sort((a, b) => {
+        dataRows.sort((a, b) => {
             const aCell = a.getElementsByTagName('td')[columnIndex];
             const bCell = b.getElementsByTagName('td')[columnIndex];
 
             let aValue = '';
             let bValue = '';
 
-            // Get the value from input if exists, otherwise use text content
             const aInput = aCell.querySelector('input[name="value"]');
             const bInput = bCell.querySelector('input[name="value"]');
 
@@ -300,7 +307,6 @@
                 bValue = bCell.textContent.trim();
             }
 
-            // Try to parse as numbers for numeric sorting
             const aNum = parseFloat(aValue);
             const bNum = parseFloat(bValue);
 
@@ -314,14 +320,18 @@
             }
         });
 
-        // Re-append sorted rows
-        rows.forEach(row => tbody.appendChild(row));
+        tbody.innerHTML = '';
+        dataRows.forEach(row => {
+            tbody.appendChild(row);
+            // If this row had an expanded card, re-append it
+            if (expandedCards.has(row)) {
+                tbody.appendChild(expandedCards.get(row));
+            }
+        });
 
-        // Update current sort state
         currentSortColumn = columnIndex;
         currentSortDirection = sortDirection;
 
-        // Update sort info
         updateSortInfo(headerElement.textContent.trim(), sortDirection);
     }
 

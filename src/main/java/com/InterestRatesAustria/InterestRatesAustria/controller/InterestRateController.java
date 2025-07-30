@@ -1,15 +1,14 @@
 package com.InterestRatesAustria.InterestRatesAustria.controller;
 
-import com.InterestRatesAustria.InterestRatesAustria.model.dto.InterestRateDTO;
-import com.InterestRatesAustria.InterestRatesAustria.model.entity.GlobalField;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.InterestRate;
+import com.InterestRatesAustria.InterestRatesAustria.service.FieldValueService;
+import com.InterestRatesAustria.InterestRatesAustria.service.GlobalFieldService;
 import com.InterestRatesAustria.InterestRatesAustria.service.InterestRateService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,9 +16,15 @@ import java.util.Map;
 public class InterestRateController {
 
     private final InterestRateService interestRateService;
+    private final GlobalFieldService globalFieldService;
+    private final FieldValueService fieldValueService;
 
-    public InterestRateController(InterestRateService interestRateService) {
+    public InterestRateController(InterestRateService interestRateService,
+                                  GlobalFieldService globalFieldService,
+                                  FieldValueService fieldValueService) {
         this.interestRateService = interestRateService;
+        this.globalFieldService = globalFieldService;
+        this.fieldValueService = fieldValueService;
     }
 
     @PostMapping("/interest-rate/create")
@@ -27,23 +32,7 @@ public class InterestRateController {
             @ModelAttribute InterestRate interestRate,
             @RequestParam Map<String, String> requestParams) {
 
-        System.out.println("Create request params: " + requestParams);
-
-        Map<String, List<String>> tableSectionData = new HashMap<>();
-        Map<String, String> textSectionData = new HashMap<>();
-
-        for (Map.Entry<String, String> entry : requestParams.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-
-            if (key.startsWith("tableTitle_") || key.startsWith("tableRowLabels_") ||
-                    key.startsWith("tableRowDescriptions_") || key.startsWith("textTitle_") ||
-                    key.startsWith("textContent_")) {
-                System.out.println("Processing: " + key + " = " + value);
-            }
-        }
-
-        interestRateService.createInterestRate(interestRate, requestParams, tableSectionData, textSectionData);
+        interestRateService.createInterestRate(interestRate, requestParams);
         return "redirect:/";
     }
 
@@ -53,10 +42,7 @@ public class InterestRateController {
             @ModelAttribute InterestRate interestRate,
             @RequestParam Map<String, String> requestParams) {
 
-        Map<String, List<String>> tableSectionData = new HashMap<>();
-        Map<String, String> textSectionData = new HashMap<>();
-
-        interestRateService.updateInterestRate(id, interestRate, requestParams, tableSectionData, textSectionData);
+        interestRateService.updateInterestRate(id, interestRate, requestParams);
         return "redirect:/";
     }
 
@@ -72,67 +58,20 @@ public class InterestRateController {
         }
     }
 
-    @GetMapping("/")
-    public String showRates(Model model) {
-        List<InterestRate> interestRates = interestRateService.getAllInterestRates();
-        List<InterestRateDTO> interestRateDTOs = interestRateService.getAllInterestRateDTOs();
-        List<GlobalField> globalFields = interestRateService.getAllGlobalFieldsOrdered();
-        Map<Long, Map<Long, String>> rateFieldValuesMap = interestRateService.getRateFieldValuesMap(interestRates);
-
-        model.addAttribute("interestRates", interestRateDTOs);
-        model.addAttribute("globalFields", globalFields);
-        model.addAttribute("rateFieldValuesMap", rateFieldValuesMap);
-        model.addAttribute("newField", new GlobalField());
-
-        return "index";
-    }
-
-    @PostMapping("/fields/add")
-    public String addGlobalField(@ModelAttribute GlobalField field) {
-        interestRateService.addGlobalField(field);
-        return "redirect:/";
-    }
-
-    @PostMapping("/fields/update")
-    public String updateGlobalField(@RequestParam Long fieldId,
-                                    @RequestParam String label) {
-        interestRateService.updateGlobalField(fieldId, label);
-        return "redirect:/";
-    }
-
-    @PostMapping("/fields/reorder")
-    @ResponseBody
-    public ResponseEntity<String> reorderFields(@RequestBody List<Long> fieldIds) {
-        try {
-            interestRateService.reorderGlobalFields(fieldIds);
-            return ResponseEntity.ok("Order updated successfully");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error updating order: " + e.getMessage());
-        }
-    }
-
-    @PostMapping("/field-values/update")
-    public String updateFieldValue(@RequestParam Long rateId,
-                                   @RequestParam Long fieldId,
-                                   @RequestParam String value) {
-        interestRateService.updateFieldValue(rateId, fieldId, value);
-        return "redirect:/";
-    }
-
     @GetMapping("/interest-rate/new")
     public String showCreateForm(Model model) {
         model.addAttribute("interestRate", new InterestRate());
-        model.addAttribute("globalFields", interestRateService.getAllGlobalFieldsOrdered());
+        model.addAttribute("globalFields", globalFieldService.getAllGlobalFieldsOrdered());
         return "interest-rate-form";
     }
 
     @GetMapping("/interest-rate/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model) {
         InterestRate interestRate = interestRateService.getInterestRateById(id);
-        Map<Long, String> fieldValues = interestRateService.getFieldValuesForRate(id);
+        Map<Long, String> fieldValues = fieldValueService.getFieldValuesForRate(id);
 
         model.addAttribute("interestRate", interestRate);
-        model.addAttribute("globalFields", interestRateService.getAllGlobalFieldsOrdered());
+        model.addAttribute("globalFields", globalFieldService.getAllGlobalFieldsOrdered());
         model.addAttribute("fieldValues", fieldValues);
         model.addAttribute("isEdit", true);
 
@@ -153,28 +92,6 @@ public class InterestRateController {
             return ResponseEntity.ok("Interest rate deleted successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error deleting interest rate: " + e.getMessage());
-        }
-    }
-
-    @PostMapping("/fields/delete/{id}")
-    @ResponseBody
-    public ResponseEntity<String> deleteGlobalField(@PathVariable Long id) {
-        try {
-            interestRateService.deleteGlobalField(id);
-            return ResponseEntity.ok("Field deleted successfully");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error deleting field: " + e.getMessage());
-        }
-    }
-
-    @DeleteMapping("/fields/{id}")
-    @ResponseBody
-    public ResponseEntity<String> deleteGlobalFieldRest(@PathVariable Long id) {
-        try {
-            interestRateService.deleteGlobalField(id);
-            return ResponseEntity.ok("Field deleted successfully");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error deleting field: " + e.getMessage());
         }
     }
 }

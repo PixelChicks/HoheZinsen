@@ -712,24 +712,24 @@ body {
 }
 
 .btn-edit {
-  background: #ffc107;
+  background: #f2d272;
   color: #212529;
 }
 
 .btn-edit:hover {
-  background: #ffb300;
+  background: #fad06e;
   color: #212529;
   transform: translateY(-1px);
   text-decoration: none;
 }
 
 .btn-delete {
-  background: #dc3545;
+  background: #cc5a65;
   color: white;
 }
 
 .btn-delete:hover {
-  background: #c82333;
+  background: #ad4c56;
   transform: translateY(-1px);
 }
 
