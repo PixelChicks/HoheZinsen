@@ -20,10 +20,10 @@ public class TextSection {
     private Long id;
 
     private String title;
-    
+
     @Column(columnDefinition = "TEXT")
     private String content;
-    
+
     @Column(name = "section_identifier") // e.g., "text-1", "text-2"
     private String sectionIdentifier;
 

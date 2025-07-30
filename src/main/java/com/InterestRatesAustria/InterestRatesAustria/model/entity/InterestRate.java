@@ -24,6 +24,8 @@ public class InterestRate {
     @JoinColumn(name = "more_info_id")
     private MoreInfo moreInfo;
 
+    private String webLink;
+
     @OneToMany(mappedBy = "interestRate", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<InterestRateFieldValue> fieldValues = new ArrayList<>();
 }

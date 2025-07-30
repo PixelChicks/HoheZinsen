@@ -22,7 +22,7 @@ public class TableSection {
     private Long id;
 
     private String title;
-    
+
     @Column(name = "section_identifier") // e.g., "table-1", "table-2"
     private String sectionIdentifier;
 

@@ -1,7 +1,8 @@
 package com.InterestRatesAustria.InterestRatesAustria.controller;
 
 import com.InterestRatesAustria.InterestRatesAustria.model.dto.InterestRateDTO;
-import com.InterestRatesAustria.InterestRatesAustria.model.entity.*;
+import com.InterestRatesAustria.InterestRatesAustria.model.entity.GlobalField;
+import com.InterestRatesAustria.InterestRatesAustria.model.entity.InterestRate;
 import com.InterestRatesAustria.InterestRatesAustria.service.InterestRateService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;

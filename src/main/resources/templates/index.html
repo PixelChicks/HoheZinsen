@@ -128,7 +128,12 @@
                                     th:onclick="'showMoreInfo(' + ${rate.id} + ')'"
                                     th:text="${rate.moreInfo != null ? 'MEHR INFO' : 'No Info'}">
                             </button>
-
+                            <a  class="angebot-btn"
+                                th:href="${rate.webLink}"
+                                target="_blank"
+                                title="Open Link">
+                                ZUM ANGEBOT
+                            </a>
                             <a class="btn-edit" th:href="@{/interest-rate/edit/{id}(id=${rate.id})}" title="Edit Interest Rate">
                                 ✎ Edit
                             </a>

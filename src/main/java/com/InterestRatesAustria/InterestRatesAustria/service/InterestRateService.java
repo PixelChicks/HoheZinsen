@@ -295,6 +295,7 @@ public class InterestRateService {
                                    Map<String, List<String>> tableSectionData,
                                    Map<String, String> textSectionData) {
         InterestRate existingRate = getInterestRateById(id);
+        existingRate.setWebLink(updatedRate.getWebLink());
 
         List<GlobalField> allFields = globalFieldRepository.findAllActiveByOrderBySortOrderAsc();
         for (GlobalField field : allFields) {
