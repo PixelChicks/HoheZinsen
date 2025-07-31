@@ -76,6 +76,37 @@
             }
         }
 
+        /* Fix for expanded card row spacing issues */
+        .rate-card-row {
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            background: transparent !important;
+        }
+
+        .rate-card-row td {
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            background: transparent !important;
+            line-height: 0 !important;
+            height: auto !important;
+        }
+
+        .rate-card {
+            margin: 0 !important;
+            line-height: normal !important;
+        }
+
+        /* Ensure no ghost spacing */
+        tr.rate-card-row {
+            display: none;
+        }
+
+        tr.rate-card-row.show {
+            display: table-row;
+        }
+
         /* Optional: Scroll indicator for better UX */
         .scroll-indicator {
             position: absolute;
@@ -899,7 +930,6 @@
             });
     }
 
-
     function showMoreInfo(rateId) {
         const rate = interestRatesData.find(r => r.id === rateId);
         if (!rate || !rate.moreInfo) return;
@@ -909,10 +939,16 @@
             closeExpandedCard(currentExpandedCard);
         }
 
-        // Check if card already exists
-        let existingCard = document.getElementById(`rateCard_${rateId}`);
+        let existingCard = document.getElementById(`rateCardRow_${rateId}`);
         if (existingCard) {
-            existingCard.remove();
+            // FIXED: Properly remove the card and clean up
+            existingCard.style.display = 'none';
+            setTimeout(() => {
+                if (existingCard.parentNode) {
+                    existingCard.parentNode.removeChild(existingCard);
+                }
+            }, 0);
+
             if (currentExpandedCard === rateId) {
                 currentExpandedCard = null;
                 return;
@@ -933,24 +969,23 @@
 
         if (!targetRow) return;
 
-        // Create new card
         const card = createRateCard(rate);
 
-        // Create a new table row to hold the card
         const cardRow = document.createElement('tr');
         cardRow.id = `rateCardRow_${rateId}`;
-        cardRow.innerHTML = `<td colspan="100%" style="padding: 0; background: transparent;"></td>`;
+        cardRow.className = 'rate-card-row show';
+        cardRow.innerHTML = `<td colspan="100%" class="rate-card-cell"></td>`;
 
-        // Insert the card into the cell
-        cardRow.firstChild.appendChild(card);
+        cardRow.querySelector('.rate-card-cell').appendChild(card);
 
-        // Insert the card row after the clicked row
         targetRow.parentNode.insertBefore(cardRow, targetRow.nextSibling);
 
-        card.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center'
-        });
+        setTimeout(() => {
+            card.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }, 50);
 
         currentExpandedCard = rateId;
     }
@@ -1080,7 +1115,17 @@
     function closeExpandedCard(rateId) {
         const cardRow = document.getElementById(`rateCardRow_${rateId}`);
         if (cardRow) {
-            cardRow.remove();
+            // FIXED: Properly hide and remove the card to prevent white space
+            cardRow.style.display = 'none';
+            cardRow.classList.remove('show');
+
+            // Use requestAnimationFrame to ensure proper cleanup
+            requestAnimationFrame(() => {
+                if (cardRow.parentNode) {
+                    cardRow.parentNode.removeChild(cardRow);
+                }
+            });
+
             if (currentExpandedCard === rateId) {
                 currentExpandedCard = null;
             }
