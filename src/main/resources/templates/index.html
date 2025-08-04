@@ -127,6 +127,195 @@
         .scroll-indicator.show {
             opacity: 1;
         }
+
+        /* Pagination Styles */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .pagination-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .page-size-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .page-size-selector select {
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .page-btn {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: #f8f9fa;
+            border-color: #007bff;
+        }
+
+        .page-btn.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-input {
+            width: 60px;
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .pagination-jump {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 15px;
+            padding-left: 15px;
+            border-left: 1px solid #eee;
+        }
+
+        /* Loading overlay styles */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .loading-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .table-container {
+            position: relative;
+        }
+
+        /* Empty state styles */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+
+        /* Mobile responsive pagination */
+        @media (max-width: 768px) {
+            .pagination-container {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+
+            .pagination-info {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .pagination-controls {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .pagination-jump {
+                margin-left: 0;
+                padding-left: 0;
+                border-left: none;
+                border-top: 1px solid #eee;
+                padding-top: 15px;
+                justify-content: center;
+            }
+        }
+
+        /* Quick navigation buttons */
+        .quick-nav {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .quick-nav .page-btn {
+            padding: 6px 10px;
+            font-size: 12px;
+            min-width: 35px;
+        }
+
+        /* Results per page indicator */
+        .results-info {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            border: 1px solid #e9ecef;
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -169,7 +358,51 @@
         </div>
     </div>
 
+    <!-- Pagination Controls - Top -->
+    <div class="pagination-container">
+        <div class="pagination-info">
+            <div class="results-info" id="resultsInfo">
+                Showing 1-5 of 25 results
+            </div>
+            <div class="page-size-selector">
+                <label for="pageSize">Show:</label>
+                <select id="pageSize" onchange="changePageSize(this.value)">
+                    <option value="5" selected>5 per page</option>
+                    <option value="10">10 per page</option>
+                    <option value="25">25 per page</option>
+                    <option value="50">50 per page</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="pagination-controls">
+            <div class="quick-nav">
+                <button class="page-btn" id="firstPageBtn" onclick="goToPage(1)" title="First page">⏮</button>
+                <button class="page-btn" id="prevPageBtn" onclick="goToPage(currentPage - 1)" title="Previous page">‹</button>
+            </div>
+
+            <div id="pageNumbers" class="quick-nav">
+                <!-- Page numbers will be generated here -->
+            </div>
+
+            <div class="quick-nav">
+                <button class="page-btn" id="nextPageBtn" onclick="goToPage(currentPage + 1)" title="Next page">›</button>
+                <button class="page-btn" id="lastPageBtn" onclick="goToPage(totalPages)" title="Last page">⏭</button>
+            </div>
+
+            <div class="pagination-jump">
+                <span>Go to:</span>
+                <input type="number" id="pageJumpInput" class="page-input" min="1" placeholder="1">
+                <button class="page-btn" onclick="jumpToPage()">Go</button>
+            </div>
+        </div>
+    </div>
+
     <div class="table-container">
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+        </div>
+
         <div class="scroll-indicator" id="scrollIndicator">← Scroll horizontally to see more →</div>
 
         <div class="table-responsive" id="tableContainer">
@@ -227,51 +460,42 @@
                 </tr>
                 </thead>
 
-                <tbody>
-                <tr th:each="rate : ${interestRates}">
-                    <!-- Dynamic fields -->
-                    <td class="data-cell"
-                        th:data-field-id="${field.id}"
-                        th:data-label="${field.label}"
-                        th:each="field : ${globalFields}">
-                        <form class="d-flex justify-content-center" method="post" th:action="@{/field-values/update}">
-                            <input name="rateId" th:value="${rate.id}" type="hidden"/>
-                            <input name="fieldId" th:value="${field.id}" type="hidden"/>
-                            <input class="form-control form-control-sm text-center"
-                                   name="value"
-                                   th:value="${rateFieldValuesMap[rate.id]?.get(field.id)}"
-                                   type="text"/>
-                        </form>
-                    </td>
-
-                    <!-- Actions -->
-                    <td data-label="Actions">
-                        <div class="action-buttons">
-                            <button class="mehr-info-btn"
-                                    th:disabled="${rate.moreInfo == null}"
-                                    th:onclick="'showMoreInfo(' + ${rate.id} + ')'"
-                                    th:text="${rate.moreInfo != null ? 'MEHR INFO' : 'No Info'}">
-                            </button>
-                            <a  class="angebot-btn"
-                                th:href="${rate.webLink}"
-                                target="_blank"
-                                title="Open Link">
-                                ZUM ANGEBOT
-                            </a>
-                            <a class="btn-edit" th:href="@{/interest-rate/edit/{id}(id=${rate.id})}" title="Edit Interest Rate">
-                                ✎ Edit
-                            </a>
-
-                            <button class="btn-delete"
-                                    th:onclick="'showDeleteConfirmation(' + ${rate.id} + ')'"
-                                    title="Delete Interest Rate">
-                                🗑 Delete
-                            </button>
-                        </div>
-                    </td>
-                </tr>
+                <tbody id="tableBody">
+                <!-- Data rows will be populated by JavaScript -->
                 </tbody>
             </table>
+
+            <!-- Empty state -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <div>📊</div>
+                <h5>No interest rates found</h5>
+                <p>Try adjusting your search criteria or add a new interest rate.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination Controls - Bottom -->
+    <div class="pagination-container">
+        <div class="pagination-info">
+            <div class="results-info" id="resultsInfoBottom">
+                Showing 1-5 of 25 results
+            </div>
+        </div>
+
+        <div class="pagination-controls">
+            <div class="quick-nav">
+                <button class="page-btn" onclick="goToPage(1)" title="First page">⏮</button>
+                <button class="page-btn" onclick="goToPage(currentPage - 1)" title="Previous page">‹</button>
+            </div>
+
+            <div id="pageNumbersBottom" class="quick-nav">
+                <!-- Page numbers will be generated here -->
+            </div>
+
+            <div class="quick-nav">
+                <button class="page-btn" onclick="goToPage(currentPage + 1)" title="Next page">›</button>
+                <button class="page-btn" onclick="goToPage(totalPages)" title="Last page">⏭</button>
+            </div>
         </div>
     </div>
 </div>
@@ -324,9 +548,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
 <script th:inline="javascript">
-    // Keep ALL your existing JavaScript exactly as it was
-    const interestRatesData = /*[[${interestRates}]]*/ [];
+    // Pagination variables
+    let currentPage = 1;
+    let pageSize = 5;
+    let totalRecords = 0;
+    let totalPages = 0;
+    let allInterestRates = /*[[${interestRates}]]*/ [];
+    let filteredRates = [];
+    let isLoading = false;
 
+    // Keep all your existing variables
     let currentExpandedCard = null;
     let currentEditForm = null;
     let draggedElement = null;
@@ -336,16 +567,975 @@
     let pendingFieldDeleteId = null;
     let draggedSection = null;
     let currentRateId = null;
-    let dataTable = null; // Remove DataTable reference
     let currentSortColumn = null;
     let currentSortDirection = null;
 
     document.addEventListener('DOMContentLoaded', function () {
+        initializePagination();
         captureOriginalOrder();
         initializeSortableHeaders();
         initializeResponsiveToggle();
         initializeScrollIndicator();
+        initializeSearch(); // Add search functionality
+
+        // Load first page from server
+        loadPageFromServer(1);
     });
+
+    function loadPageFromServer(page, searchTerm = '') {
+        if (isLoading) return;
+
+        showLoading();
+
+        const params = new URLSearchParams({
+            page: page - 1, // Spring uses 0-based indexing
+            size: pageSize,
+            sortBy: currentSortColumn || 'id',
+            sortDir: currentSortDirection || 'asc'
+        });
+
+        if (searchTerm && searchTerm.trim()) {
+            params.append('search', searchTerm.trim());
+        }
+
+        fetch(`/api/interest-rates/paginated?${params.toString()}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                return response.json();
+            })
+            .then(data => {
+                currentPage = page;
+                totalPages = data.totalPages;
+                totalRecords = data.totalElements;
+
+                // Update global data arrays
+                allInterestRates = data.content;
+                filteredRates = data.content;
+
+                // Store the field values map from server
+                serverRateFieldValuesMap = data.rateFieldValuesMap;
+
+                renderTableData(data.content);
+                updatePaginationControls();
+                updatePaginationInfo();
+                hideLoading();
+
+                // Close any expanded cards when changing pages
+                if (currentExpandedCard) {
+                    closeExpandedCard(currentExpandedCard);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading page:', error);
+                showDeleteNotification('Error loading data: ' + error.message, true);
+                hideLoading();
+            });
+    }
+
+
+    // Pagination Functions
+    function initializePagination() {
+        totalRecords = allInterestRates.length;
+        filteredRates = [...allInterestRates];
+        updatePaginationInfo();
+    }
+
+    function loadPage(page) {
+        if (isLoading) return;
+
+        showLoading();
+
+        currentPage = page;
+
+        // Simulate API call delay (remove this in production)
+        setTimeout(() => {
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+            const pageData = filteredRates.slice(startIndex, endIndex);
+
+            renderTableData(pageData);
+            updatePaginationControls();
+            updatePaginationInfo();
+            hideLoading();
+
+            // Close any expanded cards when changing pages
+            if (currentExpandedCard) {
+                closeExpandedCard(currentExpandedCard);
+            }
+        }, 300);
+    }
+
+    function renderTableData(data) {
+        const tbody = document.getElementById('tableBody');
+        const emptyState = document.getElementById('emptyState');
+
+        if (data.length === 0) {
+            tbody.innerHTML = '';
+            emptyState.style.display = 'block';
+            return;
+        }
+
+        emptyState.style.display = 'none';
+
+        // Check if we have headers in DOM (after column reordering)
+        const headers = document.querySelectorAll('.draggable-column');
+        if (headers.length > 0) {
+            // Use current DOM order
+            renderTableRows(data, tbody);
+        } else {
+            // Fetch global fields from server if not cached (initial load)
+            if (!globalFieldsCache) {
+                fetchGlobalFields()
+                    .then(() => {
+                        renderTableRows(data, tbody);
+                    });
+            } else {
+                renderTableRows(data, tbody);
+            }
+        }
+    }
+
+    function renderTableRows(data, tbody) {
+        tbody.innerHTML = data.map(rate => {
+                // Get current header order from DOM instead of using cached order
+                const headers = document.querySelectorAll('.draggable-column');
+                const currentFieldOrder = Array.from(headers)
+                    .map(header => ({
+                        id: header.dataset.fieldId,
+                        label: header.querySelector('.header-text')
+                            .textContent
+                    }));
+
+                const fieldCells = currentFieldOrder.map(field => {
+                        const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
+                        return `
+                <td class="data-cell" data-field-id="${field.id}" data-label="${field.label}">
+                    <form class="d-flex justify-content-center" method="post" action="/field-values/update">
+                        <input name="rateId" value="${rate.id}" type="hidden"/>
+                        <input name="fieldId" value="${field.id}" type="hidden"/>
+                        <input class="form-control form-control-sm text-center"
+                               name="value"
+                               value="${fieldValue}"
+                               type="text"
+                               onchange="updateFieldValueAjax(${rate.id}, ${field.id}, this.value)"/>
+                    </form>
+                </td>
+            `;
+                    })
+                    .join('');
+
+                return `
+            <tr data-rate-id="${rate.id}">
+                ${fieldCells}
+                <td data-label="Actions">
+                    <div class="action-buttons">
+                        <button class="mehr-info-btn"
+                                ${rate.moreInfo ? '' : 'disabled'}
+                                onclick="showMoreInfo(${rate.id})"
+                                title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">
+                            ${rate.moreInfo ? 'MEHR INFO' : 'No Info'}
+                        </button>
+                        <a class="angebot-btn"
+                           href="${rate.webLink || '#'}"
+                           target="_blank"
+                           title="Open Link">
+                            ZUM ANGEBOT
+                        </a>
+                        <a class="btn-edit" href="/interest-rate/edit/${rate.id}" title="Edit Interest Rate">
+                            ✎ Edit
+                        </a>
+                        <button class="btn-delete"
+                                onclick="showDeleteConfirmation(${rate.id})"
+                                title="Delete Interest Rate">
+                            🗑 Delete
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+            })
+            .join('');
+    }
+
+    let globalFieldsCache = null;
+    let serverRateFieldValuesMap = {};
+
+    function fetchGlobalFields() {
+        if (globalFieldsCache) {
+            return Promise.resolve(globalFieldsCache);
+        }
+
+        return fetch('/api/global-fields')
+            .then(response => response.json())
+            .then(fields => {
+                globalFieldsCache = fields;
+                return fields;
+            })
+            .catch(error => {
+                console.error('Error fetching global fields:', error);
+                return [];
+            });
+    }
+
+    function updatePaginationControls() {
+        totalPages = Math.ceil(filteredRates.length / pageSize);
+
+        // Update navigation buttons
+        const firstPageBtn = document.getElementById('firstPageBtn');
+        const prevPageBtn = document.getElementById('prevPageBtn');
+        const nextPageBtn = document.getElementById('nextPageBtn');
+        const lastPageBtn = document.getElementById('lastPageBtn');
+
+        if (firstPageBtn) firstPageBtn.disabled = currentPage === 1;
+        if (prevPageBtn) prevPageBtn.disabled = currentPage === 1;
+        if (nextPageBtn) nextPageBtn.disabled = currentPage === totalPages;
+        if (lastPageBtn) lastPageBtn.disabled = currentPage === totalPages;
+
+        // Update page numbers
+        updatePageNumbers();
+
+        // Update page jump input
+        const pageJumpInput = document.getElementById('pageJumpInput');
+        if (pageJumpInput) {
+            pageJumpInput.max = totalPages;
+            pageJumpInput.placeholder = currentPage;
+        }
+    }
+
+    function updatePageNumbers() {
+        const pageNumbers = document.getElementById('pageNumbers');
+        const pageNumbersBottom = document.getElementById('pageNumbersBottom');
+
+        if (!pageNumbers) return;
+
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, startPage + 4);
+
+        // Adjust start page if we're near the end
+        if (endPage - startPage < 4) {
+            startPage = Math.max(1, endPage - 4);
+        }
+
+        let html = '';
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `
+                <button class="page-btn ${i === currentPage ? 'active' : ''}"
+                        onclick="goToPage(${i})">${i}</button>
+            `;
+        }
+
+        pageNumbers.innerHTML = html;
+        if (pageNumbersBottom) {
+            pageNumbersBottom.innerHTML = html;
+        }
+    }
+
+    function updatePaginationInfo() {
+        const startRecord = filteredRates.length === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+        const endRecord = Math.min(currentPage * pageSize, filteredRates.length);
+        const totalRecords = filteredRates.length;
+
+        const infoText = `Showing ${startRecord}-${endRecord} of ${totalRecords} results`;
+
+        const resultsInfo = document.getElementById('resultsInfo');
+        const resultsInfoBottom = document.getElementById('resultsInfoBottom');
+
+        if (resultsInfo) resultsInfo.textContent = infoText;
+        if (resultsInfoBottom) resultsInfoBottom.textContent = infoText;
+    }
+
+    function goToPage(page) {
+        if (page < 1 || page > totalPages || page === currentPage || isLoading) return;
+        loadPage(page);
+    }
+
+    function jumpToPage() {
+        const input = document.getElementById('pageJumpInput');
+        const page = parseInt(input.value);
+
+        if (page && page >= 1 && page <= totalPages) {
+            goToPage(page);
+            input.value = '';
+        }
+    }
+
+    function changePageSize(newSize) {
+        pageSize = parseInt(newSize);
+        currentPage = 1; // Reset to first page
+        loadPage(1);
+    }
+
+    function showLoading() {
+        isLoading = true;
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) overlay.classList.add('show');
+    }
+
+    function hideLoading() {
+        isLoading = false;
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) overlay.classList.remove('show');
+    }
+
+    // Enhanced delete function that updates pagination
+    // Enhanced delete function with server-side pagination
+    function deleteInterestRate(rateId) {
+        fetch(`/interest-rate/${rateId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to delete interest rate');
+                }
+                return response.text();
+            })
+            .then(data => {
+                hideDeleteConfirmation();
+                showDeleteNotification('Interest rate deleted successfully!', false);
+
+                // Close any expanded card for this rate
+                closeExpandedCard(rateId);
+
+                // Reload current page to reflect deletion
+                const searchTerm = document.getElementById('searchInput')
+                    ?.value || '';
+
+                // If current page becomes empty, go to previous page
+                setTimeout(() => {
+                    loadPageFromServer(currentPage, searchTerm);
+                }, 500);
+            })
+            .catch(error => {
+                hideDeleteConfirmation();
+                showDeleteNotification('Error deleting interest rate: ' + error.message, true);
+            });
+    }
+
+
+    // Enhanced sort function that works with pagination
+    // Enhanced sort function with server-side sorting
+    function sortTable(headerElement, event) {
+        if (event && event.type === 'click' && headerElement.classList.contains('dragging')) {
+            return;
+        }
+
+        const fieldId = headerElement.dataset.fieldId;
+        const currentSortField = `field_${fieldId}`;
+
+        let sortDirection = 'asc';
+        if (currentSortColumn === currentSortField) {
+            sortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+        }
+
+        // Clear previous sort indicators
+        document.querySelectorAll('.sortable')
+            .forEach(th => {
+                th.classList.remove('sort-asc', 'sort-desc');
+            });
+
+        headerElement.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+
+        // Update sort state
+        currentSortColumn = currentSortField;
+        currentSortDirection = sortDirection;
+
+        // Reset to first page and load with new sort
+        currentPage = 1;
+        const searchTerm = document.getElementById('searchInput')
+            ?.value || '';
+        loadPageFromServer(1, searchTerm);
+
+        updateSortInfo(headerElement.textContent.trim(), sortDirection);
+    }
+
+    // Search functionality
+    function initializeSearch() {
+        // Add search input to the page if it doesn't exist
+        const searchContainer = document.createElement('div');
+        searchContainer.className = 'search-container mb-3';
+        searchContainer.innerHTML = `
+        <div class="row g-2">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="text"
+                           id="searchInput"
+                           class="form-control"
+                           placeholder="Search interest rates...">
+                    <button class="btn btn-outline-secondary"
+                            type="button"
+                            onclick="performSearch()">
+                        🔍 Search
+                    </button>
+                    <button class="btn btn-outline-secondary"
+                            type="button"
+                            onclick="clearSearch()">
+                        ✕ Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+        // Insert search container before the view toggle
+        const viewToggle = document.querySelector('.view-toggle');
+        if (viewToggle) {
+            viewToggle.parentNode.insertBefore(searchContainer, viewToggle);
+        } else {
+            const tableContainer = document.querySelector('.table-container');
+            tableContainer.parentNode.insertBefore(searchContainer, tableContainer);
+        }
+
+        // Add enter key support for search
+        document.getElementById('searchInput')
+            .addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+
+        // Add debounced search
+        let searchTimeout;
+        document.getElementById('searchInput')
+            .addEventListener('input', function (e) {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    if (e.target.value.length > 2 || e.target.value.length === 0) {
+                        performSearch();
+                    }
+                }, 500);
+            });
+    }
+
+    function performSearch() {
+        const searchTerm = document.getElementById('searchInput')
+            .value;
+        currentPage = 1; // Reset to first page
+        loadPageFromServer(1, searchTerm);
+    }
+
+    function clearSearch() {
+        document.getElementById('searchInput')
+            .value = '';
+        currentPage = 1;
+        loadPageFromServer(1, '');
+    }
+
+    // Enhanced pagination info update
+    function updatePaginationInfo() {
+        const startRecord = totalRecords === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+        const endRecord = Math.min(currentPage * pageSize, totalRecords);
+
+        const infoText = `Showing ${startRecord}-${endRecord} of ${totalRecords} results`;
+
+        const resultsInfo = document.getElementById('resultsInfo');
+        const resultsInfoBottom = document.getElementById('resultsInfoBottom');
+
+        if (resultsInfo) resultsInfo.textContent = infoText;
+        if (resultsInfoBottom) resultsInfoBottom.textContent = infoText;
+    }
+
+    // Enhanced pagination controls update
+    function updatePaginationControls() {
+        // Update navigation buttons
+        const firstPageBtn = document.getElementById('firstPageBtn');
+        const prevPageBtn = document.getElementById('prevPageBtn');
+        const nextPageBtn = document.getElementById('nextPageBtn');
+        const lastPageBtn = document.getElementById('lastPageBtn');
+
+        if (firstPageBtn) firstPageBtn.disabled = currentPage === 1;
+        if (prevPageBtn) prevPageBtn.disabled = currentPage === 1;
+        if (nextPageBtn) nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
+        if (lastPageBtn) lastPageBtn.disabled = currentPage === totalPages || totalPages === 0;
+
+        // Update page numbers
+        updatePageNumbers();
+
+        // Update page jump input
+        const pageJumpInput = document.getElementById('pageJumpInput');
+        if (pageJumpInput) {
+            pageJumpInput.max = totalPages;
+            pageJumpInput.placeholder = currentPage;
+        }
+    }
+
+    // Enhanced page numbers update
+    function updatePageNumbers() {
+        const pageNumbers = document.getElementById('pageNumbers');
+        const pageNumbersBottom = document.getElementById('pageNumbersBottom');
+
+        if (!pageNumbers) return;
+
+        if (totalPages === 0) {
+            pageNumbers.innerHTML = '';
+            if (pageNumbersBottom) pageNumbersBottom.innerHTML = '';
+            return;
+        }
+
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, startPage + 4);
+
+        // Adjust start page if we're near the end
+        if (endPage - startPage < 4) {
+            startPage = Math.max(1, endPage - 4);
+        }
+
+        let html = '';
+
+        // Add ellipsis at the beginning if needed
+        if (startPage > 1) {
+            html += `<button class="page-btn" onclick="goToPage(1)">1</button>`;
+            if (startPage > 2) {
+                html += `<span class="page-ellipsis">...</span>`;
+            }
+        }
+
+        // Add page numbers
+        for (let i = startPage; i <= endPage; i++) {
+            html += `
+            <button class="page-btn ${i === currentPage ? 'active' : ''}"
+                    onclick="goToPage(${i})">${i}</button>
+        `;
+        }
+
+        // Add ellipsis at the end if needed
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                html += `<span class="page-ellipsis">...</span>`;
+            }
+            html += `<button class="page-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+        }
+
+        pageNumbers.innerHTML = html;
+        if (pageNumbersBottom) {
+            pageNumbersBottom.innerHTML = html;
+        }
+    }
+
+    // Enhanced showMoreInfo that works with server data
+    function showMoreInfo(rateId) {
+        // Find rate in current page data first, then fall back to server call
+        let rate = allInterestRates.find(r => r.id === rateId);
+
+        if (!rate) {
+            // If not found in current page, fetch from server
+            fetchRateDetails(rateId)
+                .then(rateData => {
+                    if (rateData && rateData.moreInfo) {
+                        displayRateCard(rateData);
+                    }
+                });
+            return;
+        }
+
+        if (!rate.moreInfo) {
+            showDeleteNotification('No additional information available for this rate.', false);
+            return;
+        }
+
+        displayRateCard(rate);
+    }
+
+    function fetchRateDetails(rateId) {
+        return fetch(`/api/interest-rate/${rateId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch rate details');
+                }
+                return response.json();
+            })
+            .catch(error => {
+                console.error('Error fetching rate details:', error);
+                showDeleteNotification('Error loading rate details: ' + error.message, true);
+                return null;
+            });
+    }
+
+    function displayRateCard(rate) {
+        // Close any currently expanded card
+        if (currentExpandedCard && currentExpandedCard !== rate.id) {
+            closeExpandedCard(currentExpandedCard);
+        }
+
+        let existingCard = document.getElementById(`rateCardRow_${rate.id}`);
+        if (existingCard) {
+            // Toggle card visibility
+            existingCard.style.display = 'none';
+            setTimeout(() => {
+                if (existingCard.parentNode) {
+                    existingCard.parentNode.removeChild(existingCard);
+                }
+            }, 0);
+
+            if (currentExpandedCard === rate.id) {
+                currentExpandedCard = null;
+                return;
+            }
+        }
+
+        // Find the table row that was clicked
+        const targetRow = document.querySelector(`tr[data-rate-id="${rate.id}"]`);
+        if (!targetRow) return;
+
+        const card = createRateCard(rate);
+
+        const cardRow = document.createElement('tr');
+        cardRow.id = `rateCardRow_${rate.id}`;
+        cardRow.className = 'rate-card-row show';
+        cardRow.innerHTML = `<td colspan="100%" class="rate-card-cell"></td>`;
+
+        cardRow.querySelector('.rate-card-cell')
+            .appendChild(card);
+
+        targetRow.parentNode.insertBefore(cardRow, targetRow.nextSibling);
+
+        setTimeout(() => {
+            card.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }, 50);
+
+        currentExpandedCard = rate.id;
+    }
+
+    // Performance optimization: Add loading states for better UX
+    function showLoading() {
+        isLoading = true;
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) {
+            overlay.classList.add('show');
+        }
+
+        // Disable pagination controls during loading
+        const paginationButtons = document.querySelectorAll('.page-btn, #pageSize, #searchInput');
+        paginationButtons.forEach(btn => {
+            btn.disabled = true;
+        });
+    }
+
+    function hideLoading() {
+        isLoading = false;
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) {
+            overlay.classList.remove('show');
+        }
+
+        // Re-enable pagination controls
+        const paginationButtons = document.querySelectorAll('.page-btn, #pageSize, #searchInput');
+        paginationButtons.forEach(btn => {
+            btn.disabled = false;
+        });
+
+        // Re-disable navigation buttons based on current state
+        updatePaginationControls();
+    }
+
+    // Add refresh function for manual data reload
+    function refreshCurrentPage() {
+        const searchTerm = document.getElementById('searchInput')
+            ?.value || '';
+        loadPageFromServer(currentPage, searchTerm);
+    }
+
+    // Enhanced error handling
+    function handleApiError(error, operation = 'operation') {
+        console.error(`Error during ${operation}:`, error);
+
+        let message = `Error during ${operation}`;
+        if (error.message) {
+            message += `: ${error.message}`;
+        }
+
+        showDeleteNotification(message, true);
+        hideLoading();
+    }
+
+    // Add URL state management for bookmarking and back/forward navigation
+    function updateUrlState() {
+        const url = new URL(window.location);
+        url.searchParams.set('page', currentPage);
+        url.searchParams.set('size', pageSize);
+
+        const searchTerm = document.getElementById('searchInput')
+            ?.value;
+        if (searchTerm) {
+            url.searchParams.set('search', searchTerm);
+        } else {
+            url.searchParams.delete('search');
+        }
+
+        if (currentSortColumn) {
+            url.searchParams.set('sortBy', currentSortColumn);
+            url.searchParams.set('sortDir', currentSortDirection);
+        }
+
+        window.history.replaceState({}, '', url);
+    }
+
+    // Initialize from URL parameters
+    function initializeFromUrl() {
+        const url = new URL(window.location);
+        const urlPage = parseInt(url.searchParams.get('page')) || 1;
+        const urlSize = parseInt(url.searchParams.get('size')) || 5;
+        const urlSearch = url.searchParams.get('search') || '';
+        const urlSortBy = url.searchParams.get('sortBy') || '';
+        const urlSortDir = url.searchParams.get('sortDir') || 'asc';
+
+        currentPage = urlPage;
+        pageSize = urlSize;
+        currentSortColumn = urlSortBy;
+        currentSortDirection = urlSortDir;
+
+        // Update UI elements
+        const pageSizeSelect = document.getElementById('pageSize');
+        if (pageSizeSelect) {
+            pageSizeSelect.value = pageSize;
+        }
+
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput && urlSearch) {
+            searchInput.value = urlSearch;
+        }
+    }
+
+    // Browser back/forward navigation support
+    window.addEventListener('popstate', function (event) {
+        initializeFromUrl();
+        const searchTerm = document.getElementById('searchInput')
+            ?.value || '';
+        loadPageFromServer(currentPage, searchTerm);
+    });
+
+    // Auto-save functionality for field value changes
+    let autoSaveTimeout;
+
+    function scheduleAutoSave(rateId, fieldId, value) {
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(() => {
+            updateFieldValueAjax(rateId, fieldId, value);
+        }, 1000); // Save after 1 second of no changes
+    }
+
+    // Enhanced field value update with visual feedback
+    function updateFieldValueAjax(rateId, fieldId, value) {
+        const input = document.querySelector(`input[name="rateId"][value="${rateId}"]`)
+            ?.parentElement
+            ?.querySelector(`input[name="fieldId"][value="${fieldId}"]`)
+            ?.parentElement
+            ?.querySelector('input[name="value"]');
+
+        if (input) {
+            input.classList.add('saving');
+        }
+
+        const formData = new FormData();
+        formData.append('rateId', rateId);
+        formData.append('fieldId', fieldId);
+        formData.append('value', value);
+
+        fetch('/field-values/update', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to update field value');
+                }
+
+                // Update local cache
+                if (!serverRateFieldValuesMap[rateId]) {
+                    serverRateFieldValuesMap[rateId] = {};
+                }
+                serverRateFieldValuesMap[rateId][fieldId] = value;
+
+                if (input) {
+                    input.classList.remove('saving');
+                    input.classList.add('saved');
+                    setTimeout(() => {
+                        input.classList.remove('saved');
+                    }, 2000);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating field value:', error);
+                if (input) {
+                    input.classList.remove('saving');
+                    input.classList.add('error');
+                    setTimeout(() => {
+                        input.classList.remove('error');
+                    }, 3000);
+                }
+                showDeleteNotification('Error updating field value: ' + error.message, true);
+            });
+    }
+
+    // Bulk operations support
+    function selectAllRows() {
+        const checkboxes = document.querySelectorAll('.row-select');
+        const selectAllCheckbox = document.getElementById('selectAll');
+
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = selectAllCheckbox.checked;
+        });
+
+        updateBulkActionButtons();
+    }
+
+    function updateBulkActionButtons() {
+        const selectedRows = document.querySelectorAll('.row-select:checked');
+        const bulkActionContainer = document.getElementById('bulkActions');
+
+        if (bulkActionContainer) {
+            bulkActionContainer.style.display = selectedRows.length > 0 ? 'block' : 'none';
+        }
+    }
+
+    // Export functionality
+    function exportCurrentPage() {
+        const searchTerm = document.getElementById('searchInput')
+            ?.value || '';
+        const params = new URLSearchParams({
+            page: currentPage - 1,
+            size: pageSize,
+            sortBy: currentSortColumn || 'id',
+            sortDir: currentSortDirection || 'asc',
+            format: 'csv'
+        });
+
+        if (searchTerm.trim()) {
+            params.append('search', searchTerm.trim());
+        }
+
+        window.location.href = `/api/interest-rates/export?${params.toString()}`;
+    }
+
+    // Initialize everything when DOM is ready
+    document.addEventListener('DOMContentLoaded', function () {
+        initializeFromUrl();
+        initializePagination();
+        captureOriginalOrder();
+        initializeSortableHeaders();
+        initializeResponsiveToggle();
+        initializeScrollIndicator();
+        initializeSearch();
+
+        // Load initial page from server
+        const searchTerm = document.getElementById('searchInput')
+            ?.value || '';
+        loadPageFromServer(currentPage, searchTerm);
+
+        // Update URL state on changes
+        setInterval(updateUrlState, 2000); // Update URL every 2 seconds if needed
+    });
+
+    function updateSortInfo(columnName, direction) {
+        const sortInfo = document.getElementById('sortInfo');
+        if (sortInfo) {
+            if (columnName && direction) {
+                sortInfo.innerHTML = `Sorted by: <strong>${columnName}</strong> ${direction === 'asc' ? '↑' : '↓'}`;
+                sortInfo.style.background = 'linear-gradient(135deg, #e7f3ff, #cce7ff)';
+            } else {
+                sortInfo.textContent = 'Click column headers to sort ↕️';
+                sortInfo.style.background = 'white';
+            }
+        }
+    }
+
+    // Enhanced search function (if you want to add search later)
+    function searchInterestRates(searchTerm) {
+        if (!searchTerm.trim()) {
+            filteredRates = [...allInterestRates];
+        } else {
+            const rateFieldValuesMap = /*[[${rateFieldValuesMap}]]*/ {};
+            filteredRates = allInterestRates.filter(rate => {
+                // Search in all field values
+                if (rateFieldValuesMap[rate.id]) {
+                    return Object.values(rateFieldValuesMap[rate.id])
+                        .some(value =>
+                            value && value.toString()
+                            .toLowerCase()
+                            .includes(searchTerm.toLowerCase())
+                        );
+                }
+
+                // Also search in webLink if available
+                if (rate.webLink && rate.webLink.toLowerCase()
+                    .includes(searchTerm.toLowerCase())) {
+                    return true;
+                }
+
+                return false;
+            });
+        }
+
+        // Reset to first page after search
+        currentPage = 1;
+        loadPage(1);
+    }
+
+    // All your existing functions remain the same, just adding pagination-aware versions
+
+
+    // AJAX field value update
+    function updateFieldValueAjax(rateId, fieldId, value) {
+        const formData = new FormData();
+        formData.append('rateId', rateId);
+        formData.append('fieldId', fieldId);
+        formData.append('value', value);
+
+        fetch('/field-values/update', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to update field value');
+                }
+                // Update local cache
+                if (!serverRateFieldValuesMap[rateId]) {
+                    serverRateFieldValuesMap[rateId] = {};
+                }
+                serverRateFieldValuesMap[rateId][fieldId] = value;
+            })
+            .catch(error => {
+                console.error('Error updating field value:', error);
+                showDeleteNotification('Error updating field value: ' + error.message, true);
+            });
+    }
+
+    // Enhanced pagination functions
+    function goToPage(page) {
+        if (page < 1 || page > totalPages || page === currentPage || isLoading) return;
+
+        const searchTerm = document.getElementById('searchInput')
+            ?.value || '';
+        loadPageFromServer(page, searchTerm);
+    }
+
+    function changePageSize(newSize) {
+        pageSize = parseInt(newSize);
+        currentPage = 1; // Reset to first page
+
+        const searchTerm = document.getElementById('searchInput')
+            ?.value || '';
+        loadPageFromServer(1, searchTerm);
+    }
+
+    function jumpToPage() {
+        const input = document.getElementById('pageJumpInput');
+        const page = parseInt(input.value);
+
+        if (page && page >= 1 && page <= totalPages) {
+            goToPage(page);
+            input.value = '';
+        }
+    }
 
     function initializeScrollIndicator() {
         const tableContainer = document.getElementById('tableContainer');
@@ -378,13 +1568,13 @@
         const tableContainer = document.getElementById('tableContainer');
 
         if (stackedViewBtn && scrollViewBtn) {
-            stackedViewBtn.addEventListener('click', function() {
+            stackedViewBtn.addEventListener('click', function () {
                 tableContainer.classList.add('mobile-stack');
                 stackedViewBtn.classList.add('active');
                 scrollViewBtn.classList.remove('active');
             });
 
-            scrollViewBtn.addEventListener('click', function() {
+            scrollViewBtn.addEventListener('click', function () {
                 tableContainer.classList.remove('mobile-stack');
                 scrollViewBtn.classList.add('active');
                 stackedViewBtn.classList.remove('active');
@@ -405,114 +1595,26 @@
         });
     }
 
-    function sortTable(headerElement, event) {
-        if (event && event.type === 'click' && headerElement.classList.contains('dragging')) {
-            return;
-        }
-
-        const columnIndex = parseInt(headerElement.dataset.columnIndex);
-        const table = document.getElementById('mainTable');
-        const tbody = table.getElementsByTagName('tbody')[0];
-
-        const allRows = Array.from(tbody.getElementsByTagName('tr'));
-        const dataRows = allRows.filter(row => !row.classList.contains('expanded-card-row') && !row.id.startsWith('rateCardRow_'));
-
-        const expandedCards = new Map();
-        allRows.forEach(row => {
-            if (row.id.startsWith('rateCardRow_')) {
-                const rateId = row.id.replace('rateCardRow_', '');
-                const previousRow = row.previousElementSibling;
-                if (previousRow) {
-                    expandedCards.set(previousRow, row);
-                }
-            }
-        });
-
-        let sortDirection = 'asc';
-        if (currentSortColumn === columnIndex) {
-            sortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
-        }
-
-        document.querySelectorAll('.sortable').forEach(th => {
-            th.classList.remove('sort-asc', 'sort-desc');
-        });
-
-        headerElement.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
-
-        dataRows.sort((a, b) => {
-            const aCell = a.getElementsByTagName('td')[columnIndex];
-            const bCell = b.getElementsByTagName('td')[columnIndex];
-
-            let aValue = '';
-            let bValue = '';
-
-            const aInput = aCell.querySelector('input[name="value"]');
-            const bInput = bCell.querySelector('input[name="value"]');
-
-            if (aInput && bInput) {
-                aValue = aInput.value || '';
-                bValue = bInput.value || '';
-            } else {
-                aValue = aCell.textContent.trim();
-                bValue = bCell.textContent.trim();
-            }
-
-            const aNum = parseFloat(aValue);
-            const bNum = parseFloat(bValue);
-
-            if (!isNaN(aNum) && !isNaN(bNum)) {
-                return sortDirection === 'asc' ? aNum - bNum : bNum - aNum;
-            } else {
-                // String comparison
-                return sortDirection === 'asc'
-                    ? aValue.localeCompare(bValue)
-                    : bValue.localeCompare(aValue);
-            }
-        });
-
-        tbody.innerHTML = '';
-        dataRows.forEach(row => {
-            tbody.appendChild(row);
-            // If this row had an expanded card, re-append it
-            if (expandedCards.has(row)) {
-                tbody.appendChild(expandedCards.get(row));
-            }
-        });
-
-        currentSortColumn = columnIndex;
-        currentSortDirection = sortDirection;
-
-        updateSortInfo(headerElement.textContent.trim(), sortDirection);
-    }
-
-    function updateSortInfo(columnName, direction) {
-        const sortInfo = document.getElementById('sortInfo');
-        if (sortInfo) {
-            if (columnName && direction) {
-                sortInfo.innerHTML = `Sorted by: <strong>${columnName}</strong> ${direction === 'asc' ? '↑' : '↓'}`;
-                sortInfo.style.background = 'linear-gradient(135deg, #e7f3ff, #cce7ff)';
-            } else {
-                sortInfo.textContent = 'Click column headers to sort ↕️';
-                sortInfo.style.background = 'white';
-            }
-        }
-    }
-
     function resetSort() {
         // Clear all sort indicators
-        document.querySelectorAll('.sortable').forEach(th => {
-            th.classList.remove('sort-asc', 'sort-desc');
-        });
+        document.querySelectorAll('.sortable')
+            .forEach(th => {
+                th.classList.remove('sort-asc', 'sort-desc');
+            });
 
         // Reset sort state
         currentSortColumn = null;
         currentSortDirection = null;
 
-        // Update sort info
-        updateSortInfo();
+        // Reset data to original order
+        filteredRates = [...allInterestRates];
 
-        // Reload the page to restore original order (or implement your own logic)
-        showDeleteNotification('Sort reset! Reload page to restore original order.', false);
+        // Reset to first page
+        currentPage = 1;
+        loadPage(1);
+
+        updateSortInfo();
+        showDeleteNotification('Sort reset! Data restored to original order.', false);
     }
 
     // Keep all your existing functions but add DataTable integration where needed
@@ -602,55 +1704,6 @@
         document.getElementById('deleteConfirmationModal')
             .style.display = 'none';
         pendingDeleteId = null;
-    }
-
-    function deleteInterestRate(rateId) {
-        fetch(`/interest-rate/${rateId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to delete interest rate');
-                }
-                return response.text();
-            })
-            .then(data => {
-                // Hide the confirmation modal
-                hideDeleteConfirmation();
-
-                // Show success notification
-                showDeleteNotification('Interest rate deleted successfully!', false);
-
-                // Remove the row from the table
-                removeInterestRateRow(rateId);
-
-                // Close any expanded card for this rate
-                closeExpandedCard(rateId);
-            })
-            .catch(error => {
-                hideDeleteConfirmation();
-                showDeleteNotification('Error deleting interest rate: ' + error.message, true);
-            });
-    }
-
-    function removeInterestRateRow(rateId) {
-        // Find and remove the main table row
-        const tableRows = document.querySelectorAll('#mainTable tbody tr');
-        tableRows.forEach(row => {
-            const rateIdInput = row.querySelector('input[name="rateId"]');
-            if (rateIdInput && rateIdInput.value == rateId) {
-                row.remove();
-            }
-        });
-
-        // Remove from interestRatesData array
-        const index = interestRatesData.findIndex(rate => rate.id === rateId);
-        if (index > -1) {
-            interestRatesData.splice(index, 1);
-        }
     }
 
     function showDeleteNotification(message, isError) {
@@ -754,19 +1807,14 @@
             headerRow.insertBefore(draggedHeader, headers[targetIndex].nextSibling);
         }
 
-        // Move data cells for each row
-        const rows = document.querySelectorAll("#mainTable tbody tr");
-        rows.forEach(row => {
-            const cells = Array.from(row.querySelectorAll(".data-cell"));
-            const draggedCell = cells[draggedIndex];
-            if (!draggedCell) return;
+        // Immediately re-render the current page data to match new column order
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const pageData = filteredRates.slice(startIndex, endIndex);
 
-            if (targetIndex < draggedIndex) {
-                row.insertBefore(draggedCell, cells[targetIndex]);
-            } else {
-                row.insertBefore(draggedCell, cells[targetIndex].nextSibling);
-            }
-        });
+        // Re-render table data with new column order
+        const tbody = document.getElementById('tableBody');
+        renderTableRows(pageData, tbody);
     }
 
     function markOrderChanged() {
@@ -781,6 +1829,12 @@
         const headers = document.querySelectorAll(".draggable-column");
         const newOrder = Array.from(headers)
             .map(header => header.dataset.fieldId);
+
+        // Add visual feedback
+        const saveBtn = document.getElementById("saveOrderBtn");
+        const originalText = saveBtn.textContent;
+        saveBtn.textContent = "Saving...";
+        saveBtn.disabled = true;
 
         fetch('/fields/reorder', {
                 method: 'POST',
@@ -798,15 +1852,43 @@
             })
             .then(data => {
                 orderChanged = false;
-                document.getElementById("saveOrderBtn")
-                    .classList.remove("show");
+                saveBtn.classList.remove("show");
                 document.getElementById("orderChangedIndicator")
                     .classList.remove("show");
-                console.log(data);
+
+                // Update cache to match new order
+                updateGlobalFieldsCache();
+
+                // Show success message
+                showDeleteNotification('Column order saved successfully!', false);
+
+                // Reset button state
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
             })
             .catch(error => {
-                alert("Error saving order: " + error.message);
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+                showDeleteNotification("Error saving order: " + error.message, true);
             });
+    }
+
+    function updateGlobalFieldsCache() {
+        const headers = document.querySelectorAll('.draggable-column');
+        const currentOrder = Array.from(headers)
+            .map(header => ({
+                id: header.dataset.fieldId,
+                label: header.querySelector('.header-text')
+                    .textContent
+            }));
+
+        // Reorder globalFieldsCache to match DOM order
+        if (globalFieldsCache) {
+            globalFieldsCache = currentOrder.map(orderItem =>
+                    globalFieldsCache.find(field => field.id == orderItem.id)
+                )
+                .filter(Boolean);
+        }
     }
 
     // Optional: CSRF token extraction if needed for Spring Security
@@ -926,12 +2008,12 @@
                 return response.text();
             })
             .catch(error => {
-                showSectionOrderNotification("Error saving section order: " + error.message, true);
+                showDeleteNotification("Error saving section order: " + error.message, true);
             });
     }
 
     function showMoreInfo(rateId) {
-        const rate = interestRatesData.find(r => r.id === rateId);
+        const rate = filteredRates.find(r => r.id === rateId) || allInterestRates.find(r => r.id === rateId);
         if (!rate || !rate.moreInfo) return;
 
         // Close any currently expanded card
@@ -976,7 +2058,8 @@
         cardRow.className = 'rate-card-row show';
         cardRow.innerHTML = `<td colspan="100%" class="rate-card-cell"></td>`;
 
-        cardRow.querySelector('.rate-card-cell').appendChild(card);
+        cardRow.querySelector('.rate-card-cell')
+            .appendChild(card);
 
         targetRow.parentNode.insertBefore(cardRow, targetRow.nextSibling);
 
@@ -1158,7 +2241,43 @@
         }
     });
 
-    window.addEventListener('resize', function() {
+    // Enhanced keyboard navigation for pagination
+    document.addEventListener('keydown', function (e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+        switch (e.key) {
+        case 'ArrowLeft':
+            if (currentPage > 1) {
+                e.preventDefault();
+                goToPage(currentPage - 1);
+            }
+            break;
+        case 'ArrowRight':
+            if (currentPage < totalPages) {
+                e.preventDefault();
+                goToPage(currentPage + 1);
+            }
+            break;
+        case 'Home':
+            e.preventDefault();
+            goToPage(1);
+            break;
+        case 'End':
+            e.preventDefault();
+            goToPage(totalPages);
+            break;
+        }
+    });
+
+    // Handle Enter key in page jump input
+    document.getElementById('pageJumpInput')
+        .addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                jumpToPage();
+            }
+        });
+
+    window.addEventListener('resize', function () {
         const tableContainer = document.getElementById('tableContainer');
         const stackedViewBtn = document.getElementById('stackedView');
         const scrollViewBtn = document.getElementById('scrollView');

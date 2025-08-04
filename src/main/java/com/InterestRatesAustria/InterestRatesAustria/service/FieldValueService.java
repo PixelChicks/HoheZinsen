@@ -21,17 +21,37 @@ public class FieldValueService {
     private final GlobalFieldRepository globalFieldRepository;
 
     public FieldValueService(InterestRateFieldValueRepository fieldValueRepository,
-                            InterestRateRepository interestRateRepository,
-                            GlobalFieldRepository globalFieldRepository) {
+                             InterestRateRepository interestRateRepository,
+                             GlobalFieldRepository globalFieldRepository) {
         this.fieldValueRepository = fieldValueRepository;
         this.interestRateRepository = interestRateRepository;
         this.globalFieldRepository = globalFieldRepository;
     }
 
+    public Map<Long, Map<Long, String>> getRateFieldValuesMapForRateIds(List<Long> rateIds) {
+        Map<Long, Map<Long, String>> result = new HashMap<>();
+
+        if (rateIds.isEmpty()) {
+            return result;
+        }
+
+        List<InterestRateFieldValue> fieldValues = fieldValueRepository.findByInterestRateIdIn(rateIds);
+
+        for (InterestRateFieldValue fieldValue : fieldValues) {
+            Long rateId = fieldValue.getInterestRate().getId();
+            Long fieldId = fieldValue.getGlobalField().getId();
+
+            result.computeIfAbsent(rateId, k -> new HashMap<>())
+                    .put(fieldId, fieldValue.getValue());
+        }
+
+        return result;
+    }
+
     public Map<Long, String> getFieldValuesForRate(Long rateId) {
         InterestRate rate = interestRateRepository.findById(rateId)
                 .orElseThrow(() -> new RuntimeException("Interest rate not found with id: " + rateId));
-        
+
         return rate.getFieldValues().stream()
                 .collect(Collectors.toMap(
                         fv -> fv.getGlobalField().getId(),
@@ -64,7 +84,7 @@ public class FieldValueService {
 
     public void createFieldValuesForRate(InterestRate rate, Map<String, String> requestParams) {
         List<GlobalField> allFields = globalFieldRepository.findAllActiveByOrderBySortOrderAsc();
-        
+
         for (GlobalField field : allFields) {
             String key = "extra_" + field.getId();
             if (requestParams.containsKey(key)) {
@@ -80,7 +100,7 @@ public class FieldValueService {
 
     public void updateFieldValuesForRate(InterestRate rate, Map<String, String> requestParams) {
         List<GlobalField> allFields = globalFieldRepository.findAllActiveByOrderBySortOrderAsc();
-        
+
         for (GlobalField field : allFields) {
             String key = "extra_" + field.getId();
             if (requestParams.containsKey(key)) {
@@ -88,7 +108,7 @@ public class FieldValueService {
                 InterestRateFieldValue fieldValue = fieldValueRepository
                         .findByInterestRateIdAndGlobalFieldId(rate.getId(), field.getId())
                         .orElse(new InterestRateFieldValue());
-                        
+
                 fieldValue.setInterestRate(rate);
                 fieldValue.setGlobalField(field);
                 fieldValue.setValue(value);

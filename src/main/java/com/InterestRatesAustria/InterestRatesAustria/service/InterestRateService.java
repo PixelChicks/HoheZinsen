@@ -4,6 +4,10 @@ import com.InterestRatesAustria.InterestRatesAustria.model.dto.InterestRateDTO;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.InterestRate;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.MoreInfo;
 import com.InterestRatesAustria.InterestRatesAustria.repository.InterestRateRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +28,25 @@ public class InterestRateService {
         this.interestRateRepository = interestRateRepository;
         this.fieldValueService = fieldValueService;
         this.moreInfoService = moreInfoService;
+    }
+
+    public Page<InterestRate> getAllInterestRatesPaginated(int page, int size, String sortBy, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase("desc") ?
+                Sort.by(sortBy).descending() :
+                Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        return interestRateRepository.findAll(pageable);
+    }
+
+    public Page<InterestRate> searchInterestRatesPaginated(String searchTerm, int page, int size, String sortBy, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase("desc") ?
+                Sort.by(sortBy).descending() :
+                Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        return interestRateRepository.findBySearchTerm(searchTerm, pageable);
     }
 
     public List<InterestRateDTO> getAllInterestRateDTOs() {
@@ -50,10 +73,8 @@ public class InterestRateService {
     public void createInterestRate(InterestRate interestRate, Map<String, String> requestParams) {
         InterestRate saved = interestRateRepository.save(interestRate);
 
-        // Handle field values
         fieldValueService.createFieldValuesForRate(saved, requestParams);
 
-        // Handle more info sections
         MoreInfo moreInfo = moreInfoService.createMoreInfoWithSections(requestParams);
         if (moreInfo != null) {
             saved.setMoreInfo(moreInfo);
