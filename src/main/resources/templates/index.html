@@ -583,56 +583,57 @@
     });
 
     function loadPageFromServer(page, searchTerm = '') {
-        if (isLoading) return;
+    if (isLoading) return;
 
-        showLoading();
+    showLoading();
 
-        const params = new URLSearchParams({
-            page: page - 1, // Spring uses 0-based indexing
-            size: pageSize,
-            sortBy: currentSortColumn || 'id',
-            sortDir: currentSortDirection || 'asc'
-        });
+    const params = new URLSearchParams({
+        page: page - 1, // Spring uses 0-based indexing
+        size: pageSize,
+        sortBy: currentSortColumn || 'id',
+        sortDir: currentSortDirection || 'asc'
+    });
 
-        if (searchTerm && searchTerm.trim()) {
-            params.append('search', searchTerm.trim());
-        }
-
-        fetch(`/api/interest-rates/paginated?${params.toString()}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch data');
-                }
-                return response.json();
-            })
-            .then(data => {
-                currentPage = page;
-                totalPages = data.totalPages;
-                totalRecords = data.totalElements;
-
-                // Update global data arrays
-                allInterestRates = data.content;
-                filteredRates = data.content;
-
-                // Store the field values map from server
-                serverRateFieldValuesMap = data.rateFieldValuesMap;
-
-                renderTableData(data.content);
-                updatePaginationControls();
-                updatePaginationInfo();
-                hideLoading();
-
-                // Close any expanded cards when changing pages
-                if (currentExpandedCard) {
-                    closeExpandedCard(currentExpandedCard);
-                }
-            })
-            .catch(error => {
-                console.error('Error loading page:', error);
-                showDeleteNotification('Error loading data: ' + error.message, true);
-                hideLoading();
-            });
+    if (searchTerm && searchTerm.trim()) {
+        params.append('search', searchTerm.trim());
     }
+
+    // Use the correct endpoint
+    fetch(`/api/interest-rates/paginated?${params.toString()}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch data');
+            }
+            return response.json();
+        })
+        .then(data => {
+            currentPage = page;
+            totalPages = data.totalPages;
+            totalRecords = data.totalElements;
+
+            // Update global data arrays
+            allInterestRates = data.content;
+            filteredRates = data.content;
+
+            // Store the field values map from server
+            serverRateFieldValuesMap = data.rateFieldValuesMap;
+
+            renderTableData(data.content);
+            updatePaginationControls();
+            updatePaginationInfo();
+            hideLoading();
+
+            // Close any expanded cards when changing pages
+            if (currentExpandedCard) {
+                closeExpandedCard(currentExpandedCard);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading page:', error);
+            showDeleteNotification('Error loading data: ' + error.message, true);
+            hideLoading();
+        });
+}
 
 
     // Pagination Functions
@@ -883,44 +884,44 @@
     // Enhanced delete function that updates pagination
     // Enhanced delete function with server-side pagination
     function deleteInterestRate(rateId) {
-        fetch(`/interest-rate/${rateId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to delete interest rate');
-                }
-                return response.text();
-            })
-            .then(data => {
-                hideDeleteConfirmation();
-                showDeleteNotification('Interest rate deleted successfully!', false);
+            fetch(`/interest-rate/${rateId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to delete interest rate');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    hideDeleteConfirmation();
+                    showDeleteNotification('Interest rate deleted successfully!', false);
 
-                // Close any expanded card for this rate
-                closeExpandedCard(rateId);
+                    // Close any expanded card for this rate
+                    closeExpandedCard(rateId);
 
-                // Reload current page to reflect deletion
-                const searchTerm = document.getElementById('searchInput')
-                    ?.value || '';
+                    // Reload current page to reflect deletion
+                    const searchTerm = document.getElementById('searchInput')
+                        ?.value || '';
 
-                // If current page becomes empty, go to previous page
-                setTimeout(() => {
-                    loadPageFromServer(currentPage, searchTerm);
-                }, 500);
-            })
-            .catch(error => {
-                hideDeleteConfirmation();
-                showDeleteNotification('Error deleting interest rate: ' + error.message, true);
-            });
-    }
+                    // If current page becomes empty, go to previous page
+                    setTimeout(() => {
+                        loadPageFromServer(currentPage, searchTerm);
+                    }, 500);
+                })
+                .catch(error => {
+                    hideDeleteConfirmation();
+                    showDeleteNotification('Error deleting interest rate: ' + error.message, true);
+                });
+        }
 
 
-    // Enhanced sort function that works with pagination
-    // Enhanced sort function with server-side sorting
-    function sortTable(headerElement, event) {
+        // Enhanced sort function that works with pagination
+        // Enhanced sort function with server-side sorting
+        function sortTable(headerElement, event) {
         if (event && event.type === 'click' && headerElement.classList.contains('dragging')) {
             return;
         }
@@ -947,69 +948,66 @@
 
         // Reset to first page and load with new sort
         currentPage = 1;
-        const searchTerm = document.getElementById('searchInput')
-            ?.value || '';
+        const searchTerm = document.getElementById('searchInput')?.value || '';
         loadPageFromServer(1, searchTerm);
 
-        updateSortInfo(headerElement.textContent.trim(), sortDirection);
+        updateSortInfo(headerElement.querySelector('.header-text').textContent.trim(), sortDirection);
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!document.getElementById('sortInfo')) {
+            const sortInfo = document.createElement('div');
+            sortInfo.id = 'sortInfo';
+            sortInfo.className = 'sort-info';
+            sortInfo.textContent = 'Click column headers to sort ↕️';
+
+            const tableContainer = document.querySelector('.table-container');
+            if (tableContainer) {
+                tableContainer.parentNode.insertBefore(sortInfo, tableContainer);
+            }
+        }
+    });
+
+    // Enhanced updateSortInfo function
+    function updateSortInfo(columnName, direction) {
+        const sortInfo = document.getElementById('sortInfo');
+        if (sortInfo) {
+            if (columnName && direction) {
+                sortInfo.innerHTML = `Sorted by: <strong>${columnName}</strong> ${direction === 'asc' ? '↑' : '↓'}
+                    <button onclick="resetSort()" style="margin-left: 10px; padding: 2px 6px; font-size: 12px; border: 1px solid #ccc; background: white; border-radius: 3px; cursor: pointer;">Reset</button>`;
+                sortInfo.style.background = 'linear-gradient(135deg, #e7f3ff, #cce7ff)';
+            } else {
+                sortInfo.textContent = 'Click column headers to sort ↕️';
+                sortInfo.style.background = 'white';
+            }
+        }
     }
 
-    // Search functionality
-    function initializeSearch() {
-        // Add search input to the page if it doesn't exist
-        const searchContainer = document.createElement('div');
-        searchContainer.className = 'search-container mb-3';
-        searchContainer.innerHTML = `
-        <div class="row g-2">
-            <div class="col-md-6">
-                <div class="input-group">
-                    <input type="text"
-                           id="searchInput"
-                           class="form-control"
-                           placeholder="Search interest rates...">
-                    <button class="btn btn-outline-secondary"
-                            type="button"
-                            onclick="performSearch()">
-                        🔍 Search
-                    </button>
-                    <button class="btn btn-outline-secondary"
-                            type="button"
-                            onclick="clearSearch()">
-                        ✕ Clear
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
+    // Enhanced resetSort function
+    function resetSort() {
+        // Clear all sort indicators
+        document.querySelectorAll('.sortable')
+            .forEach(th => {
+                th.classList.remove('sort-asc', 'sort-desc');
+            });
 
-        // Insert search container before the view toggle
-        const viewToggle = document.querySelector('.view-toggle');
-        if (viewToggle) {
-            viewToggle.parentNode.insertBefore(searchContainer, viewToggle);
-        } else {
-            const tableContainer = document.querySelector('.table-container');
-            tableContainer.parentNode.insertBefore(searchContainer, tableContainer);
+        // Reset sort state
+        currentSortColumn = null;
+        currentSortDirection = null;
+
+        // Reset to first page with no sorting
+        currentPage = 1;
+        const searchTerm = document.getElementById('searchInput')?.value || '';
+        loadPageFromServer(1, searchTerm);
+
+        updateSortInfo();
+        showDeleteNotification('Sort reset! Data restored to original order.', false);
+    }
+
+   function initializeSearch() {
+        const existingSearch = document.querySelector('.search-container');
+        if (existingSearch) {
+            existingSearch.remove();
         }
-
-        // Add enter key support for search
-        document.getElementById('searchInput')
-            .addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') {
-                    performSearch();
-                }
-            });
-
-        // Add debounced search
-        let searchTimeout;
-        document.getElementById('searchInput')
-            .addEventListener('input', function (e) {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    if (e.target.value.length > 2 || e.target.value.length === 0) {
-                        performSearch();
-                    }
-                }, 500);
-            });
     }
 
     function performSearch() {

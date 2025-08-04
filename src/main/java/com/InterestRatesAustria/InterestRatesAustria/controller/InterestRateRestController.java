@@ -9,10 +9,7 @@ import com.InterestRatesAustria.InterestRatesAustria.service.GlobalFieldService;
 import com.InterestRatesAustria.InterestRatesAustria.service.InterestRateService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -27,8 +24,8 @@ public class InterestRateRestController {
     private final FieldValueService fieldValueService;
 
     public InterestRateRestController(InterestRateService interestRateService,
-                                     GlobalFieldService globalFieldService,
-                                     FieldValueService fieldValueService) {
+                                      GlobalFieldService globalFieldService,
+                                      FieldValueService fieldValueService) {
         this.interestRateService = interestRateService;
         this.globalFieldService = globalFieldService;
         this.fieldValueService = fieldValueService;
@@ -41,23 +38,23 @@ public class InterestRateRestController {
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir,
             @RequestParam(required = false) String search) {
-        
+
         Page<InterestRate> interestRatesPage;
-        
+
         if (search != null && !search.trim().isEmpty()) {
             interestRatesPage = interestRateService.searchInterestRatesPaginated(search, page, size, sortBy, sortDir);
         } else {
             interestRatesPage = interestRateService.getAllInterestRatesPaginated(page, size, sortBy, sortDir);
         }
-        
+
         List<InterestRateDTO> content = interestRatesPage.getContent().stream()
                 .map(InterestRateDTO::fromEntity)
                 .collect(Collectors.toList());
-        
+
         // Get field values for current page
         Map<Long, Map<Long, String>> rateFieldValuesMap =
-            fieldValueService.getRateFieldValuesMap(interestRatesPage.getContent());
-        
+                fieldValueService.getRateFieldValuesMap(interestRatesPage.getContent());
+
         PaginatedResponse<InterestRateDTO> response = new PaginatedResponse<>();
         response.setContent(content);
         response.setRateFieldValuesMap(rateFieldValuesMap);
@@ -67,8 +64,19 @@ public class InterestRateRestController {
         response.setPageSize(size);
         response.setFirst(interestRatesPage.isFirst());
         response.setLast(interestRatesPage.isLast());
-        
+
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/interest-rate/{id}")
+    public ResponseEntity<InterestRateDTO> getInterestRateById(@PathVariable Long id) {
+        try {
+            InterestRate interestRate = interestRateService.getInterestRateById(id);
+            InterestRateDTO dto = InterestRateDTO.fromEntity(interestRate);
+            return ResponseEntity.ok(dto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/global-fields")
