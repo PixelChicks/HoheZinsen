@@ -18,6 +18,8 @@ public class MiniTableRow {
     private Long id;
 
     private String label;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "table_section_id")

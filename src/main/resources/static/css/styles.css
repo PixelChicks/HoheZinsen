@@ -76,6 +76,9 @@
   padding: 12px 15px;
   flex: 1;
   color: #6c757d;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .text-content {
