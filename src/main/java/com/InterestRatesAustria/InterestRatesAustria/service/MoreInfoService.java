@@ -16,9 +16,9 @@ public class MoreInfoService {
     private final MiniTableRowRepository miniTableRowRepository;
 
     public MoreInfoService(MoreInfoRepository moreInfoRepository,
-                          TableSectionRepository tableSectionRepository,
-                          TextSectionRepository textSectionRepository,
-                          MiniTableRowRepository miniTableRowRepository) {
+                           TableSectionRepository tableSectionRepository,
+                           TextSectionRepository textSectionRepository,
+                           MiniTableRowRepository miniTableRowRepository) {
         this.moreInfoRepository = moreInfoRepository;
         this.tableSectionRepository = tableSectionRepository;
         this.textSectionRepository = textSectionRepository;
@@ -153,8 +153,8 @@ public class MoreInfoService {
                 if (labelsString != null && !labelsString.trim().isEmpty() &&
                         descriptionsString != null && !descriptionsString.trim().isEmpty()) {
 
-                    String[] labels = labelsString.split("\\|\\|");
-                    String[] descriptions = descriptionsString.split("\\|\\|");
+                    String[] labels = labelsString.split(",");
+                    String[] descriptions = descriptionsString.split(",");
 
                     List<MiniTableRow> miniTableRows = new ArrayList<>();
                     int maxLength = Math.max(labels.length, descriptions.length);

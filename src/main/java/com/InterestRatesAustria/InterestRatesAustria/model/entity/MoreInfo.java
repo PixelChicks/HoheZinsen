@@ -31,16 +31,14 @@ public class MoreInfo {
     @OneToMany(mappedBy = "moreInfo", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<TextSection> textSections = new ArrayList<>();
 
-    private static final String SECTION_ORDER_DELIMITER = "||";
-
     public List<String> getSectionOrderList() {
         if (sectionOrder == null || sectionOrder.trim().isEmpty()) {
             return new ArrayList<>();
         }
-        return List.of(sectionOrder.split(Pattern.quote(SECTION_ORDER_DELIMITER)));
+        return List.of(sectionOrder.split(","));
     }
 
     public void setSectionOrderList(List<String> sections) {
-        this.sectionOrder = String.join(SECTION_ORDER_DELIMITER, sections);
+        this.sectionOrder = String.join(",", sections);
     }
 }
