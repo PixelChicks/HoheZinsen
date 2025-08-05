@@ -58,13 +58,13 @@ public class WebSecurityConfig {
         };
     }
 
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico").permitAll()
                         .requestMatchers("/register", "/verify-email", "/resend-verification").permitAll()
+                        .requestMatchers("/forgot-password", "/reset-password").permitAll()
                         .requestMatchers(HttpMethod.GET, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/**").authenticated()
@@ -98,7 +98,7 @@ public class WebSecurityConfig {
                         .permitAll()
                 )
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/api/**", "/sections/reorder")
+                        .ignoringRequestMatchers("/api/**", "/sections/reorder", "/fields/reorder")
                 );
 
         return http.build();

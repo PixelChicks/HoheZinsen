@@ -46,6 +46,36 @@ public class EmailService {
         }
     }
 
+    public void sendPasswordResetEmail(String toEmail, String resetToken) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(toEmail);
+        message.setSubject("Password Reset Request - Interest Rates Austria");
+        
+        String resetLink = baseUrl + "/reset-password?token=" + resetToken;
+        
+        String emailContent = String.format(
+            "Password Reset Request\n\n" +
+            "We received a request to reset your password for your Interest Rates Austria account.\n\n" +
+            "Click the link below to reset your password:\n\n" +
+            "%s\n\n" +
+            "This link will expire in 1 hour for security reasons.\n\n" +
+            "If you didn't request a password reset, please ignore this email. Your password will remain unchanged.\n\n" +
+            "For security reasons, please do not share this link with anyone.\n\n" +
+            "Best regards,\n" +
+            "Interest Rates Austria Team",
+            resetLink
+        );
+        
+        message.setText(emailContent);
+        
+        try {
+            mailSender.send(message);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to send password reset email", e);
+        }
+    }
+
     public void sendWelcomeEmail(String toEmail) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
@@ -66,6 +96,33 @@ public class EmailService {
         } catch (Exception e) {
             // Don't throw exception for welcome email failure
             System.err.println("Failed to send welcome email: " + e.getMessage());
+        }
+    }
+
+    public void sendPasswordChangedNotification(String toEmail) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(toEmail);
+        message.setSubject("Password Changed Successfully - Interest Rates Austria");
+        
+        String emailContent = 
+            "Password Changed Successfully\n\n" +
+            "Your password has been successfully changed for your Interest Rates Austria account.\n\n" +
+            "If you didn't make this change, please contact our support team immediately.\n\n" +
+            "For security:\n" +
+            "- Never share your password with anyone\n" +
+            "- Use a strong, unique password\n" +
+            "- Log out from shared computers\n\n" +
+            "Best regards,\n" +
+            "Interest Rates Austria Team";
+        
+        message.setText(emailContent);
+        
+        try {
+            mailSender.send(message);
+        } catch (Exception e) {
+            // Don't throw exception for notification email failure
+            System.err.println("Failed to send password changed notification: " + e.getMessage());
         }
     }
 }

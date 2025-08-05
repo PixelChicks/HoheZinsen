@@ -33,6 +33,13 @@ public class User {
     @Column(name = "verification_token_expires")
     private LocalDateTime verificationTokenExpires;
 
+    // New fields for password reset
+    @Column(name = "password_reset_token")
+    private String passwordResetToken;
+
+    @Column(name = "password_reset_token_expires")
+    private LocalDateTime passwordResetTokenExpires;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -50,6 +57,7 @@ public class User {
         this.role = role;
     }
 
+    // Existing getters and setters...
     public Long getId() {
         return id;
     }
@@ -114,6 +122,23 @@ public class User {
         this.verificationTokenExpires = verificationTokenExpires;
     }
 
+    // New password reset getters and setters
+    public String getPasswordResetToken() {
+        return passwordResetToken;
+    }
+
+    public void setPasswordResetToken(String passwordResetToken) {
+        this.passwordResetToken = passwordResetToken;
+    }
+
+    public LocalDateTime getPasswordResetTokenExpires() {
+        return passwordResetTokenExpires;
+    }
+
+    public void setPasswordResetTokenExpires(LocalDateTime passwordResetTokenExpires) {
+        this.passwordResetTokenExpires = passwordResetTokenExpires;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -141,5 +166,10 @@ public class User {
     public boolean isVerificationTokenExpired() {
         return verificationTokenExpires != null &&
                 LocalDateTime.now().isAfter(verificationTokenExpires);
+    }
+
+    public boolean isPasswordResetTokenExpired() {
+        return passwordResetTokenExpires != null &&
+                LocalDateTime.now().isAfter(passwordResetTokenExpires);
     }
 }

@@ -13,6 +13,8 @@ public interface UserRepository extends CrudRepository<User, Long> {
 
     Optional<User> findByVerificationToken(String verificationToken);
 
+    Optional<User> findByPasswordResetToken(String passwordResetToken);
+
     boolean existsByUsername(String username);
 
     @Query("SELECT u FROM User u WHERE u.username = :email")
