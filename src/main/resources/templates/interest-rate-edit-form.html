@@ -651,8 +651,8 @@
                     labelInputs.forEach((input, index) => {
                         console.log(`Label ${index} (${input.type}): "${input.value}"`);
                         if (input.value && input.value.trim()) {
-                            if (input.value.includes(',')) {
-                                const splitValues = input.value.split(',');
+                            if (input.value.includes('||')) {
+                                const splitValues = input.value.split('||');
                                 splitValues.forEach(val => {
                                     if (val.trim()) labels.push(val.trim());
                                 });
@@ -669,8 +669,8 @@
                     descInputs.forEach((input, index) => {
                         console.log(`Description ${index} (${input.type}): "${input.value}"`);
                         if (input.value && input.value.trim()) {
-                            if (input.value.includes(',')) {
-                                const splitValues = input.value.split(',');
+                            if (input.value.includes('||')) {
+                                const splitValues = input.value.split('||');
                                 splitValues.forEach(val => {
                                     if (val.trim()) descriptions.push(val.trim());
                                 });
@@ -690,7 +690,7 @@
                         const labelsInput = document.createElement('input');
                         labelsInput.type = 'hidden';
                         labelsInput.name = `tableRowLabels_${sectionId}`;
-                        labelsInput.value = labels.join(',');
+                        labelsInput.value = labels.join('||');
                         section.appendChild(labelsInput);
                         console.log(`✓ Created combined labels input: "${labelsInput.value}"`);
                     }
@@ -699,7 +699,7 @@
                         const descriptionsInput = document.createElement('input');
                         descriptionsInput.type = 'hidden';
                         descriptionsInput.name = `tableRowDescriptions_${sectionId}`;
-                        descriptionsInput.value = descriptions.join(',');
+                        descriptionsInput.value = descriptions.join('||');
                         section.appendChild(descriptionsInput);
                         console.log(`✓ Created combined descriptions input: "${descriptionsInput.value}"`);
                     }
