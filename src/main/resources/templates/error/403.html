@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Forbidden</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/error.css">
+</head>
+<body>
+<div class="error-container">
+    <div class="error-card">
+        <div class="error-header">
+            <div class="error-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h1 class="error-code">403</h1>
+            <h2 class="error-title">Access Forbidden</h2>
+        </div>
+
+        <div class="error-body">
+            <p class="error-description">
+                You don't have permission to access this resource. This could be because you're not logged in or you don't have the required privileges.
+            </p>
+
+            <div class="error-actions">
+                <a href="/login" class="btn-login">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </a>
+                <a href="/" class="btn-primary">
+                    <i class="fas fa-home me-2"></i>Go Home
+                </a>
+                <a href="javascript:history.back()" class="btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Go Back
+                </a>
+            </div>
+
+            <div class="security-info">
+                <h6><i class="fas fa-info-circle"></i>Why am I seeing this?</h6>
+                <ul>
+                    <li>You may need to log in to access this page</li>
+                    <li>Your session might have expired</li>
+                    <li>You don't have the required permissions</li>
+                    <li>This resource is restricted to certain users</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Add some animation when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const card = document.querySelector('.error-card');
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100);
+    });
+</script>
+</body>
+</html>

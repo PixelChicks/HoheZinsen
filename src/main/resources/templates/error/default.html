@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${errorTitle + ' - Interest Rates Austria'}">Error</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/error.css">
+</head>
+<body>
+<div class="error-container">
+    <div class="error-card">
+        <div class="error-header">
+            <div class="error-icon">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <h1 class="error-code" th:text="${status ?: 'Error'}">Error</h1>
+            <h2 class="error-title" th:text="${errorTitle ?: 'An Error Occurred'}">An Error Occurred</h2>
+        </div>
+
+        <div class="error-body">
+            <p class="error-description" th:text="${errorDescription ?: 'Something went wrong. Please try again later.'}">
+                Something went wrong. Please try again later.
+            </p>
+
+            <div class="error-actions">
+                <a href="/" class="btn-primary">
+                    <i class="fas fa-home me-2"></i>Go Home
+                </a>
+                <a href="javascript:history.back()" class="btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Go Back
+                </a>
+            </div>
+
+            <div class="error-details-content" id="errorDetails">
+                <div class="error-details">
+                    <div class="row g-3">
+                        <div class="col-sm-6" th:if="${status}">
+                            <strong>Status Code:</strong><br>
+                            <span th:text="${status}">Unknown</span>
+                        </div>
+                        <div class="col-sm-6" th:if="${error}">
+                            <strong>Error:</strong><br>
+                            <span th:text="${error}">Unknown Error</span>
+                        </div>
+                        <div class="col-sm-6" th:if="${timestamp}">
+                            <strong>Timestamp:</strong><br>
+                            <span th:text="${#temporals.format(timestamp, 'yyyy-MM-dd HH:mm:ss')}">Unknown</span>
+                        </div>
+                        <div class="col-sm-6" th:if="${path}">
+                            <strong>Path:</strong><br>
+                            <span th:text="${path}" class="text-break">Unknown</span>
+                        </div>
+                        <div class="col-12" th:if="${message and message != 'An unexpected error occurred'}">
+                            <strong>Message:</strong><br>
+                            <span th:text="${message}" class="text-break">No additional message</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Add some animation when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const card = document.querySelector('.error-card');
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100);
+    });
+</script>
+</body>
+</html>

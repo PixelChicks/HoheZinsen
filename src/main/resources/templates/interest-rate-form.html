@@ -464,7 +464,9 @@
     </div>
 </div>
 <div sec:authorize="isAnonymous()">
-    <p>You are not logged in.</p>
+    <script>
+        window.location.href = '/';
+    </script>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
