@@ -275,16 +275,22 @@
     // Add authentication state to JavaScript
     const isAuthenticated = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false;
 
-    // All your existing JavaScript variables and functions remain the same
-    let currentPage = 1;
-    let pageSize = 5;
-    let totalRecords = 0;
-    let totalPages = 0;
-    let allInterestRates = /*[[${interestRates}]]*/ [];
-    let filteredRates = [];
-    let isLoading = false;
+    // Global pagination variables
+    let currentPage = /*[[${currentPage}]]*/ 1;
+    let pageSize = /*[[${pageSize}]]*/ 5;
+    let totalRecords = /*[[${totalElements}]]*/ 0;
+    let totalPages = /*[[${totalPages}]]*/ 0;
+    let currentSortColumn = /*[[${sortBy}]]*/ 'id';
+    let currentSortDirection = /*[[${sortDir}]]*/ 'asc';
+    let currentSearchTerm = /*[[${search}]]*/ '';
 
-    // Keep all your existing variables
+    // Server data
+    let serverRateFieldValuesMap = /*[[${rateFieldValuesMap}]]*/ {};
+    let globalFieldsCache = /*[[${globalFields}]]*/ [];
+    let currentPageData = /*[[${interestRates}]]*/ [];
+
+    // UI state variables
+    let isLoading = false;
     let currentExpandedCard = null;
     let currentEditForm = null;
     let draggedElement = null;
@@ -294,33 +300,250 @@
     let pendingFieldDeleteId = null;
     let draggedSection = null;
     let currentRateId = null;
-    let currentSortColumn = null;
-    let currentSortDirection = null;
 
     document.addEventListener('DOMContentLoaded', function () {
+        // Initialize pagination with server data
         initializePagination();
+
         if (isAuthenticated) {
             captureOriginalOrder();
         }
-        initializeSortableHeaders(); // Move this outside the if block
+
+        initializeSortableHeaders();
         initializeSearch();
-        loadPageFromServer(1);
+
+        // Render the initial data from server
+        renderInitialData();
     });
 
-    // Modified renderTableRows function to handle authentication
-    function renderTableRows(data, tbody) {
-        tbody.innerHTML = data.map(rate => {
-            const headers = document.querySelectorAll('.draggable-column, .sortable');
-            const currentFieldOrder = Array.from(headers)
-                .map(header => ({
-                    id: header.dataset.fieldId,
-                    label: header.querySelector('.header-text').textContent
-                }));
+    document.addEventListener('DOMContentLoaded', function () {
+        const stackedViewBtn = document.getElementById('stackedView');
+        const scrollViewBtn = document.getElementById('scrollView');
+        const tableContainer = document.getElementById('tableContainer');
 
+        if (stackedViewBtn && scrollViewBtn && tableContainer) {
+            stackedViewBtn.addEventListener('click', function () {
+                stackedViewBtn.classList.add('active');
+                scrollViewBtn.classList.remove('active');
+                tableContainer.classList.add('mobile-stack');
+            });
+
+            scrollViewBtn.addEventListener('click', function () {
+                scrollViewBtn.classList.add('active');
+                stackedViewBtn.classList.remove('active');
+                tableContainer.classList.remove('mobile-stack');
+            });
+        }
+    });
+
+
+    function initializePagination() {
+        // Set pagination controls based on server data
+        updatePaginationControls();
+        updatePaginationInfo();
+
+        // Set initial page size selector
+        const pageSizeSelect = document.getElementById('pageSize');
+        if (pageSizeSelect) {
+            pageSizeSelect.value = pageSize;
+        }
+    }
+
+    function renderInitialData() {
+        // Render the data that was already loaded from server
+        renderTableData(currentPageData);
+    }
+
+    // Load page from server - this is the main pagination function
+    function loadPageFromServer(page, searchTerm = '', sortBy = null, sortDir = null) {
+        if (isLoading) return;
+
+        showLoading();
+
+        const params = new URLSearchParams({
+            page: page - 1, // Convert to 0-based for backend
+            size: pageSize,
+            sortBy: sortBy || currentSortColumn,
+            sortDir: sortDir || currentSortDirection
+        });
+
+        if (searchTerm && searchTerm.trim()) {
+            params.append('search', searchTerm.trim());
+        }
+
+        // Use the correct endpoint that matches your controller
+        fetch(`/api/interest-rates?${params.toString()}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Update all pagination state
+                currentPage = page;
+                totalPages = data.totalPages;
+                totalRecords = data.totalElements;
+                currentSearchTerm = searchTerm || '';
+
+                // Update sort state if provided
+                if (sortBy) currentSortColumn = sortBy;
+                if (sortDir) currentSortDirection = sortDir;
+
+                // Update data arrays
+                currentPageData = data.content;
+                serverRateFieldValuesMap = data.rateFieldValuesMap;
+
+                // Render the new data
+                renderTableData(data.content);
+                updatePaginationControls();
+                updatePaginationInfo();
+                hideLoading();
+
+                // Close any expanded cards when changing pages
+                if (currentExpandedCard) {
+                    closeExpandedCard(currentExpandedCard);
+                }
+
+                // Update URL without page reload (optional)
+                updateBrowserUrl(page, searchTerm, sortBy, sortDir);
+            })
+            .catch(error => {
+                console.error('Error loading page:', error);
+                showDeleteNotification('Error loading data: ' + error.message, true);
+                hideLoading();
+            });
+    }
+
+    function updateBrowserUrl(page, search, sortBy, sortDir) {
+        const url = new URL(window.location);
+        url.searchParams.set('page', page - 1); // 0-based for URL consistency
+        if (search) {
+            url.searchParams.set('search', search);
+        } else {
+            url.searchParams.delete('search');
+        }
+        url.searchParams.set('sortBy', sortBy || currentSortColumn);
+        url.searchParams.set('sortDir', sortDir || currentSortDirection);
+        url.searchParams.set('size', pageSize);
+
+        window.history.replaceState({}, '', url);
+    }
+
+    function renderTableData(data) {
+        const tbody = document.getElementById('tableBody');
+        const emptyState = document.getElementById('emptyState');
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '';
+            emptyState.style.display = 'block';
+            return;
+        }
+
+        emptyState.style.display = 'none';
+        renderTableRows(data, tbody);
+    }
+
+    function saveColumnOrder() {
+        if (!isAuthenticated) {
+            showDeleteNotification('You must be logged in to save changes.', true);
+            return;
+        }
+
+        // Original saveColumnOrder function code...
+        const headers = document.querySelectorAll(".draggable-column");
+        const newOrder = Array.from(headers)
+            .map(header => header.dataset.fieldId);
+
+        const saveBtn = document.getElementById("saveOrderBtn");
+        const originalText = saveBtn.textContent;
+        saveBtn.textContent = "Saving...";
+        saveBtn.disabled = true;
+
+        fetch('/fields/reorder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': getCsrfToken()
+                },
+                body: JSON.stringify(newOrder)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to save order");
+                }
+                return response.text();
+            })
+            .then(data => {
+                orderChanged = false;
+                saveBtn.classList.remove("show");
+                document.getElementById("orderChangedIndicator")
+                    .classList.remove("show");
+                updateGlobalFieldsCache();
+                showDeleteNotification('Column order saved successfully!', false);
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+            })
+            .catch(error => {
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+                showDeleteNotification("Error saving order: " + error.message, true);
+            });
+    }
+
+    function deleteInterestRate(rateId) {
+        if (!isAuthenticated) {
+            showDeleteNotification('You must be logged in to delete items.', true);
+            return;
+        }
+
+        fetch(`/interest-rate/${rateId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to delete interest rate');
+                }
+                return response.text();
+            })
+            .then(data => {
+                hideDeleteConfirmation();
+                showDeleteNotification('Interest rate deleted successfully!', false);
+                closeExpandedCard(rateId);
+
+                setTimeout(() => {
+                    const searchTerm = document.getElementById('searchInput')
+                        ?.value || '';
+                    loadPageFromServer(currentPage, searchTerm);
+                }, 500);
+            })
+            .catch(error => {
+                hideDeleteConfirmation();
+                showDeleteNotification('Error deleting interest rate: ' + error.message, true);
+            });
+    }
+
+    function renderTableRows(data, tbody) {
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '';
+            return;
+        }
+
+        tbody.innerHTML = data.map(rate => {
+            // Get current field order from headers (this is the key part)
+            const headers = document.querySelectorAll('.draggable-column, .sortable');
+            const currentFieldOrder = Array.from(headers).map(header => ({
+                id: header.dataset.fieldId,
+                label: header.querySelector('.header-text').textContent.trim()
+            }));
+
+            // Generate cells in the new column order
             const fieldCells = currentFieldOrder.map(field => {
                 const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
 
-                // For authenticated users, show editable inputs
                 if (isAuthenticated) {
                     return `
                         <td class="data-cell" data-field-id="${field.id}" data-label="${field.label}">
@@ -336,17 +559,18 @@
                         </td>
                     `;
                 } else {
-                    // For guests, show read-only values
-                    // For guests, show read-only values
                     return `
                         <td class="data-cell" data-field-id="${field.id}" data-label="${field.label}">
-                            <div class="form-control form-control-sm text-center" style="border: none; background: transparent; cursor: default;">${fieldValue || '-'}</div>
+                            <div class="form-control form-control-sm text-center"
+                                 style="border: none; background: transparent; cursor: default;">
+                                ${fieldValue || '-'}
+                            </div>
                         </td>
                     `;
                 }
             }).join('');
 
-            // Action buttons - different for authenticated vs guest users
+            // Action buttons
             let actionButtons = '';
             if (isAuthenticated) {
                 actionButtons = `
@@ -403,240 +627,7 @@
         }).join('');
     }
 
-    // Modified functions to check authentication before executing admin actions
-    function updateFieldValueAjax(rateId, fieldId, value) {
-        if (!isAuthenticated) {
-            showDeleteNotification('You must be logged in to make changes.', true);
-            return;
-        }
-
-        // Original function code...
-        const formData = new FormData();
-        formData.append('rateId', rateId);
-        formData.append('fieldId', fieldId);
-        formData.append('value', value);
-
-        fetch('/field-values/update', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to update field value');
-            }
-            if (!serverRateFieldValuesMap[rateId]) {
-                serverRateFieldValuesMap[rateId] = {};
-            }
-            serverRateFieldValuesMap[rateId][fieldId] = value;
-        })
-        .catch(error => {
-            console.error('Error updating field value:', error);
-            showDeleteNotification('Error updating field value: ' + error.message, true);
-        });
-    }
-
-    function showDeleteConfirmation(rateId) {
-        if (!isAuthenticated) {
-            showDeleteNotification('You must be logged in to delete items.', true);
-            return;
-        }
-
-        pendingDeleteId = rateId;
-        document.getElementById('deleteConfirmationModal').style.display = 'flex';
-        document.getElementById('confirmDeleteBtn').onclick = function () {
-            deleteInterestRate(rateId);
-        };
-    }
-
-    function handleFieldDeleteClick(button) {
-        if (!isAuthenticated) {
-            showDeleteNotification('You must be logged in to delete fields.', true);
-            return;
-        }
-
-        const fieldId = button.dataset.id;
-        const fieldLabel = button.dataset.label;
-        showFieldDeleteConfirmation(fieldId, fieldLabel);
-    }
-
-    function saveColumnOrder() {
-        if (!isAuthenticated) {
-            showDeleteNotification('You must be logged in to save changes.', true);
-            return;
-        }
-
-        // Original saveColumnOrder function code...
-        const headers = document.querySelectorAll(".draggable-column");
-        const newOrder = Array.from(headers).map(header => header.dataset.fieldId);
-
-        const saveBtn = document.getElementById("saveOrderBtn");
-        const originalText = saveBtn.textContent;
-        saveBtn.textContent = "Saving...";
-        saveBtn.disabled = true;
-
-        fetch('/fields/reorder', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': getCsrfToken()
-            },
-            body: JSON.stringify(newOrder)
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Failed to save order");
-            }
-            return response.text();
-        })
-        .then(data => {
-            orderChanged = false;
-            saveBtn.classList.remove("show");
-            document.getElementById("orderChangedIndicator").classList.remove("show");
-            updateGlobalFieldsCache();
-            showDeleteNotification('Column order saved successfully!', false);
-            saveBtn.textContent = originalText;
-            saveBtn.disabled = false;
-        })
-        .catch(error => {
-            saveBtn.textContent = originalText;
-            saveBtn.disabled = false;
-            showDeleteNotification("Error saving order: " + error.message, true);
-        });
-    }
-
-    // All your other existing JavaScript functions remain the same,
-    // but add authentication checks where needed...
-
-    function loadPageFromServer(page, searchTerm = '') {
-        if (isLoading) return;
-
-        showLoading();
-
-        const params = new URLSearchParams({
-            page: page - 1,
-            size: pageSize,
-            sortBy: currentSortColumn || 'id',
-            sortDir: currentSortDirection || 'asc'
-        });
-
-        if (searchTerm && searchTerm.trim()) {
-            params.append('search', searchTerm.trim());
-        }
-
-    // Use the correct endpoint
-    fetch(`/api/interest-rates/paginated?${params.toString()}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to fetch data');
-            }
-            return response.json();
-        })
-        .then(data => {
-            currentPage = page;
-            totalPages = data.totalPages;
-            totalRecords = data.totalElements;
-
-            // Update global data arrays
-            allInterestRates = data.content;
-            filteredRates = data.content;
-
-            // Store the field values map from server
-            serverRateFieldValuesMap = data.rateFieldValuesMap;
-
-            renderTableData(data.content);
-            updatePaginationControls();
-            updatePaginationInfo();
-            hideLoading();
-
-            // Close any expanded cards when changing pages
-            if (currentExpandedCard) {
-                closeExpandedCard(currentExpandedCard);
-            }
-        })
-        .catch(error => {
-            console.error('Error loading page:', error);
-            showDeleteNotification('Error loading data: ' + error.message, true);
-            hideLoading();
-        });
-}
-
-    function initializePagination() {
-        totalRecords = allInterestRates.length;
-        filteredRates = [...allInterestRates];
-        updatePaginationInfo();
-    }
-
-    function loadPage(page) {
-        if (isLoading) return;
-
-        showLoading();
-        currentPage = page;
-
-        setTimeout(() => {
-            const startIndex = (currentPage - 1) * pageSize;
-            const endIndex = startIndex + pageSize;
-            const pageData = filteredRates.slice(startIndex, endIndex);
-
-            renderTableData(pageData);
-            updatePaginationControls();
-            updatePaginationInfo();
-            hideLoading();
-
-            if (currentExpandedCard) {
-                closeExpandedCard(currentExpandedCard);
-            }
-        }, 300);
-    }
-
-    function renderTableData(data) {
-        const tbody = document.getElementById('tableBody');
-        const emptyState = document.getElementById('emptyState');
-
-        if (data.length === 0) {
-            tbody.innerHTML = '';
-            emptyState.style.display = 'block';
-            return;
-        }
-
-        emptyState.style.display = 'none';
-
-        const headers = document.querySelectorAll('.draggable-column, .sortable');
-        if (headers.length > 0) {
-            renderTableRows(data, tbody);
-        } else {
-            if (!globalFieldsCache) {
-                fetchGlobalFields().then(() => {
-                    renderTableRows(data, tbody);
-                });
-            } else {
-                renderTableRows(data, tbody);
-            }
-        }
-    }
-
-    let globalFieldsCache = null;
-    let serverRateFieldValuesMap = {};
-
-    function fetchGlobalFields() {
-        if (globalFieldsCache) {
-            return Promise.resolve(globalFieldsCache);
-        }
-
-        return fetch('/api/global-fields')
-            .then(response => response.json())
-            .then(fields => {
-                globalFieldsCache = fields;
-                return fields;
-            })
-            .catch(error => {
-                console.error('Error fetching global fields:', error);
-                return [];
-            });
-    }
-
     function updatePaginationControls() {
-        totalPages = Math.ceil(filteredRates.length / pageSize);
-
         const firstPageBtn = document.getElementById('firstPageBtn');
         const prevPageBtn = document.getElementById('prevPageBtn');
         const nextPageBtn = document.getElementById('nextPageBtn');
@@ -644,8 +635,8 @@
 
         if (firstPageBtn) firstPageBtn.disabled = currentPage === 1;
         if (prevPageBtn) prevPageBtn.disabled = currentPage === 1;
-        if (nextPageBtn) nextPageBtn.disabled = currentPage === totalPages;
-        if (lastPageBtn) lastPageBtn.disabled = currentPage === totalPages;
+        if (nextPageBtn) nextPageBtn.disabled = currentPage >= totalPages;
+        if (lastPageBtn) lastPageBtn.disabled = currentPage >= totalPages;
 
         updatePageNumbers();
 
@@ -670,7 +661,6 @@
         }
 
         let html = '';
-
         for (let i = startPage; i <= endPage; i++) {
             html += `
                 <button class="page-btn ${i === currentPage ? 'active' : ''}"
@@ -685,9 +675,8 @@
     }
 
     function updatePaginationInfo() {
-        const startRecord = filteredRates.length === 0 ? 0 : (currentPage - 1) * pageSize + 1;
-        const endRecord = Math.min(currentPage * pageSize, filteredRates.length);
-        const totalRecords = filteredRates.length;
+        const startRecord = totalRecords === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+        const endRecord = Math.min(currentPage * pageSize, totalRecords);
 
         const infoText = `Showing ${startRecord}-${endRecord} of ${totalRecords} results`;
 
@@ -698,9 +687,10 @@
         if (resultsInfoBottom) resultsInfoBottom.textContent = infoText;
     }
 
+    // Main navigation function - always loads from server
     function goToPage(page) {
         if (page < 1 || page > totalPages || page === currentPage || isLoading) return;
-        loadPage(page);
+        loadPageFromServer(page, currentSearchTerm);
     }
 
     function jumpToPage() {
@@ -716,7 +706,7 @@
     function changePageSize(newSize) {
         pageSize = parseInt(newSize);
         currentPage = 1;
-        loadPage(1);
+        loadPageFromServer(1, currentSearchTerm);
     }
 
     function showLoading() {
@@ -731,6 +721,142 @@
         if (overlay) overlay.classList.remove('show');
     }
 
+    // Search functionality
+    function initializeSearch() {
+        // Create search input if it doesn't exist
+        let searchContainer = document.querySelector('.search-container');
+        if (!searchContainer) {
+            searchContainer = document.createElement('div');
+            searchContainer.className = 'search-container mb-3';
+            searchContainer.innerHTML = `
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                           <input type="text" class="form-control" id="searchInput"
+                               placeholder="Search interest rates..."
+                               th:value="${currentSearchTerm != null} ? ${currentSearchTerm} : ''" />
+                            <button class="btn btn-outline-secondary" type="button" onclick="performSearch()">
+                                🔍 Search
+                            </button>
+                            <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()">
+                                ✕ Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Insert after the view toggle or before the pagination
+            const viewToggle = document.querySelector('.view-toggle');
+            const paginationTop = document.querySelector('.pagination-container');
+            if (viewToggle) {
+                viewToggle.parentNode.insertBefore(searchContainer, viewToggle.nextSibling);
+            } else if (paginationTop) {
+                paginationTop.parentNode.insertBefore(searchContainer, paginationTop);
+            }
+        }
+
+        // Add enter key support
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+        }
+    }
+
+    function performSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const searchTerm = searchInput ? searchInput.value.trim() : '';
+        currentPage = 1;
+        loadPageFromServer(1, searchTerm);
+    }
+
+    function clearSearch() {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+        currentPage = 1;
+        loadPageFromServer(1, '');
+    }
+
+    // Sorting functionality
+    function sortTable(headerElement, event) {
+        if (event && event.type === 'click' && headerElement.classList.contains('dragging')) {
+            return;
+        }
+
+        const fieldId = headerElement.dataset.fieldId;
+        const sortBy = `field_${fieldId}`;
+
+        let sortDirection = 'asc';
+        if (currentSortColumn === sortBy) {
+            sortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+        }
+
+        // Update UI indicators
+        document.querySelectorAll('.sortable')
+            .forEach(th => {
+                th.classList.remove('sort-asc', 'sort-desc');
+            });
+        headerElement.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+
+        // Load data with new sort
+        currentPage = 1;
+        loadPageFromServer(1, currentSearchTerm, sortBy, sortDirection);
+    }
+
+    // Field value update
+    function updateFieldValueAjax(rateId, fieldId, value) {
+        if (!isAuthenticated) {
+            showDeleteNotification('You must be logged in to make changes.', true);
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('rateId', rateId);
+        formData.append('fieldId', fieldId);
+        formData.append('value', value);
+
+        fetch('/field-values/update', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to update field value');
+                }
+                // Update local cache
+                if (!serverRateFieldValuesMap[rateId]) {
+                    serverRateFieldValuesMap[rateId] = {};
+                }
+                serverRateFieldValuesMap[rateId][fieldId] = value;
+            })
+            .catch(error => {
+                console.error('Error updating field value:', error);
+                showDeleteNotification('Error updating field value: ' + error.message, true);
+            });
+    }
+
+    // Delete functionality
+    function showDeleteConfirmation(rateId) {
+        if (!isAuthenticated) {
+            showDeleteNotification('You must be logged in to delete items.', true);
+            return;
+        }
+
+        pendingDeleteId = rateId;
+        document.getElementById('deleteConfirmationModal')
+            .style.display = 'flex';
+        document.getElementById('confirmDeleteBtn')
+            .onclick = function () {
+                deleteInterestRate(rateId);
+            };
+    }
+
     function deleteInterestRate(rateId) {
         if (!isAuthenticated) {
             showDeleteNotification('You must be logged in to delete items.', true);
@@ -738,133 +864,207 @@
         }
 
         fetch(`/interest-rate/${rateId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to delete interest rate');
-            }
-            return response.text();
-        })
-        .then(data => {
-            hideDeleteConfirmation();
-            showDeleteNotification('Interest rate deleted successfully!', false);
-            closeExpandedCard(rateId);
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to delete interest rate');
+                }
+                return response.text();
+            })
+            .then(data => {
+                hideDeleteConfirmation();
+                showDeleteNotification('Interest rate deleted successfully!', false);
+                closeExpandedCard(rateId);
+
+                // Reload current page after deletion
+                setTimeout(() => {
+                    loadPageFromServer(currentPage, currentSearchTerm);
+                }, 500);
+            })
+            .catch(error => {
+                hideDeleteConfirmation();
+                showDeleteNotification('Error deleting interest rate: ' + error.message, true);
+            });
+    }
+
+    function hideDeleteConfirmation() {
+        document.getElementById('deleteConfirmationModal')
+            .style.display = 'none';
+        pendingDeleteId = null;
+    }
+
+    function showDeleteNotification(message, isError) {
+        const notification = document.getElementById('deleteNotification');
+        if (notification) {
+            notification.textContent = message;
+            notification.classList.toggle('error', isError);
+            notification.classList.toggle('success', !isError);
+            notification.classList.add('show');
 
             setTimeout(() => {
-                const searchTerm = document.getElementById('searchInput')?.value || '';
-                loadPageFromServer(currentPage, searchTerm);
-            }, 500);
-        })
-        .catch(error => {
-            hideDeleteConfirmation();
-            showDeleteNotification('Error deleting interest rate: ' + error.message, true);
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    }
+
+    // Initialize sortable headers
+    function initializeSortableHeaders() {
+        const headers = document.querySelectorAll('.draggable-column, .sortable');
+        headers.forEach(header => {
+            header.classList.add('sortable');
         });
     }
 
-    function sortTable(headerElement, event) {
-        if (event && event.type === 'click' && headerElement.classList.contains('dragging')) {
-            return;
-        }
-
-        const fieldId = headerElement.dataset.fieldId;
-        const currentSortField = `field_${fieldId}`;
-
-        let sortDirection = 'asc';
-        if (currentSortColumn === currentSortField) {
-            sortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
-        }
-
-        document.querySelectorAll('.sortable').forEach(th => {
-            th.classList.remove('sort-asc', 'sort-desc');
-        });
-
-        headerElement.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
-
-        currentSortColumn = currentSortField;
-        currentSortDirection = sortDirection;
-
-        currentPage = 1;
-        const searchTerm = document.getElementById('searchInput')?.value || '';
-        loadPageFromServer(1, searchTerm);
-
-        updateSortInfo(headerElement.querySelector('.header-text').textContent.trim(), sortDirection);
+    // Admin-only functions for field management and drag-drop
+    function captureOriginalOrder() {
+        if (!isAuthenticated) return;
+        const headers = document.querySelectorAll('.draggable-column');
+        originalOrder = Array.from(headers)
+            .map(header => header.dataset.fieldId);
     }
 
-    function updateSortInfo(columnName, direction) {
-        const sortInfo = document.getElementById('sortInfo');
-        if (sortInfo) {
-            if (columnName && direction) {
-                let resetButton = '';
-                if (isAuthenticated) {
-                    resetButton = `<button onclick="resetSort()" style="margin-left: 10px; padding: 2px 6px; font-size: 12px; border: 1px solid #ccc; background: white; border-radius: 3px; cursor: pointer;">Reset</button>`;
+
+    // More info functionality - fetch individual rate details if needed
+   function showMoreInfo(rateId) {
+    let rate = currentPageData.find(r => r.id === rateId);
+
+    if (!rate) {
+        fetchRateDetails(rateId).then(rateData => {
+            if (rateData && rateData.moreInfo) {
+                displayRateCard(rateData);
+            }
+        });
+        return;
+    }
+
+    if (!rate.moreInfo) {
+        showDeleteNotification('No additional information available for this rate.', false);
+        return;
+    }
+
+    displayRateCard(rate);
+}
+
+    function fetchRateDetails(rateId) {
+        return fetch(`/api/interest-rate/${rateId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch rate details');
                 }
-                sortInfo.innerHTML = `Sorted by: <strong>${columnName}</strong> ${direction === 'asc' ? '↑' : '↓'} ${resetButton}`;
-                sortInfo.style.background = 'linear-gradient(135deg, #e7f3ff, #cce7ff)';
-            } else {
-                sortInfo.textContent = 'Click column headers to sort ↕️';
-                sortInfo.style.background = 'white';
+                return response.json();
+            })
+            .catch(error => {
+                console.error('Error fetching rate details:', error);
+                showDeleteNotification('Error loading rate details: ' + error.message, true);
+                return null;
+            });
+    }
+
+    function displayRateCard(rate) {
+        if (currentExpandedCard && currentExpandedCard !== rate.id) {
+            closeExpandedCard(currentExpandedCard);
+        }
+
+        let existingCard = document.getElementById(`rateCardRow_${rate.id}`);
+        if (existingCard) {
+            existingCard.style.display = 'none';
+            setTimeout(() => {
+                if (existingCard.parentNode) {
+                    existingCard.parentNode.removeChild(existingCard);
+                }
+            }, 0);
+
+            if (currentExpandedCard === rate.id) {
+                currentExpandedCard = null;
+                return;
+            }
+        }
+
+        const targetRow = document.querySelector(`tr[data-rate-id="${rate.id}"]`);
+        if (!targetRow) return;
+
+        const card = createRateCard(rate);
+        const cardRow = document.createElement('tr');
+        cardRow.id = `rateCardRow_${rate.id}`;
+        cardRow.className = 'rate-card-row show';
+        cardRow.innerHTML = `<td colspan="100%" class="rate-card-cell"></td>`;
+
+        cardRow.querySelector('.rate-card-cell')
+            .appendChild(card);
+        targetRow.parentNode.insertBefore(cardRow, targetRow.nextSibling);
+
+        setTimeout(() => {
+            card.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }, 50);
+
+        currentExpandedCard = rate.id;
+    }
+
+
+
+    function closeExpandedCard(rateId) {
+        const cardRow = document.getElementById(`rateCardRow_${rateId}`);
+        if (cardRow) {
+            cardRow.style.display = 'none';
+            cardRow.classList.remove('show');
+            requestAnimationFrame(() => {
+                if (cardRow.parentNode) {
+                    cardRow.parentNode.removeChild(cardRow);
+                }
+            });
+
+            if (currentExpandedCard === rateId) {
+                currentExpandedCard = null;
             }
         }
     }
 
-    function resetSort() {
-        document.querySelectorAll('.sortable').forEach(th => {
-            th.classList.remove('sort-asc', 'sort-desc');
-        });
+    // Enhanced keyboard navigation for pagination
+    document.addEventListener('keydown', function (e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-        currentSortColumn = null;
-        currentSortDirection = null;
-
-        currentPage = 1;
-        const searchTerm = document.getElementById('searchInput')?.value || '';
-        loadPageFromServer(1, searchTerm);
-
-        updateSortInfo();
-        showDeleteNotification('Sort reset! Data restored to original order.', false);
-    }
-
-    function initializeSearch() {
-        const existingSearch = document.querySelector('.search-container');
-        if (existingSearch) {
-            existingSearch.remove();
+        switch (e.key) {
+        case 'ArrowLeft':
+            if (currentPage > 1) {
+                e.preventDefault();
+                goToPage(currentPage - 1);
+            }
+            break;
+        case 'ArrowRight':
+            if (currentPage < totalPages) {
+                e.preventDefault();
+                goToPage(currentPage + 1);
+            }
+            break;
+        case 'Home':
+            e.preventDefault();
+            goToPage(1);
+            break;
+        case 'End':
+            e.preventDefault();
+            goToPage(totalPages);
+            break;
         }
-    }
+    });
 
-    function performSearch() {
-        const searchTerm = document.getElementById('searchInput').value;
-        currentPage = 1;
-        loadPageFromServer(1, searchTerm);
-    }
-
-    function clearSearch() {
-        document.getElementById('searchInput').value = '';
-        currentPage = 1;
-        loadPageFromServer(1, '');
-    }
-
-    function showMoreInfo(rateId) {
-        let rate = allInterestRates.find(r => r.id === rateId);
-
-        if (!rate) {
-            fetchRateDetails(rateId).then(rateData => {
-                if (rateData && rateData.moreInfo) {
-                    displayRateCard(rateData);
+    // Handle Enter key in page jump input
+    document.addEventListener('DOMContentLoaded', function () {
+        const pageJumpInput = document.getElementById('pageJumpInput');
+        if (pageJumpInput) {
+            pageJumpInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    jumpToPage();
                 }
             });
-            return;
         }
-
-        if (!rate.moreInfo) {
-            showDeleteNotification('No additional information available for this rate.', false);
-            return;
-        }
-
-        displayRateCard(rate);
-    }
+    });
 
     function fetchRateDetails(rateId) {
         return fetch(`/api/interest-rate/${rateId}`)
@@ -911,7 +1111,8 @@
         cardRow.className = 'rate-card-row show';
         cardRow.innerHTML = `<td colspan="100%" class="rate-card-cell"></td>`;
 
-        cardRow.querySelector('.rate-card-cell').appendChild(card);
+        cardRow.querySelector('.rate-card-cell')
+            .appendChild(card);
         targetRow.parentNode.insertBefore(cardRow, targetRow.nextSibling);
 
         setTimeout(() => {
@@ -924,148 +1125,150 @@
         currentExpandedCard = rate.id;
     }
 
-    function createRateCard(rate) {
-        const card = document.createElement('div');
-        card.className = 'rate-card';
-        card.id = `rateCard_${rate.id}`;
+  // Remove duplicate createRateCard functions - keep only this complete one:
+function createRateCard(rate) {
+    const card = document.createElement('div');
+    card.className = 'rate-card';
+    card.id = `rateCard_${rate.id}`;
 
-        const moreInfo = rate.moreInfo;
-        if (!moreInfo) return card;
+    const moreInfo = rate.moreInfo;
+    if (!moreInfo) return card;
 
-        const sectionOrder = moreInfo.sectionOrder || [];
-        const tableSectionsMap = new Map();
-        const textSectionsMap = new Map();
+    const sectionOrder = moreInfo.sectionOrder || [];
+    const tableSectionsMap = new Map();
+    const textSectionsMap = new Map();
 
-        if (moreInfo.tableSections) {
-            moreInfo.tableSections.forEach(tableSection => {
-                tableSectionsMap.set(tableSection.sectionIdentifier, tableSection);
-            });
+    if (moreInfo.tableSections) {
+        moreInfo.tableSections.forEach(tableSection => {
+            tableSectionsMap.set(tableSection.sectionIdentifier, tableSection);
+        });
+    }
+
+    if (moreInfo.textSections) {
+        moreInfo.textSections.forEach(textSection => {
+            textSectionsMap.set(textSection.sectionIdentifier, textSection);
+        });
+    }
+
+    const createTableSection = (tableSection) => {
+        if (!tableSection || !tableSection.title || !tableSection.miniTableRows || tableSection.miniTableRows.length === 0) {
+            return '';
         }
 
-        if (moreInfo.textSections) {
-            moreInfo.textSections.forEach(textSection => {
-                textSectionsMap.set(textSection.sectionIdentifier, textSection);
-            });
+        let dragAttributes = '';
+        let dragHandle = '';
+        let sectionControls = '';
+
+        if (isAuthenticated) {
+            dragAttributes = `
+                draggable="true"
+                ondragstart="handleSectionDragStart(event, '${tableSection.sectionIdentifier}', ${rate.id})"
+                ondragover="handleSectionDragOver(event)"
+                ondrop="handleSectionDrop(event, '${tableSection.sectionIdentifier}', ${rate.id})"
+                ondragend="handleSectionDragEnd(event)"
+            `;
+            dragHandle = `<div class="section-drag-handle" title="Drag to reorder">⋮⋮</div>`;
+            sectionControls = `
+                <div class="section-controls">
+                    <span class="section-type-indicator">Table</span>
+                </div>
+            `;
         }
 
-        const createTableSection = (tableSection) => {
-            if (!tableSection || !tableSection.title || !tableSection.miniTableRows || tableSection.miniTableRows.length === 0) {
-                return '';
-            }
-
-            let dragAttributes = '';
-            let dragHandle = '';
-            let sectionControls = '';
-
-            if (isAuthenticated) {
-                dragAttributes = `
-                    draggable="true"
-                    ondragstart="handleSectionDragStart(event, '${tableSection.sectionIdentifier}', ${rate.id})"
-                    ondragover="handleSectionDragOver(event)"
-                    ondrop="handleSectionDrop(event, '${tableSection.sectionIdentifier}', ${rate.id})"
-                    ondragend="handleSectionDragEnd(event)"
-                `;
-                dragHandle = `<div class="section-drag-handle" title="Drag to reorder">⋮⋮</div>`;
-                sectionControls = `
-                    <div class="section-controls">
-                        <span class="section-type-indicator">Table</span>
-                    </div>
-                `;
-            }
-
-            return `
-                <div class="expanded-section ${isAuthenticated ? 'draggable-section' : ''} table-section"
-                     data-section-type="table"
-                     data-section-id="${tableSection.sectionIdentifier}"
-                     ${dragAttributes}>
-                    ${dragHandle}
-                    ${sectionControls}
-                    <h5 class="section-title">${tableSection.title}</h5>
-                    <div class="info-table">
-                        ${tableSection.miniTableRows.map(row => `
-                            <div class="info-table-row">
-                                <div class="info-table-label">${row.label || ''}</div>
-                                <div class="info-table-value">${row.description || ''}</div>
-                            </div>
-                        `).join('')}
-                    </div>
+        return `
+            <div class="expanded-section ${isAuthenticated ? 'draggable-section' : ''} table-section"
+                 data-section-type="table"
+                 data-section-id="${tableSection.sectionIdentifier}"
+                 ${dragAttributes}>
+                ${dragHandle}
+                ${sectionControls}
+                <h5 class="section-title">${tableSection.title}</h5>
+                <div class="info-table">
+                    ${tableSection.miniTableRows.map(row => `
+                        <div class="info-table-row">
+                            <div class="info-table-label">${row.label || ''}</div>
+                            <div class="info-table-value">${row.description || ''}</div>
+                        </div>
+                    `).join('')}
                 </div>
-            `;
-        };
-
-        const createTextSection = (textSection) => {
-            if (!textSection || (!textSection.title && !textSection.content)) {
-                return '';
-            }
-
-            let dragAttributes = '';
-            let dragHandle = '';
-            let sectionControls = '';
-
-            if (isAuthenticated) {
-                dragAttributes = `
-                    draggable="true"
-                    ondragstart="handleSectionDragStart(event, '${textSection.sectionIdentifier}', ${rate.id})"
-                    ondragover="handleSectionDragOver(event)"
-                    ondrop="handleSectionDrop(event, '${textSection.sectionIdentifier}', ${rate.id})"
-                    ondragend="handleSectionDragEnd(event)"
-                `;
-                dragHandle = `<div class="section-drag-handle" title="Drag to reorder">⋮⋮</div>`;
-                sectionControls = `
-                    <div class="section-controls">
-                        <span class="section-type-indicator">Text</span>
-                    </div>
-                `;
-            }
-
-            return `
-                <div class="expanded-section ${isAuthenticated ? 'draggable-section' : ''} text-section"
-                     data-section-type="text"
-                     data-section-id="${textSection.sectionIdentifier}"
-                     ${dragAttributes}>
-                    ${dragHandle}
-                    ${sectionControls}
-                    ${textSection.title ? `<h5 class="section-title">${textSection.title}</h5>` : ''}
-                    <div class="text-content" style="text-align: left;">${textSection.content || ''}</div>
-                </div>
-            `;
-        };
-
-        let sectionsHTML = '';
-        sectionOrder.forEach(sectionIdentifier => {
-            if (sectionIdentifier.startsWith('table-')) {
-                const tableSection = tableSectionsMap.get(sectionIdentifier);
-                if (tableSection) {
-                    sectionsHTML += createTableSection(tableSection);
-                }
-            } else if (sectionIdentifier.startsWith('text-')) {
-                const textSection = textSectionsMap.get(sectionIdentifier);
-                if (textSection) {
-                    sectionsHTML += createTextSection(textSection);
-                }
-            }
-        });
-
-        tableSectionsMap.forEach((tableSection, identifier) => {
-            if (!sectionOrder.includes(identifier)) {
-                sectionsHTML += createTableSection(tableSection);
-            }
-        });
-
-        textSectionsMap.forEach((textSection, identifier) => {
-            if (!sectionOrder.includes(identifier)) {
-                sectionsHTML += createTextSection(textSection);
-            }
-        });
-
-        card.innerHTML = `
-            <div class="rate-expanded-content show">
-                ${sectionsHTML}
             </div>
         `;
+    };
 
-        return card;
-    }
+    const createTextSection = (textSection) => {
+        if (!textSection || (!textSection.title && !textSection.content)) {
+            return '';
+        }
+
+        let dragAttributes = '';
+        let dragHandle = '';
+        let sectionControls = '';
+
+        if (isAuthenticated) {
+            dragAttributes = `
+                draggable="true"
+                ondragstart="handleSectionDragStart(event, '${textSection.sectionIdentifier}', ${rate.id})"
+                ondragover="handleSectionDragOver(event)"
+                ondrop="handleSectionDrop(event, '${textSection.sectionIdentifier}', ${rate.id})"
+                ondragend="handleSectionDragEnd(event)"
+            `;
+            dragHandle = `<div class="section-drag-handle" title="Drag to reorder">⋮⋮</div>`;
+            sectionControls = `
+                <div class="section-controls">
+                    <span class="section-type-indicator">Text</span>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="expanded-section ${isAuthenticated ? 'draggable-section' : ''} text-section"
+                 data-section-type="text"
+                 data-section-id="${textSection.sectionIdentifier}"
+                 ${dragAttributes}>
+                ${dragHandle}
+                ${sectionControls}
+                ${textSection.title ? `<h5 class="section-title">${textSection.title}</h5>` : ''}
+                <div class="text-content" style="text-align: left;">${textSection.content || ''}</div>
+            </div>
+        `;
+    };
+
+    let sectionsHTML = '';
+    sectionOrder.forEach(sectionIdentifier => {
+        if (sectionIdentifier.startsWith('table-')) {
+            const tableSection = tableSectionsMap.get(sectionIdentifier);
+            if (tableSection) {
+                sectionsHTML += createTableSection(tableSection);
+            }
+        } else if (sectionIdentifier.startsWith('text-')) {
+            const textSection = textSectionsMap.get(sectionIdentifier);
+            if (textSection) {
+                sectionsHTML += createTextSection(textSection);
+            }
+        }
+    });
+
+    // Add any sections not in order
+    tableSectionsMap.forEach((tableSection, identifier) => {
+        if (!sectionOrder.includes(identifier)) {
+            sectionsHTML += createTableSection(tableSection);
+        }
+    });
+
+    textSectionsMap.forEach((textSection, identifier) => {
+        if (!sectionOrder.includes(identifier)) {
+            sectionsHTML += createTextSection(textSection);
+        }
+    });
+
+    card.innerHTML = `
+        <div class="rate-expanded-content show">
+            ${sectionsHTML}
+        </div>
+    `;
+
+    return card;
+}
 
     function closeExpandedCard(rateId) {
         const cardRow = document.getElementById(`rateCardRow_${rateId}`);
@@ -1090,7 +1293,8 @@
         if (!isAuthenticated) return;
 
         const headers = document.querySelectorAll('.draggable-column');
-        originalOrder = Array.from(headers).map(header => header.dataset.fieldId);
+        originalOrder = Array.from(headers)
+            .map(header => header.dataset.fieldId);
     }
 
     function initializeSortableHeaders() {
@@ -1128,19 +1332,24 @@
         if (!isAuthenticated) return;
 
         pendingFieldDeleteId = fieldId;
-        document.getElementById('fieldToDeleteName').textContent = fieldLabel;
-        document.getElementById('fieldToDeleteId').textContent = fieldId;
-        document.getElementById('fieldDeleteConfirmationModal').style.display = 'flex';
+        document.getElementById('fieldToDeleteName')
+            .textContent = fieldLabel;
+        document.getElementById('fieldToDeleteId')
+            .textContent = fieldId;
+        document.getElementById('fieldDeleteConfirmationModal')
+            .style.display = 'flex';
 
-        document.getElementById('confirmFieldDeleteBtn').onclick = function () {
-            deleteGlobalField(fieldId);
-        };
+        document.getElementById('confirmFieldDeleteBtn')
+            .onclick = function () {
+                deleteGlobalField(fieldId);
+            };
     }
 
     function hideFieldDeleteConfirmation() {
         if (!isAuthenticated) return;
 
-        document.getElementById('fieldDeleteConfirmationModal').style.display = 'none';
+        document.getElementById('fieldDeleteConfirmationModal')
+            .style.display = 'none';
         pendingFieldDeleteId = null;
     }
 
@@ -1153,35 +1362,36 @@
         confirmBtn.disabled = true;
 
         fetch(`/fields/delete/${fieldId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to delete field');
-            }
-            return response.text();
-        })
-        .then(data => {
-            hideFieldDeleteConfirmation();
-            showDeleteNotification('Field deleted successfully! Page will reload...', false);
-            setTimeout(() => {
-                window.location.reload();
-            }, 1500);
-        })
-        .catch(error => {
-            confirmBtn.textContent = originalText;
-            confirmBtn.disabled = false;
-            showDeleteNotification('Error deleting field: ' + error.message, true);
-        });
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to delete field');
+                }
+                return response.text();
+            })
+            .then(data => {
+                hideFieldDeleteConfirmation();
+                showDeleteNotification('Field deleted successfully! Page will reload...', false);
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            })
+            .catch(error => {
+                confirmBtn.textContent = originalText;
+                confirmBtn.disabled = false;
+                showDeleteNotification('Error deleting field: ' + error.message, true);
+            });
     }
 
     function hideDeleteConfirmation() {
         if (!isAuthenticated) return;
 
-        document.getElementById('deleteConfirmationModal').style.display = 'none';
+        document.getElementById('deleteConfirmationModal')
+            .style.display = 'none';
         pendingDeleteId = null;
     }
 
@@ -1217,7 +1427,8 @@
 
         const target = event.target.closest('.draggable-column');
         if (target && target !== draggedElement) {
-            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            document.querySelectorAll('.drag-over')
+                .forEach(el => el.classList.remove('drag-over'));
             target.classList.add('drag-over');
             showDropIndicator(target, event);
         }
@@ -1248,11 +1459,13 @@
         if (draggedElement) {
             draggedElement.classList.remove('dragging');
         }
-        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+        document.querySelectorAll('.drag-over')
+            .forEach(el => el.classList.remove('drag-over'));
         hideDropIndicator();
         draggedElement = null;
     }
 
+    // Fixed moveColumn function that properly moves data with columns
     function moveColumn(draggedFieldId, targetFieldId) {
         if (!isAuthenticated) return;
 
@@ -1264,6 +1477,7 @@
 
         if (draggedIndex === -1 || targetIndex === -1 || draggedIndex === targetIndex) return;
 
+        // Move the header element
         const draggedHeader = headers[draggedIndex];
         if (targetIndex < draggedIndex) {
             headerRow.insertBefore(draggedHeader, headers[targetIndex]);
@@ -1271,36 +1485,49 @@
             headerRow.insertBefore(draggedHeader, headers[targetIndex].nextSibling);
         }
 
-        const startIndex = (currentPage - 1) * pageSize;
-        const endIndex = startIndex + pageSize;
-        const pageData = filteredRates.slice(startIndex, endIndex);
-
+        // Re-render the table body with current page data to match new column order
         const tbody = document.getElementById('tableBody');
-        renderTableRows(pageData, tbody);
+        renderTableRows(currentPageData, tbody);
     }
 
     function markOrderChanged() {
         if (!isAuthenticated) return;
 
         orderChanged = true;
-        document.getElementById("saveOrderBtn").classList.add("show");
-        document.getElementById("orderChangedIndicator").classList.add("show");
+        document.getElementById("saveOrderBtn")
+            .classList.add("show");
+        document.getElementById("orderChangedIndicator")
+            .classList.add("show");
     }
 
     function updateGlobalFieldsCache() {
         if (!isAuthenticated) return;
 
         const headers = document.querySelectorAll('.draggable-column');
-        const currentOrder = Array.from(headers).map(header => ({
-            id: header.dataset.fieldId,
-            label: header.querySelector('.header-text').textContent
-        }));
+        const currentOrder = Array.from(headers)
+            .map(header => ({
+                id: header.dataset.fieldId,
+                label: header.querySelector('.header-text')
+                    .textContent
+            }));
 
         if (globalFieldsCache) {
             globalFieldsCache = currentOrder.map(orderItem =>
-                globalFieldsCache.find(field => field.id == orderItem.id)
-            ).filter(Boolean);
+                    globalFieldsCache.find(field => field.id == orderItem.id)
+                )
+                .filter(Boolean);
         }
+    }
+
+    function handleFieldDeleteClick(button) {
+        if (!isAuthenticated) {
+            showDeleteNotification('You must be logged in to delete fields.', true);
+            return;
+        }
+
+        const fieldId = button.dataset.id;
+        const fieldLabel = button.dataset.label;
+        showFieldDeleteConfirmation(fieldId, fieldLabel);
     }
 
     function getCsrfToken() {
@@ -1353,7 +1580,8 @@
         if (target && draggedSection && target !== draggedSection.element &&
             target.closest(`#rateCard_${currentRateId}`)) {
 
-            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            document.querySelectorAll('.drag-over')
+                .forEach(el => el.classList.remove('drag-over'));
             target.classList.add('drag-over');
         }
     }
@@ -1369,8 +1597,10 @@
 
             if (sourceElement && targetElement) {
                 const parent = sourceElement.parentElement;
-                const sourceIndex = Array.from(parent.children).indexOf(sourceElement);
-                const targetIndex = Array.from(parent.children).indexOf(targetElement);
+                const sourceIndex = Array.from(parent.children)
+                    .indexOf(sourceElement);
+                const targetIndex = Array.from(parent.children)
+                    .indexOf(targetElement);
 
                 if (sourceIndex < targetIndex) {
                     parent.insertBefore(sourceElement, targetElement.nextSibling);
@@ -1379,7 +1609,8 @@
                 }
 
                 const sections = parent.querySelectorAll('[data-section-id]');
-                const newOrder = Array.from(sections).map(el => el.getAttribute('data-section-id'));
+                const newOrder = Array.from(sections)
+                    .map(el => el.getAttribute('data-section-id'));
 
                 saveSectionOrder(rateId, newOrder);
             }
@@ -1420,189 +1651,6 @@
             .catch(error => {
                 showDeleteNotification("Error saving section order: " + error.message, true);
             });
-    }
-
-    function showMoreInfo(rateId) {
-        const rate = filteredRates.find(r => r.id === rateId) || allInterestRates.find(r => r.id === rateId);
-        if (!rate || !rate.moreInfo) return;
-
-        // Close any currently expanded card
-        if (currentExpandedCard && currentExpandedCard !== rateId) {
-            closeExpandedCard(currentExpandedCard);
-        }
-
-        let existingCard = document.getElementById(`rateCardRow_${rateId}`);
-        if (existingCard) {
-            // FIXED: Properly remove the card and clean up
-            existingCard.style.display = 'none';
-            setTimeout(() => {
-                if (existingCard.parentNode) {
-                    existingCard.parentNode.removeChild(existingCard);
-                }
-            }, 0);
-
-            if (currentExpandedCard === rateId) {
-                currentExpandedCard = null;
-                return;
-            }
-        }
-
-        // Find the table row that was clicked
-        const tableRows = document.querySelectorAll('tbody tr');
-        let targetRow = null;
-
-        tableRows.forEach(row => {
-            const button = row.querySelector('.mehr-info-btn');
-            if (button && button.onclick && button.onclick.toString()
-                .includes(`showMoreInfo(${rateId})`)) {
-                targetRow = row;
-            }
-        });
-
-        if (!targetRow) return;
-
-        const card = createRateCard(rate);
-
-        const cardRow = document.createElement('tr');
-        cardRow.id = `rateCardRow_${rateId}`;
-        cardRow.className = 'rate-card-row show';
-        cardRow.innerHTML = `<td colspan="100%" class="rate-card-cell"></td>`;
-
-        cardRow.querySelector('.rate-card-cell')
-            .appendChild(card);
-
-        targetRow.parentNode.insertBefore(cardRow, targetRow.nextSibling);
-
-        setTimeout(() => {
-            card.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            });
-        }, 50);
-
-        currentExpandedCard = rateId;
-    }
-
-    function createRateCard(rate) {
-        const card = document.createElement('div');
-        card.className = 'rate-card';
-        card.id = `rateCard_${rate.id}`;
-
-        const moreInfo = rate.moreInfo;
-        if (!moreInfo) return card;
-
-        // Get the section order from the data, default to empty array
-        const sectionOrder = moreInfo.sectionOrder || [];
-
-        // Create section content maps
-        const tableSectionsMap = new Map();
-        const textSectionsMap = new Map();
-
-        // Map table sections by identifier
-        if (moreInfo.tableSections) {
-            moreInfo.tableSections.forEach(tableSection => {
-                tableSectionsMap.set(tableSection.sectionIdentifier, tableSection);
-            });
-        }
-
-        // Map text sections by identifier
-        if (moreInfo.textSections) {
-            moreInfo.textSections.forEach(textSection => {
-                textSectionsMap.set(textSection.sectionIdentifier, textSection);
-            });
-        }
-
-        // Helper function to create table sections
-        const createTableSection = (tableSection) => {
-            if (!tableSection || !tableSection.title || !tableSection.miniTableRows || tableSection.miniTableRows.length === 0) {
-                return '';
-            }
-            return `
-                    <div class="expanded-section draggable-section table-section"
-                         draggable="true"
-                         data-section-type="table"
-                         data-section-id="${tableSection.sectionIdentifier}"
-                         ondragstart="handleSectionDragStart(event, '${tableSection.sectionIdentifier}', ${rate.id})"
-                         ondragover="handleSectionDragOver(event)"
-                         ondrop="handleSectionDrop(event, '${tableSection.sectionIdentifier}', ${rate.id})"
-                         ondragend="handleSectionDragEnd(event)">
-                        <div class="section-drag-handle" title="Drag to reorder">⋮⋮</div>
-                        <div class="section-controls">
-                            <span class="section-type-indicator">Table</span>
-                        </div>
-                        <h5 class="section-title">${tableSection.title}</h5>
-                        <div class="info-table">
-                            ${tableSection.miniTableRows.map(row => `
-                                <div class="info-table-row">
-                                    <div class="info-table-label">${row.label || ''}</div>
-                                    <div class="info-table-value">${row.description || ''}</div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-        };
-
-        // Helper function to create text sections
-        const createTextSection = (textSection) => {
-            if (!textSection || (!textSection.title && !textSection.content)) {
-                return '';
-            }
-            return `
-                    <div class="expanded-section draggable-section text-section"
-                         draggable="true"
-                         data-section-type="text"
-                         data-section-id="${textSection.sectionIdentifier}"
-                         ondragstart="handleSectionDragStart(event, '${textSection.sectionIdentifier}', ${rate.id})"
-                         ondragover="handleSectionDragOver(event)"
-                         ondrop="handleSectionDrop(event, '${textSection.sectionIdentifier}', ${rate.id})"
-                         ondragend="handleSectionDragEnd(event)">
-                        <div class="section-drag-handle" title="Drag to reorder">⋮⋮</div>
-                        <div class="section-controls">
-                            <span class="section-type-indicator">Text</span>
-                        </div>
-                        ${textSection.title ? `<h5 class="section-title">${textSection.title}</h5>` : ''}
-                        <div class="text-content" style="text-align: left;">${textSection.content || ''}</div>
-                    </div>
-                `;
-        };
-
-        // Build sections in the correct order
-        let sectionsHTML = '';
-        sectionOrder.forEach(sectionIdentifier => {
-            if (sectionIdentifier.startsWith('table-')) {
-                const tableSection = tableSectionsMap.get(sectionIdentifier);
-                if (tableSection) {
-                    sectionsHTML += createTableSection(tableSection);
-                }
-            } else if (sectionIdentifier.startsWith('text-')) {
-                const textSection = textSectionsMap.get(sectionIdentifier);
-                if (textSection) {
-                    sectionsHTML += createTextSection(textSection);
-                }
-            }
-        });
-
-        // Add any sections not in the order (fallback)
-        tableSectionsMap.forEach((tableSection, identifier) => {
-            if (!sectionOrder.includes(identifier)) {
-                sectionsHTML += createTableSection(tableSection);
-            }
-        });
-
-        textSectionsMap.forEach((textSection, identifier) => {
-            if (!sectionOrder.includes(identifier)) {
-                sectionsHTML += createTextSection(textSection);
-            }
-        });
-
-        card.innerHTML = `
-                <div class="rate-expanded-content show">
-                    ${sectionsHTML}
-                </div>
-            `;
-
-        return card;
     }
 
     function closeExpandedCard(rateId) {
@@ -1686,26 +1734,6 @@
                 jumpToPage();
             }
         });
-
-    window.addEventListener('resize', function () {
-        const tableContainer = document.getElementById('tableContainer');
-        const stackedViewBtn = document.getElementById('stackedView');
-        const scrollViewBtn = document.getElementById('scrollView');
-
-        if (window.innerWidth > 768) {
-            tableContainer.classList.remove('mobile-stack');
-            if (stackedViewBtn) stackedViewBtn.style.display = 'none';
-            if (scrollViewBtn) scrollViewBtn.style.display = 'none';
-        } else {
-            if (stackedViewBtn) stackedViewBtn.style.display = 'inline-block';
-            if (scrollViewBtn) scrollViewBtn.style.display = 'inline-block';
-
-            if (!tableContainer.classList.contains('mobile-stack') &&
-                stackedViewBtn && stackedViewBtn.classList.contains('active')) {
-                tableContainer.classList.add('mobile-stack');
-            }
-        }
-    });
 </script>
 </body>
 </html>

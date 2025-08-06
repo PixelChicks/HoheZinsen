@@ -39,29 +39,45 @@ public class HomeController {
                             @RequestParam(defaultValue = "0") int page,
                             @RequestParam(defaultValue = "5") int size,
                             @RequestParam(defaultValue = "id") String sortBy,
-                            @RequestParam(defaultValue = "asc") String sortDir) {
-        Page<InterestRate> interestRatesPage = interestRateService.getAllInterestRatesPaginated(page, size, sortBy, sortDir);
-        List<InterestRateDTO> interestRateDTOs = interestRateService.getAllInterestRateDTOs();
+                            @RequestParam(defaultValue = "asc") String sortDir,
+                            @RequestParam(required = false) String search) {
+
+        // Get initial page of data for server-side rendering
+        Page<InterestRate> interestRatesPage;
+        if (search != null && !search.trim().isEmpty()) {
+            interestRatesPage = interestRateService.searchInterestRatesPaginated(search, page, size, sortBy, sortDir);
+        } else {
+            interestRatesPage = interestRateService.getAllInterestRatesPaginated(page, size, sortBy, sortDir);
+        }
+
+        List<InterestRateDTO> interestRateDTOs = interestRatesPage.getContent().stream()
+                .map(InterestRateDTO::fromEntity)
+                .collect(Collectors.toList());
+
         List<GlobalField> globalFields = globalFieldService.getAllGlobalFieldsOrdered();
 
-        List<InterestRate> allRates = interestRateService.getAllInterestRates();
-        Map<Long, Map<Long, String>> rateFieldValuesMap = fieldValueService.getRateFieldValuesMap(allRates);
+        Map<Long, Map<Long, String>> rateFieldValuesMap =
+                fieldValueService.getRateFieldValuesMap(interestRatesPage.getContent());
 
+        // Pass only the current page data, not all data
         model.addAttribute("interestRates", interestRateDTOs);
         model.addAttribute("globalFields", globalFields);
         model.addAttribute("rateFieldValuesMap", rateFieldValuesMap);
         model.addAttribute("newField", new GlobalField());
 
+        // Pagination info
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", interestRatesPage.getTotalPages());
         model.addAttribute("totalElements", interestRatesPage.getTotalElements());
         model.addAttribute("pageSize", size);
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortDir", sortDir);
+        model.addAttribute("search", search);
 
         return "index";
     }
 
+    // Fixed endpoint path to match what JavaScript is calling
     @GetMapping("/api/interest-rates")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getInterestRatesPaginated(

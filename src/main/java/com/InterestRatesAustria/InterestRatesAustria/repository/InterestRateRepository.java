@@ -12,7 +12,6 @@ public interface InterestRateRepository extends JpaRepository<InterestRate, Long
     Page<InterestRate> findByWebLinkContainingIgnoreCase(String webLink, Pageable pageable);
 
     @Query("SELECT ir FROM InterestRate ir JOIN ir.fieldValues fv WHERE " +
-            "LOWER(ir.webLink) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
             "LOWER(fv.value) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
     Page<InterestRate> findBySearchTerm(@Param("searchTerm") String searchTerm, Pageable pageable);
 
