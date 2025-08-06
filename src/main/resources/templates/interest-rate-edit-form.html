@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:sec="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Edit Interest Rate</title>
@@ -366,223 +366,255 @@
     </style>
 </head>
 <body class="bg-light">
-<div class="container py-5">
-    <div class="edit-container">
-        <div class="edit-header">
-            <h1>
-                <i class="bi bi-pencil-square"></i>
-                Edit Interest Rate
-                <span class="edit-badge">ID: [[${interestRate.id}]]</span>
-            </h1>
-            <p class="text-muted mt-2">Modify the interest rate details below and click "Update" to save changes</p>
-        </div>
-
-        <form id="editForm" class="form-container" method="post" th:action="@{/interest-rate/update/{id}(id=${interestRate.id})}" th:object="${interestRate}">
-
-            <!-- Basic Interest Rate Fields -->
-            <div class="section-header">
-                <h5>
-                    <i class="bi bi-info-circle-fill"></i>
-                    Basic Information
-                </h5>
+<div sec:authorize="isAuthenticated()">
+    <div class="container py-5">
+        <div class="edit-container">
+            <div class="edit-header">
+                <h1>
+                    <i class="bi bi-pencil-square"></i>
+                    Edit Interest Rate
+                    <span class="edit-badge">ID: [[${interestRate.id}]]</span>
+                </h1>
+                <p class="text-muted mt-2">Modify the interest rate details below and click "Update" to save changes</p>
             </div>
 
-            <div class="row g-3 mb-4" th:each="field : ${globalFields}">
-                <div class="col-md-6">
-                    <div class="field-group">
-                        <label class="field-label" th:for="${'extra_' + field.id}">
-                            <i class="bi bi-tag-fill"></i>
-                            [[${field.label}]]
-                        </label>
-                        <div class="field-value" th:if="${fieldValues?.get(field.id) != null and !#strings.isEmpty(fieldValues.get(field.id))}">
-                            Current value: <strong>[[${fieldValues.get(field.id)}]]</strong>
+            <form class="form-container" id="editForm" method="post"
+                  th:action="@{/interest-rate/update/{id}(id=${interestRate.id})}" th:object="${interestRate}">
+
+                <!-- Basic Interest Rate Fields -->
+                <div class="section-header">
+                    <h5>
+                        <i class="bi bi-info-circle-fill"></i>
+                        Basic Information
+                    </h5>
+                </div>
+
+                <div class="row g-3 mb-4" th:each="field : ${globalFields}">
+                    <div class="col-md-6">
+                        <div class="field-group">
+                            <label class="field-label" th:for="${'extra_' + field.id}">
+                                <i class="bi bi-tag-fill"></i>
+                                [[${field.label}]]
+                            </label>
+                            <div class="field-value"
+                                 th:if="${fieldValues?.get(field.id) != null and !#strings.isEmpty(fieldValues.get(field.id))}">
+                                Current value: <strong>[[${fieldValues.get(field.id)}]]</strong>
+                            </div>
+                            <input class="form-control"
+                                   th:name="${'extra_' + field.id}"
+                                   th:placeholder="${'Enter ' + field.label}"
+                                   th:value="${fieldValues?.get(field.id) ?: ''}"
+                                   type="text"/>
                         </div>
-                        <input class="form-control"
-                               th:name="${'extra_' + field.id}"
-                               th:value="${fieldValues?.get(field.id) ?: ''}"
-                               th:placeholder="${'Enter ' + field.label}"
-                               type="text"/>
                     </div>
                 </div>
-            </div>
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <div class="field-group">
-                        <label class="field-label" for="webLink">
-                            <i class="bi bi-tag-fill"></i>
-                            Web Link
-                        </label>
-                        <input class="form-control"
-                               th:field="*{webLink}"
-                               placeholder="Enter link"
-                               type="text"
-                               id="webLink"/>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="field-group">
+                            <label class="field-label" for="webLink">
+                                <i class="bi bi-tag-fill"></i>
+                                Web Link
+                            </label>
+                            <input class="form-control"
+                                   id="webLink"
+                                   placeholder="Enter link"
+                                   th:field="*{webLink}"
+                                   type="text"/>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <!-- Dynamic Sections -->
-            <div class="section-header">
-                <h5>
-                    <i class="bi bi-layers-fill"></i>
-                    Additional Information Sections
-                </h5>
-            </div>
+                <!-- Dynamic Sections -->
+                <div class="section-header">
+                    <h5>
+                        <i class="bi bi-layers-fill"></i>
+                        Additional Information Sections
+                    </h5>
+                </div>
 
-            <div class="sections-container" id="sectionsContainer">
-                <!-- Existing Table Sections -->
-                <div th:if="${interestRate.moreInfo?.tableSections != null and !interestRate.moreInfo.tableSections.isEmpty()}">
-                    <div class="dynamic-section" data-section-type="table" th:each="tableSection, iterStat : ${interestRate.moreInfo.tableSections}" th:attr="data-section-id='table_' + ${tableSection.sectionIdentifier}">
-                        <div class="section-type-badge">
-                            <i class="bi bi-table"></i> Table Section
-                        </div>
-                        <div class="section-controls">
-                            <button type="button" class="remove-section-btn" onclick="removeSection(this)" title="Remove section">
-                                <i class="bi bi-x"></i>
-                            </button>
-                        </div>
-
-                        <div style="margin-top: 40px;">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">
-                                    <i class="bi bi-type-h1"></i>
-                                    Table Title
-                                </label>
-                                <div class="field-value" th:if="${tableSection.title != null and !#strings.isEmpty(tableSection.title)}">
-                                    Current: <strong>[[${tableSection.title}]]</strong>
-                                </div>
-                                <input type="text" th:name="'tableTitle_' + ${tableSection.sectionIdentifier}" class="form-control"
-                                       th:value="${tableSection.title ?: ''}"
-                                       placeholder="e.g. Interest Rate Details" />
+                <div class="sections-container" id="sectionsContainer">
+                    <!-- Existing Table Sections -->
+                    <div th:if="${interestRate.moreInfo?.tableSections != null and !interestRate.moreInfo.tableSections.isEmpty()}">
+                        <div class="dynamic-section" data-section-type="table"
+                             th:attr="data-section-id='table_' + ${tableSection.sectionIdentifier}"
+                             th:each="tableSection, iterStat : ${interestRate.moreInfo.tableSections}">
+                            <div class="section-type-badge">
+                                <i class="bi bi-table"></i> Table Section
+                            </div>
+                            <div class="section-controls">
+                                <button class="remove-section-btn" onclick="removeSection(this)" title="Remove section"
+                                        type="button">
+                                    <i class="bi bi-x"></i>
+                                </button>
                             </div>
 
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">
-                                    <i class="bi bi-list-ul"></i>
-                                    Table Rows
-                                </label>
-                                <div th:attr="data-section=${tableSection.sectionIdentifier}" class="table-rows-container">
-                                    <div class="mini-table-row" th:each="row, rowStat : ${tableSection.miniTableRows}">
-                                        <button type="button" class="remove-row-btn" onclick="removeTableRow(this)" title="Remove row">
-                                            <i class="bi bi-x"></i>
-                                        </button>
-                                        <div class="row g-3 align-items-start" style="margin-top: 20px;">
-                                            <div class="col-md-3">
-                                                <label class="form-label small">Label</label>
-                                                <input type="text" th:name="'tableRowLabels_' + ${tableSection.sectionIdentifier}" class="form-control form-control-sm"
-                                                       th:value="${row.label ?: ''}"
-                                                       placeholder="Row label" />
-                                            </div>
-                                            <div class="col-md-9">
-                                                <label class="form-label small">Description</label>
-                                                <div class="rich-text-row">
-                                                    <div class="format-toolbar">
-                                                        <button type="button" class="format-btn" onclick="formatText(this, 'bold')" title="Bold">
-                                                            <i class="bi bi-type-bold"></i>
-                                                        </button>
-                                                        <button type="button" class="format-btn" onclick="formatText(this, 'italic')" title="Italic">
-                                                            <i class="bi bi-type-italic"></i>
-                                                        </button>
-                                                        <button type="button" class="format-btn" onclick="formatText(this, 'underline')" title="Underline">
-                                                            <i class="bi bi-type-underline"></i>
-                                                        </button>
-                                                        <span style="color: #6c757d; font-size: 12px;">Rich text formatting</span>
+                            <div style="margin-top: 40px;">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">
+                                        <i class="bi bi-type-h1"></i>
+                                        Table Title
+                                    </label>
+                                    <div class="field-value"
+                                         th:if="${tableSection.title != null and !#strings.isEmpty(tableSection.title)}">
+                                        Current: <strong>[[${tableSection.title}]]</strong>
+                                    </div>
+                                    <input class="form-control" placeholder="e.g. Interest Rate Details"
+                                           th:name="'tableTitle_' + ${tableSection.sectionIdentifier}"
+                                           th:value="${tableSection.title ?: ''}"
+                                           type="text"/>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">
+                                        <i class="bi bi-list-ul"></i>
+                                        Table Rows
+                                    </label>
+                                    <div class="table-rows-container"
+                                         th:attr="data-section=${tableSection.sectionIdentifier}">
+                                        <div class="mini-table-row"
+                                             th:each="row, rowStat : ${tableSection.miniTableRows}">
+                                            <button class="remove-row-btn" onclick="removeTableRow(this)" title="Remove row"
+                                                    type="button">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                            <div class="row g-3 align-items-start" style="margin-top: 20px;">
+                                                <div class="col-md-3">
+                                                    <label class="form-label small">Label</label>
+                                                    <input class="form-control form-control-sm"
+                                                           placeholder="Row label"
+                                                           th:name="'tableRowLabels_' + ${tableSection.sectionIdentifier}"
+                                                           th:value="${row.label ?: ''}"
+                                                           type="text"/>
+                                                </div>
+                                                <div class="col-md-9">
+                                                    <label class="form-label small">Description</label>
+                                                    <div class="rich-text-row">
+                                                        <div class="format-toolbar">
+                                                            <button class="format-btn" onclick="formatText(this, 'bold')"
+                                                                    title="Bold" type="button">
+                                                                <i class="bi bi-type-bold"></i>
+                                                            </button>
+                                                            <button class="format-btn" onclick="formatText(this, 'italic')"
+                                                                    title="Italic" type="button">
+                                                                <i class="bi bi-type-italic"></i>
+                                                            </button>
+                                                            <button class="format-btn" onclick="formatText(this, 'underline')"
+                                                                    title="Underline"
+                                                                    type="button">
+                                                                <i class="bi bi-type-underline"></i>
+                                                            </button>
+                                                            <span style="color: #6c757d; font-size: 12px;">Rich text formatting</span>
+                                                        </div>
+                                                        <div class="simple-editor"
+                                                             contenteditable="true"
+                                                             onblur="updateHiddenInput(this)"
+                                                             onpaste="handlePaste(event)"
+                                                             placeholder="Full text description with formatting..."
+                                                             th:utext="${row.description ?: ''}"></div>
+                                                        <input th:name="'tableRowDescriptions_' + ${tableSection.sectionIdentifier}"
+                                                               th:value="${row.description ?: ''}"
+                                                               type="hidden"/>
                                                     </div>
-                                                    <div class="simple-editor"
-                                                         contenteditable="true"
-                                                         placeholder="Full text description with formatting..."
-                                                         onpaste="handlePaste(event)"
-                                                         onblur="updateHiddenInput(this)"
-                                                         th:utext="${row.description ?: ''}"></div>
-                                                    <input type="hidden" th:name="'tableRowDescriptions_' + ${tableSection.sectionIdentifier}" th:value="${row.description ?: ''}" />
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+                                    <button class="add-row-btn mt-2" onclick="addTableRowFromButton(this)"
+                                            th:attr="data-section-id=${tableSection.sectionIdentifier}"
+                                            type="button">
+                                        <i class="bi bi-plus-circle"></i>
+                                        Add Row
+                                    </button>
                                 </div>
-                                <button type="button" class="add-row-btn mt-2" th:attr="data-section-id=${tableSection.sectionIdentifier}" onclick="addTableRowFromButton(this)">
-                                    <i class="bi bi-plus-circle"></i>
-                                    Add Row
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Existing Text Sections -->
+                    <div th:if="${interestRate.moreInfo?.textSections != null and !interestRate.moreInfo.textSections.isEmpty()}">
+                        <div class="dynamic-section" data-section-type="text"
+                             th:attr="data-section-id='text_' + ${textSection.sectionIdentifier}"
+                             th:each="textSection, iterStat : ${interestRate.moreInfo.textSections}">
+                            <div class="section-type-badge">
+                                <i class="bi bi-text-paragraph"></i> Text Section
+                            </div>
+                            <div class="section-controls">
+                                <button class="remove-section-btn" onclick="removeSection(this)" title="Remove section"
+                                        type="button">
+                                    <i class="bi bi-x"></i>
                                 </button>
                             </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Existing Text Sections -->
-                <div th:if="${interestRate.moreInfo?.textSections != null and !interestRate.moreInfo.textSections.isEmpty()}">
-                    <div class="dynamic-section" data-section-type="text" th:each="textSection, iterStat : ${interestRate.moreInfo.textSections}" th:attr="data-section-id='text_' + ${textSection.sectionIdentifier}">
-                        <div class="section-type-badge">
-                            <i class="bi bi-text-paragraph"></i> Text Section
-                        </div>
-                        <div class="section-controls">
-                            <button type="button" class="remove-section-btn" onclick="removeSection(this)" title="Remove section">
-                                <i class="bi bi-x"></i>
-                            </button>
-                        </div>
-
-                        <div style="margin-top: 40px;">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">
-                                    <i class="bi bi-type-h2"></i>
-                                    Text Title
-                                </label>
-                                <div class="field-value" th:if="${textSection.title != null and !#strings.isEmpty(textSection.title)}">
-                                    Current: <strong>[[${textSection.title}]]</strong>
+                            <div style="margin-top: 40px;">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">
+                                        <i class="bi bi-type-h2"></i>
+                                        Text Title
+                                    </label>
+                                    <div class="field-value"
+                                         th:if="${textSection.title != null and !#strings.isEmpty(textSection.title)}">
+                                        Current: <strong>[[${textSection.title}]]</strong>
+                                    </div>
+                                    <input class="form-control" placeholder="e.g. Additional Details"
+                                           th:name="'textTitle_' + ${textSection.sectionIdentifier}"
+                                           th:value="${textSection.title ?: ''}"
+                                           type="text"/>
                                 </div>
-                                <input type="text" th:name="'textTitle_' + ${textSection.sectionIdentifier}" class="form-control"
-                                       th:value="${textSection.title ?: ''}"
-                                       placeholder="e.g. Additional Details" />
-                            </div>
 
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">
-                                    <i class="bi bi-textarea-t"></i>
-                                    Text Content
-                                </label>
-                                <div class="rich-text-container">
-                                    <div th:id="'textEditor_' + ${textSection.sectionIdentifier}" style="min-height: 200px;"></div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">
+                                        <i class="bi bi-textarea-t"></i>
+                                        Text Content
+                                    </label>
+                                    <div class="rich-text-container">
+                                        <div style="min-height: 200px;"
+                                             th:id="'textEditor_' + ${textSection.sectionIdentifier}"></div>
+                                    </div>
+                                    <textarea style="display: none;"
+                                              th:name="'textContent_' + ${textSection.sectionIdentifier}" th:text="${textSection.content ?: ''}"></textarea>
                                 </div>
-                                <textarea th:name="'textContent_' + ${textSection.sectionIdentifier}" style="display: none;" th:text="${textSection.content ?: ''}"></textarea>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Empty message when no sections exist -->
+                    <div class="empty-sections-message" id="emptySectionsMessage"
+                         th:if="${interestRate.moreInfo == null or (interestRate.moreInfo.tableSections.isEmpty() and interestRate.moreInfo.textSections.isEmpty())}">
+                        <i class="bi bi-plus-square"></i>
+                        <h6>No sections added yet</h6>
+                        <p>Click the buttons below to add table or text sections</p>
+                    </div>
                 </div>
 
-                <!-- Empty message when no sections exist -->
-                <div class="empty-sections-message" id="emptySectionsMessage" th:if="${interestRate.moreInfo == null or (interestRate.moreInfo.tableSections.isEmpty() and interestRate.moreInfo.textSections.isEmpty())}">
-                    <i class="bi bi-plus-square"></i>
-                    <h6>No sections added yet</h6>
-                    <p>Click the buttons below to add table or text sections</p>
+                <!-- Add Section Buttons -->
+                <div class="d-flex justify-content-center gap-3 my-4">
+                    <button class="add-section-btn" onclick="addTableSection()" type="button">
+                        <i class="bi bi-table"></i>
+                        Add Table Section
+                    </button>
+                    <button class="add-section-btn" onclick="addTextSection()" type="button">
+                        <i class="bi bi-text-paragraph"></i>
+                        Add Text Section
+                    </button>
                 </div>
-            </div>
 
-            <!-- Add Section Buttons -->
-            <div class="d-flex justify-content-center gap-3 my-4">
-                <button type="button" class="add-section-btn" onclick="addTableSection()">
-                    <i class="bi bi-table"></i>
-                    Add Table Section
-                </button>
-                <button type="button" class="add-section-btn" onclick="addTextSection()">
-                    <i class="bi bi-text-paragraph"></i>
-                    Add Text Section
-                </button>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="action-buttons">
-                <button class="btn btn-success btn-lg" type="submit">
-                    <i class="bi bi-check-circle"></i>
-                    Update Interest Rate
-                </button>
-                <a class="btn btn-secondary btn-lg ms-2" th:href="@{/}">
-                    <i class="bi bi-x-circle"></i>
-                    Cancel
-                </a>
-            </div>
-        </form>
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn btn-success btn-lg" type="submit">
+                        <i class="bi bi-check-circle"></i>
+                        Update Interest Rate
+                    </button>
+                    <a class="btn btn-secondary btn-lg ms-2" th:href="@{/}">
+                        <i class="bi bi-x-circle"></i>
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
-
+<div sec:authorize="isAnonymous()">
+    <p>You are not logged in.</p>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
 <script>
     let sectionCounter = 1000;

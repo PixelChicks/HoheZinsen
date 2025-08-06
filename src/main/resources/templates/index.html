@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,16 +9,15 @@
 
     <!-- Enhanced scrolling styles -->
     <style>
-        /* Enhanced table scrolling */
+        /* All your existing styles remain the same */
         .table-responsive {
             overflow-x: auto;
-            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+            -webkit-overflow-scrolling: touch;
             border: 1px solid #dee2e6;
             border-radius: 0.375rem;
             box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
         }
 
-        /* Custom scrollbar styling */
         .table-responsive::-webkit-scrollbar {
             height: 12px;
         }
@@ -38,26 +37,22 @@
             background: #a8a8a8;
         }
 
-        /* Ensure table has minimum width for proper scrolling */
         #mainTable {
             min-width: 800px;
             margin-bottom: 0;
         }
 
-        /* Prevent column content from wrapping */
         #mainTable th,
         #mainTable td {
             white-space: nowrap;
             min-width: 120px;
         }
 
-        /* Actions column should be wider */
         #mainTable th:last-child,
         #mainTable td:last-child {
             min-width: 200px;
         }
 
-        /* Mobile responsive - disable horizontal scroll in mobile stack view */
         @media (max-width: 768px) {
             .table-responsive.mobile-stack {
                 overflow-x: visible;
@@ -76,7 +71,6 @@
             }
         }
 
-        /* Fix for expanded card row spacing issues */
         .rate-card-row {
             margin: 0 !important;
             padding: 0 !important;
@@ -98,7 +92,6 @@
             line-height: normal !important;
         }
 
-        /* Ensure no ghost spacing */
         tr.rate-card-row {
             display: none;
         }
@@ -107,7 +100,6 @@
             display: table-row;
         }
 
-        /* Optional: Scroll indicator for better UX */
         .scroll-indicator {
             position: absolute;
             top: 50%;
@@ -253,7 +245,6 @@
             position: relative;
         }
 
-        /* Empty state styles */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -266,7 +257,6 @@
             color: #ddd;
         }
 
-        /* Mobile responsive pagination */
         @media (max-width: 768px) {
             .pagination-container {
                 flex-direction: column;
@@ -295,7 +285,6 @@
             }
         }
 
-        /* Quick navigation buttons */
         .quick-nav {
             display: flex;
             gap: 5px;
@@ -308,7 +297,6 @@
             min-width: 35px;
         }
 
-        /* Results per page indicator */
         .results-info {
             background: #f8f9fa;
             padding: 8px 12px;
@@ -316,26 +304,119 @@
             font-size: 13px;
             border: 1px solid #e9ecef;
         }
+
+        /* Authentication styles */
+        .auth-section {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .guest-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+        }
+
+        .guest-notice .alert-heading {
+            color: #856404;
+            margin-bottom: 5px;
+        }
+
+        .readonly-notice {
+            font-size: 0.9em;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        /* Admin-only elements should be hidden by default for guests */
+        .admin-only {
+            display: none;
+        }
+
+        /* Show admin elements when user is authenticated */
+        body.authenticated .admin-only {
+            display: block;
+        }
+
+        body.authenticated .inline-admin-only {
+            display: inline-block;
+        }
+
+        body.authenticated .flex-admin-only {
+            display: flex;
+        }
+        /* Guest-specific styles */
+        body.guest .data-cell .form-control {
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            cursor: default;
+            padding: 8px 12px;
+        }
+
+        body.guest .data-cell .form-control:focus {
+            outline: none;
+            box-shadow: none;
+        }
     </style>
 </head>
-<body class="bg-light">
+<body class="bg-light" th:classappend="${#authorization.expression('isAuthenticated()')} ? 'authenticated' : 'guest'">
 <div class="container py-4">
+
+    <!-- Authentication Status Section -->
+    <div sec:authorize="isAuthenticated()" class="auth-section">
+        <div class="user-info">
+            <div>
+                <strong>Welcome, <span sec:authentication="name">User</span>!</strong>
+                <span class="text-muted">• Administrator Mode</span>
+            </div>
+            <div>
+                <a href="/logout" class="btn btn-outline-secondary btn-sm">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guest Notice -->
+    <div sec:authorize="!isAuthenticated()" class="guest-notice">
+        <div class="alert-heading"><strong>👁️ Read-Only Mode</strong></div>
+        <p class="mb-2">You are viewing this page as a guest. All data is read-only.</p>
+        <p class="mb-0">
+            <a href="/login" class="btn btn-primary btn-sm me-2">Login</a>
+            <a href="/register" class="btn btn-outline-primary btn-sm">Register</a>
+            to access administrative features.
+        </p>
+    </div>
 
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
         <div class="d-flex align-items-center flex-wrap">
             <h2 class="me-3 mb-2 mb-md-0">Interest Rate Offers</h2>
-            <span class="order-changed-indicator" id="orderChangedIndicator">
+            <!-- Admin-only order change indicator -->
+            <span class="order-changed-indicator admin-only" id="orderChangedIndicator">
                 Order changed - click save to persist
             </span>
-            <button class="save-order-btn" id="saveOrderBtn" onclick="saveColumnOrder()">
+            <button class="save-order-btn admin-only" id="saveOrderBtn" onclick="saveColumnOrder()">
                 Save Order
             </button>
         </div>
-        <a class="btn btn-primary mt-2 mt-md-0" href="/interest-rate/new">+ Add New Interest Rate</a>
+        <!-- Admin-only add button -->
+        <a class="btn btn-primary mt-2 mt-md-0 admin-only" href="/interest-rate/new" sec:authorize="isAuthenticated()">+ Add New Interest Rate</a>
     </div>
 
-    <!-- Form to Add a New Global Field -->
-    <form class="mb-4" method="post" th:action="@{/fields/add}" th:object="${newField}">
+    <!-- Admin-only form to add global fields -->
+    <form class="mb-4 admin-only" method="post" th:action="@{/fields/add}" th:object="${newField}" sec:authorize="isAuthenticated()">
         <div class="row g-2">
             <div class="col-md-6 col-lg-4">
                 <input class="form-control" placeholder="Label (e.g. Max Deposit)" th:field="*{label}"/>
@@ -409,35 +490,41 @@
             <table class="table table-sm" id="mainTable">
                 <thead class="table">
                 <tr id="column-header-row">
-                    <th class="draggable-column sortable"
-                        draggable="true"
-                        ondragend="handleDragEnd(event)"
-                        ondragover="handleDragOver(event)"
-                        ondragstart="handleDragStart(event)"
-                        ondrop="handleDrop(event)"
+                    <th th:each="field, iterStat : ${globalFields}"
+                        th:class="${#authorization.expression('isAuthenticated()')} ? 'draggable-column sortable' : 'sortable'"
+                        th:draggable="${#authorization.expression('isAuthenticated()')}"
+                        th:attr="ondragend=${#authorization.expression('isAuthenticated()')} ? 'handleDragEnd(event)' : null,
+                                 ondragover=${#authorization.expression('isAuthenticated()')} ? 'handleDragOver(event)' : null,
+                                 ondragstart=${#authorization.expression('isAuthenticated()')} ? 'handleDragStart(event)' : null,
+                                 ondrop=${#authorization.expression('isAuthenticated()')} ? 'handleDrop(event)' : null"
                         onclick="sortTable(this, event)"
                         th:data-field-id="${field.id}"
-                        th:data-column-index="${iterStat.index}"
-                        th:each="field, iterStat : ${globalFields}">
+                        th:data-column-index="${iterStat.index}">
 
-                        <div class="drag-handle">⋮⋮</div>
+                        <!-- Admin-only drag handle -->
+                        <div class="drag-handle admin-only" sec:authorize="isAuthenticated()">⋮⋮</div>
 
                         <div class="header-container">
                             <span class="header-text" th:text="${field.label}"></span>
-                            <button class="edit-header-btn" th:onclick="'showEditForm(' + ${field.id} + ')'" type="button">
+                            <!-- Admin-only edit and delete buttons -->
+                            <button class="edit-header-btn admin-only"
+                                    th:onclick="'showEditForm(' + ${field.id} + ')'"
+                                    type="button"
+                                    sec:authorize="isAuthenticated()">
                                 ✎
                             </button>
-                            <button class="delete-field-btn"
+                            <button class="delete-field-btn admin-only"
                                     th:data-id="${field.id}"
                                     th:data-label="${field.label}"
                                     onclick="handleFieldDeleteClick(this)"
                                     type="button"
-                                    title="Delete this field">
+                                    title="Delete this field"
+                                    sec:authorize="isAuthenticated()">
                                 🗑
                             </button>
 
-                            <!-- Edit Form -->
-                            <div class="header-edit-form" th:id="'editForm_' + ${field.id}">
+                            <!-- Admin-only edit form -->
+                            <div class="header-edit-form admin-only" th:id="'editForm_' + ${field.id}" sec:authorize="isAuthenticated()">
                                 <form method="post" th:action="@{/fields/update}">
                                     <input name="fieldId" th:value="${field.id}" type="hidden"/>
 
@@ -500,55 +587,60 @@
     </div>
 </div>
 
-<!-- Keep all your existing modals and notifications -->
-<!-- Field Delete Confirmation Modal -->
-<div class="delete-confirmation-modal" id="fieldDeleteConfirmationModal">
-    <div class="delete-confirmation-content">
-        <h5>⚠️ Delete Field</h5>
-        <div class="field-info">
-            <p><strong>Field:</strong> <span id="fieldToDeleteName">Field Name</span></p>
-            <p><strong>ID:</strong> <span id="fieldToDeleteId">Field ID</span></p>
-        </div>
-        <p>Are you sure you want to delete this field (column)?</p>
-        <div class="warning-text">
-            ⚠️ This will permanently remove the field and ALL associated data for every interest rate!
-        </div>
-        <p><strong>This action cannot be undone.</strong></p>
+<!-- Admin-only modals -->
+<div sec:authorize="isAuthenticated()">
+    <!-- Field Delete Confirmation Modal -->
+    <div class="delete-confirmation-modal" id="fieldDeleteConfirmationModal">
+        <div class="delete-confirmation-content">
+            <h5>⚠️ Delete Field</h5>
+            <div class="field-info">
+                <p><strong>Field:</strong> <span id="fieldToDeleteName">Field Name</span></p>
+                <p><strong>ID:</strong> <span id="fieldToDeleteId">Field ID</span></p>
+            </div>
+            <p>Are you sure you want to delete this field (column)?</p>
+            <div class="warning-text">
+                ⚠️ This will permanently remove the field and ALL associated data for every interest rate!
+            </div>
+            <p><strong>This action cannot be undone.</strong></p>
 
-        <div class="delete-confirmation-buttons">
-            <button class="btn btn-danger" id="confirmFieldDeleteBtn">Yes, Delete Field</button>
-            <button class="btn btn-secondary" onclick="hideFieldDeleteConfirmation()">Cancel</button>
-        </div>
-    </div>
-</div>
-
-<!-- Interest Rate Delete Confirmation Modal -->
-<div class="delete-confirmation-modal" id="deleteConfirmationModal">
-    <div class="delete-confirmation-content">
-        <h5>⚠️ Confirm Deletion</h5>
-        <p>Are you sure you want to delete this interest rate?</p>
-        <p><strong>This action cannot be undone.</strong></p>
-
-        <div class="delete-confirmation-buttons">
-            <button class="btn btn-danger" id="confirmDeleteBtn">Yes, Delete</button>
-            <button class="btn btn-secondary" onclick="hideDeleteConfirmation()">Cancel</button>
+            <div class="delete-confirmation-buttons">
+                <button class="btn btn-danger" id="confirmFieldDeleteBtn">Yes, Delete Field</button>
+                <button class="btn btn-secondary" onclick="hideFieldDeleteConfirmation()">Cancel</button>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Drop indicator -->
-<div class="drop-indicator" id="dropIndicator"></div>
+    <!-- Interest Rate Delete Confirmation Modal -->
+    <div class="delete-confirmation-modal" id="deleteConfirmationModal">
+        <div class="delete-confirmation-content">
+            <h5>⚠️ Confirm Deletion</h5>
+            <p>Are you sure you want to delete this interest rate?</p>
+            <p><strong>This action cannot be undone.</strong></p>
 
-<!-- Delete notification -->
-<div class="delete-notification" id="deleteNotification">
-    Action completed successfully!
+            <div class="delete-confirmation-buttons">
+                <button class="btn btn-danger" id="confirmDeleteBtn">Yes, Delete</button>
+                <button class="btn btn-secondary" onclick="hideDeleteConfirmation()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Drop indicator -->
+    <div class="drop-indicator" id="dropIndicator"></div>
+
+    <!-- Delete notification -->
+    <div class="delete-notification" id="deleteNotification">
+        Action completed successfully!
+    </div>
 </div>
 
 <!-- Include jQuery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
 <script th:inline="javascript">
-    // Pagination variables
+    // Add authentication state to JavaScript
+    const isAuthenticated = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false;
+
+    // All your existing JavaScript variables and functions remain the same
     let currentPage = 1;
     let pageSize = 5;
     let totalRecords = 0;
@@ -572,31 +664,229 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         initializePagination();
-        captureOriginalOrder();
-        initializeSortableHeaders();
-        initializeResponsiveToggle();
-        initializeScrollIndicator();
-        initializeSearch(); // Add search functionality
-
-        // Load first page from server
+        if (isAuthenticated) {
+            captureOriginalOrder();
+        }
+        initializeSortableHeaders(); // Move this outside the if block
+        initializeSearch();
         loadPageFromServer(1);
     });
 
-    function loadPageFromServer(page, searchTerm = '') {
-    if (isLoading) return;
+    // Modified renderTableRows function to handle authentication
+    function renderTableRows(data, tbody) {
+        tbody.innerHTML = data.map(rate => {
+            const headers = document.querySelectorAll('.draggable-column, .sortable');
+            const currentFieldOrder = Array.from(headers)
+                .map(header => ({
+                    id: header.dataset.fieldId,
+                    label: header.querySelector('.header-text').textContent
+                }));
 
-    showLoading();
+            const fieldCells = currentFieldOrder.map(field => {
+                const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
 
-    const params = new URLSearchParams({
-        page: page - 1, // Spring uses 0-based indexing
-        size: pageSize,
-        sortBy: currentSortColumn || 'id',
-        sortDir: currentSortDirection || 'asc'
-    });
+                // For authenticated users, show editable inputs
+                if (isAuthenticated) {
+                    return `
+                        <td class="data-cell" data-field-id="${field.id}" data-label="${field.label}">
+                            <form class="d-flex justify-content-center" method="post" action="/field-values/update">
+                                <input name="rateId" value="${rate.id}" type="hidden"/>
+                                <input name="fieldId" value="${field.id}" type="hidden"/>
+                                <input class="form-control form-control-sm text-center"
+                                       name="value"
+                                       value="${fieldValue}"
+                                       type="text"
+                                       onchange="updateFieldValueAjax(${rate.id}, ${field.id}, this.value)"/>
+                            </form>
+                        </td>
+                    `;
+                } else {
+                    // For guests, show read-only values
+                    // For guests, show read-only values
+                    return `
+                        <td class="data-cell" data-field-id="${field.id}" data-label="${field.label}">
+                            <div class="form-control form-control-sm text-center" style="border: none; background: transparent; cursor: default;">${fieldValue || '-'}</div>
+                        </td>
+                    `;
+                }
+            }).join('');
 
-    if (searchTerm && searchTerm.trim()) {
-        params.append('search', searchTerm.trim());
+            // Action buttons - different for authenticated vs guest users
+            let actionButtons = '';
+            if (isAuthenticated) {
+                actionButtons = `
+                    <div class="action-buttons">
+                        <button class="mehr-info-btn"
+                                ${rate.moreInfo ? '' : 'disabled'}
+                                onclick="showMoreInfo(${rate.id})"
+                                title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">
+                            ${rate.moreInfo ? 'MEHR INFO' : 'No Info'}
+                        </button>
+                        <a class="angebot-btn"
+                           href="${rate.webLink || '#'}"
+                           target="_blank"
+                           title="Open Link">
+                            ZUM ANGEBOT
+                        </a>
+                        <a class="btn-edit" href="/interest-rate/edit/${rate.id}" title="Edit Interest Rate">
+                            ✎ Edit
+                        </a>
+                        <button class="btn-delete"
+                                onclick="showDeleteConfirmation(${rate.id})"
+                                title="Delete Interest Rate">
+                            🗑 Delete
+                        </button>
+                    </div>
+                `;
+            } else {
+                actionButtons = `
+                    <div class="action-buttons">
+                        <button class="mehr-info-btn"
+                                ${rate.moreInfo ? '' : 'disabled'}
+                                onclick="showMoreInfo(${rate.id})"
+                                title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">
+                            ${rate.moreInfo ? 'MEHR INFO' : 'No Info'}
+                        </button>
+                        <a class="angebot-btn"
+                           href="${rate.webLink || '#'}"
+                           target="_blank"
+                           title="Open Link">
+                            ZUM ANGEBOT
+                        </a>
+                    </div>
+                `;
+            }
+
+            return `
+                <tr data-rate-id="${rate.id}">
+                    ${fieldCells}
+                    <td data-label="Actions">
+                        ${actionButtons}
+                    </td>
+                </tr>
+            `;
+        }).join('');
     }
+
+    // Modified functions to check authentication before executing admin actions
+    function updateFieldValueAjax(rateId, fieldId, value) {
+        if (!isAuthenticated) {
+            showDeleteNotification('You must be logged in to make changes.', true);
+            return;
+        }
+
+        // Original function code...
+        const formData = new FormData();
+        formData.append('rateId', rateId);
+        formData.append('fieldId', fieldId);
+        formData.append('value', value);
+
+        fetch('/field-values/update', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to update field value');
+            }
+            if (!serverRateFieldValuesMap[rateId]) {
+                serverRateFieldValuesMap[rateId] = {};
+            }
+            serverRateFieldValuesMap[rateId][fieldId] = value;
+        })
+        .catch(error => {
+            console.error('Error updating field value:', error);
+            showDeleteNotification('Error updating field value: ' + error.message, true);
+        });
+    }
+
+    function showDeleteConfirmation(rateId) {
+        if (!isAuthenticated) {
+            showDeleteNotification('You must be logged in to delete items.', true);
+            return;
+        }
+
+        pendingDeleteId = rateId;
+        document.getElementById('deleteConfirmationModal').style.display = 'flex';
+        document.getElementById('confirmDeleteBtn').onclick = function () {
+            deleteInterestRate(rateId);
+        };
+    }
+
+    function handleFieldDeleteClick(button) {
+        if (!isAuthenticated) {
+            showDeleteNotification('You must be logged in to delete fields.', true);
+            return;
+        }
+
+        const fieldId = button.dataset.id;
+        const fieldLabel = button.dataset.label;
+        showFieldDeleteConfirmation(fieldId, fieldLabel);
+    }
+
+    function saveColumnOrder() {
+        if (!isAuthenticated) {
+            showDeleteNotification('You must be logged in to save changes.', true);
+            return;
+        }
+
+        // Original saveColumnOrder function code...
+        const headers = document.querySelectorAll(".draggable-column");
+        const newOrder = Array.from(headers).map(header => header.dataset.fieldId);
+
+        const saveBtn = document.getElementById("saveOrderBtn");
+        const originalText = saveBtn.textContent;
+        saveBtn.textContent = "Saving...";
+        saveBtn.disabled = true;
+
+        fetch('/fields/reorder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': getCsrfToken()
+            },
+            body: JSON.stringify(newOrder)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Failed to save order");
+            }
+            return response.text();
+        })
+        .then(data => {
+            orderChanged = false;
+            saveBtn.classList.remove("show");
+            document.getElementById("orderChangedIndicator").classList.remove("show");
+            updateGlobalFieldsCache();
+            showDeleteNotification('Column order saved successfully!', false);
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
+        })
+        .catch(error => {
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
+            showDeleteNotification("Error saving order: " + error.message, true);
+        });
+    }
+
+    // All your other existing JavaScript functions remain the same,
+    // but add authentication checks where needed...
+
+    function loadPageFromServer(page, searchTerm = '') {
+        if (isLoading) return;
+
+        showLoading();
+
+        const params = new URLSearchParams({
+            page: page - 1,
+            size: pageSize,
+            sortBy: currentSortColumn || 'id',
+            sortDir: currentSortDirection || 'asc'
+        });
+
+        if (searchTerm && searchTerm.trim()) {
+            params.append('search', searchTerm.trim());
+        }
 
     // Use the correct endpoint
     fetch(`/api/interest-rates/paginated?${params.toString()}`)
@@ -635,8 +925,6 @@
         });
 }
 
-
-    // Pagination Functions
     function initializePagination() {
         totalRecords = allInterestRates.length;
         filteredRates = [...allInterestRates];
@@ -647,10 +935,8 @@
         if (isLoading) return;
 
         showLoading();
-
         currentPage = page;
 
-        // Simulate API call delay (remove this in production)
         setTimeout(() => {
             const startIndex = (currentPage - 1) * pageSize;
             const endIndex = startIndex + pageSize;
@@ -661,7 +947,6 @@
             updatePaginationInfo();
             hideLoading();
 
-            // Close any expanded cards when changing pages
             if (currentExpandedCard) {
                 closeExpandedCard(currentExpandedCard);
             }
@@ -680,84 +965,18 @@
 
         emptyState.style.display = 'none';
 
-        // Check if we have headers in DOM (after column reordering)
-        const headers = document.querySelectorAll('.draggable-column');
+        const headers = document.querySelectorAll('.draggable-column, .sortable');
         if (headers.length > 0) {
-            // Use current DOM order
             renderTableRows(data, tbody);
         } else {
-            // Fetch global fields from server if not cached (initial load)
             if (!globalFieldsCache) {
-                fetchGlobalFields()
-                    .then(() => {
-                        renderTableRows(data, tbody);
-                    });
+                fetchGlobalFields().then(() => {
+                    renderTableRows(data, tbody);
+                });
             } else {
                 renderTableRows(data, tbody);
             }
         }
-    }
-
-    function renderTableRows(data, tbody) {
-        tbody.innerHTML = data.map(rate => {
-                // Get current header order from DOM instead of using cached order
-                const headers = document.querySelectorAll('.draggable-column');
-                const currentFieldOrder = Array.from(headers)
-                    .map(header => ({
-                        id: header.dataset.fieldId,
-                        label: header.querySelector('.header-text')
-                            .textContent
-                    }));
-
-                const fieldCells = currentFieldOrder.map(field => {
-                        const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
-                        return `
-                <td class="data-cell" data-field-id="${field.id}" data-label="${field.label}">
-                    <form class="d-flex justify-content-center" method="post" action="/field-values/update">
-                        <input name="rateId" value="${rate.id}" type="hidden"/>
-                        <input name="fieldId" value="${field.id}" type="hidden"/>
-                        <input class="form-control form-control-sm text-center"
-                               name="value"
-                               value="${fieldValue}"
-                               type="text"
-                               onchange="updateFieldValueAjax(${rate.id}, ${field.id}, this.value)"/>
-                    </form>
-                </td>
-            `;
-                    })
-                    .join('');
-
-                return `
-            <tr data-rate-id="${rate.id}">
-                ${fieldCells}
-                <td data-label="Actions">
-                    <div class="action-buttons">
-                        <button class="mehr-info-btn"
-                                ${rate.moreInfo ? '' : 'disabled'}
-                                onclick="showMoreInfo(${rate.id})"
-                                title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">
-                            ${rate.moreInfo ? 'MEHR INFO' : 'No Info'}
-                        </button>
-                        <a class="angebot-btn"
-                           href="${rate.webLink || '#'}"
-                           target="_blank"
-                           title="Open Link">
-                            ZUM ANGEBOT
-                        </a>
-                        <a class="btn-edit" href="/interest-rate/edit/${rate.id}" title="Edit Interest Rate">
-                            ✎ Edit
-                        </a>
-                        <button class="btn-delete"
-                                onclick="showDeleteConfirmation(${rate.id})"
-                                title="Delete Interest Rate">
-                            🗑 Delete
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `;
-            })
-            .join('');
     }
 
     let globalFieldsCache = null;
@@ -783,7 +1002,6 @@
     function updatePaginationControls() {
         totalPages = Math.ceil(filteredRates.length / pageSize);
 
-        // Update navigation buttons
         const firstPageBtn = document.getElementById('firstPageBtn');
         const prevPageBtn = document.getElementById('prevPageBtn');
         const nextPageBtn = document.getElementById('nextPageBtn');
@@ -794,10 +1012,8 @@
         if (nextPageBtn) nextPageBtn.disabled = currentPage === totalPages;
         if (lastPageBtn) lastPageBtn.disabled = currentPage === totalPages;
 
-        // Update page numbers
         updatePageNumbers();
 
-        // Update page jump input
         const pageJumpInput = document.getElementById('pageJumpInput');
         if (pageJumpInput) {
             pageJumpInput.max = totalPages;
@@ -814,7 +1030,6 @@
         let startPage = Math.max(1, currentPage - 2);
         let endPage = Math.min(totalPages, startPage + 4);
 
-        // Adjust start page if we're near the end
         if (endPage - startPage < 4) {
             startPage = Math.max(1, endPage - 4);
         }
@@ -865,7 +1080,7 @@
 
     function changePageSize(newSize) {
         pageSize = parseInt(newSize);
-        currentPage = 1; // Reset to first page
+        currentPage = 1;
         loadPage(1);
     }
 
@@ -881,47 +1096,41 @@
         if (overlay) overlay.classList.remove('show');
     }
 
-    // Enhanced delete function that updates pagination
-    // Enhanced delete function with server-side pagination
     function deleteInterestRate(rateId) {
-            fetch(`/interest-rate/${rateId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to delete interest rate');
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    hideDeleteConfirmation();
-                    showDeleteNotification('Interest rate deleted successfully!', false);
-
-                    // Close any expanded card for this rate
-                    closeExpandedCard(rateId);
-
-                    // Reload current page to reflect deletion
-                    const searchTerm = document.getElementById('searchInput')
-                        ?.value || '';
-
-                    // If current page becomes empty, go to previous page
-                    setTimeout(() => {
-                        loadPageFromServer(currentPage, searchTerm);
-                    }, 500);
-                })
-                .catch(error => {
-                    hideDeleteConfirmation();
-                    showDeleteNotification('Error deleting interest rate: ' + error.message, true);
-                });
+        if (!isAuthenticated) {
+            showDeleteNotification('You must be logged in to delete items.', true);
+            return;
         }
 
+        fetch(`/interest-rate/${rateId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to delete interest rate');
+            }
+            return response.text();
+        })
+        .then(data => {
+            hideDeleteConfirmation();
+            showDeleteNotification('Interest rate deleted successfully!', false);
+            closeExpandedCard(rateId);
 
-        // Enhanced sort function that works with pagination
-        // Enhanced sort function with server-side sorting
-        function sortTable(headerElement, event) {
+            setTimeout(() => {
+                const searchTerm = document.getElementById('searchInput')?.value || '';
+                loadPageFromServer(currentPage, searchTerm);
+            }, 500);
+        })
+        .catch(error => {
+            hideDeleteConfirmation();
+            showDeleteNotification('Error deleting interest rate: ' + error.message, true);
+        });
+    }
+
+    function sortTable(headerElement, event) {
         if (event && event.type === 'click' && headerElement.classList.contains('dragging')) {
             return;
         }
@@ -934,46 +1143,31 @@
             sortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
         }
 
-        // Clear previous sort indicators
-        document.querySelectorAll('.sortable')
-            .forEach(th => {
-                th.classList.remove('sort-asc', 'sort-desc');
-            });
+        document.querySelectorAll('.sortable').forEach(th => {
+            th.classList.remove('sort-asc', 'sort-desc');
+        });
 
         headerElement.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
 
-        // Update sort state
         currentSortColumn = currentSortField;
         currentSortDirection = sortDirection;
 
-        // Reset to first page and load with new sort
         currentPage = 1;
         const searchTerm = document.getElementById('searchInput')?.value || '';
         loadPageFromServer(1, searchTerm);
 
         updateSortInfo(headerElement.querySelector('.header-text').textContent.trim(), sortDirection);
     }
-    document.addEventListener('DOMContentLoaded', function() {
-        if (!document.getElementById('sortInfo')) {
-            const sortInfo = document.createElement('div');
-            sortInfo.id = 'sortInfo';
-            sortInfo.className = 'sort-info';
-            sortInfo.textContent = 'Click column headers to sort ↕️';
 
-            const tableContainer = document.querySelector('.table-container');
-            if (tableContainer) {
-                tableContainer.parentNode.insertBefore(sortInfo, tableContainer);
-            }
-        }
-    });
-
-    // Enhanced updateSortInfo function
     function updateSortInfo(columnName, direction) {
         const sortInfo = document.getElementById('sortInfo');
         if (sortInfo) {
             if (columnName && direction) {
-                sortInfo.innerHTML = `Sorted by: <strong>${columnName}</strong> ${direction === 'asc' ? '↑' : '↓'}
-                    <button onclick="resetSort()" style="margin-left: 10px; padding: 2px 6px; font-size: 12px; border: 1px solid #ccc; background: white; border-radius: 3px; cursor: pointer;">Reset</button>`;
+                let resetButton = '';
+                if (isAuthenticated) {
+                    resetButton = `<button onclick="resetSort()" style="margin-left: 10px; padding: 2px 6px; font-size: 12px; border: 1px solid #ccc; background: white; border-radius: 3px; cursor: pointer;">Reset</button>`;
+                }
+                sortInfo.innerHTML = `Sorted by: <strong>${columnName}</strong> ${direction === 'asc' ? '↑' : '↓'} ${resetButton}`;
                 sortInfo.style.background = 'linear-gradient(135deg, #e7f3ff, #cce7ff)';
             } else {
                 sortInfo.textContent = 'Click column headers to sort ↕️';
@@ -982,19 +1176,14 @@
         }
     }
 
-    // Enhanced resetSort function
     function resetSort() {
-        // Clear all sort indicators
-        document.querySelectorAll('.sortable')
-            .forEach(th => {
-                th.classList.remove('sort-asc', 'sort-desc');
-            });
+        document.querySelectorAll('.sortable').forEach(th => {
+            th.classList.remove('sort-asc', 'sort-desc');
+        });
 
-        // Reset sort state
         currentSortColumn = null;
         currentSortDirection = null;
 
-        // Reset to first page with no sorting
         currentPage = 1;
         const searchTerm = document.getElementById('searchInput')?.value || '';
         loadPageFromServer(1, searchTerm);
@@ -1003,7 +1192,7 @@
         showDeleteNotification('Sort reset! Data restored to original order.', false);
     }
 
-   function initializeSearch() {
+    function initializeSearch() {
         const existingSearch = document.querySelector('.search-container');
         if (existingSearch) {
             existingSearch.remove();
@@ -1011,123 +1200,26 @@
     }
 
     function performSearch() {
-        const searchTerm = document.getElementById('searchInput')
-            .value;
-        currentPage = 1; // Reset to first page
+        const searchTerm = document.getElementById('searchInput').value;
+        currentPage = 1;
         loadPageFromServer(1, searchTerm);
     }
 
     function clearSearch() {
-        document.getElementById('searchInput')
-            .value = '';
+        document.getElementById('searchInput').value = '';
         currentPage = 1;
         loadPageFromServer(1, '');
     }
 
-    // Enhanced pagination info update
-    function updatePaginationInfo() {
-        const startRecord = totalRecords === 0 ? 0 : (currentPage - 1) * pageSize + 1;
-        const endRecord = Math.min(currentPage * pageSize, totalRecords);
-
-        const infoText = `Showing ${startRecord}-${endRecord} of ${totalRecords} results`;
-
-        const resultsInfo = document.getElementById('resultsInfo');
-        const resultsInfoBottom = document.getElementById('resultsInfoBottom');
-
-        if (resultsInfo) resultsInfo.textContent = infoText;
-        if (resultsInfoBottom) resultsInfoBottom.textContent = infoText;
-    }
-
-    // Enhanced pagination controls update
-    function updatePaginationControls() {
-        // Update navigation buttons
-        const firstPageBtn = document.getElementById('firstPageBtn');
-        const prevPageBtn = document.getElementById('prevPageBtn');
-        const nextPageBtn = document.getElementById('nextPageBtn');
-        const lastPageBtn = document.getElementById('lastPageBtn');
-
-        if (firstPageBtn) firstPageBtn.disabled = currentPage === 1;
-        if (prevPageBtn) prevPageBtn.disabled = currentPage === 1;
-        if (nextPageBtn) nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
-        if (lastPageBtn) lastPageBtn.disabled = currentPage === totalPages || totalPages === 0;
-
-        // Update page numbers
-        updatePageNumbers();
-
-        // Update page jump input
-        const pageJumpInput = document.getElementById('pageJumpInput');
-        if (pageJumpInput) {
-            pageJumpInput.max = totalPages;
-            pageJumpInput.placeholder = currentPage;
-        }
-    }
-
-    // Enhanced page numbers update
-    function updatePageNumbers() {
-        const pageNumbers = document.getElementById('pageNumbers');
-        const pageNumbersBottom = document.getElementById('pageNumbersBottom');
-
-        if (!pageNumbers) return;
-
-        if (totalPages === 0) {
-            pageNumbers.innerHTML = '';
-            if (pageNumbersBottom) pageNumbersBottom.innerHTML = '';
-            return;
-        }
-
-        let startPage = Math.max(1, currentPage - 2);
-        let endPage = Math.min(totalPages, startPage + 4);
-
-        // Adjust start page if we're near the end
-        if (endPage - startPage < 4) {
-            startPage = Math.max(1, endPage - 4);
-        }
-
-        let html = '';
-
-        // Add ellipsis at the beginning if needed
-        if (startPage > 1) {
-            html += `<button class="page-btn" onclick="goToPage(1)">1</button>`;
-            if (startPage > 2) {
-                html += `<span class="page-ellipsis">...</span>`;
-            }
-        }
-
-        // Add page numbers
-        for (let i = startPage; i <= endPage; i++) {
-            html += `
-            <button class="page-btn ${i === currentPage ? 'active' : ''}"
-                    onclick="goToPage(${i})">${i}</button>
-        `;
-        }
-
-        // Add ellipsis at the end if needed
-        if (endPage < totalPages) {
-            if (endPage < totalPages - 1) {
-                html += `<span class="page-ellipsis">...</span>`;
-            }
-            html += `<button class="page-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
-        }
-
-        pageNumbers.innerHTML = html;
-        if (pageNumbersBottom) {
-            pageNumbersBottom.innerHTML = html;
-        }
-    }
-
-    // Enhanced showMoreInfo that works with server data
     function showMoreInfo(rateId) {
-        // Find rate in current page data first, then fall back to server call
         let rate = allInterestRates.find(r => r.id === rateId);
 
         if (!rate) {
-            // If not found in current page, fetch from server
-            fetchRateDetails(rateId)
-                .then(rateData => {
-                    if (rateData && rateData.moreInfo) {
-                        displayRateCard(rateData);
-                    }
-                });
+            fetchRateDetails(rateId).then(rateData => {
+                if (rateData && rateData.moreInfo) {
+                    displayRateCard(rateData);
+                }
+            });
             return;
         }
 
@@ -1155,14 +1247,12 @@
     }
 
     function displayRateCard(rate) {
-        // Close any currently expanded card
         if (currentExpandedCard && currentExpandedCard !== rate.id) {
             closeExpandedCard(currentExpandedCard);
         }
 
         let existingCard = document.getElementById(`rateCardRow_${rate.id}`);
         if (existingCard) {
-            // Toggle card visibility
             existingCard.style.display = 'none';
             setTimeout(() => {
                 if (existingCard.parentNode) {
@@ -1176,7 +1266,6 @@
             }
         }
 
-        // Find the table row that was clicked
         const targetRow = document.querySelector(`tr[data-rate-id="${rate.id}"]`);
         if (!targetRow) return;
 
@@ -1187,9 +1276,7 @@
         cardRow.className = 'rate-card-row show';
         cardRow.innerHTML = `<td colspan="100%" class="rate-card-cell"></td>`;
 
-        cardRow.querySelector('.rate-card-cell')
-            .appendChild(card);
-
+        cardRow.querySelector('.rate-card-cell').appendChild(card);
         targetRow.parentNode.insertBefore(cardRow, targetRow.nextSibling);
 
         setTimeout(() => {
@@ -1202,537 +1289,285 @@
         currentExpandedCard = rate.id;
     }
 
-    // Performance optimization: Add loading states for better UX
-    function showLoading() {
-        isLoading = true;
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) {
-            overlay.classList.add('show');
-        }
+    function createRateCard(rate) {
+        const card = document.createElement('div');
+        card.className = 'rate-card';
+        card.id = `rateCard_${rate.id}`;
 
-        // Disable pagination controls during loading
-        const paginationButtons = document.querySelectorAll('.page-btn, #pageSize, #searchInput');
-        paginationButtons.forEach(btn => {
-            btn.disabled = true;
-        });
-    }
+        const moreInfo = rate.moreInfo;
+        if (!moreInfo) return card;
 
-    function hideLoading() {
-        isLoading = false;
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) {
-            overlay.classList.remove('show');
-        }
+        const sectionOrder = moreInfo.sectionOrder || [];
+        const tableSectionsMap = new Map();
+        const textSectionsMap = new Map();
 
-        // Re-enable pagination controls
-        const paginationButtons = document.querySelectorAll('.page-btn, #pageSize, #searchInput');
-        paginationButtons.forEach(btn => {
-            btn.disabled = false;
-        });
-
-        // Re-disable navigation buttons based on current state
-        updatePaginationControls();
-    }
-
-    // Add refresh function for manual data reload
-    function refreshCurrentPage() {
-        const searchTerm = document.getElementById('searchInput')
-            ?.value || '';
-        loadPageFromServer(currentPage, searchTerm);
-    }
-
-    // Enhanced error handling
-    function handleApiError(error, operation = 'operation') {
-        console.error(`Error during ${operation}:`, error);
-
-        let message = `Error during ${operation}`;
-        if (error.message) {
-            message += `: ${error.message}`;
-        }
-
-        showDeleteNotification(message, true);
-        hideLoading();
-    }
-
-    // Add URL state management for bookmarking and back/forward navigation
-    function updateUrlState() {
-        const url = new URL(window.location);
-        url.searchParams.set('page', currentPage);
-        url.searchParams.set('size', pageSize);
-
-        const searchTerm = document.getElementById('searchInput')
-            ?.value;
-        if (searchTerm) {
-            url.searchParams.set('search', searchTerm);
-        } else {
-            url.searchParams.delete('search');
-        }
-
-        if (currentSortColumn) {
-            url.searchParams.set('sortBy', currentSortColumn);
-            url.searchParams.set('sortDir', currentSortDirection);
-        }
-
-        window.history.replaceState({}, '', url);
-    }
-
-    // Initialize from URL parameters
-    function initializeFromUrl() {
-        const url = new URL(window.location);
-        const urlPage = parseInt(url.searchParams.get('page')) || 1;
-        const urlSize = parseInt(url.searchParams.get('size')) || 5;
-        const urlSearch = url.searchParams.get('search') || '';
-        const urlSortBy = url.searchParams.get('sortBy') || '';
-        const urlSortDir = url.searchParams.get('sortDir') || 'asc';
-
-        currentPage = urlPage;
-        pageSize = urlSize;
-        currentSortColumn = urlSortBy;
-        currentSortDirection = urlSortDir;
-
-        // Update UI elements
-        const pageSizeSelect = document.getElementById('pageSize');
-        if (pageSizeSelect) {
-            pageSizeSelect.value = pageSize;
-        }
-
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput && urlSearch) {
-            searchInput.value = urlSearch;
-        }
-    }
-
-    // Browser back/forward navigation support
-    window.addEventListener('popstate', function (event) {
-        initializeFromUrl();
-        const searchTerm = document.getElementById('searchInput')
-            ?.value || '';
-        loadPageFromServer(currentPage, searchTerm);
-    });
-
-    // Auto-save functionality for field value changes
-    let autoSaveTimeout;
-
-    function scheduleAutoSave(rateId, fieldId, value) {
-        clearTimeout(autoSaveTimeout);
-        autoSaveTimeout = setTimeout(() => {
-            updateFieldValueAjax(rateId, fieldId, value);
-        }, 1000); // Save after 1 second of no changes
-    }
-
-    // Enhanced field value update with visual feedback
-    function updateFieldValueAjax(rateId, fieldId, value) {
-        const input = document.querySelector(`input[name="rateId"][value="${rateId}"]`)
-            ?.parentElement
-            ?.querySelector(`input[name="fieldId"][value="${fieldId}"]`)
-            ?.parentElement
-            ?.querySelector('input[name="value"]');
-
-        if (input) {
-            input.classList.add('saving');
-        }
-
-        const formData = new FormData();
-        formData.append('rateId', rateId);
-        formData.append('fieldId', fieldId);
-        formData.append('value', value);
-
-        fetch('/field-values/update', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to update field value');
-                }
-
-                // Update local cache
-                if (!serverRateFieldValuesMap[rateId]) {
-                    serverRateFieldValuesMap[rateId] = {};
-                }
-                serverRateFieldValuesMap[rateId][fieldId] = value;
-
-                if (input) {
-                    input.classList.remove('saving');
-                    input.classList.add('saved');
-                    setTimeout(() => {
-                        input.classList.remove('saved');
-                    }, 2000);
-                }
-            })
-            .catch(error => {
-                console.error('Error updating field value:', error);
-                if (input) {
-                    input.classList.remove('saving');
-                    input.classList.add('error');
-                    setTimeout(() => {
-                        input.classList.remove('error');
-                    }, 3000);
-                }
-                showDeleteNotification('Error updating field value: ' + error.message, true);
+        if (moreInfo.tableSections) {
+            moreInfo.tableSections.forEach(tableSection => {
+                tableSectionsMap.set(tableSection.sectionIdentifier, tableSection);
             });
-    }
-
-    // Bulk operations support
-    function selectAllRows() {
-        const checkboxes = document.querySelectorAll('.row-select');
-        const selectAllCheckbox = document.getElementById('selectAll');
-
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = selectAllCheckbox.checked;
-        });
-
-        updateBulkActionButtons();
-    }
-
-    function updateBulkActionButtons() {
-        const selectedRows = document.querySelectorAll('.row-select:checked');
-        const bulkActionContainer = document.getElementById('bulkActions');
-
-        if (bulkActionContainer) {
-            bulkActionContainer.style.display = selectedRows.length > 0 ? 'block' : 'none';
-        }
-    }
-
-    // Export functionality
-    function exportCurrentPage() {
-        const searchTerm = document.getElementById('searchInput')
-            ?.value || '';
-        const params = new URLSearchParams({
-            page: currentPage - 1,
-            size: pageSize,
-            sortBy: currentSortColumn || 'id',
-            sortDir: currentSortDirection || 'asc',
-            format: 'csv'
-        });
-
-        if (searchTerm.trim()) {
-            params.append('search', searchTerm.trim());
         }
 
-        window.location.href = `/api/interest-rates/export?${params.toString()}`;
+        if (moreInfo.textSections) {
+            moreInfo.textSections.forEach(textSection => {
+                textSectionsMap.set(textSection.sectionIdentifier, textSection);
+            });
+        }
+
+        const createTableSection = (tableSection) => {
+            if (!tableSection || !tableSection.title || !tableSection.miniTableRows || tableSection.miniTableRows.length === 0) {
+                return '';
+            }
+
+            let dragAttributes = '';
+            let dragHandle = '';
+            let sectionControls = '';
+
+            if (isAuthenticated) {
+                dragAttributes = `
+                    draggable="true"
+                    ondragstart="handleSectionDragStart(event, '${tableSection.sectionIdentifier}', ${rate.id})"
+                    ondragover="handleSectionDragOver(event)"
+                    ondrop="handleSectionDrop(event, '${tableSection.sectionIdentifier}', ${rate.id})"
+                    ondragend="handleSectionDragEnd(event)"
+                `;
+                dragHandle = `<div class="section-drag-handle" title="Drag to reorder">⋮⋮</div>`;
+                sectionControls = `
+                    <div class="section-controls">
+                        <span class="section-type-indicator">Table</span>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="expanded-section ${isAuthenticated ? 'draggable-section' : ''} table-section"
+                     data-section-type="table"
+                     data-section-id="${tableSection.sectionIdentifier}"
+                     ${dragAttributes}>
+                    ${dragHandle}
+                    ${sectionControls}
+                    <h5 class="section-title">${tableSection.title}</h5>
+                    <div class="info-table">
+                        ${tableSection.miniTableRows.map(row => `
+                            <div class="info-table-row">
+                                <div class="info-table-label">${row.label || ''}</div>
+                                <div class="info-table-value">${row.description || ''}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        };
+
+        const createTextSection = (textSection) => {
+            if (!textSection || (!textSection.title && !textSection.content)) {
+                return '';
+            }
+
+            let dragAttributes = '';
+            let dragHandle = '';
+            let sectionControls = '';
+
+            if (isAuthenticated) {
+                dragAttributes = `
+                    draggable="true"
+                    ondragstart="handleSectionDragStart(event, '${textSection.sectionIdentifier}', ${rate.id})"
+                    ondragover="handleSectionDragOver(event)"
+                    ondrop="handleSectionDrop(event, '${textSection.sectionIdentifier}', ${rate.id})"
+                    ondragend="handleSectionDragEnd(event)"
+                `;
+                dragHandle = `<div class="section-drag-handle" title="Drag to reorder">⋮⋮</div>`;
+                sectionControls = `
+                    <div class="section-controls">
+                        <span class="section-type-indicator">Text</span>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="expanded-section ${isAuthenticated ? 'draggable-section' : ''} text-section"
+                     data-section-type="text"
+                     data-section-id="${textSection.sectionIdentifier}"
+                     ${dragAttributes}>
+                    ${dragHandle}
+                    ${sectionControls}
+                    ${textSection.title ? `<h5 class="section-title">${textSection.title}</h5>` : ''}
+                    <div class="text-content" style="text-align: left;">${textSection.content || ''}</div>
+                </div>
+            `;
+        };
+
+        let sectionsHTML = '';
+        sectionOrder.forEach(sectionIdentifier => {
+            if (sectionIdentifier.startsWith('table-')) {
+                const tableSection = tableSectionsMap.get(sectionIdentifier);
+                if (tableSection) {
+                    sectionsHTML += createTableSection(tableSection);
+                }
+            } else if (sectionIdentifier.startsWith('text-')) {
+                const textSection = textSectionsMap.get(sectionIdentifier);
+                if (textSection) {
+                    sectionsHTML += createTextSection(textSection);
+                }
+            }
+        });
+
+        tableSectionsMap.forEach((tableSection, identifier) => {
+            if (!sectionOrder.includes(identifier)) {
+                sectionsHTML += createTableSection(tableSection);
+            }
+        });
+
+        textSectionsMap.forEach((textSection, identifier) => {
+            if (!sectionOrder.includes(identifier)) {
+                sectionsHTML += createTextSection(textSection);
+            }
+        });
+
+        card.innerHTML = `
+            <div class="rate-expanded-content show">
+                ${sectionsHTML}
+            </div>
+        `;
+
+        return card;
     }
 
-    // Initialize everything when DOM is ready
-    document.addEventListener('DOMContentLoaded', function () {
-        initializeFromUrl();
-        initializePagination();
-        captureOriginalOrder();
-        initializeSortableHeaders();
-        initializeResponsiveToggle();
-        initializeScrollIndicator();
-        initializeSearch();
+    function closeExpandedCard(rateId) {
+        const cardRow = document.getElementById(`rateCardRow_${rateId}`);
+        if (cardRow) {
+            cardRow.style.display = 'none';
+            cardRow.classList.remove('show');
 
-        // Load initial page from server
-        const searchTerm = document.getElementById('searchInput')
-            ?.value || '';
-        loadPageFromServer(currentPage, searchTerm);
+            requestAnimationFrame(() => {
+                if (cardRow.parentNode) {
+                    cardRow.parentNode.removeChild(cardRow);
+                }
+            });
 
-        // Update URL state on changes
-        setInterval(updateUrlState, 2000); // Update URL every 2 seconds if needed
-    });
-
-    function updateSortInfo(columnName, direction) {
-        const sortInfo = document.getElementById('sortInfo');
-        if (sortInfo) {
-            if (columnName && direction) {
-                sortInfo.innerHTML = `Sorted by: <strong>${columnName}</strong> ${direction === 'asc' ? '↑' : '↓'}`;
-                sortInfo.style.background = 'linear-gradient(135deg, #e7f3ff, #cce7ff)';
-            } else {
-                sortInfo.textContent = 'Click column headers to sort ↕️';
-                sortInfo.style.background = 'white';
+            if (currentExpandedCard === rateId) {
+                currentExpandedCard = null;
             }
         }
     }
 
-    // Enhanced search function (if you want to add search later)
-    function searchInterestRates(searchTerm) {
-        if (!searchTerm.trim()) {
-            filteredRates = [...allInterestRates];
-        } else {
-            const rateFieldValuesMap = /*[[${rateFieldValuesMap}]]*/ {};
-            filteredRates = allInterestRates.filter(rate => {
-                // Search in all field values
-                if (rateFieldValuesMap[rate.id]) {
-                    return Object.values(rateFieldValuesMap[rate.id])
-                        .some(value =>
-                            value && value.toString()
-                            .toLowerCase()
-                            .includes(searchTerm.toLowerCase())
-                        );
-                }
+    // Admin-only functions (only available to authenticated users)
+    function captureOriginalOrder() {
+        if (!isAuthenticated) return;
 
-                // Also search in webLink if available
-                if (rate.webLink && rate.webLink.toLowerCase()
-                    .includes(searchTerm.toLowerCase())) {
-                    return true;
-                }
-
-                return false;
-            });
-        }
-
-        // Reset to first page after search
-        currentPage = 1;
-        loadPage(1);
-    }
-
-    // All your existing functions remain the same, just adding pagination-aware versions
-
-
-    // AJAX field value update
-    function updateFieldValueAjax(rateId, fieldId, value) {
-        const formData = new FormData();
-        formData.append('rateId', rateId);
-        formData.append('fieldId', fieldId);
-        formData.append('value', value);
-
-        fetch('/field-values/update', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to update field value');
-                }
-                // Update local cache
-                if (!serverRateFieldValuesMap[rateId]) {
-                    serverRateFieldValuesMap[rateId] = {};
-                }
-                serverRateFieldValuesMap[rateId][fieldId] = value;
-            })
-            .catch(error => {
-                console.error('Error updating field value:', error);
-                showDeleteNotification('Error updating field value: ' + error.message, true);
-            });
-    }
-
-    // Enhanced pagination functions
-    function goToPage(page) {
-        if (page < 1 || page > totalPages || page === currentPage || isLoading) return;
-
-        const searchTerm = document.getElementById('searchInput')
-            ?.value || '';
-        loadPageFromServer(page, searchTerm);
-    }
-
-    function changePageSize(newSize) {
-        pageSize = parseInt(newSize);
-        currentPage = 1; // Reset to first page
-
-        const searchTerm = document.getElementById('searchInput')
-            ?.value || '';
-        loadPageFromServer(1, searchTerm);
-    }
-
-    function jumpToPage() {
-        const input = document.getElementById('pageJumpInput');
-        const page = parseInt(input.value);
-
-        if (page && page >= 1 && page <= totalPages) {
-            goToPage(page);
-            input.value = '';
-        }
-    }
-
-    function initializeScrollIndicator() {
-        const tableContainer = document.getElementById('tableContainer');
-        const scrollIndicator = document.getElementById('scrollIndicator');
-
-        if (tableContainer && scrollIndicator) {
-            function checkScrollNeeded() {
-                const table = document.getElementById('mainTable');
-                if (table && tableContainer.scrollWidth > tableContainer.clientWidth) {
-                    scrollIndicator.classList.add('show');
-
-                    setTimeout(() => {
-                        scrollIndicator.classList.remove('show');
-                    }, 3000);
-                }
-            }
-
-            setTimeout(checkScrollNeeded, 500);
-            window.addEventListener('resize', checkScrollNeeded);
-
-            tableContainer.addEventListener('scroll', () => {
-                scrollIndicator.classList.remove('show');
-            });
-        }
-    }
-
-    function initializeResponsiveToggle() {
-        const stackedViewBtn = document.getElementById('stackedView');
-        const scrollViewBtn = document.getElementById('scrollView');
-        const tableContainer = document.getElementById('tableContainer');
-
-        if (stackedViewBtn && scrollViewBtn) {
-            stackedViewBtn.addEventListener('click', function () {
-                tableContainer.classList.add('mobile-stack');
-                stackedViewBtn.classList.add('active');
-                scrollViewBtn.classList.remove('active');
-            });
-
-            scrollViewBtn.addEventListener('click', function () {
-                tableContainer.classList.remove('mobile-stack');
-                scrollViewBtn.classList.add('active');
-                stackedViewBtn.classList.remove('active');
-            });
-
-            // Set default view for mobile
-            if (window.innerWidth <= 768) {
-                tableContainer.classList.add('mobile-stack');
-            }
-        }
+        const headers = document.querySelectorAll('.draggable-column');
+        originalOrder = Array.from(headers).map(header => header.dataset.fieldId);
     }
 
     function initializeSortableHeaders() {
-        // Add sortable class to all draggable columns
-        const headers = document.querySelectorAll('.draggable-column');
+        const headers = document.querySelectorAll('.draggable-column, .sortable');
         headers.forEach(header => {
             header.classList.add('sortable');
         });
     }
 
-    function resetSort() {
-        // Clear all sort indicators
-        document.querySelectorAll('.sortable')
-            .forEach(th => {
-                th.classList.remove('sort-asc', 'sort-desc');
-            });
+    function showEditForm(fieldId) {
+        if (!isAuthenticated) {
+            showDeleteNotification('You must be logged in to edit fields.', true);
+            return;
+        }
 
-        // Reset sort state
-        currentSortColumn = null;
-        currentSortDirection = null;
-
-        // Reset data to original order
-        filteredRates = [...allInterestRates];
-
-        // Reset to first page
-        currentPage = 1;
-        loadPage(1);
-
-        updateSortInfo();
-        showDeleteNotification('Sort reset! Data restored to original order.', false);
+        if (currentEditForm) {
+            currentEditForm.classList.remove('show');
+        }
+        const form = document.getElementById('editForm_' + fieldId);
+        if (form) {
+            form.classList.add('show');
+            currentEditForm = form;
+        }
     }
 
-    // Keep all your existing functions but add DataTable integration where needed
-    function captureOriginalOrder() {
-        const headers = document.querySelectorAll('.draggable-column');
-        originalOrder = Array.from(headers)
-            .map(header => header.dataset.fieldId);
-    }
-
-    function handleFieldDeleteClick(button) {
-        const fieldId = button.dataset.id;
-        const fieldLabel = button.dataset.label;
-        showFieldDeleteConfirmation(fieldId, fieldLabel);
+    function hideEditForm(fieldId) {
+        const form = document.getElementById('editForm_' + fieldId);
+        if (form) {
+            form.classList.remove('show');
+        }
+        currentEditForm = null;
     }
 
     function showFieldDeleteConfirmation(fieldId, fieldLabel) {
-        pendingFieldDeleteId = fieldId;
-        document.getElementById('fieldToDeleteName')
-            .textContent = fieldLabel;
-        document.getElementById('fieldToDeleteId')
-            .textContent = fieldId;
-        document.getElementById('fieldDeleteConfirmationModal')
-            .style.display = 'flex';
+        if (!isAuthenticated) return;
 
-        document.getElementById('confirmFieldDeleteBtn')
-            .onclick = function () {
-                deleteGlobalField(fieldId);
-            };
+        pendingFieldDeleteId = fieldId;
+        document.getElementById('fieldToDeleteName').textContent = fieldLabel;
+        document.getElementById('fieldToDeleteId').textContent = fieldId;
+        document.getElementById('fieldDeleteConfirmationModal').style.display = 'flex';
+
+        document.getElementById('confirmFieldDeleteBtn').onclick = function () {
+            deleteGlobalField(fieldId);
+        };
     }
 
     function hideFieldDeleteConfirmation() {
-        document.getElementById('fieldDeleteConfirmationModal')
-            .style.display = 'none';
+        if (!isAuthenticated) return;
+
+        document.getElementById('fieldDeleteConfirmationModal').style.display = 'none';
         pendingFieldDeleteId = null;
     }
 
     function deleteGlobalField(fieldId) {
+        if (!isAuthenticated) return;
+
         const confirmBtn = document.getElementById('confirmFieldDeleteBtn');
         const originalText = confirmBtn.textContent;
         confirmBtn.textContent = 'Deleting...';
         confirmBtn.disabled = true;
 
         fetch(`/fields/delete/${fieldId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to delete field');
-                }
-                return response.text();
-            })
-            .then(data => {
-                hideFieldDeleteConfirmation();
-
-                showDeleteNotification('Field deleted successfully! Page will reload...', false);
-
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
-            })
-            .catch(error => {
-                // Reset button
-                confirmBtn.textContent = originalText;
-                confirmBtn.disabled = false;
-
-                showDeleteNotification('Error deleting field: ' + error.message, true);
-            });
-    }
-
-    // Interest rate delete functionality
-    function showDeleteConfirmation(rateId) {
-        pendingDeleteId = rateId;
-        document.getElementById('deleteConfirmationModal')
-            .style.display = 'flex';
-
-        // Set up the confirm button click handler
-        document.getElementById('confirmDeleteBtn')
-            .onclick = function () {
-                deleteInterestRate(rateId);
-            };
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to delete field');
+            }
+            return response.text();
+        })
+        .then(data => {
+            hideFieldDeleteConfirmation();
+            showDeleteNotification('Field deleted successfully! Page will reload...', false);
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        })
+        .catch(error => {
+            confirmBtn.textContent = originalText;
+            confirmBtn.disabled = false;
+            showDeleteNotification('Error deleting field: ' + error.message, true);
+        });
     }
 
     function hideDeleteConfirmation() {
-        document.getElementById('deleteConfirmationModal')
-            .style.display = 'none';
+        if (!isAuthenticated) return;
+
+        document.getElementById('deleteConfirmationModal').style.display = 'none';
         pendingDeleteId = null;
     }
 
     function showDeleteNotification(message, isError) {
         const notification = document.getElementById('deleteNotification');
-        notification.textContent = message;
-        notification.classList.toggle('error', isError);
-        notification.classList.toggle('success', !isError);
-        notification.classList.add('show');
+        if (notification) {
+            notification.textContent = message;
+            notification.classList.toggle('error', isError);
+            notification.classList.toggle('success', !isError);
+            notification.classList.add('show');
 
-        setTimeout(() => {
-            notification.classList.remove('show');
-        }, 3000);
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
     }
 
-    // Close modals when clicking outside
-    document.getElementById('deleteConfirmationModal')
-        .addEventListener('click', function (e) {
-            if (e.target === this) {
-                hideDeleteConfirmation();
-            }
-        });
-
-    document.getElementById('fieldDeleteConfirmationModal')
-        .addEventListener('click', function (e) {
-            if (e.target === this) {
-                hideFieldDeleteConfirmation();
-            }
-        });
-
-    // Column drag and drop functionality
+    // Drag and drop functions (admin only)
     function handleDragStart(event) {
+        if (!isAuthenticated) return;
+
         draggedElement = event.target;
         event.target.classList.add('dragging');
         event.dataTransfer.effectAllowed = 'move';
@@ -1740,22 +1575,22 @@
     }
 
     function handleDragOver(event) {
+        if (!isAuthenticated) return;
+
         event.preventDefault();
         event.dataTransfer.dropEffect = 'move';
 
         const target = event.target.closest('.draggable-column');
         if (target && target !== draggedElement) {
-            // Remove existing drag-over class
-            document.querySelectorAll('.drag-over')
-                .forEach(el => el.classList.remove('drag-over'));
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
             target.classList.add('drag-over');
-
-            // Show drop indicator
             showDropIndicator(target, event);
         }
     }
 
     function handleDrop(event) {
+        if (!isAuthenticated) return;
+
         event.preventDefault();
 
         const target = event.target.closest('.draggable-column');
@@ -1763,14 +1598,10 @@
             const draggedFieldId = draggedElement.dataset.fieldId;
             const targetFieldId = target.dataset.fieldId;
 
-            // Move the column
             moveColumn(draggedFieldId, targetFieldId);
-
-            // Mark order as changed
             markOrderChanged();
         }
 
-        // Clean up
         cleanup();
     }
 
@@ -1782,13 +1613,14 @@
         if (draggedElement) {
             draggedElement.classList.remove('dragging');
         }
-        document.querySelectorAll('.drag-over')
-            .forEach(el => el.classList.remove('drag-over'));
+        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
         hideDropIndicator();
         draggedElement = null;
     }
 
     function moveColumn(draggedFieldId, targetFieldId) {
+        if (!isAuthenticated) return;
+
         const headerRow = document.getElementById("column-header-row");
         const headers = Array.from(headerRow.querySelectorAll(".draggable-column"));
 
@@ -1797,7 +1629,6 @@
 
         if (draggedIndex === -1 || targetIndex === -1 || draggedIndex === targetIndex) return;
 
-        // Move header
         const draggedHeader = headers[draggedIndex];
         if (targetIndex < draggedIndex) {
             headerRow.insertBefore(draggedHeader, headers[targetIndex]);
@@ -1805,112 +1636,67 @@
             headerRow.insertBefore(draggedHeader, headers[targetIndex].nextSibling);
         }
 
-        // Immediately re-render the current page data to match new column order
         const startIndex = (currentPage - 1) * pageSize;
         const endIndex = startIndex + pageSize;
         const pageData = filteredRates.slice(startIndex, endIndex);
 
-        // Re-render table data with new column order
         const tbody = document.getElementById('tableBody');
         renderTableRows(pageData, tbody);
     }
 
     function markOrderChanged() {
+        if (!isAuthenticated) return;
+
         orderChanged = true;
-        document.getElementById("saveOrderBtn")
-            .classList.add("show");
-        document.getElementById("orderChangedIndicator")
-            .classList.add("show");
-    }
-
-    function saveColumnOrder() {
-        const headers = document.querySelectorAll(".draggable-column");
-        const newOrder = Array.from(headers)
-            .map(header => header.dataset.fieldId);
-
-        // Add visual feedback
-        const saveBtn = document.getElementById("saveOrderBtn");
-        const originalText = saveBtn.textContent;
-        saveBtn.textContent = "Saving...";
-        saveBtn.disabled = true;
-
-        fetch('/fields/reorder', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': getCsrfToken()
-                },
-                body: JSON.stringify(newOrder)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Failed to save order");
-                }
-                return response.text();
-            })
-            .then(data => {
-                orderChanged = false;
-                saveBtn.classList.remove("show");
-                document.getElementById("orderChangedIndicator")
-                    .classList.remove("show");
-
-                // Update cache to match new order
-                updateGlobalFieldsCache();
-
-                // Show success message
-                showDeleteNotification('Column order saved successfully!', false);
-
-                // Reset button state
-                saveBtn.textContent = originalText;
-                saveBtn.disabled = false;
-            })
-            .catch(error => {
-                saveBtn.textContent = originalText;
-                saveBtn.disabled = false;
-                showDeleteNotification("Error saving order: " + error.message, true);
-            });
+        document.getElementById("saveOrderBtn").classList.add("show");
+        document.getElementById("orderChangedIndicator").classList.add("show");
     }
 
     function updateGlobalFieldsCache() {
-        const headers = document.querySelectorAll('.draggable-column');
-        const currentOrder = Array.from(headers)
-            .map(header => ({
-                id: header.dataset.fieldId,
-                label: header.querySelector('.header-text')
-                    .textContent
-            }));
+        if (!isAuthenticated) return;
 
-        // Reorder globalFieldsCache to match DOM order
+        const headers = document.querySelectorAll('.draggable-column');
+        const currentOrder = Array.from(headers).map(header => ({
+            id: header.dataset.fieldId,
+            label: header.querySelector('.header-text').textContent
+        }));
+
         if (globalFieldsCache) {
             globalFieldsCache = currentOrder.map(orderItem =>
-                    globalFieldsCache.find(field => field.id == orderItem.id)
-                )
-                .filter(Boolean);
+                globalFieldsCache.find(field => field.id == orderItem.id)
+            ).filter(Boolean);
         }
     }
 
-    // Optional: CSRF token extraction if needed for Spring Security
     function getCsrfToken() {
         const tokenMeta = document.querySelector('meta[name="_csrf"]');
         return tokenMeta ? tokenMeta.getAttribute('content') : '';
     }
 
     function showDropIndicator(target, event) {
+        if (!isAuthenticated) return;
+
         const indicator = document.getElementById("dropIndicator");
-        const rect = target.getBoundingClientRect();
-        indicator.style.left = `${rect.left}px`;
-        indicator.style.top = `${rect.top}px`;
-        indicator.style.height = `${rect.height}px`;
-        indicator.classList.add("show");
+        if (indicator) {
+            const rect = target.getBoundingClientRect();
+            indicator.style.left = `${rect.left}px`;
+            indicator.style.top = `${rect.top}px`;
+            indicator.style.height = `${rect.height}px`;
+            indicator.classList.add("show");
+        }
     }
 
     function hideDropIndicator() {
-        document.getElementById("dropIndicator")
-            .classList.remove("show");
+        const indicator = document.getElementById("dropIndicator");
+        if (indicator) {
+            indicator.classList.remove("show");
+        }
     }
 
-    // Section drag and drop functions - FIXED VERSION
+    // Section drag and drop functions (admin only)
     function handleSectionDragStart(event, sectionIdentifier, rateId) {
+        if (!isAuthenticated) return;
+
         draggedSection = {
             element: event.target.closest('.expanded-section'),
             identifier: sectionIdentifier,
@@ -1923,6 +1709,8 @@
     }
 
     function handleSectionDragOver(event) {
+        if (!isAuthenticated) return;
+
         event.preventDefault();
         event.dataTransfer.dropEffect = 'move';
 
@@ -1930,14 +1718,14 @@
         if (target && draggedSection && target !== draggedSection.element &&
             target.closest(`#rateCard_${currentRateId}`)) {
 
-            // Remove existing drag-over class
-            document.querySelectorAll('.drag-over')
-                .forEach(el => el.classList.remove('drag-over'));
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
             target.classList.add('drag-over');
         }
     }
 
     function handleSectionDrop(event, targetIdentifier, rateId) {
+        if (!isAuthenticated) return;
+
         event.preventDefault();
 
         if (draggedSection && draggedSection.rateId === rateId && draggedSection.identifier !== targetIdentifier) {
@@ -1945,34 +1733,23 @@
             const targetElement = event.target.closest('.expanded-section');
 
             if (sourceElement && targetElement) {
-                // Get the parent container (should be the rate card content)
                 const parent = sourceElement.parentElement;
-
-                // Determine if we should insert before or after the target
-                const sourceIndex = Array.from(parent.children)
-                    .indexOf(sourceElement);
-                const targetIndex = Array.from(parent.children)
-                    .indexOf(targetElement);
+                const sourceIndex = Array.from(parent.children).indexOf(sourceElement);
+                const targetIndex = Array.from(parent.children).indexOf(targetElement);
 
                 if (sourceIndex < targetIndex) {
-                    // Moving down - insert after target
                     parent.insertBefore(sourceElement, targetElement.nextSibling);
                 } else {
-                    // Moving up - insert before target
                     parent.insertBefore(sourceElement, targetElement);
                 }
 
-                // Get new order from DOM - only count sections with data-section-id
                 const sections = parent.querySelectorAll('[data-section-id]');
-                const newOrder = Array.from(sections)
-                    .map(el => el.getAttribute('data-section-id'));
+                const newOrder = Array.from(sections).map(el => el.getAttribute('data-section-id'));
 
-                // Update the order in the database
                 saveSectionOrder(rateId, newOrder);
             }
         }
 
-        // Clean up
         cleanupSectionDrag();
     }
 

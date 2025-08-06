@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:sec="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>New Interest Rate</title>
@@ -366,99 +366,105 @@
     </style>
 </head>
 <body class="bg-light">
-<div class="container py-5">
-    <div class="create-container">
-        <div class="create-header">
-            <h2 class="mb-0">
-                <i class="bi bi-plus-circle-fill"></i>
-                Create New Interest Rate
-            </h2>
-            <p class="text-muted mt-2">Fill in the basic information and add multiple sections as needed</p>
+<div sec:authorize="isAuthenticated()">
+    <div class="container py-5">
+        <div class="create-container">
+            <div class="create-header">
+                <h2 class="mb-0">
+                    <i class="bi bi-plus-circle-fill"></i>
+                    Create New Interest Rate
+                </h2>
+                <p class="text-muted mt-2">Fill in the basic information and add multiple sections as needed</p>
+            </div>
+
+            <form class="form-container" id="createForm" method="post" th:action="@{/interest-rate/create}"
+                  th:object="${interestRate}">
+
+                <!-- Basic Interest Rate Fields -->
+                <div class="section-header">
+                    <h5>
+                        <i class="bi bi-info-circle-fill"></i>
+                        Basic Information
+                    </h5>
+                </div>
+
+
+                <div class="row g-3 mb-4" th:each="field : ${globalFields}">
+                    <div class="col-md-6">
+                        <div class="field-group">
+                            <label class="field-label" th:for="${'extra_' + field.id}">
+                                <i class="bi bi-tag-fill"></i>
+                                [[${field.label}]]
+                            </label>
+                            <input class="form-control"
+                                   th:name="${'extra_' + field.id}"
+                                   th:placeholder="${'Enter ' + field.label}"
+                                   type="text"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="field-group">
+                            <label class="field-label" for="webLink">
+                                <i class="bi bi-tag-fill"></i>
+                                Web Link
+                            </label>
+                            <input class="form-control"
+                                   id="webLink"
+                                   placeholder="Enter link"
+                                   th:field="*{webLink}"
+                                   type="text"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dynamic Sections -->
+                <div class="section-header">
+                    <h5>
+                        <i class="bi bi-layers-fill"></i>
+                        Additional Information Sections
+                    </h5>
+                </div>
+
+                <div class="sections-container" id="sectionsContainer">
+                    <div class="empty-sections-message" id="emptySectionsMessage">
+                        <i class="bi bi-plus-square"></i>
+                        <h6>No sections added yet</h6>
+                        <p>Click the buttons below to add table or text sections</p>
+                    </div>
+                </div>
+
+                <!-- Add Section Buttons -->
+                <div class="d-flex justify-content-center gap-3 my-4">
+                    <button class="add-section-btn" onclick="addTableSection()" type="button">
+                        <i class="bi bi-table"></i>
+                        Add Table Section
+                    </button>
+                    <button class="add-section-btn" onclick="addTextSection()" type="button">
+                        <i class="bi bi-text-paragraph"></i>
+                        Add Text Section
+                    </button>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn btn-success btn-lg" type="submit">
+                        <i class="bi bi-check-circle"></i>
+                        Create Interest Rate
+                    </button>
+                    <a class="btn btn-secondary btn-lg ms-2" th:href="@{/}">
+                        <i class="bi bi-x-circle"></i>
+                        Cancel
+                    </a>
+                </div>
+            </form>
         </div>
-
-        <form id="createForm" class="form-container" method="post" th:action="@{/interest-rate/create}" th:object="${interestRate}">
-
-            <!-- Basic Interest Rate Fields -->
-            <div class="section-header">
-                <h5>
-                    <i class="bi bi-info-circle-fill"></i>
-                    Basic Information
-                </h5>
-            </div>
-
-
-            <div class="row g-3 mb-4" th:each="field : ${globalFields}">
-                <div class="col-md-6">
-                    <div class="field-group">
-                        <label class="field-label" th:for="${'extra_' + field.id}">
-                            <i class="bi bi-tag-fill"></i>
-                            [[${field.label}]]
-                        </label>
-                        <input class="form-control"
-                               th:name="${'extra_' + field.id}"
-                               th:placeholder="${'Enter ' + field.label}"
-                               type="text"/>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <div class="field-group">
-                        <label class="field-label" for="webLink">
-                            <i class="bi bi-tag-fill"></i>
-                            Web Link
-                        </label>
-                        <input class="form-control"
-                               th:field="*{webLink}"
-                               placeholder="Enter link"
-                               type="text"
-                               id="webLink"/>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dynamic Sections -->
-            <div class="section-header">
-                <h5>
-                    <i class="bi bi-layers-fill"></i>
-                    Additional Information Sections
-                </h5>
-            </div>
-
-            <div class="sections-container" id="sectionsContainer">
-                <div class="empty-sections-message" id="emptySectionsMessage">
-                    <i class="bi bi-plus-square"></i>
-                    <h6>No sections added yet</h6>
-                    <p>Click the buttons below to add table or text sections</p>
-                </div>
-            </div>
-
-            <!-- Add Section Buttons -->
-            <div class="d-flex justify-content-center gap-3 my-4">
-                <button type="button" class="add-section-btn" onclick="addTableSection()">
-                    <i class="bi bi-table"></i>
-                    Add Table Section
-                </button>
-                <button type="button" class="add-section-btn" onclick="addTextSection()">
-                    <i class="bi bi-text-paragraph"></i>
-                    Add Text Section
-                </button>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="action-buttons">
-                <button class="btn btn-success btn-lg" type="submit">
-                    <i class="bi bi-check-circle"></i>
-                    Create Interest Rate
-                </button>
-                <a class="btn btn-secondary btn-lg ms-2" th:href="@{/}">
-                    <i class="bi bi-x-circle"></i>
-                    Cancel
-                </a>
-            </div>
-        </form>
     </div>
+</div>
+<div sec:authorize="isAnonymous()">
+    <p>You are not logged in.</p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>

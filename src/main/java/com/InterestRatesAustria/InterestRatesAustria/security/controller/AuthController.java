@@ -1,7 +1,11 @@
-package com.InterestRatesAustria.InterestRatesAustria.security;
+package com.InterestRatesAustria.InterestRatesAustria.security.controller;
 
 import com.InterestRatesAustria.InterestRatesAustria.security.service.UserService;
 import com.InterestRatesAustria.InterestRatesAustria.security.service.EmailService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -177,5 +181,21 @@ public class AuthController {
         }
 
         return "login";
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpServletRequest request, HttpServletResponse response) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+
+        Cookie cookie = new Cookie("JSESSIONID", null);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+
+        return "redirect:/login?logout=true";
     }
 }
