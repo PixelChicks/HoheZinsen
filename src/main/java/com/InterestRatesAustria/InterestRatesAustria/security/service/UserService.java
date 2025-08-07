@@ -22,28 +22,23 @@ public class UserService {
     private EmailService emailService;
 
     public User registerUser(String email, String password) throws Exception {
-        // Check if user already exists
         if (userRepository.existsByUsername(email)) {
             throw new Exception("User with this email already exists");
         }
 
-        // Create new user
         User user = new User();
         user.setUsername(email);
         user.setPassword(passwordEncoder.encode(password));
         user.setRole("USER");
-        user.setEnabled(false); // Will be enabled after email verification
+        user.setEnabled(false);
         user.setEmailVerified(false);
 
-        // Generate verification token
         String verificationToken = UUID.randomUUID().toString();
         user.setVerificationToken(verificationToken);
         user.setVerificationTokenExpires(LocalDateTime.now().plusHours(24)); // Token expires in 24 hours
 
-        // Save user
         User savedUser = userRepository.save(user);
 
-        // Send verification email
         emailService.sendVerificationEmail(email, verificationToken);
 
         return savedUser;
@@ -58,17 +53,18 @@ public class UserService {
 
         User user = userOpt.get();
 
-        // Check if token is expired
         if (user.isVerificationTokenExpired()) {
             return false;
         }
 
-        // Verify the user
         user.setEmailVerified(true);
         user.setVerificationToken(null);
         user.setVerificationTokenExpires(null);
 
         userRepository.save(user);
+
+        emailService.sendEmailVerifiedNotification(user.getEmail());
+
         return true;
     }
 
@@ -85,14 +81,12 @@ public class UserService {
             throw new Exception("Email is already verified");
         }
 
-        // Generate new verification token
         String verificationToken = UUID.randomUUID().toString();
         user.setVerificationToken(verificationToken);
         user.setVerificationTokenExpires(LocalDateTime.now().plusHours(24));
 
         userRepository.save(user);
 
-        // Send verification email
         emailService.sendVerificationEmail(email, verificationToken);
     }
 
@@ -100,26 +94,21 @@ public class UserService {
         Optional<User> userOpt = userRepository.findByEmail(email);
 
         if (userOpt.isEmpty()) {
-            // For security, don't reveal if email exists or not
-            // Just silently return - user will think email was sent
             return;
         }
 
         User user = userOpt.get();
 
-        // Check if user is verified
         if (!user.isEmailVerified()) {
             throw new Exception("Please verify your email address first before resetting password");
         }
 
-        // Generate password reset token
         String resetToken = UUID.randomUUID().toString();
         user.setPasswordResetToken(resetToken);
-        user.setPasswordResetTokenExpires(LocalDateTime.now().plusHours(1)); // Token expires in 1 hour
+        user.setPasswordResetTokenExpires(LocalDateTime.now().plusHours(1));
 
         userRepository.save(user);
 
-        // Send password reset email
         emailService.sendPasswordResetEmail(email, resetToken);
     }
 
@@ -143,24 +132,20 @@ public class UserService {
 
         User user = userOpt.get();
 
-        // Check if token is expired
         if (user.isPasswordResetTokenExpired()) {
             return false;
         }
 
-        // Validate new password
         if (newPassword == null || newPassword.length() < 6) {
             throw new Exception("Password must be at least 6 characters long");
         }
 
-        // Update password
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setPasswordResetToken(null);
         user.setPasswordResetTokenExpires(null);
 
         userRepository.save(user);
 
-        // Send notification email
         emailService.sendPasswordChangedNotification(user.getEmail());
 
         return true;
@@ -173,13 +158,5 @@ public class UserService {
             user.setLastLogin(LocalDateTime.now());
             userRepository.save(user);
         }
-    }
-
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
-
-    public boolean existsByEmail(String email) {
-        return userRepository.existsByUsername(email);
     }
 }

@@ -121,8 +121,53 @@ public class EmailService {
         try {
             mailSender.send(message);
         } catch (Exception e) {
-            // Don't throw exception for notification email failure
             System.err.println("Failed to send password changed notification: " + e.getMessage());
+        }
+    }
+
+    public void sendEmailVerifiedNotification(String toEmail) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(toEmail);
+        message.setSubject("Email Verified - Awaiting Account Approval");
+
+        String emailContent =
+                "Email Verification Successful!\n\n" +
+                        "Your email has been successfully verified for your Interest Rates Austria account.\n\n" +
+                        "Your account is now awaiting approval from our administrators. " +
+                        "You will receive another email once your account has been activated and you can log in.\n\n" +
+                        "Thank you for your patience!\n\n" +
+                        "Best regards,\n" +
+                        "Interest Rates Austria Team";
+
+        message.setText(emailContent);
+
+        try {
+            mailSender.send(message);
+        } catch (Exception e) {
+            System.err.println("Failed to send email verified notification: " + e.getMessage());
+        }
+    }
+
+    public void sendAccountDisabledNotification(String toEmail) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(toEmail);
+        message.setSubject("Account Disabled - Interest Rates Austria");
+
+        String emailContent =
+                "Account Disabled\n\n" +
+                        "Your Interest Rates Austria account has been disabled by an administrator.\n\n" +
+                        "If you believe this was done in error, please contact our support team.\n\n" +
+                        "Best regards,\n" +
+                        "Interest Rates Austria Team";
+
+        message.setText(emailContent);
+
+        try {
+            mailSender.send(message);
+        } catch (Exception e) {
+            System.err.println("Failed to send account disabled notification: " + e.getMessage());
         }
     }
 }

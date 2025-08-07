@@ -173,7 +173,7 @@ public class AuthController {
                                 Model model) {
 
         if (error != null) {
-            model.addAttribute("error", "Invalid email or password. Please make sure your email is verified.");
+            model.addAttribute("error", "Login failed. Please check your credentials and make sure your email is verified and your account is enabled by an administrator.");
         }
 
         if (logout != null) {

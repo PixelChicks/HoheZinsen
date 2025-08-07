@@ -65,6 +65,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico").permitAll()
                         .requestMatchers("/register", "/verify-email", "/resend-verification").permitAll()
                         .requestMatchers("/forgot-password", "/reset-password").permitAll()
+                        .requestMatchers("/admin/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/**").authenticated()

@@ -1,6 +1,5 @@
 package com.InterestRatesAustria.InterestRatesAustria.security.persistance;
 
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -49,7 +48,7 @@ public class MyUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        // User must be both email verified AND enabled by admin to login
+        return user.isEnabled() && user.isEmailVerified();
     }
-
 }
