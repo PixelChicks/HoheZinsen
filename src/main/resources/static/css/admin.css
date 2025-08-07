@@ -1,22 +1,7 @@
- .sidebar {
-    min-height: 100vh;
-    background: #00b894;
-}
-.sidebar .nav-link {
-    color: rgba(255, 255, 255, 0.8);
-    padding: 0.8rem 1.5rem;
-    border-radius: 0.5rem;
-    margin: 0.2rem 0;
-    transition: all 0.3s;
-}
-.sidebar .nav-link:hover {
-    color: white;
-    background-color: rgba(255, 255, 255, 0.1);
-    transform: translateX(5px);
-}
 .main-content {
     background-color: #f8f9fa;
     min-height: 100vh;
+    width: 100%;
 }
 .user-status-verified {
     color: white;
@@ -38,11 +23,4 @@
     border-top: none;
     background-color: #f8f9fa;
     font-weight: 600;
-}
-.filter-tabs .nav-link {
-    color: #495057;
-}
-.filter-tabs .nav-link.active {
-    background-color: #00b894;
-    border-color: #00b894;
 }

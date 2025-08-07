@@ -1,243 +1,186 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>User Management - Admin Dashboard</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/css/admin.css">
+    <link href="/css/admin.css" rel="stylesheet">
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <nav class="col-md-3 col-lg-2 d-md-block sidebar">
-            <div class="position-sticky pt-3">
-                <div class="text-center mb-4">
-                    <h4 class="text-white">
-                        <i class="fas fa-shield-alt"></i>
-                        Admin Panel
-                    </h4>
-                    <small class="text-white-50" sec:authentication="name"></small>
-                </div>
+<div class="container py-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">
+            <i class="fas fa-users me-2"></i>
+            User Management
+        </h1>
+    </div>
 
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/admin/dashboard}">
-                            <i class="fas fa-chart-pie me-2"></i>
-                            Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" th:href="@{/admin/users}">
-                            <i class="fas fa-users me-2"></i>
-                            User Management
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/admin/users?filter=pending}">
-                            <i class="fas fa-clock me-2"></i>
-                            Pending Approvals
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/}">
-                            <i class="fas fa-home me-2"></i>
-                            Back to Site
-                        </a>
-                    </li>
-                    <li class="nav-item mt-3">
-                        <form th:action="@{/logout}" method="post" class="d-inline">
-                            <button type="submit" class="nav-link btn btn-link text-start w-100 border-0">
-                                <i class="fas fa-sign-out-alt me-2"></i>
-                                Logout
-                            </button>
-                        </form>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+    <!-- Alert Messages -->
+    <div class="alert alert-success alert-dismissible fade show" role="alert" th:if="${success}">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}"></span>
+        <button class="btn-close" data-bs-dismiss="alert" type="button"></button>
+    </div>
 
-        <!-- Main content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">
-                    <i class="fas fa-users me-2"></i>
-                    User Management
-                </h1>
-                <div class="btn-toolbar mb-2 mb-md-0">
-                    <a th:href="@{/admin/dashboard}" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-arrow-left me-1"></i>
-                        Back to Dashboard
-                    </a>
-                </div>
-            </div>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert" th:if="${error}">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <span th:text="${error}"></span>
+        <button class="btn-close" data-bs-dismiss="alert" type="button"></button>
+    </div>
 
-            <!-- Alert Messages -->
-            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle me-2"></i>
-                <span th:text="${success}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
+    <!-- Filter Tabs -->
+    <ul class="nav nav-tabs filter-tabs mb-3">
+        <li class="nav-item">
+            <a class="nav-link"
+               th:classappend="${currentFilter == 'all'} ? 'active' : ''"
+               th:href="@{/admin/users?filter=all}">
+                <i class="fas fa-users me-1"></i>
+                All Users
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link"
+               th:classappend="${currentFilter == 'pending'} ? 'active' : ''"
+               th:href="@{/admin/users?filter=pending}">
+                <i class="fas fa-clock me-1"></i>
+                Pending Approval
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link"
+               th:classappend="${currentFilter == 'enabled'} ? 'active' : ''"
+               th:href="@{/admin/users?filter=enabled}">
+                <i class="fas fa-user-check me-1"></i>
+                Active Users
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link"
+               th:classappend="${currentFilter == 'unverified'} ? 'active' : ''"
+               th:href="@{/admin/users?filter=unverified}">
+                <i class="fas fa-envelope me-1"></i>
+                Unverified
+            </a>
+        </li>
+    </ul>
 
-            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                <span th:text="${error}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-
-            <!-- Filter Tabs -->
-            <ul class="nav nav-tabs filter-tabs mb-3">
-                <li class="nav-item">
-                    <a class="nav-link"
-                       th:classappend="${currentFilter == 'all'} ? 'active' : ''"
-                       th:href="@{/admin/users?filter=all}">
-                        <i class="fas fa-users me-1"></i>
-                        All Users
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link"
-                       th:classappend="${currentFilter == 'pending'} ? 'active' : ''"
-                       th:href="@{/admin/users?filter=pending}">
-                        <i class="fas fa-clock me-1"></i>
-                        Pending Approval
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link"
-                       th:classappend="${currentFilter == 'enabled'} ? 'active' : ''"
-                       th:href="@{/admin/users?filter=enabled}">
-                        <i class="fas fa-user-check me-1"></i>
-                        Active Users
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link"
-                       th:classappend="${currentFilter == 'unverified'} ? 'active' : ''"
-                       th:href="@{/admin/users?filter=unverified}">
-                        <i class="fas fa-envelope me-1"></i>
-                        Unverified
-                    </a>
-                </li>
-            </ul>
-
-            <!-- Users Table -->
-            <div class="card shadow">
-                <div class="card-header">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-list me-2"></i>
-                        Users List
-                        <span th:switch="${currentFilter}">
+    <!-- Users Table -->
+    <div class="card shadow">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-list me-2"></i>
+                Users List
+                <span th:switch="${currentFilter}">
                                 <span th:case="'pending'">(Pending Approval)</span>
                                 <span th:case="'enabled'">(Active Users)</span>
                                 <span th:case="'unverified'">(Unverified)</span>
                                 <span th:case="*">(All Users)</span>
                             </span>
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Email Status</th>
-                                <th>Account Status</th>
-                                <th>Created At</th>
-                                <th>Last Login</th>
-                                <th>Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:if="${#lists.isEmpty(users)}">
-                                <td colspan="8" class="text-center py-4">
-                                    <i class="fas fa-users fa-2x text-muted mb-2"></i>
-                                    <div class="text-muted">No users found for the selected filter.</div>
-                                </td>
-                            </tr>
-                            <tr th:each="user : ${users}">
-                                <td th:text="${user.id}">1</td>
-                                <td>
-                                    <strong th:text="${user.username}">user@example.com</strong>
-                                </td>
-                                <td>
-                                    <span class="badge bg-info" th:text="${user.role}">USER</span>
-                                </td>
-                                <td>
-                                            <span th:if="${user.emailVerified}"
-                                                  class="badge bg-success user-status-verified">
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Email Status</th>
+                        <th>Account Status</th>
+                        <th>Created At</th>
+                        <th>Last Login</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(users)}">
+                        <td class="text-center py-4" colspan="8">
+                            <i class="fas fa-users fa-2x text-muted mb-2"></i>
+                            <div class="text-muted">No users found for the selected filter.</div>
+                        </td>
+                    </tr>
+                    <tr th:each="user : ${users}">
+                        <td th:text="${user.id}">1</td>
+                        <td>
+                            <strong th:text="${user.username}">user@example.com</strong>
+                        </td>
+                        <td>
+                            <span class="badge bg-info" th:text="${user.role}">USER</span>
+                        </td>
+                        <td>
+                                            <span class="badge bg-success user-status-verified"
+                                                  th:if="${user.emailVerified}">
                                                 <i class="fas fa-check me-1"></i>Verified
                                             </span>
-                                    <span th:unless="${user.emailVerified}"
-                                          class="badge bg-danger user-status-unverified">
+                            <span class="badge bg-danger user-status-unverified"
+                                  th:unless="${user.emailVerified}">
                                                 <i class="fas fa-times me-1"></i>Unverified
                                             </span>
-                                </td>
-                                <td>
-                                            <span th:if="${user.enabled}"
-                                                  class="badge bg-success user-status-enabled">
+                        </td>
+                        <td>
+                                            <span class="badge bg-success user-status-enabled"
+                                                  th:if="${user.enabled}">
                                                 <i class="fas fa-check-circle me-1"></i>Enabled
                                             </span>
-                                    <span th:unless="${user.enabled}"
-                                          class="badge bg-secondary user-status-disabled">
+                            <span class="badge bg-secondary user-status-disabled"
+                                  th:unless="${user.enabled}">
                                                 <i class="fas fa-ban me-1"></i>Disabled
                                             </span>
-                                </td>
-                                <td>
-                                    <small th:text="${#temporals.format(user.createdAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 10:00</small>
-                                </td>
-                                <td>
-                                    <small th:if="${user.lastLogin}"
-                                           th:text="${#temporals.format(user.lastLogin, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 10:00</small>
-                                    <small th:unless="${user.lastLogin}" class="text-muted">Never</small>
-                                </td>
-                                <td class="action-buttons">
-                                    <!-- Enable Button -->
-                                    <form th:if="${user.emailVerified && !user.enabled}"
-                                          th:action="@{/admin/users/{id}/enable(id=${user.id})}"
-                                          method="post"
-                                          class="d-inline"
-                                          onsubmit="return confirm('Enable this user account?')">
-                                        <button type="submit" class="btn btn-success btn-sm" title="Enable User">
-                                            <i class="fas fa-check"></i>
-                                        </button>
-                                    </form>
+                        </td>
+                        <td>
+                            <small th:text="${#temporals.format(user.createdAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024
+                                10:00</small>
+                        </td>
+                        <td>
+                            <small th:if="${user.lastLogin}"
+                                   th:text="${#temporals.format(user.lastLogin, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024
+                                10:00</small>
+                            <small class="text-muted" th:unless="${user.lastLogin}">Never</small>
+                        </td>
+                        <td class="action-buttons">
+                            <!-- Enable Button -->
+                            <form class="d-inline"
+                                  method="post"
+                                  onsubmit="return confirm('Enable this user account?')"
+                                  th:action="@{/admin/users/{id}/enable(id=${user.id})}"
+                                  th:if="${user.emailVerified && !user.enabled}">
+                                <button class="btn btn-success btn-sm" title="Enable User" type="submit">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </form>
 
-                                    <!-- Disable Button -->
-                                    <form th:if="${user.enabled}"
-                                          th:action="@{/admin/users/{id}/disable(id=${user.id})}"
-                                          method="post"
-                                          class="d-inline"
-                                          onsubmit="return confirm('Disable this user account?')">
-                                        <button type="submit" class="btn btn-warning btn-sm" title="Disable User">
-                                            <i class="fas fa-ban"></i>
-                                        </button>
-                                    </form>
+                            <!-- Disable Button -->
+                            <form class="d-inline"
+                                  method="post"
+                                  onsubmit="return confirm('Disable this user account?')"
+                                  th:action="@{/admin/users/{id}/disable(id=${user.id})}"
+                                  th:if="${user.enabled}">
+                                <button class="btn btn-warning btn-sm" title="Disable User" type="submit">
+                                    <i class="fas fa-ban"></i>
+                                </button>
+                            </form>
 
-                                    <!-- Delete Button -->
-                                    <form th:action="@{/admin/users/{id}/delete(id=${user.id})}"
-                                          method="post"
-                                          class="d-inline"
-                                          onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.')">
-                                        <button type="submit"
-                                                class="btn btn-danger btn-sm"
-                                                title="Delete User"
-                                                th:disabled="${user.role == 'ROLE_ADMIN'}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                            <!-- Delete Button -->
+                            <form class="d-inline"
+                                  method="post"
+                                  onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.')"
+                                  th:action="@{/admin/users/{id}/delete(id=${user.id})}">
+                                <button class="btn btn-danger btn-sm"
+                                        th:disabled="${user.role == 'ROLE_ADMIN'}"
+                                        title="Delete User"
+                                        type="submit">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
-        </main>
+        </div>
     </div>
 </div>
 

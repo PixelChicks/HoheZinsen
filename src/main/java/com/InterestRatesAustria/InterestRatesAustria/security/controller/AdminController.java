@@ -19,16 +19,6 @@ public class AdminController {
     @Autowired
     private AdminService adminService;
 
-    @GetMapping("/dashboard")
-    public String adminDashboard(Model model) {
-        model.addAttribute("totalUsers", adminService.getTotalUsers());
-        model.addAttribute("pendingUsers", adminService.getPendingUsersCount());
-        model.addAttribute("enabledUsers", adminService.getEnabledUsersCount());
-        model.addAttribute("unverifiedUsers", adminService.getUnverifiedUsersCount());
-
-        return "admin/dashboard";
-    }
-
     @GetMapping("/users")
     public String listUsers(@RequestParam(defaultValue = "all") String filter, Model model) {
         List<User> users;
