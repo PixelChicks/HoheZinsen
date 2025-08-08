@@ -196,6 +196,12 @@ public class AuthController {
         cookie.setMaxAge(0);
         response.addCookie(cookie);
 
+        Cookie cookieRememberMe = new Cookie("interest-rates-remember-me", null);
+        cookieRememberMe.setPath("/");
+        cookieRememberMe.setHttpOnly(true);
+        cookieRememberMe.setMaxAge(0);
+        response.addCookie(cookieRememberMe);
+
         return "redirect:/login?logout=true";
     }
 }
