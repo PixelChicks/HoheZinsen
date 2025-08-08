@@ -3,6 +3,7 @@ package com.InterestRatesAustria.InterestRatesAustria.repository;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.InterestRate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,4 +20,12 @@ public interface InterestRateRepository extends JpaRepository<InterestRate, Long
             "LOWER(ir.webLink) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
             "LOWER(fv.value) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
     long countBySearchTerm(@Param("searchTerm") String searchTerm);
+
+    @Query("SELECT DISTINCT ir FROM InterestRate ir " +
+            "LEFT JOIN ir.fieldValues fv " +
+            "WHERE LOWER(ir.webLink) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "OR LOWER(fv.value) LIKE LOWER(CONCAT('%', :search, '%'))")
+    Page<InterestRate> searchByWebLinkOrFieldValue(@Param("search") String search, Pageable pageable);
+
+    Page<InterestRate> findAll(Specification<InterestRate> spec, Pageable pageable);
 }

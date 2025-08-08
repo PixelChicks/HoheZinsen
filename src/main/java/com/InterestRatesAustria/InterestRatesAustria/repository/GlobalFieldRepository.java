@@ -12,4 +12,5 @@ public interface GlobalFieldRepository extends JpaRepository<GlobalField, Long> 
 
     @Query("SELECT COALESCE(MAX(g.sortOrder), 0) FROM GlobalField g WHERE g.deletedAt IS NULL")
     Integer findMaxSortOrder();
+    List<GlobalField> findByDeletedAtIsNullOrderBySortOrder();
 }

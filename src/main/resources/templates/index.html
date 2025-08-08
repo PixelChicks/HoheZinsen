@@ -53,6 +53,36 @@
         <a class="btn btn-primary mt-2 mt-md-0 admin-only" href="/interest-rate/new" sec:authorize="isAuthenticated()">+ Add New Interest Rate</a>
     </div>
 
+    <!-- Filter Section HTML -->
+    <div class="filter-section" id="filterSection">
+        <div class="filter-toggle" id="filterToggle" onclick="toggleFilters()">
+            <h5>
+                🔍 Filters
+                <span class="filter-summary" id="filterSummary">Click to add filters</span>
+            </h5>
+            <span class="chevron">▼</span>
+        </div>
+
+        <div class="filter-content" id="filterContent">
+            <!-- Active Filters Tags -->
+            <div class="active-filters" id="activeFilters">
+                <!-- Active filter tags will be populated here -->
+            </div>
+
+            <!-- Filter Grid -->
+            <div class="filter-grid" id="filterGrid">
+                <!-- Filter items will be populated here -->
+            </div>
+
+            <!-- Filter Actions -->
+            <div class="filter-actions">
+                <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+                <button class="btn btn-secondary" onclick="clearAllFilters()">Clear All</button>
+                <button class="btn btn-outline-secondary" onclick="toggleFilters()">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Admin-only form to add global fields -->
     <form class="mb-4 admin-only" method="post" th:action="@{/fields/add}" th:object="${newField}" sec:authorize="isAuthenticated()">
         <div class="row g-2">
@@ -1558,6 +1588,364 @@
         }
     });
 
+    // ============================================================================
+    // FILTERS
+    // ============================================================================
+
+    // Filter Management JavaScript
+    let availableFilters = [];
+    let activeFilters = new Map(); // fieldId -> Set of selected values
+    let filterExpanded = false;
+
+    // Initialize filters when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeFilters();
+    });
+
+    async function initializeFilters() {
+        try {
+            // Load available filters from server
+            const response = await fetch('/filters/available');
+            if (response.ok) {
+                availableFilters = await response.json();
+                renderFilterGrid();
+
+                // Initialize with any existing filters from URL
+                initializeFromUrlParams();
+                updateFilterSummary();
+            }
+        } catch (error) {
+            console.error('Error loading filters:', error);
+        }
+    }
+
+    function initializeFromUrlParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        for (const [key, value] of urlParams.entries()) {
+            if (key.startsWith('filter_')) {
+                const fieldId = key.substring(7);
+                const values = value.split(',');
+                activeFilters.set(fieldId, new Set(values));
+            }
+        }
+
+        if (activeFilters.size > 0) {
+            updateActiveFiltersDisplay();
+            updateFilterCheckboxes();
+        }
+    }
+
+    function toggleFilters() {
+        const content = document.getElementById('filterContent');
+        const toggle = document.getElementById('filterToggle');
+
+        filterExpanded = !filterExpanded;
+
+        if (filterExpanded) {
+            content.classList.add('show');
+            toggle.classList.add('expanded');
+        } else {
+            content.classList.remove('show');
+            toggle.classList.remove('expanded');
+        }
+    }
+
+    function renderFilterGrid() {
+        const grid = document.getElementById('filterGrid');
+
+        grid.innerHTML = availableFilters.map(filter => `
+            <div class="filter-item" data-field-id="${filter.fieldId}">
+                <h6>
+                    ${filter.label}
+                    <span class="text-muted">(${filter.options.length})</span>
+                </h6>
+                <div class="filter-options" id="options_${filter.fieldId}">
+                    ${filter.options.map(option => `
+                        <div class="filter-option" onclick="toggleFilterOption(${filter.fieldId}, '${option.value}')">
+                            <input type="checkbox"
+                                   id="filter_${filter.fieldId}_${option.value.replace(/[^a-zA-Z0-9]/g, '_')}"
+                                   value="${option.value}">
+                            <label for="filter_${filter.fieldId}_${option.value.replace(/[^a-zA-Z0-9]/g, '_')}">
+                                ${option.label}
+                            </label>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function toggleFilterOption(fieldId, value) {
+        const fieldIdStr = fieldId.toString();
+
+        if (!activeFilters.has(fieldIdStr)) {
+            activeFilters.set(fieldIdStr, new Set());
+        }
+
+        const fieldFilters = activeFilters.get(fieldIdStr);
+
+        if (fieldFilters.has(value)) {
+            fieldFilters.delete(value);
+            if (fieldFilters.size === 0) {
+                activeFilters.delete(fieldIdStr);
+            }
+        } else {
+            fieldFilters.add(value);
+        }
+
+        updateFilterCheckboxes();
+        updateActiveFiltersDisplay();
+        updateFilterSummary();
+    }
+
+    function updateFilterCheckboxes() {
+        availableFilters.forEach(filter => {
+            const fieldIdStr = filter.fieldId.toString();
+            const selectedValues = activeFilters.get(fieldIdStr) || new Set();
+
+            filter.options.forEach(option => {
+                const checkboxId = `filter_${filter.fieldId}_${option.value.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                const checkbox = document.getElementById(checkboxId);
+                if (checkbox) {
+                    checkbox.checked = selectedValues.has(option.value);
+                }
+            });
+        });
+    }
+
+    function updateActiveFiltersDisplay() {
+        const container = document.getElementById('activeFilters');
+        const tags = [];
+
+        activeFilters.forEach((values, fieldId) => {
+            const filter = availableFilters.find(f => f.fieldId.toString() === fieldId);
+            if (filter) {
+                values.forEach(value => {
+                    tags.push(`
+                        <span class="filter-tag">
+                            ${filter.label}: ${value}
+                            <button class="remove-filter" onclick="removeFilterTag('${fieldId}', '${value}')" title="Remove filter">
+                                ✕
+                            </button>
+                        </span>
+                    `);
+                });
+            }
+        });
+
+        container.innerHTML = tags.join('');
+        container.style.display = tags.length > 0 ? 'flex' : 'none';
+    }
+
+    function updateFilterSummary() {
+        const summary = document.getElementById('filterSummary');
+        const totalActive = Array.from(activeFilters.values()).reduce((sum, set) => sum + set.size, 0);
+
+        if (totalActive === 0) {
+            summary.textContent = 'Click to add filters';
+            summary.style.color = '#666';
+        } else {
+            summary.textContent = `${totalActive} filter${totalActive > 1 ? 's' : ''} active`;
+            summary.style.color = '#007bff';
+            summary.style.fontWeight = '600';
+        }
+    }
+
+    function removeFilterTag(fieldId, value) {
+        if (activeFilters.has(fieldId)) {
+            activeFilters.get(fieldId).delete(value);
+            if (activeFilters.get(fieldId).size === 0) {
+                activeFilters.delete(fieldId);
+            }
+        }
+
+        updateFilterCheckboxes();
+        updateActiveFiltersDisplay();
+        updateFilterSummary();
+
+        // Auto-apply filters when removing tags
+        applyFilters();
+    }
+
+    function clearAllFilters() {
+        activeFilters.clear();
+        updateFilterCheckboxes();
+        updateActiveFiltersDisplay();
+        updateFilterSummary();
+        applyFilters();
+    }
+
+    function applyFilters() {
+        // Build filter parameters for the API call
+        const params = new URLSearchParams();
+
+        // Add existing parameters
+        params.set('page', '0'); // Reset to first page when applying filters
+        params.set('size', pageSize.toString());
+        params.set('sortBy', currentSortColumn);
+        params.set('sortDir', currentSortDirection);
+
+        if (currentSearchTerm) {
+            params.set('search', currentSearchTerm);
+        }
+
+        // Add filter parameters
+        activeFilters.forEach((values, fieldId) => {
+            if (values.size > 0) {
+                params.set(`filter_${fieldId}`, Array.from(values).join(','));
+            }
+        });
+
+        // Make API call with filters
+        currentPage = 1;
+        loadPageFromServerWithFilters(1, currentSearchTerm, currentSortColumn, currentSortDirection, activeFilters);
+
+        // Update URL
+        updateBrowserUrlWithFilters();
+
+        // Close filters panel on mobile after applying
+        if (window.innerWidth <= 768) {
+            toggleFilters();
+        }
+    }
+
+    function loadPageFromServerWithFilters(page, searchTerm = '', sortBy = null, sortDir = null, filters = new Map()) {
+        if (isLoading) return;
+
+        showLoading();
+
+        const params = new URLSearchParams({
+            page: page - 1, // Convert to 0-based for backend
+            size: pageSize,
+            sortBy: sortBy || currentSortColumn,
+            sortDir: sortDir || currentSortDirection
+        });
+
+        if (searchTerm && searchTerm.trim()) {
+            params.append('search', searchTerm.trim());
+        }
+
+        // Add filter parameters
+        filters.forEach((values, fieldId) => {
+            if (values.size > 0) {
+                params.set(`filter_${fieldId}`, Array.from(values).join(','));
+            }
+        });
+
+        fetch(`/api/interest-rates?${params.toString()}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Update all pagination state
+                currentPage = page;
+                totalPages = data.totalPages;
+                totalRecords = data.totalElements;
+                currentSearchTerm = searchTerm || '';
+
+                // Update sort state if provided
+                if (sortBy) currentSortColumn = sortBy;
+                if (sortDir) currentSortDirection = sortDir;
+
+                // Update data arrays
+                currentPageData = data.content;
+                serverRateFieldValuesMap = data.rateFieldValuesMap;
+
+                // Render the new data
+                renderTableData(data.content);
+                updatePaginationControls();
+                updatePaginationInfo();
+                hideLoading();
+
+                // Close any expanded cards when changing pages
+                if (currentExpandedCard) {
+                    closeExpandedCard(currentExpandedCard);
+                }
+
+                // Update URL without page reload
+                updateBrowserUrlWithFilters();
+            })
+            .catch(error => {
+                console.error('Error loading page:', error);
+                showDeleteNotification('Error loading data: ' + error.message, true);
+                hideLoading();
+            });
+    }
+
+    function updateBrowserUrlWithFilters() {
+        const url = new URL(window.location);
+
+        // Clear existing filter parameters
+        for (const [key] of url.searchParams.entries()) {
+            if (key.startsWith('filter_')) {
+                url.searchParams.delete(key);
+            }
+        }
+
+        // Add current filter parameters
+        activeFilters.forEach((values, fieldId) => {
+            if (values.size > 0) {
+                url.searchParams.set(`filter_${fieldId}`, Array.from(values).join(','));
+            }
+        });
+
+        // Update other parameters
+        url.searchParams.set('page', currentPage - 1);
+        if (currentSearchTerm) {
+            url.searchParams.set('search', currentSearchTerm);
+        } else {
+            url.searchParams.delete('search');
+        }
+        url.searchParams.set('sortBy', currentSortColumn);
+        url.searchParams.set('sortDir', currentSortDirection);
+        url.searchParams.set('size', pageSize);
+
+        window.history.replaceState({}, '', url);
+    }
+
+    // Override the existing loadPageFromServer function to support filters
+    const originalLoadPageFromServer = window.loadPageFromServer;
+    window.loadPageFromServer = function(page, searchTerm = '', sortBy = null, sortDir = null) {
+        loadPageFromServerWithFilters(page, searchTerm, sortBy, sortDir, activeFilters);
+    };
+
+    // Override the existing performSearch function to preserve filters
+    const originalPerformSearch = window.performSearch;
+    window.performSearch = function() {
+        const searchInput = document.getElementById('searchInput');
+        const searchTerm = searchInput ? searchInput.value.trim() : '';
+        currentPage = 1;
+        loadPageFromServerWithFilters(1, searchTerm, currentSortColumn, currentSortDirection, activeFilters);
+    };
+
+    // Override the existing clearSearch function to preserve filters
+    const originalClearSearch = window.clearSearch;
+    window.clearSearch = function() {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+        currentPage = 1;
+        loadPageFromServerWithFilters(1, '', currentSortColumn, currentSortDirection, activeFilters);
+    };
+
+    // Add filter refresh capability
+    function refreshFiltersFromServer() {
+        initializeFilters();
+    }
+
+    // Export functions for use in main application
+    window.filterFunctions = {
+        toggleFilters,
+        applyFilters,
+        clearAllFilters,
+        refreshFiltersFromServer,
+        loadPageFromServerWithFilters
+    };
 </script>
 </body>
 </html>

@@ -4,6 +4,7 @@ import com.InterestRatesAustria.InterestRatesAustria.model.dto.InterestRateDTO;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.GlobalField;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.InterestRate;
 import com.InterestRatesAustria.InterestRatesAustria.service.FieldValueService;
+import com.InterestRatesAustria.InterestRatesAustria.service.FilterService;
 import com.InterestRatesAustria.InterestRatesAustria.service.GlobalFieldService;
 import com.InterestRatesAustria.InterestRatesAustria.service.InterestRateService;
 import org.springframework.data.domain.Page;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 @Controller
@@ -25,13 +27,16 @@ public class HomeController {
     private final InterestRateService interestRateService;
     private final GlobalFieldService globalFieldService;
     private final FieldValueService fieldValueService;
+    private final FilterService filterService;
 
     public HomeController(InterestRateService interestRateService,
                           GlobalFieldService globalFieldService,
-                          FieldValueService fieldValueService) {
+                          FieldValueService fieldValueService,
+                          FilterService filterService) {
         this.interestRateService = interestRateService;
         this.globalFieldService = globalFieldService;
         this.fieldValueService = fieldValueService;
+        this.filterService = filterService;
     }
 
     @GetMapping("/")
@@ -40,12 +45,14 @@ public class HomeController {
                             @RequestParam(defaultValue = "5") int size,
                             @RequestParam(defaultValue = "id") String sortBy,
                             @RequestParam(defaultValue = "asc") String sortDir,
-                            @RequestParam(required = false) String search) {
+                            @RequestParam(required = false) String search,
+                            @RequestParam Map<String, String> allParams) {
 
-        // Get initial page of data for server-side rendering
+        Map<Long, List<String>> filters = extractFilters(allParams);
+
         Page<InterestRate> interestRatesPage;
-        if (search != null && !search.trim().isEmpty()) {
-            interestRatesPage = interestRateService.searchInterestRatesPaginated(search, page, size, sortBy, sortDir);
+        if ((search != null && !search.trim().isEmpty()) || !filters.isEmpty()) {
+            interestRatesPage = filterService.getFilteredInterestRates(filters, page, size, sortBy, sortDir, search);
         } else {
             interestRatesPage = interestRateService.getAllInterestRatesPaginated(page, size, sortBy, sortDir);
         }
@@ -59,13 +66,11 @@ public class HomeController {
         Map<Long, Map<Long, String>> rateFieldValuesMap =
                 fieldValueService.getRateFieldValuesMap(interestRatesPage.getContent());
 
-        // Pass only the current page data, not all data
         model.addAttribute("interestRates", interestRateDTOs);
         model.addAttribute("globalFields", globalFields);
         model.addAttribute("rateFieldValuesMap", rateFieldValuesMap);
         model.addAttribute("newField", new GlobalField());
 
-        // Pagination info
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", interestRatesPage.getTotalPages());
         model.addAttribute("totalElements", interestRatesPage.getTotalElements());
@@ -74,10 +79,12 @@ public class HomeController {
         model.addAttribute("sortDir", sortDir);
         model.addAttribute("search", search);
 
+        model.addAttribute("activeFilters", filters);
+        model.addAttribute("availableFilters", filterService.getAvailableFilters());
+
         return "index";
     }
 
-    // Fixed endpoint path to match what JavaScript is calling
     @GetMapping("/api/interest-rates")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getInterestRatesPaginated(
@@ -85,12 +92,15 @@ public class HomeController {
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir,
-            @RequestParam(required = false) String search) {
+            @RequestParam(required = false) String search,
+            @RequestParam Map<String, String> allParams) {
+
+        Map<Long, List<String>> filters = extractFilters(allParams);
 
         Page<InterestRate> interestRatesPage;
 
-        if (search != null && !search.trim().isEmpty()) {
-            interestRatesPage = interestRateService.searchInterestRatesPaginated(search, page, size, sortBy, sortDir);
+        if ((search != null && !search.trim().isEmpty()) || !filters.isEmpty()) {
+            interestRatesPage = filterService.getFilteredInterestRates(filters, page, size, sortBy, sortDir, search);
         } else {
             interestRatesPage = interestRateService.getAllInterestRatesPaginated(page, size, sortBy, sortDir);
         }
@@ -111,7 +121,30 @@ public class HomeController {
         response.put("pageSize", size);
         response.put("isFirst", interestRatesPage.isFirst());
         response.put("isLast", interestRatesPage.isLast());
+        response.put("activeFilters", filters);
 
         return ResponseEntity.ok(response);
+    }
+
+    private Map<Long, List<String>> extractFilters(Map<String, String> allParams) {
+        Map<Long, List<String>> filters = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : allParams.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+
+            // Filter parameters are expected to be in format "filter_<fieldId>"
+            if (key.startsWith("filter_") && value != null && !value.trim().isEmpty()) {
+                try {
+                    Long fieldId = Long.parseLong(key.substring(7)); // Remove "filter_" prefix
+                    List<String> values = Arrays.asList(value.split(","));
+                    filters.put(fieldId, values);
+                } catch (NumberFormatException e) {
+                    // Invalid field ID, skip this filter
+                }
+            }
+        }
+
+        return filters;
     }
 }
