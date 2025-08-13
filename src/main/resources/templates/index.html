@@ -303,7 +303,6 @@
 
 <!-- Include jQuery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-
 <script th:inline="javascript">
     // ============================================================================
     // GLOBAL VARIABLES AND STATE
@@ -355,6 +354,7 @@
 
         // Render the initial data from server
         renderInitialData();
+        initializeMobileScrolling();
     });
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -582,19 +582,21 @@
         }
 
         tbody.innerHTML = data.map(rate => {
-            // Get current field order from headers (this is the key part)
-            const headers = document.querySelectorAll('.draggable-column, .sortable');
-            const currentFieldOrder = Array.from(headers).map(header => ({
-                id: header.dataset.fieldId,
-                label: header.querySelector('.header-text').textContent.trim()
-            }));
+                // Get current field order from headers (this is the key part)
+                const headers = document.querySelectorAll('.draggable-column, .sortable');
+                const currentFieldOrder = Array.from(headers)
+                    .map(header => ({
+                        id: header.dataset.fieldId,
+                        label: header.querySelector('.header-text')
+                            .textContent.trim()
+                    }));
 
-            // Generate cells in the new column order
-            const fieldCells = currentFieldOrder.map(field => {
-                const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
+                // Generate cells in the new column order
+                const fieldCells = currentFieldOrder.map(field => {
+                        const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
 
-                if (isAuthenticated) {
-                    return `
+                        if (isAuthenticated) {
+                            return `
                         <td class="data-cell" data-field-id="${field.id}" data-label="${field.label}">
                             <form class="d-flex justify-content-center" method="post" action="/field-values/update">
                                 <input name="rateId" value="${rate.id}" type="hidden"/>
@@ -607,8 +609,8 @@
                             </form>
                         </td>
                     `;
-                } else {
-                    return `
+                        } else {
+                            return `
                         <td class="data-cell" data-field-id="${field.id}" data-label="${field.label}">
                             <div class="form-control form-control-sm text-center"
                                  style="border: none; background: transparent; cursor: default;">
@@ -616,13 +618,14 @@
                             </div>
                         </td>
                     `;
-                }
-            }).join('');
+                        }
+                    })
+                    .join('');
 
-            // Action buttons
-            let actionButtons = '';
-            if (isAuthenticated) {
-                actionButtons = `
+                // Action buttons
+                let actionButtons = '';
+                if (isAuthenticated) {
+                    actionButtons = `
                     <div class="action-buttons">
                         <button class="mehr-info-btn"
                                 ${rate.moreInfo ? '' : 'disabled'}
@@ -646,8 +649,8 @@
                         </button>
                     </div>
                 `;
-            } else {
-                actionButtons = `
+                } else {
+                    actionButtons = `
                     <div class="action-buttons">
                         <button class="mehr-info-btn"
                                 ${rate.moreInfo ? '' : 'disabled'}
@@ -663,9 +666,9 @@
                         </a>
                     </div>
                 `;
-            }
+                }
 
-            return `
+                return `
                 <tr data-rate-id="${rate.id}">
                     ${fieldCells}
                     <td data-label="Actions">
@@ -673,7 +676,8 @@
                     </td>
                 </tr>
             `;
-        }).join('');
+            })
+            .join('');
     }
 
     function updateBrowserUrl(page, search, sortBy, sortDir) {
@@ -784,8 +788,27 @@
     function performSearch() {
         const searchInput = document.getElementById('searchInput');
         const searchTerm = searchInput ? searchInput.value.trim() : '';
-        currentPage = 1;
-        loadPageFromServer(1, searchTerm);
+
+        if (isInfiniteScrollEnabled) {
+            // Reset infinite scroll state
+            loadedPages.clear();
+            allLoadedData = [];
+            hasMoreData = true;
+            currentPage = 1;
+
+            // Hide indicators
+            hideInfiniteScrollIndicator();
+            hideLoadingMoreIndicator();
+            const endIndicator = document.getElementById('endOfDataIndicator');
+            if (endIndicator) endIndicator.style.display = 'none';
+
+            // Load first page with search and current filters
+            loadPageFromServerWithInfiniteScroll(1, searchTerm, currentSortColumn, currentSortDirection);
+        } else {
+            // Use normal search with filters
+            currentPage = 1;
+            loadPageFromServerWithFilters(1, searchTerm, currentSortColumn, currentSortDirection, activeFilters);
+        }
     }
 
     function clearSearch() {
@@ -793,8 +816,27 @@
         if (searchInput) {
             searchInput.value = '';
         }
-        currentPage = 1;
-        loadPageFromServer(1, '');
+
+        if (isInfiniteScrollEnabled) {
+            // Reset infinite scroll state
+            loadedPages.clear();
+            allLoadedData = [];
+            hasMoreData = true;
+            currentPage = 1;
+
+            // Hide indicators
+            hideInfiniteScrollIndicator();
+            hideLoadingMoreIndicator();
+            const endIndicator = document.getElementById('endOfDataIndicator');
+            if (endIndicator) endIndicator.style.display = 'none';
+
+            // Load first page without search but with current filters
+            loadPageFromServerWithInfiniteScroll(1, '', currentSortColumn, currentSortDirection);
+        } else {
+            // Use normal clear with filters
+            currentPage = 1;
+            loadPageFromServerWithFilters(1, '', currentSortColumn, currentSortDirection, activeFilters);
+        }
     }
 
     // ============================================================================
@@ -863,12 +905,18 @@
     function showMoreInfo(rateId) {
         let rate = currentPageData.find(r => r.id === rateId);
 
+        // If not found in current page data, try to find in all loaded data (for infinite scroll)
+        if (!rate && typeof allLoadedData !== 'undefined' && allLoadedData.length > 0) {
+            rate = allLoadedData.find(r => r.id === rateId);
+        }
+
         if (!rate) {
-            fetchRateDetails(rateId).then(rateData => {
-                if (rateData && rateData.moreInfo) {
-                    displayRateCard(rateData);
-                }
-            });
+            fetchRateDetails(rateId)
+                .then(rateData => {
+                    if (rateData && rateData.moreInfo) {
+                        displayRateCard(rateData);
+                    }
+                });
             return;
         }
 
@@ -879,6 +927,7 @@
 
         displayRateCard(rate);
     }
+
 
     function displayRateCard(rate) {
         if (currentExpandedCard && currentExpandedCard !== rate.id) {
@@ -900,8 +949,57 @@
             }
         }
 
-        const targetRow = document.querySelector(`tr[data-rate-id="${rate.id}"]`);
-        if (!targetRow) return;
+        // FIXED: Better debugging and target identification
+        console.log('Looking for rate ID:', rate.id);
+
+        // Check if we're in mobile card view
+        const tableContainer = document.getElementById('tableContainer');
+        const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
+
+        console.log('Mobile card view active:', isMobileCardView);
+
+        let targetRow = null;
+
+        if (isMobileCardView) {
+            // In mobile card view, look for the TR with class mobile-card-row
+            targetRow = document.querySelector(`div.mobile-card-row[data-rate-id="${rate.id}"]`);
+            console.log('Found mobile card row:', targetRow);
+        } else {
+            // In table view, look for regular table row
+            targetRow = document.querySelector(`tr[data-rate-id="${rate.id}"]`);
+            console.log('Found table row:', targetRow);
+        }
+
+        if (!targetRow) {
+            console.error('Target row not found for rate ID:', rate.id);
+            // Try alternative selectors as fallback
+            targetRow = document.querySelector(`[data-rate-id="${rate.id}"]`);
+            console.log('Fallback found:', targetRow);
+
+            if (!targetRow) {
+                console.error('No element found with rate ID:', rate.id);
+                return;
+            }
+
+            // If we found a non-TR element, find its closest TR parent
+            if (targetRow.tagName !== 'TR') {
+                targetRow = targetRow.closest('tr');
+                console.log('Closest TR:', targetRow);
+            }
+        }
+
+        if (!targetRow) {
+            console.error('Still no target row found');
+            return;
+        }
+
+        console.log('Target row details:', {
+            tagName: targetRow.tagName,
+            className: targetRow.className,
+            dataRateId: targetRow.dataset.rateId,
+            nextSibling: targetRow.nextSibling,
+            nextElementSibling: targetRow.nextElementSibling
+        });
 
         const card = createRateCard(rate);
         const cardRow = document.createElement('tr');
@@ -911,7 +1009,22 @@
 
         cardRow.querySelector('.rate-card-cell')
             .appendChild(card);
-        targetRow.parentNode.insertBefore(cardRow, targetRow.nextSibling);
+
+        // FIXED: Use insertAdjacentElement for more predictable positioning
+        try {
+            targetRow.insertAdjacentElement('afterend', cardRow);
+            console.log('Successfully inserted card row after target');
+        } catch (error) {
+            console.error('Error inserting card row:', error);
+            // Fallback to original method
+            if (targetRow.parentNode) {
+                targetRow.parentNode.insertBefore(cardRow, targetRow.nextSibling);
+                console.log('Used fallback insertion method');
+            } else {
+                console.error('Target row has no parent node');
+                return;
+            }
+        }
 
         setTimeout(() => {
             card.scrollIntoView({
@@ -922,6 +1035,7 @@
 
         currentExpandedCard = rate.id;
     }
+
 
     function createRateCard(rate) {
         const card = document.createElement('div');
@@ -1598,7 +1712,7 @@
     let filterExpanded = false;
 
     // Initialize filters when page loads
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         initializeFilters();
     });
 
@@ -1673,7 +1787,8 @@
                     `).join('')}
                 </div>
             </div>
-        `).join('');
+        `)
+            .join('');
     }
 
     function toggleFilterOption(fieldId, value) {
@@ -1740,7 +1855,8 @@
 
     function updateFilterSummary() {
         const summary = document.getElementById('filterSummary');
-        const totalActive = Array.from(activeFilters.values()).reduce((sum, set) => sum + set.size, 0);
+        const totalActive = Array.from(activeFilters.values())
+            .reduce((sum, set) => sum + set.size, 0);
 
         if (totalActive === 0) {
             summary.textContent = 'Click to add filters';
@@ -1754,8 +1870,10 @@
 
     function removeFilterTag(fieldId, value) {
         if (activeFilters.has(fieldId)) {
-            activeFilters.get(fieldId).delete(value);
-            if (activeFilters.get(fieldId).size === 0) {
+            activeFilters.get(fieldId)
+                .delete(value);
+            if (activeFilters.get(fieldId)
+                .size === 0) {
                 activeFilters.delete(fieldId);
             }
         }
@@ -1764,7 +1882,7 @@
         updateActiveFiltersDisplay();
         updateFilterSummary();
 
-        // Auto-apply filters when removing tags
+        // FIXED: Auto-apply filters when removing tags, with proper infinite scroll handling
         applyFilters();
     }
 
@@ -1773,6 +1891,8 @@
         updateFilterCheckboxes();
         updateActiveFiltersDisplay();
         updateFilterSummary();
+
+        // FIXED: Apply cleared filters with proper infinite scroll handling
         applyFilters();
     }
 
@@ -1793,13 +1913,32 @@
         // Add filter parameters
         activeFilters.forEach((values, fieldId) => {
             if (values.size > 0) {
-                params.set(`filter_${fieldId}`, Array.from(values).join(','));
+                params.set(`filter_${fieldId}`, Array.from(values)
+                    .join(','));
             }
         });
 
-        // Make API call with filters
-        currentPage = 1;
-        loadPageFromServerWithFilters(1, currentSearchTerm, currentSortColumn, currentSortDirection, activeFilters);
+        // FIXED: Check if we're in infinite scroll mode and handle accordingly
+        if (isInfiniteScrollEnabled) {
+            // Reset infinite scroll state for filters
+            loadedPages.clear();
+            allLoadedData = [];
+            hasMoreData = true;
+            currentPage = 1;
+
+            // Hide indicators while loading
+            hideInfiniteScrollIndicator();
+            hideLoadingMoreIndicator();
+            const endIndicator = document.getElementById('endOfDataIndicator');
+            if (endIndicator) endIndicator.style.display = 'none';
+
+            // Load first page with filters in infinite scroll mode
+            loadPageFromServerWithInfiniteScroll(1, currentSearchTerm, currentSortColumn, currentSortDirection);
+        } else {
+            // Normal pagination mode
+            currentPage = 1;
+            loadPageFromServerWithFilters(1, currentSearchTerm, currentSortColumn, currentSortDirection, activeFilters);
+        }
 
         // Update URL
         updateBrowserUrlWithFilters();
@@ -1829,7 +1968,8 @@
         // Add filter parameters
         filters.forEach((values, fieldId) => {
             if (values.size > 0) {
-                params.set(`filter_${fieldId}`, Array.from(values).join(','));
+                params.set(`filter_${fieldId}`, Array.from(values)
+                    .join(','));
             }
         });
 
@@ -1889,7 +2029,8 @@
         // Add current filter parameters
         activeFilters.forEach((values, fieldId) => {
             if (values.size > 0) {
-                url.searchParams.set(`filter_${fieldId}`, Array.from(values).join(','));
+                url.searchParams.set(`filter_${fieldId}`, Array.from(values)
+                    .join(','));
             }
         });
 
@@ -1909,29 +2050,10 @@
 
     // Override the existing loadPageFromServer function to support filters
     const originalLoadPageFromServer = window.loadPageFromServer;
-    window.loadPageFromServer = function(page, searchTerm = '', sortBy = null, sortDir = null) {
+    window.loadPageFromServer = function (page, searchTerm = '', sortBy = null, sortDir = null) {
         loadPageFromServerWithFilters(page, searchTerm, sortBy, sortDir, activeFilters);
     };
 
-    // Override the existing performSearch function to preserve filters
-    const originalPerformSearch = window.performSearch;
-    window.performSearch = function() {
-        const searchInput = document.getElementById('searchInput');
-        const searchTerm = searchInput ? searchInput.value.trim() : '';
-        currentPage = 1;
-        loadPageFromServerWithFilters(1, searchTerm, currentSortColumn, currentSortDirection, activeFilters);
-    };
-
-    // Override the existing clearSearch function to preserve filters
-    const originalClearSearch = window.clearSearch;
-    window.clearSearch = function() {
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.value = '';
-        }
-        currentPage = 1;
-        loadPageFromServerWithFilters(1, '', currentSortColumn, currentSortDirection, activeFilters);
-    };
 
     // Add filter refresh capability
     function refreshFiltersFromServer() {
@@ -1946,6 +2068,722 @@
         refreshFiltersFromServer,
         loadPageFromServerWithFilters
     };
+
+    // ============================================================================
+    // MOBILE INFINITE SCROLL FUNCTIONALITY
+    // ============================================================================
+
+    // Mobile-specific variables
+    let isMobileView = false;
+    let isInfiniteScrollEnabled = false;
+    let loadedPages = new Set();
+    let allLoadedData = [];
+    let isLoadingMore = false;
+    let hasMoreData = true;
+    let scrollThreshold = 200; // pixels from bottom to trigger load
+    // FIXED: Enhanced mobile scroll initialization
+    function initializeMobileScrolling() {
+        // Detect mobile view changes
+        checkMobileView();
+        window.addEventListener('resize', debounce(checkMobileView, 250));
+
+        // Initialize scroll listener
+        window.addEventListener('scroll', debounce(handleScroll, 100));
+
+        // FIXED: Better monitor view toggle buttons with enhanced event handling
+        const stackedViewBtn = document.getElementById('stackedView');
+        const scrollViewBtn = document.getElementById('scrollView');
+
+        if (stackedViewBtn && scrollViewBtn) {
+            // Remove any existing listeners
+            stackedViewBtn.replaceWith(stackedViewBtn.cloneNode(true));
+            scrollViewBtn.replaceWith(scrollViewBtn.cloneNode(true));
+
+            // Get the new elements and add fresh listeners
+            const newStackedBtn = document.getElementById('stackedView');
+            const newScrollBtn = document.getElementById('scrollView');
+
+            newStackedBtn.addEventListener('click', function () {
+                enableMobileCardView();
+            });
+
+            newScrollBtn.addEventListener('click', function () {
+                disableMobileCardView();
+            });
+        }
+    }
+
+
+    function checkMobileView() {
+        const wasMobile = isMobileView;
+        isMobileView = window.innerWidth <= 768;
+
+        // Check if we're in card view mode
+        const tableContainer = document.getElementById('tableContainer');
+        const isCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
+
+        // Get current button states
+        const stackedViewBtn = document.getElementById('stackedView');
+        const scrollViewBtn = document.getElementById('scrollView');
+        const stackedActive = stackedViewBtn && stackedViewBtn.classList.contains('active');
+
+        // Enable infinite scroll only on mobile in card view AND when stacked view is active
+        const shouldEnable = isMobileView && isCardView && stackedActive;
+
+        if (shouldEnable !== isInfiniteScrollEnabled) {
+            if (shouldEnable) {
+                enableInfiniteScroll();
+            } else {
+                disableInfiniteScroll();
+            }
+        }
+
+        // FIXED: If switching from mobile to desktop, ensure proper table view
+        if (wasMobile && !isMobileView) {
+            // Force disable infinite scroll
+            if (isInfiniteScrollEnabled) {
+                disableInfiniteScroll();
+            }
+
+            // Ensure table view is properly set
+            if (tableContainer && tableContainer.classList.contains('mobile-stack')) {
+                // If we're on desktop but still in card view, switch to table view
+                if (scrollViewBtn && stackedViewBtn) {
+                    scrollViewBtn.classList.add('active');
+                    stackedViewBtn.classList.remove('active');
+                    tableContainer.classList.remove('mobile-stack');
+                    renderTableData(currentPageData);
+                }
+            }
+        }
+    }
+
+    function enableMobileCardView() {
+        const stackedViewBtn = document.getElementById('stackedView');
+        const scrollViewBtn = document.getElementById('scrollView');
+        const tableContainer = document.getElementById('tableContainer');
+
+        if (stackedViewBtn && scrollViewBtn && tableContainer) {
+            stackedViewBtn.classList.add('active');
+            scrollViewBtn.classList.remove('active');
+            tableContainer.classList.add('mobile-stack');
+
+            // Enable infinite scroll if on mobile
+            if (isMobileView) {
+                enableInfiniteScroll();
+            }
+        }
+    }
+
+    function disableMobileCardView() {
+        const stackedViewBtn = document.getElementById('stackedView');
+        const scrollViewBtn = document.getElementById('scrollView');
+        const tableContainer = document.getElementById('tableContainer');
+
+        if (stackedViewBtn && scrollViewBtn && tableContainer) {
+            scrollViewBtn.classList.add('active');
+            stackedViewBtn.classList.remove('active');
+            tableContainer.classList.remove('mobile-stack');
+
+            // FIXED: Disable infinite scroll and revert to normal table
+            if (isInfiniteScrollEnabled) {
+                disableInfiniteScroll();
+            }
+
+            // FIXED: Force re-render as normal table
+            setTimeout(() => {
+                renderTableData(currentPageData);
+            }, 100);
+        }
+    }
+
+    function enableInfiniteScroll() {
+        if (isInfiniteScrollEnabled) return;
+
+        isInfiniteScrollEnabled = true;
+
+        // Hide pagination controls
+        hidePaginationControls();
+
+        // Initialize with current data
+        loadedPages.clear();
+        loadedPages.add(currentPage);
+        allLoadedData = [...currentPageData];
+        hasMoreData = currentPage < totalPages;
+
+        // Render all loaded data as cards
+        renderMobileCards(allLoadedData);
+
+        // Show loading indicator at bottom
+        showInfiniteScrollIndicator();
+
+        console.log('Infinite scroll enabled');
+    }
+
+    function disableInfiniteScroll() {
+        if (!isInfiniteScrollEnabled) return;
+
+        isInfiniteScrollEnabled = false;
+        isLoadingMore = false;
+
+        // Show pagination controls
+        showPaginationControls();
+
+        // Hide infinite scroll indicators
+        hideInfiniteScrollIndicator();
+        hideLoadingMoreIndicator();
+        const endIndicator = document.getElementById('endOfDataIndicator');
+        if (endIndicator) endIndicator.style.display = 'none';
+
+        // FIXED: Reset to normal table view with proper data
+        resetToNormalPagination();
+
+        console.log('Infinite scroll disabled');
+    }
+
+
+    function resetToNormalPagination() {
+        // Reset data arrays
+        loadedPages.clear();
+        allLoadedData = [];
+        hasMoreData = true;
+
+        // FIXED: Use current page data if available, otherwise reload
+        if (currentPageData && currentPageData.length > 0) {
+            renderTableData(currentPageData);
+            updatePaginationControls();
+            updatePaginationInfo();
+        } else {
+            // Reload current page normally
+            loadPageFromServer(currentPage, currentSearchTerm, currentSortColumn, currentSortDirection);
+        }
+    }
+
+    // ============================================================================
+    // SCROLL HANDLING
+    // ============================================================================
+
+    function handleScroll() {
+        if (!isInfiniteScrollEnabled || isLoadingMore || !hasMoreData) return;
+
+        // Check if we're near the bottom of the page
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+
+        const distanceFromBottom = documentHeight - (scrollTop + windowHeight);
+
+        if (distanceFromBottom <= scrollThreshold) {
+            loadMoreData();
+        }
+    }
+
+    async function loadMoreData() {
+        if (isLoadingMore || !hasMoreData) return;
+
+       const nextPage = loadedPages.size + 1;
+
+        if (nextPage > totalPages) {
+            hasMoreData = false;
+            hideInfiniteScrollIndicator();
+            showEndOfDataIndicator();
+            return;
+        }
+
+        isLoadingMore = true;
+        showLoadingMoreIndicator();
+
+        console.log('Loading more data, page:', nextPage); // Debug log
+
+        try {
+            // FIXED: Pass current sort and search parameters, fetchPageData will handle filters
+            const data = await fetchPageData(nextPage, currentSearchTerm, currentSortColumn, currentSortDirection);
+
+            if (data && data.content && data.content.length > 0) {
+                // Add new data to our collection
+                allLoadedData = [...allLoadedData, ...data.content];
+                loadedPages.add(nextPage);
+
+                // Update server data map
+                Object.assign(serverRateFieldValuesMap, data.rateFieldValuesMap || {});
+
+                // Re-render all cards with new data
+                renderMobileCards(allLoadedData);
+
+                // Update pagination info for user feedback
+                updateInfiniteScrollInfo();
+
+                // Check if there's more data
+                hasMoreData = nextPage < totalPages;
+
+                console.log('Loaded page:', nextPage, 'Total items now:', allLoadedData.length); // Debug log
+
+                if (!hasMoreData) {
+                    hideInfiniteScrollIndicator();
+                    showEndOfDataIndicator();
+                }
+            } else {
+                hasMoreData = false;
+                hideInfiniteScrollIndicator();
+                showEndOfDataIndicator();
+            }
+        } catch (error) {
+            console.error('Error loading more data:', error);
+            showDeleteNotification('Error loading more data: ' + error.message, true);
+        } finally {
+            isLoadingMore = false;
+            hideLoadingMoreIndicator();
+        }
+    }
+
+
+   async function fetchPageData(page, searchTerm = '', sortBy = null, sortDir = null) {
+        const params = new URLSearchParams({
+            page: page - 1, // Convert to 0-based for backend
+            size: pageSize,
+            sortBy: sortBy || currentSortColumn,
+            sortDir: sortDir || currentSortDirection
+        });
+
+        if (searchTerm && searchTerm.trim()) {
+            params.append('search', searchTerm.trim());
+        }
+
+        // FIXED: Add filter parameters from activeFilters
+        if (typeof activeFilters !== 'undefined' && activeFilters.size > 0) {
+            activeFilters.forEach((values, fieldId) => {
+                if (values.size > 0) {
+                    params.set(`filter_${fieldId}`, Array.from(values).join(','));
+                }
+            });
+        }
+
+        console.log('Fetching page with params:', params.toString()); // Debug log
+
+        const response = await fetch(`/api/interest-rates?${params.toString()}`);
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch data');
+        }
+
+        return await response.json();
+    }
+
+    // ============================================================================
+    // MOBILE CARD RENDERING
+    // ============================================================================
+
+    function renderMobileCards(data) {
+        const tbody = document.getElementById('tableBody');
+        const emptyState = document.getElementById('emptyState');
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '';
+            emptyState.style.display = 'block';
+            return;
+        }
+
+        emptyState.style.display = 'none';
+
+        // Create card-based layout for mobile
+        tbody.innerHTML = data.map(rate => createMobileCard(rate))
+            .join('');
+    }
+
+    function createMobileCard(rate) {
+        // Get current field order from headers
+        const headers = document.querySelectorAll('.draggable-column, .sortable');
+        const currentFieldOrder = Array.from(headers)
+            .map(header => ({
+                id: header.dataset.fieldId,
+                label: header.querySelector('.header-text')
+                    .textContent.trim()
+            }));
+
+        // Generate field rows for the card
+        const fieldRows = currentFieldOrder.map(field => {
+                const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
+
+                if (isAuthenticated) {
+                    return `
+                <div class="card-field-row">
+                    <label class="card-field-label">${field.label}:</label>
+                    <div class="card-field-value">
+                        <form class="d-flex" method="post" action="/field-values/update">
+                            <input name="rateId" value="${rate.id}" type="hidden"/>
+                            <input name="fieldId" value="${field.id}" type="hidden"/>
+                            <input class="form-control form-control-sm"
+                                   name="value"
+                                   value="${fieldValue}"
+                                   type="text"
+                                   onchange="updateFieldValueAjax(${rate.id}, ${field.id}, this.value)"/>
+                        </form>
+                    </div>
+                </div>
+            `;
+                } else {
+                    return `
+                <div class="card-field-row">
+                    <label class="card-field-label">${field.label}:</label>
+                    <div class="card-field-value">
+                        <span class="card-field-display">${fieldValue || '-'}</span>
+                    </div>
+                </div>
+            `;
+                }
+            })
+            .join('');
+
+        // Action buttons with proper mehr-info-btn class
+        let actionButtons = '';
+        if (isAuthenticated) {
+            actionButtons = `
+            <div class="card-actions">
+                <button class="btn btn-info btn-sm mehr-info-btn-card"
+                        ${rate.moreInfo ? '' : 'disabled'}
+                        onclick="showMoreInfo(${rate.id})"
+                        title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">
+                    ${rate.moreInfo ? 'MEHR INFO' : 'No Info'}
+                </button>
+                <a class="btn btn-primary btn-sm angebot-btn-card"
+                   href="${rate.webLink || '#'}"
+                   target="_blank"
+                   title="Open Link">
+                    ZUM ANGEBOT
+                </a>
+                <div class="card-admin-actions">
+                    <a class="btn btn-outline-secondary btn-sm" href="/interest-rate/edit/${rate.id}" title="Edit">
+                        ✎ Edit
+                    </a>
+                    <button class="btn btn-outline-danger btn-sm"
+                            onclick="showDeleteConfirmation(${rate.id})"
+                            title="Delete">
+                        🗑 Delete
+                    </button>
+                </div>
+            </div>
+        `;
+        } else {
+            actionButtons = `
+            <div class="card-actions">
+                <button class="btn btn-info btn-sm mehr-info-btn-card"
+                        ${rate.moreInfo ? '' : 'disabled'}
+                        onclick="showMoreInfo(${rate.id})"
+                        title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">
+                    ${rate.moreInfo ? 'MEHR INFO' : 'No Info'}
+                </button>
+                <a class="btn btn-primary btn-sm angebot-btn-card"
+                   href="${rate.webLink || '#'}"
+                   target="_blank"
+                   title="Open Link">
+                    ZUM ANGEBOT
+                </a>
+            </div>
+        `;
+        }
+
+        // FIXED: Return proper TR structure with correct data attributes
+        return `
+        <div class="mobile-card-row" data-rate-id="${rate.id}">
+            <div colspan="100%">
+                <div class="mobile-interest-card" data-rate-id="${rate.id}">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">Interest Rate #${rate.id}</h6>
+                    </div>
+                    <div class="card-body">
+                        ${fieldRows}
+                        ${actionButtons}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    }
+
+    // ============================================================================
+    // UI INDICATORS AND CONTROLS
+    // ============================================================================
+
+    function hidePaginationControls() {
+        const paginationContainers = document.querySelectorAll('.pagination-container');
+        paginationContainers.forEach(container => {
+            container.style.display = 'none';
+        });
+    }
+
+    function showPaginationControls() {
+        const paginationContainers = document.querySelectorAll('.pagination-container');
+        paginationContainers.forEach(container => {
+            container.style.display = 'flex';
+        });
+    }
+
+    function showInfiniteScrollIndicator() {
+        let indicator = document.getElementById('infiniteScrollIndicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'infiniteScrollIndicator';
+            indicator.className = 'infinite-scroll-indicator';
+            indicator.innerHTML = `
+            <div class="text-center py-3">
+                <div class="text-muted">Scroll down to load more...</div>
+            </div>
+        `;
+
+            // Insert after the table container
+            const tableContainer = document.querySelector('.table-container');
+            if (tableContainer) {
+                tableContainer.parentNode.insertBefore(indicator, tableContainer.nextSibling);
+            }
+        }
+        indicator.style.display = 'block';
+    }
+
+    function hideInfiniteScrollIndicator() {
+        const indicator = document.getElementById('infiniteScrollIndicator');
+        if (indicator) {
+            indicator.style.display = 'none';
+        }
+    }
+
+    function showLoadingMoreIndicator() {
+        let indicator = document.getElementById('loadingMoreIndicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'loadingMoreIndicator';
+            indicator.className = 'loading-more-indicator';
+            indicator.innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border spinner-border-sm me-2" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <span class="text-muted">Loading more rates...</span>
+            </div>
+        `;
+
+            const tableContainer = document.querySelector('.table-container');
+            if (tableContainer) {
+                tableContainer.parentNode.insertBefore(indicator, tableContainer.nextSibling);
+            }
+        }
+        indicator.style.display = 'block';
+    }
+
+    function hideLoadingMoreIndicator() {
+        const indicator = document.getElementById('loadingMoreIndicator');
+        if (indicator) {
+            indicator.style.display = 'none';
+        }
+    }
+
+    function showEndOfDataIndicator() {
+        let indicator = document.getElementById('endOfDataIndicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'endOfDataIndicator';
+            indicator.className = 'end-of-data-indicator';
+            indicator.innerHTML = `
+            <div class="text-center py-3">
+                <div class="text-muted">
+                    <div>📊</div>
+                    <small>You've reached the end of the results</small>
+                </div>
+            </div>
+        `;
+
+            const tableContainer = document.querySelector('.table-container');
+            if (tableContainer) {
+                tableContainer.parentNode.insertBefore(indicator, tableContainer.nextSibling);
+            }
+        }
+        indicator.style.display = 'block';
+    }
+
+    function updateInfiniteScrollInfo() {
+        const totalLoaded = allLoadedData.length;
+        const infoText = `Showing ${totalLoaded} of ${totalRecords} results`;
+
+        // Update the results info at the top
+        const resultsInfo = document.getElementById('resultsInfo');
+        if (resultsInfo) {
+            resultsInfo.textContent = infoText;
+        }
+    }
+
+    // ============================================================================
+    // UTILITY FUNCTIONS
+    // ============================================================================
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // ============================================================================
+    // OVERRIDE EXISTING FUNCTIONS FOR MOBILE COMPATIBILITY
+    // ============================================================================
+
+    // Override search functions to work with infinite scroll
+    const originalPerformSearchMobile = window.performSearch;
+    window.performSearch = function () {
+        const searchInput = document.getElementById('searchInput');
+        const searchTerm = searchInput ? searchInput.value.trim() : '';
+
+        if (isInfiniteScrollEnabled) {
+            // Reset infinite scroll state
+            loadedPages.clear();
+            allLoadedData = [];
+            hasMoreData = true;
+            currentPage = 1;
+
+            // Load first page with search
+            loadPageFromServerWithInfiniteScroll(1, searchTerm);
+        } else {
+            // Use normal search
+            originalPerformSearchMobile();
+        }
+    };
+
+    const originalClearSearchMobile = window.clearSearch;
+    window.clearSearch = function () {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+
+        if (isInfiniteScrollEnabled) {
+            // Reset infinite scroll state
+            loadedPages.clear();
+            allLoadedData = [];
+            hasMoreData = true;
+            currentPage = 1;
+
+            // Load first page without search
+            loadPageFromServerWithInfiniteScroll(1, '');
+        } else {
+            // Use normal clear
+            originalClearSearchMobile();
+        }
+    };
+
+    // Special function for loading data in infinite scroll mode
+    async function loadPageFromServerWithInfiniteScroll(page, searchTerm = '', sortBy = null, sortDir = null) {
+        if (isLoadingMore && page > 1) return; // Only block additional page loads, not filter resets
+
+        showLoading();
+
+        try {
+            // FIXED: Use the enhanced fetchPageData which now includes filters
+            const data = await fetchPageData(page, searchTerm, sortBy, sortDir);
+
+            // Update pagination state
+            currentPage = page;
+            totalPages = data.totalPages;
+            totalRecords = data.totalElements;
+            currentSearchTerm = searchTerm || '';
+
+            // Update sort state if provided
+            if (sortBy) currentSortColumn = sortBy;
+            if (sortDir) currentSortDirection = sortDir;
+
+            // Initialize infinite scroll data
+            loadedPages.clear();
+            loadedPages.add(page);
+            allLoadedData = [...data.content];
+            serverRateFieldValuesMap = data.rateFieldValuesMap || {};
+
+            // Render cards
+            renderMobileCards(allLoadedData);
+
+            // Update UI
+            updateInfiniteScrollInfo();
+            hasMoreData = page < totalPages;
+
+            console.log('Loaded page:', page, 'Total pages:', totalPages, 'Has more:', hasMoreData); // Debug log
+
+            if (hasMoreData) {
+                showInfiniteScrollIndicator();
+            } else {
+                hideInfiniteScrollIndicator();
+                showEndOfDataIndicator();
+            }
+
+            hideLoading();
+        } catch (error) {
+            console.error('Error loading page:', error);
+            showDeleteNotification('Error loading data: ' + error.message, true);
+            hideLoading();
+        }
+    }
+
+    // ============================================================================
+    // INITIALIZATION
+    // ============================================================================
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const stackedViewBtn = document.getElementById('stackedView');
+        const scrollViewBtn = document.getElementById('scrollView');
+        const tableContainer = document.getElementById('tableContainer');
+
+        if (stackedViewBtn && scrollViewBtn && tableContainer) {
+            stackedViewBtn.addEventListener('click', function () {
+                enableMobileCardView();
+            });
+
+            scrollViewBtn.addEventListener('click', function () {
+                disableMobileCardView();
+            });
+        }
+    });
+
+    // Export functions for debugging
+    window.mobileScrollFunctions = {
+        enableInfiniteScroll,
+        disableInfiniteScroll,
+        loadMoreData,
+        renderMobileCards,
+        checkMobileView
+    };
+
+
+    // FIXED: Override the original functions to use the fixed versions
+    window.createMobileCard = createMobileCard;
+    window.showMoreInfo = showMoreInfo;
+    window.displayRateCard = displayRateCard;
+    window.enableMobileCardView = enableMobileCardView;
+    window.disableMobileCardView = disableMobileCardView;
+    window.disableInfiniteScroll = disableInfiniteScroll;
+    window.resetToNormalPagination = resetToNormalPagination;
+    window.checkMobileView = checkMobileView;
+    window.initializeMobileScrolling = initializeMobileScrolling;
+    window.applyFilters = applyFilters;
+    window.removeFilterTag = removeFilterTag;
+    window.clearAllFilters = clearAllFilters;
+    window.performSearch = performSearch;
+    window.clearSearch = clearSearch;
+    window.loadMoreData = loadMoreData;
+    window.fetchPageData = fetchPageData;
+    window.loadPageFromServerWithInfiniteScroll = loadPageFromServerWithInfiniteScroll;
+
+    // Debug function to check current filter state
+    window.debugFilters = function () {
+        console.log('Active filters:', activeFilters);
+        console.log('Is infinite scroll enabled:', isInfiniteScrollEnabled);
+        console.log('Current page:', currentPage);
+        console.log('Total pages:', totalPages);
+        console.log('Has more data:', hasMoreData);
+        console.log('Loaded pages:', loadedPages);
+        console.log('All loaded data length:', allLoadedData.length);
+    };
+
+    console.log('Filter integration for infinite scroll has been fixed!');
 </script>
 </body>
 </html>

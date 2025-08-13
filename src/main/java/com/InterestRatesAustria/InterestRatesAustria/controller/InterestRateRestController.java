@@ -41,6 +41,10 @@ public class InterestRateRestController {
 
         Page<InterestRate> interestRatesPage;
 
+        if (page < 0) {
+            page = 0;
+        }
+
         if (search != null && !search.trim().isEmpty()) {
             interestRatesPage = interestRateService.searchInterestRatesPaginated(search, page, size, sortBy, sortDir);
         } else {

@@ -538,3 +538,395 @@ body.guest .data-cell .form-control:focus {
         flex-direction: column;
     }
 }
+/* ============================================================================
+   MOBILE CARD LAYOUT STYLES - ADD TO YOUR EXISTING CSS
+   ============================================================================ */
+
+/* Mobile Interest Rate Cards */
+.mobile-interest-card {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.mobile-interest-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.mobile-interest-card .card-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid #e0e0e0;
+    padding: 12px 16px;
+}
+
+.mobile-interest-card .card-title {
+    color: #495057;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.mobile-interest-card .card-body {
+    padding: 16px;
+}
+
+/* Card Field Rows */
+.card-field-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f3f5;
+    min-height: 40px;
+}
+
+.card-field-row:last-of-type {
+    border-bottom: none;
+    margin-bottom: 12px;
+}
+
+.card-field-label {
+    font-weight: 500;
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-bottom: 0;
+    flex-shrink: 0;
+    width: 35%;
+    text-align: left;
+}
+
+.card-field-value {
+    flex: 1;
+    margin-left: 12px;
+    text-align: right;
+}
+
+.card-field-value .form-control {
+    text-align: center;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    padding: 6px 8px;
+}
+
+.card-field-value .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.card-field-display {
+    font-weight: 500;
+    color: #495057;
+    font-size: 0.875rem;
+    background: #f8f9fa;
+    padding: 6px 12px;
+    border-radius: 6px;
+    display: inline-block;
+    min-width: 60px;
+    text-align: center;
+}
+
+/* Card Actions */
+.card-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #f1f3f5;
+}
+
+.card-actions .btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.card-actions .btn:hover {
+    transform: translateY(-1px);
+}
+
+.mehr-info-btn-card {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    border: none;
+    color: white !important;
+}
+
+.mehr-info-btn-card:disabled {
+    background: #6c757d !important;
+    border-color: #6c757d !important;
+}
+
+.angebot-btn-card {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border: none;
+    color: white !important;
+}
+
+.card-admin-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.card-admin-actions .btn {
+    flex: 1;
+}
+
+/* Mobile Card Row Styling */
+.mobile-card-row {
+    border: none !important;
+}
+
+.mobile-card-row td {
+    border: none !important;
+    padding: 0 !important;
+}
+
+/* ============================================================================
+   INFINITE SCROLL INDICATORS
+   ============================================================================ */
+
+.infinite-scroll-indicator,
+.loading-more-indicator,
+.end-of-data-indicator {
+    margin: 20px 0;
+    padding: 15px 16px;
+    text-align: center;
+    border-radius: 12px;
+}
+
+.infinite-scroll-indicator {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    color: #6c757d;
+}
+
+.loading-more-indicator {
+    background: #fff;
+    border: 1px solid #007bff;
+    color: #007bff;
+}
+
+.end-of-data-indicator {
+    background: linear-gradient(135deg, #f1f3f4 0%, #e8eaed 100%);
+    border: 1px solid #dadce0;
+    color: #5f6368;
+}
+
+.end-of-data-indicator div:first-child {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+/* ============================================================================
+   MOBILE RESPONSIVE ADJUSTMENTS
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    /* Ensure cards use full width on mobile */
+    .mobile-interest-card {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    /* Adjust field layout for very small screens */
+    .card-field-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .card-field-label {
+        width: 100%;
+        color: #495057;
+        font-weight: 600;
+    }
+
+    .card-field-value {
+        width: 100%;
+        margin-left: 0;
+        text-align: left;
+    }
+
+    .card-field-display {
+        width: 100%;
+        text-align: left;
+        background: transparent;
+        padding: 4px 0;
+        border-radius: 0;
+        border-bottom: 1px solid #e9ecef;
+        color: #212529;
+        font-weight: 400;
+    }
+
+    /* Stack action buttons vertically on very small screens */
+    .card-admin-actions {
+        flex-direction: column;
+    }
+
+    .card-admin-actions .btn {
+        width: 100%;
+    }
+}
+
+/* ============================================================================
+   TABLE CONTAINER MODIFICATIONS FOR MOBILE CARDS
+   ============================================================================ */
+
+/* When in mobile-stack mode, modify table display */
+.table-container.mobile-stack .table {
+    border: none;
+}
+
+.table-container.mobile-stack .table thead {
+    display: none; /* Hide table headers in card view */
+}
+
+.table-container.mobile-stack .table tbody {
+    display: block;
+}
+
+.table-container.mobile-stack .mobile-card-row {
+    display: block;
+    width: 100%;
+}
+
+/* Ensure normal table rows are hidden in mobile stack mode */
+.table-container.mobile-stack tr:not(.mobile-card-row):not(.rate-card-row) {
+    display: none;
+}
+
+/* ============================================================================
+   VIEW TOGGLE ENHANCEMENTS
+   ============================================================================ */
+
+.view-toggle {
+    margin-bottom: 15px;
+}
+
+.view-toggle .btn-group {
+    width: 100%;
+}
+
+.view-toggle .btn {
+    flex: 1;
+    font-size: 14px;
+    padding: 8px 12px;
+}
+
+/* ============================================================================
+   INTEGRATION WITH EXISTING STYLES
+   ============================================================================ */
+
+/* Ensure mobile cards work well with existing filter system */
+.mobile-interest-card[data-filtered="true"] {
+    display: block;
+}
+
+.mobile-interest-card[data-filtered="false"] {
+    display: none;
+}
+
+/* Integration with existing more info expansion */
+.mobile-interest-card .mehr-info-btn-card:hover {
+    background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
+}
+
+/* Ensure proper spacing with existing elements */
+.mobile-interest-card + .rate-card-row {
+    margin-top: -16px; /* Adjust for expanded more info */
+}
+
+/* ============================================================================
+   PERFORMANCE OPTIMIZATIONS
+   ============================================================================ */
+
+/* Use GPU acceleration for smooth scrolling */
+.mobile-interest-card {
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: translateZ(0); /* Force hardware acceleration */
+}
+
+/* Optimize animations */
+.infinite-scroll-indicator,
+.loading-more-indicator {
+    transform: translateZ(0); /* Force hardware acceleration */
+}
+
+/* ============================================================================
+   SMOOTH LOADING ANIMATIONS
+   ============================================================================ */
+
+/* Fade in animation for new cards */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.mobile-interest-card {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+/* Pulse effect for scroll indicator */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.infinite-scroll-indicator {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* ============================================================================
+   ACCESSIBILITY IMPROVEMENTS
+   ============================================================================ */
+
+/* Focus styles for card elements */
+.mobile-interest-card:focus-within {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .mobile-interest-card {
+        border: 2px solid #000;
+    }
+
+    .card-field-display {
+        background: #fff;
+        border: 1px solid #000;
+    }
+
+    .infinite-scroll-indicator,
+    .loading-more-indicator,
+    .end-of-data-indicator {
+        border: 2px solid #000;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .mobile-interest-card,
+    .infinite-scroll-indicator {
+        animation: none;
+        transition: none;
+    }
+}
