@@ -3,12 +3,14 @@ package com.InterestRatesAustria.InterestRatesAustria.repository;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.InterestRate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface InterestRateRepository extends JpaRepository<InterestRate, Long> {
+import java.util.List;
+
+public interface InterestRateRepository extends JpaRepository<InterestRate, Long>, JpaSpecificationExecutor<InterestRate> {
 
     Page<InterestRate> findByWebLinkContainingIgnoreCase(String webLink, Pageable pageable);
 
@@ -27,5 +29,13 @@ public interface InterestRateRepository extends JpaRepository<InterestRate, Long
             "OR LOWER(fv.value) LIKE LOWER(CONCAT('%', :search, '%'))")
     Page<InterestRate> searchByWebLinkOrFieldValue(@Param("search") String search, Pageable pageable);
 
-    Page<InterestRate> findAll(Specification<InterestRate> spec, Pageable pageable);
+    @Query("SELECT ir.id, fv.value FROM InterestRate ir " +
+            "LEFT JOIN ir.fieldValues fv ON fv.globalField.id = :fieldId " +
+            "ORDER BY ir.id")
+    List<Object[]> findRateIdAndPercentageValue(@Param("fieldId") Long fieldId);
+
+    @Query("SELECT ir.id, fv.value FROM InterestRate ir " +
+            "LEFT JOIN ir.fieldValues fv ON fv.globalField.id = :fieldId " +
+            "ORDER BY ir.id")
+    List<Object[]> findRateIdAndFieldValue(@Param("fieldId") Long fieldId);
 }

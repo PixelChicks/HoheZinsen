@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Arrays;
 import java.util.stream.Collectors;
 
 @Controller
@@ -43,8 +43,8 @@ public class HomeController {
     public String showRates(Model model,
                             @RequestParam(defaultValue = "0") int page,
                             @RequestParam(defaultValue = "5") int size,
-                            @RequestParam(defaultValue = "id") String sortBy,
-                            @RequestParam(defaultValue = "asc") String sortDir,
+                            @RequestParam(defaultValue = "field_1") String sortBy,
+                            @RequestParam(defaultValue = "desc") String sortDir,
                             @RequestParam(required = false) String search,
                             @RequestParam Map<String, String> allParams) {
 
@@ -90,8 +90,8 @@ public class HomeController {
     public ResponseEntity<Map<String, Object>> getInterestRatesPaginated(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir,
+            @RequestParam(defaultValue = "field_1") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir,
             @RequestParam(required = false) String search,
             @RequestParam Map<String, String> allParams) {
 
@@ -136,7 +136,7 @@ public class HomeController {
             // Filter parameters are expected to be in format "filter_<fieldId>"
             if (key.startsWith("filter_") && value != null && !value.trim().isEmpty()) {
                 try {
-                    Long fieldId = Long.parseLong(key.substring(7)); // Remove "filter_" prefix
+                    Long fieldId = Long.parseLong(key.substring(7));
                     List<String> values = Arrays.asList(value.split(","));
                     filters.put(fieldId, values);
                 } catch (NumberFormatException e) {

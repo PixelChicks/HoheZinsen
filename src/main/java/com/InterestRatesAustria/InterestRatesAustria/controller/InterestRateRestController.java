@@ -35,8 +35,8 @@ public class InterestRateRestController {
     public ResponseEntity<PaginatedResponse<InterestRateDTO>> getInterestRatesPaginated(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir,
+            @RequestParam(defaultValue = "field_1") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir,
             @RequestParam(required = false) String search) {
 
         Page<InterestRate> interestRatesPage;
