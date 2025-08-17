@@ -1739,7 +1739,9 @@
         for (const [key, value] of urlParams.entries()) {
             if (key.startsWith('filter_')) {
                 const fieldId = key.substring(7);
-                const values = value.split(',');
+                // FIXED: Decode the URL-encoded value and split by pipe
+                const decodedValue = decodeURIComponent(value);
+                const values = decodedValue.includes('|') ? decodedValue.split('|') : [decodedValue];
                 activeFilters.set(fieldId, new Set(values));
             }
         }
@@ -1896,6 +1898,7 @@
         applyFilters();
     }
 
+
     function applyFilters() {
         // Build filter parameters for the API call
         const params = new URLSearchParams();
@@ -1910,15 +1913,16 @@
             params.set('search', currentSearchTerm);
         }
 
-        // Add filter parameters
+        // FIXED: Add filter parameters using pipe separator instead of comma
         activeFilters.forEach((values, fieldId) => {
             if (values.size > 0) {
-                params.set(`filter_${fieldId}`, Array.from(values)
-                    .join(','));
+                // Use pipe (|) as separator and URL encode the entire value
+                const filterValue = Array.from(values).join('|');
+                params.set(`filter_${fieldId}`, encodeURIComponent(filterValue));
             }
         });
 
-        // FIXED: Check if we're in infinite scroll mode and handle accordingly
+        // Check if we're in infinite scroll mode and handle accordingly
         if (isInfiniteScrollEnabled) {
             // Reset infinite scroll state for filters
             loadedPages.clear();
@@ -1965,11 +1969,11 @@
             params.append('search', searchTerm.trim());
         }
 
-        // Add filter parameters
+        // FIXED: Add filter parameters using pipe separator
         filters.forEach((values, fieldId) => {
             if (values.size > 0) {
-                params.set(`filter_${fieldId}`, Array.from(values)
-                    .join(','));
+                const filterValue = Array.from(values).join('|');
+                params.set(`filter_${fieldId}`, encodeURIComponent(filterValue));
             }
         });
 
@@ -2026,11 +2030,11 @@
             }
         }
 
-        // Add current filter parameters
+        // FIXED: Add current filter parameters using pipe separator
         activeFilters.forEach((values, fieldId) => {
             if (values.size > 0) {
-                url.searchParams.set(`filter_${fieldId}`, Array.from(values)
-                    .join(','));
+                const filterValue = Array.from(values).join('|');
+                url.searchParams.set(`filter_${fieldId}`, encodeURIComponent(filterValue));
             }
         });
 
@@ -2349,11 +2353,12 @@
             params.append('search', searchTerm.trim());
         }
 
-        // FIXED: Add filter parameters from activeFilters
+        // FIXED: Add filter parameters from activeFilters using pipe separator
         if (typeof activeFilters !== 'undefined' && activeFilters.size > 0) {
             activeFilters.forEach((values, fieldId) => {
                 if (values.size > 0) {
-                    params.set(`filter_${fieldId}`, Array.from(values).join(','));
+                    const filterValue = Array.from(values).join('|');
+                    params.set(`filter_${fieldId}`, encodeURIComponent(filterValue));
                 }
             });
         }

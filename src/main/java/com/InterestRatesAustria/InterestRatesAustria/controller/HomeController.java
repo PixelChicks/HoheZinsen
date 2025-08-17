@@ -133,14 +133,37 @@ public class HomeController {
             String key = entry.getKey();
             String value = entry.getValue();
 
-            // Filter parameters are expected to be in format "filter_<fieldId>"
             if (key.startsWith("filter_") && value != null && !value.trim().isEmpty()) {
                 try {
                     Long fieldId = Long.parseLong(key.substring(7));
-                    List<String> values = Arrays.asList(value.split(","));
-                    filters.put(fieldId, values);
+
+                    String decodedValue = java.net.URLDecoder.decode(value, "UTF-8");
+                    List<String> values;
+
+                    if (decodedValue.contains("|")) {
+                        values = Arrays.asList(decodedValue.split("\\|"));
+                    } else {
+                        values = Arrays.asList(decodedValue);
+                    }
+
+                    values = values.stream()
+                            .map(String::trim)
+                            .filter(v -> !v.isEmpty())
+                            .collect(Collectors.toList());
+
+                    if (!values.isEmpty()) {
+                        filters.put(fieldId, values);
+                    }
                 } catch (NumberFormatException e) {
                     // Invalid field ID, skip this filter
+                } catch (java.io.UnsupportedEncodingException e) {
+                    try {
+                        Long fieldId = Long.parseLong(key.substring(7));
+                        List<String> values = Arrays.asList(value);
+                        filters.put(fieldId, values);
+                    } catch (NumberFormatException ex) {
+                        // Skip invalid field ID
+                    }
                 }
             }
         }
