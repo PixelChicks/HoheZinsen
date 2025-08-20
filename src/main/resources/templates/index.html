@@ -2129,6 +2129,19 @@
         // Get current button states
         const stackedViewBtn = document.getElementById('stackedView');
         const scrollViewBtn = document.getElementById('scrollView');
+
+        // NEW: Auto-enable card view when switching to mobile
+        if (!wasMobile && isMobileView) {
+            // Switching from desktop to mobile - enable card view by default
+            if (stackedViewBtn && scrollViewBtn && tableContainer) {
+                stackedViewBtn.classList.add('active');
+                scrollViewBtn.classList.remove('active');
+                tableContainer.classList.add('mobile-stack');
+                enableInfiniteScroll();
+                return; // Early return to avoid further logic
+            }
+        }
+
         const stackedActive = stackedViewBtn && stackedViewBtn.classList.contains('active');
 
         // Enable infinite scroll only on mobile in card view AND when stacked view is active
@@ -2142,7 +2155,7 @@
             }
         }
 
-        // FIXED: If switching from mobile to desktop, ensure proper table view
+        // If switching from mobile to desktop, ensure proper table view
         if (wasMobile && !isMobileView) {
             // Force disable infinite scroll
             if (isInfiniteScrollEnabled) {
@@ -2151,7 +2164,6 @@
 
             // Ensure table view is properly set
             if (tableContainer && tableContainer.classList.contains('mobile-stack')) {
-                // If we're on desktop but still in card view, switch to table view
                 if (scrollViewBtn && stackedViewBtn) {
                     scrollViewBtn.classList.add('active');
                     stackedViewBtn.classList.remove('active');
