@@ -1,7 +1,6 @@
 package com.InterestRatesAustria.InterestRatesAustria.service;
 
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.GlobalField;
-import com.InterestRatesAustria.InterestRatesAustria.model.entity.InterestRate;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.InterestRateFieldValue;
 import com.InterestRatesAustria.InterestRatesAustria.repository.GlobalFieldRepository;
 import com.InterestRatesAustria.InterestRatesAustria.repository.InterestRateFieldValueRepository;
@@ -19,8 +18,8 @@ public class GlobalFieldService {
     private final InterestRateFieldValueRepository fieldValueRepository;
 
     public GlobalFieldService(GlobalFieldRepository globalFieldRepository,
-                             InterestRateRepository interestRateRepository,
-                             InterestRateFieldValueRepository fieldValueRepository) {
+                              InterestRateRepository interestRateRepository,
+                              InterestRateFieldValueRepository fieldValueRepository) {
         this.globalFieldRepository = globalFieldRepository;
         this.interestRateRepository = interestRateRepository;
         this.fieldValueRepository = fieldValueRepository;
@@ -51,7 +50,7 @@ public class GlobalFieldService {
                 .orElseThrow(() -> new RuntimeException("Field not found with id: " + fieldId));
 
         field.setLabel(label);
-        field.setFieldKey(label.toLowerCase().replaceAll("\\s+", ""));
+
         globalFieldRepository.save(field);
     }
 

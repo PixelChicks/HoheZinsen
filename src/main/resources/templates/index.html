@@ -167,6 +167,7 @@
                                  ondrop=${#authorization.expression('isAuthenticated()')} ? 'handleDrop(event)' : null"
                         onclick="sortTable(this, event)"
                         th:data-field-id="${field.id}"
+                        th:data-field-key="${field.fieldKey}"
                         th:data-column-index="${iterStat.index}">
 
                         <!-- Admin-only drag handle -->
@@ -601,6 +602,7 @@
             const currentFieldOrder = Array.from(headers)
                 .map(header => ({
                     id: header.dataset.fieldId,
+                    fieldKey: header.dataset.fieldKey,
                     label: header.querySelector('.header-text').textContent.trim()
                 }));
 
@@ -608,8 +610,7 @@
             const fieldCells = currentFieldOrder.map(field => {
                 const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
 
-                // Check if this is the Image1 field and handle it specially
-                if (field.label === 'Image1' || field.label === 'Image' || field.label.toLowerCase().includes('image')) {
+    if (field.fieldKey && field.fieldKey.toLowerCase().includes('img')) {
         if (isAuthenticated) {
             return `
                 <td class="data-cell image-cell" data-field-id="${field.id}" data-label="${field.label}">
@@ -2733,6 +2734,7 @@
         const currentFieldOrder = Array.from(headers)
             .map(header => ({
                 id: header.dataset.fieldId,
+                fieldKey: header.dataset.fieldKey,
                 label: header.querySelector('.header-text')
                     .textContent.trim()
             }));
@@ -2741,7 +2743,7 @@
         const fieldRows = currentFieldOrder.map(field => {
             const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
 
-            if (field.label === 'Image1' || field.label === 'Image' || field.label.toLowerCase().includes('image')) {
+    if (field.fieldKey && field.fieldKey.toLowerCase().includes('img')) {
     if (isAuthenticated) {
         return `
             <div class="card-field-row">

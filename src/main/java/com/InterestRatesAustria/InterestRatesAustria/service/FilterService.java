@@ -7,16 +7,15 @@ import com.InterestRatesAustria.InterestRatesAustria.model.entity.InterestRate;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.InterestRateFieldValue;
 import com.InterestRatesAustria.InterestRatesAustria.repository.GlobalFieldRepository;
 import com.InterestRatesAustria.InterestRatesAustria.repository.InterestRateRepository;
+import jakarta.persistence.criteria.Predicate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import jakarta.persistence.criteria.Predicate;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,6 +43,7 @@ public class FilterService {
         List<GlobalField> fields = globalFieldRepository.findByDeletedAtIsNullOrderBySortOrder();
 
         return fields.stream()
+                .filter(field -> !isImageField(field.getFieldKey()))
                 .map(field -> {
                     FilterDTO filter = new FilterDTO();
                     filter.setFieldId(field.getId());
@@ -331,5 +331,23 @@ public class FilterService {
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
+    }
+
+
+    private boolean isImageField(String fieldLabel) {
+        if (fieldLabel == null) {
+            return false;
+        }
+
+        String label = fieldLabel.toLowerCase();
+        return label.contains("image") ||
+                label.contains("img") ||
+                label.contains("photo") ||
+                label.contains("picture") ||
+                label.contains("logo") ||
+                label.contains("icon") ||
+                label.contains("avatar") ||
+                label.contains("thumbnail") ||
+                label.contains("banner");
     }
 }
