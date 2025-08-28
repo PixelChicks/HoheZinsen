@@ -441,6 +441,20 @@
         }
     }
 
+    window.addEventListener("load", () => {
+        const emptyState = document.getElementById("emptyState");
+
+        if (emptyState && emptyState.style.display !== "none") {
+            const params = new URLSearchParams(window.location.search);
+            let page = parseInt(params.get("page") || "1", 10);
+
+            if (page >= 1) {
+                params.set("page", page - 1);
+                window.location.href = `/?${params.toString()}`;
+            }
+        }
+    });
+
     // ============================================================================
     // DATA LOADING AND API CALLS
     // ============================================================================
@@ -1545,9 +1559,9 @@
                 showDeleteNotification('Interest rate deleted successfully!', false);
                 closeExpandedCard(rateId);
 
-                // Reload current page after deletion
+            // Redirect to home after deletion
                 setTimeout(() => {
-                    loadPageFromServer(currentPage, currentSearchTerm);
+                    window.location.reload();
                 }, 500);
             })
             .catch(error => {
