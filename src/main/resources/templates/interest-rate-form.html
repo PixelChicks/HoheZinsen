@@ -7,6 +7,153 @@
     <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+        /* Image Upload Styles */
+.image-upload-container {
+    margin-top: 10px;
+}
+
+.image-upload-area {
+    width: 100%;
+}
+
+.upload-zone {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+    position: relative;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.upload-zone:hover {
+    border-color: #007bff;
+    background: #e7f3ff;
+}
+
+.upload-zone.drag-over {
+    border-color: #28a745;
+    background: #e8f5e8;
+}
+
+.upload-placeholder {
+    text-align: center;
+}
+
+.upload-placeholder i {
+    font-size: 2rem;
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+.upload-placeholder p {
+    margin: 8px 0 4px 0;
+    font-weight: 500;
+    color: #495057;
+}
+
+.upload-placeholder small {
+    color: #6c757d;
+}
+
+.image-preview {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.preview-image {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.image-overlay {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.image-preview:hover .image-overlay {
+    opacity: 1;
+}
+
+.remove-image {
+    background: rgba(220, 53, 69, 0.9);
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.remove-image:hover {
+    background: #dc3545;
+    transform: scale(1.1);
+}
+
+.upload-progress {
+    margin-top: 10px;
+}
+
+.upload-progress .progress {
+    height: 6px;
+    background: #e9ecef;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.upload-progress .progress-bar {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    transition: width 0.3s ease;
+    height: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .upload-zone {
+        padding: 15px;
+        min-height: 100px;
+    }
+
+    .upload-placeholder i {
+        font-size: 1.5rem;
+    }
+
+    .preview-image {
+        max-height: 150px;
+    }
+}
+
+/* Animation for upload success */
+@keyframes uploadSuccess {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.upload-success {
+    animation: uploadSuccess 0.6s ease;
+}
+
+/* Notification styles */
+#upload-notification {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border: none;
+}
         .create-container {
            background: white;
            border-radius: 15px;
@@ -844,6 +991,271 @@
             }
         });
     });
+
+    // Image Upload Component
+class ImageUploadManager {
+    constructor() {
+        this.maxFileSize = 5 * 1024 * 1024; // 5MB
+        this.allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        this.setupImageUploadFields();
+    }
+
+    setupImageUploadFields() {
+        document.addEventListener('DOMContentLoaded', () => {
+            this.initializeImageFields();
+        });
+    }
+
+    initializeImageFields() {
+        // Find all image field inputs
+        const imageFields = document.querySelectorAll('input[name^="extra_"]:not([data-image-initialized])');
+
+        imageFields.forEach(input => {
+            const fieldName = input.getAttribute('name');
+            // Check if this is the image field (assuming field ID 2 for image field)
+            if (this.isImageField(input)) {
+                this.convertToImageUpload(input);
+                input.setAttribute('data-image-initialized', 'true');
+            }
+        });
+    }
+
+    isImageField(input) {
+        // Check if the label or placeholder suggests this is an image field
+        const label = input.closest('.field-group')?.querySelector('label')?.textContent?.toLowerCase() || '';
+        const placeholder = input.getAttribute('placeholder')?.toLowerCase() || '';
+
+        return label.includes('image') || placeholder.includes('image') ||
+               label.includes('photo') || placeholder.includes('photo') ||
+               label.includes('picture') || placeholder.includes('picture');
+    }
+
+    convertToImageUpload(originalInput) {
+        const fieldGroup = originalInput.closest('.field-group');
+        if (!fieldGroup) return;
+
+        // Create image upload container
+        const uploadContainer = document.createElement('div');
+        uploadContainer.className = 'image-upload-container';
+        uploadContainer.innerHTML = this.createImageUploadHTML(originalInput.getAttribute('name'));
+
+        // Replace the original input
+        originalInput.style.display = 'none';
+        fieldGroup.appendChild(uploadContainer);
+
+        // Setup event listeners
+        this.setupImageUploadEvents(uploadContainer, originalInput);
+    }
+
+    createImageUploadHTML(fieldName) {
+        return `
+            <div class="image-upload-area" data-field="${fieldName}">
+                <div class="upload-zone" onclick="triggerFileInput('${fieldName}')">
+                    <div class="upload-placeholder">
+                        <i class="bi bi-cloud-upload" style="font-size: 2rem; color: #6c757d;"></i>
+                        <p class="mb-1">Click to upload image</p>
+                        <small class="text-muted">PNG, JPG, GIF up to 5MB</small>
+                    </div>
+                    <div class="image-preview" style="display: none;">
+                        <img src="" alt="Preview" class="preview-image">
+                        <div class="image-overlay">
+                            <button type="button" class="btn btn-sm btn-danger remove-image" onclick="removeImage('${fieldName}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <input type="file" id="file-${fieldName}" accept="image/*" style="display: none;" onchange="handleImageUpload(event, '${fieldName}')">
+                <div class="upload-progress" style="display: none;">
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    setupImageUploadEvents(container, originalInput) {
+        const fieldName = originalInput.getAttribute('name');
+        const fileInput = container.querySelector(`#file-${fieldName}`);
+        const uploadZone = container.querySelector('.upload-zone');
+        const imagePreview = container.querySelector('.image-preview');
+        const placeholder = container.querySelector('.upload-placeholder');
+
+        // Drag and drop functionality
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('drag-over');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('drag-over');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('drag-over');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                this.processImageFile(files[0], fieldName, originalInput);
+            }
+        });
+
+        // Load existing image if present
+        const existingValue = originalInput.value;
+        if (existingValue && existingValue.startsWith('/images/')) {
+            this.showImagePreview(existingValue, container);
+        }
+    }
+
+    async processImageFile(file, fieldName, originalInput) {
+        if (!this.validateImageFile(file)) {
+            return;
+        }
+
+        const container = document.querySelector(`[data-field="${fieldName}"]`);
+        const progressContainer = container.querySelector('.upload-progress');
+        const progressBar = container.querySelector('.progress-bar');
+
+        try {
+            // Show progress
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+
+            // Create FormData
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Upload file
+            const response = await fetch('/api/files/upload-image', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Update progress
+                progressBar.style.width = '100%';
+
+                // Update original input with file path
+                originalInput.value = result.path;
+
+                // Show image preview
+                this.showImagePreview(result.path, container);
+
+                // Hide progress after a short delay
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                }, 1000);
+
+                this.showNotification('Image uploaded successfully', 'success');
+            } else {
+                throw new Error(result.message);
+            }
+
+        } catch (error) {
+            console.error('Upload error:', error);
+            this.showNotification(error.message || 'Failed to upload image', 'error');
+            progressContainer.style.display = 'none';
+        }
+    }
+
+    showImagePreview(imagePath, container) {
+        const placeholder = container.querySelector('.upload-placeholder');
+        const imagePreview = container.querySelector('.image-preview');
+        const previewImg = container.querySelector('.preview-image');
+
+        previewImg.src = imagePath;
+        placeholder.style.display = 'none';
+        imagePreview.style.display = 'block';
+    }
+
+    hideImagePreview(container) {
+        const placeholder = container.querySelector('.upload-placeholder');
+        const imagePreview = container.querySelector('.image-preview');
+
+        placeholder.style.display = 'block';
+        imagePreview.style.display = 'none';
+    }
+
+    validateImageFile(file) {
+        if (!this.allowedTypes.includes(file.type)) {
+            this.showNotification('Please select a valid image file (PNG, JPG, GIF)', 'error');
+            return false;
+        }
+
+        if (file.size > this.maxFileSize) {
+            this.showNotification('File size must be less than 5MB', 'error');
+            return false;
+        }
+
+        return true;
+    }
+
+    showNotification(message, type = 'info') {
+        // Create notification element if it doesn't exist
+        let notification = document.getElementById('upload-notification');
+        if (!notification) {
+            notification = document.createElement('div');
+            notification.id = 'upload-notification';
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                padding: 12px 20px;
+                border-radius: 4px;
+                color: white;
+                font-weight: 500;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+            document.body.appendChild(notification);
+        }
+
+        // Set message and style
+        notification.textContent = message;
+        notification.className = `alert alert-${type === 'error' ? 'danger' : 'success'}`;
+        notification.style.backgroundColor = type === 'error' ? '#dc3545' : '#28a745';
+        notification.style.opacity = '1';
+
+        // Hide after 3 seconds
+        setTimeout(() => {
+            notification.style.opacity = '0';
+        }, 3000);
+    }
+}
+
+// Global functions for onclick handlers
+function triggerFileInput(fieldName) {
+    document.getElementById(`file-${fieldName}`).click();
+}
+
+function handleImageUpload(event, fieldName) {
+    const file = event.target.files[0];
+    if (file) {
+        const originalInput = document.querySelector(`input[name="${fieldName}"]`);
+        imageUploadManager.processImageFile(file, fieldName, originalInput);
+    }
+}
+
+function removeImage(fieldName) {
+    const originalInput = document.querySelector(`input[name="${fieldName}"]`);
+    const container = document.querySelector(`[data-field="${fieldName}"]`);
+
+    // Clear the original input
+    originalInput.value = '';
+
+    // Hide image preview
+    imageUploadManager.hideImagePreview(container);
+
+    imageUploadManager.showNotification('Image removed', 'success');
+}
+
+// Initialize when page loads
+const imageUploadManager = new ImageUploadManager();
 </script>
 </body>
 </html>
