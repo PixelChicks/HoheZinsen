@@ -7,6 +7,7 @@ import com.InterestRatesAustria.InterestRatesAustria.service.FieldValueService;
 import com.InterestRatesAustria.InterestRatesAustria.service.FilterService;
 import com.InterestRatesAustria.InterestRatesAustria.service.GlobalFieldService;
 import com.InterestRatesAustria.InterestRatesAustria.service.InterestRateService;
+import com.InterestRatesAustria.InterestRatesAustria.service.LastUpdateService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -28,15 +29,18 @@ public class HomeController {
     private final GlobalFieldService globalFieldService;
     private final FieldValueService fieldValueService;
     private final FilterService filterService;
+    private final LastUpdateService lastUpdateService;
 
     public HomeController(InterestRateService interestRateService,
                           GlobalFieldService globalFieldService,
                           FieldValueService fieldValueService,
-                          FilterService filterService) {
+                          FilterService filterService,
+                          LastUpdateService lastUpdateService) {
         this.interestRateService = interestRateService;
         this.globalFieldService = globalFieldService;
         this.fieldValueService = fieldValueService;
         this.filterService = filterService;
+        this.lastUpdateService = lastUpdateService;
     }
 
     @GetMapping("/")
@@ -82,6 +86,8 @@ public class HomeController {
         model.addAttribute("activeFilters", filters);
         model.addAttribute("availableFilters", filterService.getAvailableFilters());
 
+        model.addAttribute("lastUpdateMessage", lastUpdateService.getFormattedLastUpdateMessage());
+
         return "index";
     }
 
@@ -122,6 +128,7 @@ public class HomeController {
         response.put("isFirst", interestRatesPage.isFirst());
         response.put("isLast", interestRatesPage.isLast());
         response.put("activeFilters", filters);
+        response.put("lastUpdateMessage", lastUpdateService.getFormattedLastUpdateMessage());
 
         return ResponseEntity.ok(response);
     }
