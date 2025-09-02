@@ -759,10 +759,11 @@ body {
   right: 8px;
   top: 50%;
   transform: translateY(-50%);
-  color: #6c757d;
-  font-size: 14px;
+  color: #00b894;
+  font-size: 20px;
   opacity: 0.5;
   transition: all 0.3s ease;
+  z-index: 9999;
 }
 
 #mainTable thead th.sortable:hover::after {
@@ -771,15 +772,15 @@ body {
 
 #mainTable thead th.sort-asc::after {
   content: "↑";
-  color: #007bff;
-  opacity: 1;
+  color: #00b894;
+  opacity: 3;
   font-weight: bold;
 }
 
 #mainTable thead th.sort-desc::after {
   content: "↓";
-  color: #007bff;
-  opacity: 1;
+  color: #00b894;
+  opacity: 3;
   font-weight: bold;
 }
 

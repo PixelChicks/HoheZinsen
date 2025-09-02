@@ -53,7 +53,7 @@ public class WebSecurityConfig {
                     userService.updateLastLogin(username);
                 }
 
-                return "/";
+                return "/admin";
             }
         };
     }
