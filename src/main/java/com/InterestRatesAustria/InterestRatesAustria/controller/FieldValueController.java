@@ -21,6 +21,6 @@ public class FieldValueController {
                                    @RequestParam Long fieldId,
                                    @RequestParam String value) {
         fieldValueService.updateFieldValue(rateId, fieldId, value);
-        return "redirect:/";
+        return "redirect:/admin";
     }
 }
