@@ -82,6 +82,31 @@ public class FieldValueService {
         fieldValueRepository.save(fieldValue);
     }
 
+    public boolean existsFieldValue(Long rateId, Long fieldId) {
+        return fieldValueRepository.findByInterestRateIdAndGlobalFieldId(rateId, fieldId).isPresent();
+    }
+
+    public void createFieldValue(Long rateId, Long fieldId, String value) {
+        boolean exists = fieldValueRepository.findByInterestRateIdAndGlobalFieldId(rateId, fieldId).isPresent();
+        if (exists) {
+            throw new RuntimeException("Field value already exists for rate: " + rateId + " and field: " + fieldId);
+        }
+
+        InterestRate rate = interestRateRepository.findById(rateId)
+                .orElseThrow(() -> new RuntimeException("Interest rate not found with id: " + rateId));
+
+        GlobalField field = globalFieldRepository.findById(fieldId)
+                .orElseThrow(() -> new RuntimeException("Global field not found with id: " + fieldId));
+
+        InterestRateFieldValue newFieldValue = new InterestRateFieldValue();
+        newFieldValue.setInterestRate(rate);
+        newFieldValue.setGlobalField(field);
+        newFieldValue.setValue(value);
+
+        fieldValueRepository.save(newFieldValue);
+    }
+
+
     public void createFieldValuesForRate(InterestRate rate, Map<String, String> requestParams) {
         List<GlobalField> allFields = globalFieldRepository.findAllActiveByOrderBySortOrderAsc();
 

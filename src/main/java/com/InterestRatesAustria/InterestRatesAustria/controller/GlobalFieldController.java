@@ -21,14 +21,14 @@ public class GlobalFieldController {
     @PostMapping("/add")
     public String addGlobalField(@ModelAttribute GlobalField field) {
         globalFieldService.addGlobalField(field);
-        return "redirect:/";
+        return "redirect:/admin";
     }
 
     @PostMapping("/update")
     public String updateGlobalField(@RequestParam Long fieldId,
                                     @RequestParam String label) {
         globalFieldService.updateGlobalField(fieldId, label);
-        return "redirect:/";
+        return "redirect:/admin";
     }
 
     @PostMapping("/reorder")
