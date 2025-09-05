@@ -18,8 +18,6 @@ public class LastUpdateService {
     }
 
     public void recordUpdate() {
-        lastUpdateRepository.deleteAll();
-        
         LastUpdate update = LastUpdate.builder()
                 .lastUpdated(LocalDateTime.now())
                 .build();
@@ -28,7 +26,7 @@ public class LastUpdateService {
     }
 
     public String getFormattedLastUpdateMessage() {
-        Optional<LastUpdate> lastUpdate = lastUpdateRepository.findMostRecent();
+        Optional<LastUpdate> lastUpdate = lastUpdateRepository.findFirstByOrderByIdDesc();
         
         if (lastUpdate.isEmpty()) {
             return "No updates recorded yet";
@@ -39,7 +37,7 @@ public class LastUpdateService {
     }
 
     public LocalDateTime getLastUpdateTime() {
-        Optional<LastUpdate> lastUpdate = lastUpdateRepository.findMostRecent();
+        Optional<LastUpdate> lastUpdate = lastUpdateRepository.findFirstByOrderByIdDesc();
         return lastUpdate.map(LastUpdate::getLastUpdated).orElse(null);
     }
 
