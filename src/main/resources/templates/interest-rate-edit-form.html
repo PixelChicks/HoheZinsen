@@ -540,6 +540,9 @@
                 <div class="row g-3 mb-4" th:each="field : ${globalFields}">
                     <div class="col-md-6">
                         <div class="field-group">
+                            <!-- Hidden field for fieldKey -->
+                            <input type="hidden" th:name="${'fieldKey_' + field.id}" th:value="${field.fieldKey}" />
+
                             <label class="field-label" th:for="${'extra_' + field.id}">
                                 <i class="bi bi-tag-fill"></i>
                                 [[${field.label}]]
@@ -1294,13 +1297,16 @@
         }
 
         isImageField(input) {
-            // Check if the label or placeholder suggests this is an image field
-            const label = input.closest('.field-group')?.querySelector('label')?.textContent?.toLowerCase() || '';
+            // Get the fieldKey from the hidden input field
+            const fieldGroup = input.closest('.field-group');
+            const hiddenFieldKey = fieldGroup?.querySelector('input[type="hidden"][name*="fieldKey_"]');
+            const fieldKey = hiddenFieldKey?.value?.toLowerCase() || '';
+
             const placeholder = input.getAttribute('placeholder')?.toLowerCase() || '';
 
-            return label.includes('image') || placeholder.includes('image') ||
-                   label.includes('photo') || placeholder.includes('photo') ||
-                   label.includes('picture') || placeholder.includes('picture');
+            return fieldKey.includes('img') || placeholder.includes('image') ||
+                   fieldKey.includes('photo') || placeholder.includes('photo') ||
+                   fieldKey.includes('picture') || placeholder.includes('picture');
         }
 
         convertToImageUpload(originalInput) {
