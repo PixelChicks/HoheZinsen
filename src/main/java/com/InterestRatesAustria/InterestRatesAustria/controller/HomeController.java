@@ -91,6 +91,54 @@ public class HomeController {
         return "index";
     }
 
+    @GetMapping("/admin")
+    public String showRatesAdmin(Model model,
+                                 @RequestParam(defaultValue = "0") int page,
+                                 @RequestParam(defaultValue = "5") int size,
+                                 @RequestParam(defaultValue = "field_1") String sortBy,
+                                 @RequestParam(defaultValue = "desc") String sortDir,
+                                 @RequestParam(required = false) String search,
+                                 @RequestParam Map<String, String> allParams) {
+
+        Map<Long, List<String>> filters = extractFilters(allParams);
+
+        Page<InterestRate> interestRatesPage;
+        if ((search != null && !search.trim().isEmpty()) || !filters.isEmpty()) {
+            interestRatesPage = filterService.getFilteredInterestRates(filters, page, size, sortBy, sortDir, search);
+        } else {
+            interestRatesPage = interestRateService.getAllInterestRatesPaginated(page, size, sortBy, sortDir);
+        }
+
+        List<InterestRateDTO> interestRateDTOs = interestRatesPage.getContent().stream()
+                .map(InterestRateDTO::fromEntity)
+                .collect(Collectors.toList());
+
+        List<GlobalField> globalFields = globalFieldService.getAllGlobalFieldsOrdered();
+
+        Map<Long, Map<Long, String>> rateFieldValuesMap =
+                fieldValueService.getRateFieldValuesMap(interestRatesPage.getContent());
+
+        model.addAttribute("interestRates", interestRateDTOs);
+        model.addAttribute("globalFields", globalFields);
+        model.addAttribute("rateFieldValuesMap", rateFieldValuesMap);
+        model.addAttribute("newField", new GlobalField());
+
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", interestRatesPage.getTotalPages());
+        model.addAttribute("totalElements", interestRatesPage.getTotalElements());
+        model.addAttribute("pageSize", size);
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("sortDir", sortDir);
+        model.addAttribute("search", search);
+
+        model.addAttribute("activeFilters", filters);
+        model.addAttribute("availableFilters", filterService.getAvailableFilters());
+
+        model.addAttribute("lastUpdateMessage", lastUpdateService.getFormattedLastUpdateMessage());
+
+        return "admin/indexAdmin";
+    }
+
     @GetMapping("/api/interest-rates")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getInterestRatesPaginated(

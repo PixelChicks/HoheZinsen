@@ -1,4 +1,4 @@
-package com.InterestRatesAustria.InterestRatesAustria;
+package com.InterestRatesAustria.InterestRatesAustria.controller;
 
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.InterestRate;
 import com.InterestRatesAustria.InterestRatesAustria.service.FieldValueService;
@@ -33,7 +33,7 @@ public class InterestRateController {
             @RequestParam Map<String, String> requestParams) {
 
         interestRateService.createInterestRate(interestRate, requestParams);
-        return "redirect:/";
+        return "redirect:/admin";
     }
 
     @PostMapping("/interest-rate/update/{id}")
@@ -43,7 +43,7 @@ public class InterestRateController {
             @RequestParam Map<String, String> requestParams) {
 
         interestRateService.updateInterestRate(id, interestRate, requestParams);
-        return "redirect:/";
+        return "redirect:/admin";
     }
 
     @PostMapping("/sections/reorder")
@@ -81,7 +81,7 @@ public class InterestRateController {
     @PostMapping("/interest-rate/delete/{id}")
     public String deleteInterestRate(@PathVariable Long id) {
         interestRateService.deleteInterestRate(id);
-        return "redirect:/";
+        return "redirect:/admin";
     }
 
     @DeleteMapping("/interest-rate/{id}")
