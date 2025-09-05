@@ -934,6 +934,7 @@ body.guest .data-cell .form-control:focus {
 /* Image cell styling */
 .image-cell {
     text-align: center;
+    z-index: 0;
     vertical-align: middle;
     min-width: 80px;
 }
@@ -984,6 +985,7 @@ body.guest .data-cell .form-control:focus {
 /* Image cell styling */
 .image-cell {
     position: relative;
+    z-index: 0;
     padding: 8px !important;
 }
 
@@ -1062,7 +1064,6 @@ body.guest .data-cell .form-control:focus {
     border: 2px solid #007bff;
     border-radius: 4px;
     padding: 10px;
-    z-index: 9999;
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     min-height: 50px;
 }
@@ -1072,7 +1073,6 @@ body.guest .data-cell .form-control:focus {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    z-index: 9999;
 }
 
 /* File upload area */
