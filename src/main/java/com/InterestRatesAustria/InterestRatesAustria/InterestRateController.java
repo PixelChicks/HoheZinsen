@@ -1,4 +1,4 @@
-package com.InterestRatesAustria.InterestRatesAustria.controller;
+package com.InterestRatesAustria.InterestRatesAustria;
 
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.InterestRate;
 import com.InterestRatesAustria.InterestRatesAustria.service.FieldValueService;
