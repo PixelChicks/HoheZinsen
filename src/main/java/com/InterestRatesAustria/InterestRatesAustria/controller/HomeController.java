@@ -93,12 +93,12 @@ public class HomeController {
 
     @GetMapping("/admin")
     public String showRatesAdmin(Model model,
-                            @RequestParam(defaultValue = "0") int page,
-                            @RequestParam(defaultValue = "5") int size,
-                            @RequestParam(defaultValue = "field_1") String sortBy,
-                            @RequestParam(defaultValue = "desc") String sortDir,
-                            @RequestParam(required = false) String search,
-                            @RequestParam Map<String, String> allParams) {
+                                 @RequestParam(defaultValue = "0") int page,
+                                 @RequestParam(defaultValue = "5") int size,
+                                 @RequestParam(defaultValue = "field_1") String sortBy,
+                                 @RequestParam(defaultValue = "desc") String sortDir,
+                                 @RequestParam(required = false) String search,
+                                 @RequestParam Map<String, String> allParams) {
 
         Map<Long, List<String>> filters = extractFilters(allParams);
 

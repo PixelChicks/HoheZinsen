@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
 
 public interface LastUpdateRepository extends JpaRepository<LastUpdate, Long> {
-    
-    @Query("SELECT l FROM LastUpdate l ORDER BY l.lastUpdated DESC")
-    Optional<LastUpdate> findMostRecent();
+
+    Optional<LastUpdate> findFirstByOrderByIdDesc();
 }

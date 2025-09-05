@@ -1,3 +1,4 @@
+
 package com.InterestRatesAustria.InterestRatesAustria.model.entity;
 
 import jakarta.persistence.*;
