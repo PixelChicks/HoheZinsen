@@ -113,7 +113,7 @@ public class HomeController {
                 .map(InterestRateDTO::fromEntity)
                 .collect(Collectors.toList());
 
-        List<GlobalField> globalFields = globalFieldService.getAllGlobalFieldsOrdered();
+        List<GlobalField> globalFields = globalFieldService.getTableFieldsOrdered();
 
         Map<Long, Map<Long, String>> rateFieldValuesMap =
                 fieldValueService.getRateFieldValuesMap(interestRatesPage.getContent());

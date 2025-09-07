@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Global Fields</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .field-row {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background: #f8f9fa;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        .field-row:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .remove-btn {
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+        .remove-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        .add-field-btn {
+            border: 2px dashed #6c757d;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+        .add-field-btn:hover {
+            border-color: #0d6efd;
+            background: rgba(13, 110, 253, 0.05);
+        }
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        .form-check {
+            margin: 0;
+        }
+        .submit-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            border: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <h2 class="mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        Create Global Fields
+                    </h2>
+                    <p class="mb-0 opacity-75">Add multiple global fields with display preferences</p>
+                </div>
+
+                <div class="card-body p-4">
+                    <form id="globalFieldsForm" method="post" action="/fields/add-multiple">
+                        <div id="fieldsContainer">
+                            <!-- Initial field row -->
+                            <div class="field-row p-3" data-field-index="0">
+                                <div class="row g-3 align-items-center">
+                                    <div class="col-12 col-md-4">
+                                        <label class="form-label fw-semibold">
+                                            <i class="fas fa-tag me-1"></i>
+                                            Field Label
+                                        </label>
+                                        <input type="text"
+                                               class="form-control"
+                                               name="fields[0].label"
+                                               placeholder="e.g. Max Deposit"
+                                               required>
+                                    </div>
+
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label fw-semibold">
+                                            <i class="fas fa-table me-1"></i>
+                                            Display Options
+                                        </label>
+                                        <div class="checkbox-group mt-2">
+                                            <div class="form-check">
+                                                <input type="checkbox"
+                                                       class="form-check-input"
+                                                       name="fields[0].atTable"
+                                                       id="atTable_0"
+                                                       value="true">
+                                                <label class="form-check-label" for="atTable_0">
+                                                    <i class="fas fa-list me-1"></i>
+                                                    Show in Table
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input type="checkbox"
+                                                       class="form-check-input"
+                                                       name="fields[0].atCompare"
+                                                       id="atCompare_0"
+                                                       value="true">
+                                                <label class="form-check-label" for="atCompare_0">
+                                                    <i class="fas fa-balance-scale me-1"></i>
+                                                    Show in Compare
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-2 text-end">
+                                        <button type="button"
+                                                class="btn btn-outline-danger btn-sm remove-btn d-none"
+                                                onclick="removeField(this)"
+                                                title="Remove Field">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add Field Button -->
+                        <div class="text-center my-4">
+                            <button type="button"
+                                    class="btn btn-outline-secondary add-field-btn px-4 py-3"
+                                    onclick="addField()">
+                                <i class="fas fa-plus me-2"></i>
+                                Add Another Field
+                            </button>
+                        </div>
+
+                        <!-- Submit Section -->
+                        <div class="submit-section p-4 mt-4">
+                            <div class="row g-3 align-items-center">
+                                <div class="col-12 col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-info-circle text-info me-2"></i>
+                                        <span class="text-muted">
+                                                <span id="fieldCount">1</span> field(s) ready to create
+                                            </span>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 text-md-end">
+                                    <button type="button"
+                                            class="btn btn-outline-secondary me-2"
+                                            onclick="clearAllFields()">
+                                        <i class="fas fa-broom me-1"></i>
+                                        Clear All
+                                    </button>
+                                    <button type="submit"
+                                            class="btn btn-success px-4">
+                                        <i class="fas fa-save me-2"></i>
+                                        Create Global Fields
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    let fieldIndex = 1;
+
+    function addField() {
+        const container = document.getElementById('fieldsContainer');
+        const newFieldHtml = `
+            <div class="field-row p-3" data-field-index="${fieldIndex}">
+                <div class="row g-3 align-items-center">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-tag me-1"></i>
+                            Field Label
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               name="fields[${fieldIndex}].label"
+                               placeholder="e.g. Max Deposit"
+                               required>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-table me-1"></i>
+                            Display Options
+                        </label>
+                        <div class="checkbox-group mt-2">
+                            <div class="form-check">
+                                <input type="checkbox"
+                                       class="form-check-input"
+                                       name="fields[${fieldIndex}].atTable"
+                                       id="atTable_${fieldIndex}"
+                                       value="true">
+                                <label class="form-check-label" for="atTable_${fieldIndex}">
+                                    <i class="fas fa-list me-1"></i>
+                                    Show in Table
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox"
+                                       class="form-check-input"
+                                       name="fields[${fieldIndex}].atCompare"
+                                       id="atCompare_${fieldIndex}"
+                                       value="true">
+                                <label class="form-check-label" for="atCompare_${fieldIndex}">
+                                    <i class="fas fa-balance-scale me-1"></i>
+                                    Show in Compare
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-2 text-end">
+                        <button type="button"
+                                class="btn btn-outline-danger btn-sm remove-btn"
+                                onclick="removeField(this)"
+                                title="Remove Field">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        container.insertAdjacentHTML('beforeend', newFieldHtml);
+        fieldIndex++;
+        updateFieldCount();
+        updateRemoveButtons();
+    }
+
+    function removeField(button) {
+        const fieldRow = button.closest('.field-row');
+        fieldRow.style.transform = 'translateX(-100%)';
+        fieldRow.style.opacity = '0';
+
+        setTimeout(() => {
+            fieldRow.remove();
+            updateFieldCount();
+            updateRemoveButtons();
+            reindexFields();
+        }, 300);
+    }
+
+    function updateFieldCount() {
+        const count = document.querySelectorAll('.field-row').length;
+        document.getElementById('fieldCount').textContent = count;
+    }
+
+    function updateRemoveButtons() {
+        const fieldRows = document.querySelectorAll('.field-row');
+        const removeButtons = document.querySelectorAll('.remove-btn');
+
+        if (fieldRows.length <= 1) {
+            removeButtons.forEach(btn => btn.classList.add('d-none'));
+        } else {
+            removeButtons.forEach(btn => btn.classList.remove('d-none'));
+        }
+    }
+
+    function reindexFields() {
+        const fieldRows = document.querySelectorAll('.field-row');
+        fieldRows.forEach((row, index) => {
+            row.setAttribute('data-field-index', index);
+
+            // Update input names
+            const inputs = row.querySelectorAll('input');
+            inputs.forEach(input => {
+                const name = input.getAttribute('name');
+                if (name) {
+                    const newName = name.replace(/\[\d+\]/, `[${index}]`);
+                    input.setAttribute('name', newName);
+                }
+
+                const id = input.getAttribute('id');
+                if (id) {
+                    const newId = id.replace(/_\d+$/, `_${index}`);
+                    input.setAttribute('id', newId);
+                }
+            });
+
+            // Update labels
+            const labels = row.querySelectorAll('label[for]');
+            labels.forEach(label => {
+                const forAttr = label.getAttribute('for');
+                if (forAttr) {
+                    const newFor = forAttr.replace(/_\d+$/, `_${index}`);
+                    label.setAttribute('for', newFor);
+                }
+            });
+        });
+
+        fieldIndex = fieldRows.length;
+    }
+
+    function clearAllFields() {
+        if (confirm('Are you sure you want to clear all fields?')) {
+            const container = document.getElementById('fieldsContainer');
+            container.innerHTML = `
+                <div class="field-row p-3" data-field-index="0">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-tag me-1"></i>
+                                Field Label
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   name="fields[0].label"
+                                   placeholder="e.g. Max Deposit"
+                                   required>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-table me-1"></i>
+                                Display Options
+                            </label>
+                            <div class="checkbox-group mt-2">
+                                <div class="form-check">
+                                    <input type="checkbox"
+                                           class="form-check-input"
+                                           name="fields[0].atTable"
+                                           id="atTable_0"
+                                           value="true">
+                                    <label class="form-check-label" for="atTable_0">
+                                        <i class="fas fa-list me-1"></i>
+                                        Show in Table
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox"
+                                           class="form-check-input"
+                                           name="fields[0].atCompare"
+                                           id="atCompare_0"
+                                           value="true">
+                                    <label class="form-check-label" for="atCompare_0">
+                                        <i class="fas fa-balance-scale me-1"></i>
+                                        Show in Compare
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-2 text-end">
+                            <button type="button"
+                                    class="btn btn-outline-danger btn-sm remove-btn d-none"
+                                    onclick="removeField(this)"
+                                    title="Remove Field">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            fieldIndex = 1;
+            updateFieldCount();
+            updateRemoveButtons();
+        }
+    }
+
+    // Initialize
+    updateFieldCount();
+    updateRemoveButtons();
+</script>
+</body>
+</html>

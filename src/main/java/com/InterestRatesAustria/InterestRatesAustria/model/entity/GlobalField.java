@@ -22,6 +22,9 @@ public class GlobalField {
     private String label;      // e.g. "Max Deposit"
     private Integer sortOrder; // New field for column ordering
 
+    private boolean atTable; //where the global field is being displayed
+    private boolean atCompare;
+
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 }

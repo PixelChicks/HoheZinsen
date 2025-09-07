@@ -6,7 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/fields")
@@ -22,6 +24,11 @@ public class GlobalFieldController {
     public String addGlobalField(@ModelAttribute GlobalField field) {
         globalFieldService.addGlobalField(field);
         return "redirect:/admin";
+    }
+
+    @GetMapping("/createMultiple")
+    public String createMultipleGlobalFields(@ModelAttribute GlobalField field) {
+        return "admin/createGlobalField";
     }
 
     @PostMapping("/update")
@@ -62,5 +69,11 @@ public class GlobalFieldController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error deleting field: " + e.getMessage());
         }
+    }
+
+    @PostMapping("/add-multiple")
+    public String addMultipleGlobalFields(@RequestParam Map<String, String> allParams) {
+        globalFieldService.addMultipleGlobalFields(allParams);
+        return "redirect:/admin";
     }
 }

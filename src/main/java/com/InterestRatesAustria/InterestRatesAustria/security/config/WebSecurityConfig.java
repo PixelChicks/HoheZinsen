@@ -99,7 +99,7 @@ public class WebSecurityConfig {
                         .permitAll()
                 )
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/api/**", "/sections/reorder", "/fields/reorder", "/field-values/update", "/fields/delete/**", "/interest-rate/*")
+                        .ignoringRequestMatchers("/api/**", "/sections/reorder", "/fields/reorder", "/fields/add-multiple", "/field-values/update", "/fields/delete/**", "/interest-rate/*")
                 );
 
         return http.build();
