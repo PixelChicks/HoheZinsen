@@ -7,6 +7,324 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="/css/index.css">
+    <style>
+        /* Comparison Section Styles */
+        .comparison-section {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+        }
+
+        .comparison-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .comparison-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+            color: #333;
+        }
+
+        .clear-comparison-btn {
+            background: #dc3545;
+            border: none;
+            color: white;
+            padding: 0.375rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            margin-left: auto;
+        }
+
+        .clear-comparison-btn:hover {
+            background: #c82333;
+        }
+
+        .comparison-container {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+        }
+
+        .comparison-card {
+            background: white;
+            border: 2px solid #17a2b8;
+            border-radius: 8px;
+            padding: 1rem;
+            min-width: 400px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .comparison-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .provider-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .provider-logo {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .provider-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .remove-comparison {
+            background: none;
+            border: none;
+            color: #dc3545;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .remove-comparison:hover {
+            color: #c82333;
+            background-color: #f8f9fa;
+            border-radius: 50%;
+        }
+
+        .comparison-details {
+            margin-bottom: 1rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.85rem;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: #666;
+            flex-shrink: 0;
+            margin-right: 0.5rem;
+        }
+
+        .detail-value {
+            color: #333;
+            text-align: right;
+            word-break: break-word;
+        }
+
+        .comparison-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .mehr-info-btn {
+            flex: 1;
+            background: #17a2b8;
+            border: none;
+            color: white;
+            padding: 0.4rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .mehr-info-btn:hover {
+            background: #138496;
+        }
+
+        .mehr-info-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .angebot-btn {
+            flex: 1;
+            background: #28a745;
+            border: none;
+            color: white;
+            padding: 0.4rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            text-decoration: none;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .angebot-btn:hover {
+            background: #218838;
+            color: white;
+            text-decoration: none;
+        }
+
+        .empty-comparison-state {
+            text-align: center;
+            color: #666;
+            padding: 2rem;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+        }
+
+        .empty-comparison-state .icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.5;
+        }
+
+        /* Table modifications */
+        .comparison-checkbox {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .table th:first-child,
+        .table td:first-child {
+            width: 50px;
+            text-align: center;
+        }
+
+        .table-row-selected {
+            background-color: #e3f2fd !important;
+        }
+
+        .comparison-limit-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+            text-align: center;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            display: none;
+        }
+
+        .comparison-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .comparison-status.show {
+            transform: translateX(0);
+        }
+
+        .comparison-status.warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .comparison-status.info {
+            background: #17a2b8;
+        }
+
+        /* Basic table styles */
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+            padding: 0.75rem;
+        }
+
+        .table td {
+            padding: 0.75rem;
+            vertical-align: middle;
+        }
+
+        .data-cell {
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .action-buttons button,
+        .action-buttons a {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 4px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Image display for comparison cards */
+        .comparison-image {
+            max-width: 100%;
+            max-height: 40px;
+            object-fit: contain;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .comparison-container {
+                flex-direction: column;
+            }
+
+            .comparison-card {
+                min-width: auto;
+                width: 100%;
+            }
+
+            .comparison-header {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: stretch;
+            }
+
+            .clear-comparison-btn {
+                margin-left: 0;
+                align-self: flex-end;
+            }
+        }
+    </style>
 </head>
 <body class="bg-light" th:classappend="${#authorization.expression('isAuthenticated()')} ? 'authenticated' : 'guest'">
 <div class="container py-4">
@@ -75,6 +393,28 @@
                 <button class="btn btn-secondary" onclick="clearAllFilters()">Clear All</button>
                 <button class="btn btn-outline-secondary" onclick="toggleFilters()">Close</button>
             </div>
+        </div>
+    </div>
+
+    <div class="comparison-section" id="comparisonSection" style="display: none;">
+        <div class="comparison-header">
+            <h3 class="comparison-title">Vergleichen</h3>
+            <button class="clear-comparison-btn" onclick="clearAllComparisons()">
+                Alle entfernen
+            </button>
+        </div>
+
+        <div class="comparison-limit-warning" id="comparisonWarning">
+            Sie können maximal 3 Zinssätze gleichzeitig vergleichen. Entfernen Sie einen Vergleich, um einen neuen hinzuzufügen.
+        </div>
+
+        <div class="comparison-container" id="comparisonContainer">
+            <!-- Comparison cards will be populated here -->
+        </div>
+
+        <div class="empty-comparison-state" id="emptyComparisonState">
+            <div class="icon">📊</div>
+            <p>click a provider from the table below to add to compare</p>
         </div>
     </div>
 
@@ -184,6 +524,9 @@
         </div>
     </div>
 
+    <!-- Status notification -->
+    <div class="comparison-status" id="comparisonStatus"></div>
+
     <!-- Pagination Controls - Bottom -->
     <div class="pagination-container">
         <div class="pagination-info">
@@ -232,6 +575,7 @@
     // Server data
     let serverRateFieldValuesMap = /*[[${rateFieldValuesMap}]]*/ {};
     let globalFieldsCache = /*[[${globalFields}]]*/ [];
+    let globalFieldsCompareCache = /*[[${globalFieldsCompare}]]*/ [];
     let currentPageData = /*[[${interestRates}]]*/ [];
 
     // UI state variables
@@ -371,63 +715,386 @@
 
     // Load page from server - this is the main pagination function
     function loadPageFromServer(page, searchTerm = '', sortBy = null, sortDir = null) {
-        if (isLoading) return;
+    if (isLoading) return;
 
-        showLoading();
+    showLoading();
 
-        const params = new URLSearchParams({
-            page: page - 1, // Convert to 0-based for backend
-            size: pageSize,
-            sortBy: sortBy || currentSortColumn,
-            sortDir: sortDir || currentSortDirection
+    const params = new URLSearchParams({
+        page: page - 1, // Convert to 0-based for backend
+        size: pageSize,
+        sortBy: sortBy || currentSortColumn,
+        sortDir: sortDir || currentSortDirection
+    });
+
+    if (searchTerm && searchTerm.trim()) {
+        params.append('search', searchTerm.trim());
+    }
+
+    // Use the correct endpoint that matches your controller
+    fetch(`/api/interest-rates?${params.toString()}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch data');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Update all pagination state
+            currentPage = page;
+            totalPages = data.totalPages;
+            totalRecords = data.totalElements;
+            currentSearchTerm = searchTerm || '';
+
+            // Update sort state if provided
+            if (sortBy) currentSortColumn = sortBy;
+            if (sortDir) currentSortDirection = sortDir;
+
+            // Update data arrays
+            currentPageData = data.content;
+
+            // FIXED: Merge new field values with existing ones instead of replacing
+            // This preserves field data for rates that are in comparison but not on current page
+            Object.assign(serverRateFieldValuesMap, data.rateFieldValuesMap || {});
+
+            // Check which compared rates are no longer available and might need their data fetched
+            const currentRateIds = new Set(data.content.map(rate => rate.id));
+            const comparedRatesNeedingData = [];
+
+            comparedRates.forEach((rate, rateId) => {
+                if (!currentRateIds.has(rateId) && !serverRateFieldValuesMap[rateId]) {
+                    // This rate is in comparison but we don't have its field data
+                    comparedRatesNeedingData.push(rateId);
+                }
+            });
+
+            // If we have compared rates that need their data fetched, get them
+            if (comparedRatesNeedingData.length > 0) {
+                fetchMissingRateData(comparedRatesNeedingData).then(() => {
+                    updateComparisonDisplay();
+                });
+            }
+
+            // Render the new data
+            renderTableData(data.content);
+            updatePaginationControls();
+            updatePaginationInfo();
+            hideLoading();
+
+            // Close any expanded cards when changing pages
+            if (currentExpandedCard) {
+                closeExpandedCard(currentExpandedCard);
+            }
+
+            // Update URL without page reload (optional)
+            updateBrowserUrl(page, searchTerm, sortBy, sortDir);
+        })
+        .catch(error => {
+            console.error('Error loading page:', error);
+            showDeleteNotification('Error loading data: ' + error.message, true);
+            hideLoading();
         });
+    }
 
-        if (searchTerm && searchTerm.trim()) {
-            params.append('search', searchTerm.trim());
+    // Add this new function to fetch missing rate data
+    async function fetchMissingRateData(rateIds) {
+        try {
+            const promises = rateIds.map(rateId =>
+                fetch(`/api/interest-rate/${rateId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Failed to fetch rate ${rateId}`);
+                        }
+                        return response.json();
+                    })
+                    .then(rateData => {
+                        // Store the rate data and its field values
+                        if (rateData && rateData.fieldValues) {
+                            serverRateFieldValuesMap[rateId] = rateData.fieldValues;
+                        }
+                        return rateData;
+                    })
+                    .catch(error => {
+                        console.warn(`Could not fetch data for rate ${rateId}:`, error);
+                        return null;
+                    })
+            );
+
+            await Promise.all(promises);
+            console.log('Successfully fetched missing rate data');
+        } catch (error) {
+            console.error('Error fetching missing rate data:', error);
+        }
+    }
+
+    // Comparison functionality
+    const maxComparisons = 3;
+    let comparedRates = new Map();
+
+    function toggleComparison(rateId, isChecked) {
+        if (isChecked) {
+            addToComparison(rateId);
+        } else {
+            removeFromComparison(rateId);
+        }
+    }
+
+    // Update the showStatus message to use your provider names
+    function addToComparison(rateId) {
+        if (comparedRates.size >= maxComparisons) {
+            showStatus('Maximum number of comparisons reached (3)', 'warning');
+            const checkbox = document.getElementById(`compare-${rateId}`);
+            const mobileCheckbox = document.getElementById(`compare-mobile-${rateId}`);
+            if (checkbox) checkbox.checked = false;
+            if (mobileCheckbox) mobileCheckbox.checked = false;
+            return;
         }
 
-        // Use the correct endpoint that matches your controller
-        fetch(`/api/interest-rates?${params.toString()}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch data');
+        // Find rate in current page data or all loaded data
+        let rate = currentPageData.find(r => r.id === rateId);
+        if (!rate && typeof allLoadedData !== 'undefined') {
+            rate = allLoadedData.find(r => r.id === rateId);
+        }
+
+        if (rate && !comparedRates.has(rateId)) {
+            comparedRates.set(rateId, rate);
+
+            // Ensure we have field data for this rate
+            if (!serverRateFieldValuesMap[rateId]) {
+                fetchMissingRateData([rateId]).then(() => {
+                    updateComparisonDisplay();
+                });
+            } else {
+                updateComparisonDisplay();
+            }
+
+            updateTableRowHighlight(rateId, true);
+
+            // Get provider name for status message
+            const providerName = serverRateFieldValuesMap[rateId]?.[1] || `Rate #${rateId}`;
+            showStatus(`${providerName} added to comparison`, 'success');
+        }
+    }
+
+    function removeFromComparison(rateId) {
+        if (comparedRates.has(rateId)) {
+            comparedRates.delete(rateId);
+            updateComparisonDisplay();
+            updateTableRowHighlight(rateId, false);
+            showStatus(`Aus dem Vergleich entfernt`, 'info');
+            showWarning(false);
+
+            const checkbox = document.getElementById(`compare-${rateId}`);
+            if (checkbox) checkbox.checked = false;
+        }
+    }
+
+    function clearAllComparisons() {
+        document.querySelectorAll('.comparison-checkbox').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        comparedRates.forEach((rate, rateId) => {
+            updateTableRowHighlight(rateId, false);
+        });
+
+        comparedRates.clear();
+        updateComparisonDisplay();
+        showWarning(false);
+        showStatus('Alle Vergleiche entfernt', 'info');
+    }
+
+    function updateComparisonDisplay() {
+        const section = document.getElementById('comparisonSection');
+        const container = document.getElementById('comparisonContainer');
+        const emptyState = document.getElementById('emptyComparisonState');
+
+        if (comparedRates.size === 0) {
+            section.style.display = 'none';
+            return;
+        }
+
+        section.style.display = 'block';
+        container.innerHTML = '';
+        emptyState.style.display = 'none';
+
+        comparedRates.forEach((rate, rateId) => {
+            const card = createComparisonCard(rate);
+            container.appendChild(card);
+        });
+    }
+
+    function createComparisonCard(rate) {
+        const card = document.createElement('div');
+        card.className = 'comparison-card';
+
+        // Get the field values for this rate
+        const rateFieldValues = serverRateFieldValuesMap[rate.id] || {};
+
+        // If we don't have field data, show loading state
+        if (Object.keys(rateFieldValues).length === 0) {
+            card.innerHTML = `
+                <div class="comparison-card-header">
+                    <div class="provider-info">
+                        <span class="provider-name">Loading Rate #${rate.id}...</span>
+                    </div>
+                    <button class="remove-comparison" onclick="removeFromComparison(${rate.id})" title="Remove">
+                        ✕
+                    </button>
+                </div>
+                <div class="comparison-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Loading...</span>
+                        <span class="detail-value">Please wait</span>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        // Generate detail rows using your actual globalFieldsCache structure
+        const detailRows = globalFieldsCompareCache.map(field => {
+            const value = rateFieldValues[field.id] || '-';
+            let displayValue = value;
+
+            // Handle image fields
+            if (field.fieldKey && field.fieldKey.toLowerCase().includes('img')) {
+                if (value && value !== '-') {
+                    displayValue = `<img src="${value}" alt="Logo" class="comparison-image">`;
+                } else {
+                    displayValue = '<span class="text-muted">No Image</span>';
                 }
-                return response.json();
-            })
-            .then(data => {
-                // Update all pagination state
-                currentPage = page;
-                totalPages = data.totalPages;
-                totalRecords = data.totalElements;
-                currentSearchTerm = searchTerm || '';
+            }
 
-                // Update sort state if provided
-                if (sortBy) currentSortColumn = sortBy;
-                if (sortDir) currentSortDirection = sortDir;
+            return `
+                <div class="detail-row">
+                    <span class="detail-label">${field.label}:</span>
+                    <span class="detail-value">${displayValue}</span>
+                </div>
+            `;
+        }).join('');
 
-                // Update data arrays
-                currentPageData = data.content;
-                serverRateFieldValuesMap = data.rateFieldValuesMap;
+        // Get a meaningful name for the provider (use first field or fallback)
+        const providerName = rateFieldValues[1] || `Interest Rate #${rate.id}`;
 
-                // Render the new data
-                renderTableData(data.content);
-                updatePaginationControls();
-                updatePaginationInfo();
-                hideLoading();
+        card.innerHTML = `
+            <div class="comparison-card-header">
+                <div class="provider-info">
+                    <span class="provider-name">${providerName}</span>
+                </div>
+                <button class="remove-comparison" onclick="removeFromComparison(${rate.id})" title="Remove">
+                    ✕
+                </button>
+            </div>
 
-                // Close any expanded cards when changing pages
-                if (currentExpandedCard) {
-                    closeExpandedCard(currentExpandedCard);
-                }
+            <div class="comparison-details">
+                ${detailRows}
+            </div>
+        `;
+        return card;
+    }
 
-                // Update URL without page reload (optional)
-                updateBrowserUrl(page, searchTerm, sortBy, sortDir);
-            })
-            .catch(error => {
-                console.error('Error loading page:', error);
-                showDeleteNotification('Error loading data: ' + error.message, true);
-                hideLoading();
-            });
+    function maintainComparisonState() {
+        // Re-check checkboxes and row highlights after data refresh
+        comparedRates.forEach((rate, rateId) => {
+            const checkbox = document.getElementById(`compare-${rateId}`);
+            if (checkbox) {
+                checkbox.checked = true;
+            }
+            updateTableRowHighlight(rateId, true);
+        });
+    }
+
+    function updateTableRowHighlight(rateId, highlight) {
+        const row = document.querySelector(`tr[data-rate-id="${rateId}"]`);
+        if (row) {
+            if (highlight) {
+                row.classList.add('table-row-selected');
+            } else {
+                row.classList.remove('table-row-selected');
+            }
+        }
+    }
+
+    function showWarning(show) {
+        const warning = document.getElementById('comparisonWarning');
+        warning.style.display = show ? 'block' : 'none';
+    }
+
+    function showStatus(message, type = 'success') {
+        const status = document.getElementById('comparisonStatus');
+        status.textContent = message;
+        status.className = `comparison-status ${type}`;
+        status.classList.add('show');
+
+        setTimeout(() => {
+            status.classList.remove('show');
+        }, 3000);
+    }
+
+    function showMoreInfo(rateId) {
+        const rate = currentPageData.find(r => r.id === rateId);
+        if (rate && rate.moreInfo) {
+            const rateFieldValues = serverRateFieldValuesMap[rateId] || {};
+            const details = globalFieldsCache.map(field =>
+                `${field.label}: ${rateFieldValues[field.id] || 'N/A'}`
+            ).join('\n');
+
+            alert(`More information:\n\n${details}`);
+        } else {
+            showStatus('Keine zusätzlichen Informationen für diesen Zinssatz verfügbar.', 'info');
+        }
+    }
+
+    // Integration functions for your existing code
+    function integrateWithExistingTable() {
+        // This function shows how to integrate with your existing renderTableRows function
+        // Replace your existing renderTableRows function content with something like this:
+
+        /*
+        function renderTableRows(data, tbody) {
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '';
+                return;
+            }
+
+            tbody.innerHTML = data.map(rate => {
+                // Get current field order from headers
+                const headers = document.querySelectorAll('.draggable-column, .sortable');
+                const currentFieldOrder = Array.from(headers)
+                    .map(header => ({
+                        id: header.dataset.fieldId,
+                        fieldKey: header.dataset.fieldKey,
+                        label: header.querySelector('.header-text').textContent.trim()
+                    }));
+
+                // Add comparison checkbox as first cell
+                const comparisonCell = `
+                    <td class="data-cell" data-label="Compare">
+                        <input type="checkbox"
+                               class="comparison-checkbox"
+                               onchange="toggleComparison(${rate.id}, this.checked)"
+                               id="compare-${rate.id}">
+                    </td>
+                `;
+
+                // Generate other cells as before
+                const fieldCells = currentFieldOrder.map(field => {
+                    const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
+                    // ... your existing cell generation logic
+                });
+
+                return `
+                    <tr data-rate-id="${rate.id}">
+                        ${comparisonCell}
+                        ${fieldCells.join('')}
+                        <td data-label="Actions">
+                            ${actionButtons}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        */
     }
 
     function fetchRateDetails(rateId) {
@@ -461,6 +1128,9 @@
 
         emptyState.style.display = 'none';
         renderTableRows(data, tbody);
+
+        // Maintain comparison state after re-render
+        maintainComparisonState();
     }
 
     function renderTableRows(data, tbody) {
@@ -470,7 +1140,7 @@
         }
 
         tbody.innerHTML = data.map(rate => {
-            // Get current field order from headers (this is the key part)
+            // Get current field order from headers
             const headers = document.querySelectorAll('.draggable-column, .sortable');
             const currentFieldOrder = Array.from(headers)
                 .map(header => ({
@@ -479,36 +1149,45 @@
                     label: header.querySelector('.header-text').textContent.trim()
                 }));
 
+            // Check if this rate is currently selected for comparison
+            const isSelected = comparedRates.has(rate.id);
+
             // Generate cells in the new column order
             const fieldCells = currentFieldOrder.map(field => {
                 const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
 
-    if (field.fieldKey && field.fieldKey.toLowerCase().includes('img')) {
-            return `
-                <td class="data-cell image-cell" data-field-id="${field.id}" data-label="${field.label}">
-                    <div class="image-container">
-                        ${fieldValue ? `<img src="${fieldValue}" alt="Interest Rate Logo" class="interest-rate-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />` : ''}
-                        <div class="no-image-placeholder" style="${fieldValue ? 'display:none' : 'display:block'}">No Image</div>
-                    </div>
-                </td>
-            `;
-    } else {
-         return `
-                <td class="data-cell" data-field-id="${field.id}" data-label="${field.label}">
-                    <div class="form-control form-control-sm text-center"
-                         style="border: none; background: transparent; cursor: default;">
-                        ${fieldValue || '-'}
-                    </div>
-                </td>
-         `;
-        }
-    }).join('');
+                if (field.fieldKey && field.fieldKey.toLowerCase().includes('img')) {
+                    return `
+                        <td class="data-cell image-cell" data-field-id="${field.id}" data-label="${field.label}">
+                            <div class="image-container">
+                                ${fieldValue ? `<img src="${fieldValue}" alt="Interest Rate Logo" class="interest-rate-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />` : ''}
+                                <div class="no-image-placeholder" style="${fieldValue ? 'display:none' : 'display:block'}">No Image</div>
+                            </div>
+                        </td>
+                    `;
+                } else {
+                    return `
+                        <td class="data-cell" data-field-id="${field.id}" data-label="${field.label}">
+                            <div class="form-control form-control-sm text-center"
+                                 style="border: none; background: transparent; cursor: default;">
+                                ${fieldValue || '-'}
+                            </div>
+                        </td>
+                    `;
+                }
+            }).join('');
 
-        // Action buttons (unchanged)
-        let actionButtons = '';
-
-            actionButtons = `
+            // Action buttons with comparison checkbox
+            let actionButtons = `
                 <div class="action-buttons">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <input type="checkbox"
+                               class="comparison-checkbox"
+                               onchange="toggleComparison(${rate.id}, this.checked)"
+                               id="compare-${rate.id}"
+                               ${isSelected ? 'checked' : ''}>
+                        <label for="compare-${rate.id}" style="font-size: 0.8rem; margin: 0;">Compare</label>
+                    </div>
                     <button class="mehr-info-btn"
                             ${rate.moreInfo ? '' : 'disabled'}
                             onclick="showMoreInfo(${rate.id})"
@@ -524,16 +1203,16 @@
                 </div>
             `;
 
-        return `
-            <tr data-rate-id="${rate.id}">
-                ${fieldCells}
-                <td data-label="Actions">
-                    ${actionButtons}
-                </td>
-            </tr>
-        `;
-    }).join('');
-}
+            return `
+                <tr data-rate-id="${rate.id}" ${isSelected ? 'class="table-row-selected"' : ''}>
+                    ${fieldCells}
+                    <td data-label="Actions">
+                        ${actionButtons}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
 
     function updateBrowserUrl(page, search, sortBy, sortDir) {
         const url = new URL(window.location);
@@ -1350,7 +2029,7 @@
             params.append('search', searchTerm.trim());
         }
 
-        // FIXED: Add filter parameters using pipe separator
+        // Add filter parameters using pipe separator
         filters.forEach((values, fieldId) => {
             if (values.size > 0) {
                 const filterValue = Array.from(values).join('|');
@@ -1378,7 +2057,25 @@
 
                 // Update data arrays
                 currentPageData = data.content;
-                serverRateFieldValuesMap = data.rateFieldValuesMap;
+
+                // FIXED: Merge field values instead of replacing
+                Object.assign(serverRateFieldValuesMap, data.rateFieldValuesMap || {});
+
+                // Check for compared rates needing data
+                const currentRateIds = new Set(data.content.map(rate => rate.id));
+                const comparedRatesNeedingData = [];
+
+                comparedRates.forEach((rate, rateId) => {
+                    if (!currentRateIds.has(rateId) && !serverRateFieldValuesMap[rateId]) {
+                        comparedRatesNeedingData.push(rateId);
+                    }
+                });
+
+                if (comparedRatesNeedingData.length > 0) {
+                    fetchMissingRateData(comparedRatesNeedingData).then(() => {
+                        updateComparisonDisplay();
+                    });
+                }
 
                 // Render the new data
                 renderTableData(data.content);

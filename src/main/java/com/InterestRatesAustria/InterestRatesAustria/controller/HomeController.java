@@ -65,13 +65,15 @@ public class HomeController {
                 .map(InterestRateDTO::fromEntity)
                 .collect(Collectors.toList());
 
-        List<GlobalField> globalFields = globalFieldService.getAllGlobalFieldsOrdered();
+        List<GlobalField> globalFields = globalFieldService.getTableFieldsOrdered();
+        List<GlobalField> globalFieldsCompare = globalFieldService.getCompareFieldsOrdered();
 
         Map<Long, Map<Long, String>> rateFieldValuesMap =
                 fieldValueService.getRateFieldValuesMap(interestRatesPage.getContent());
 
         model.addAttribute("interestRates", interestRateDTOs);
         model.addAttribute("globalFields", globalFields);
+        model.addAttribute("globalFieldsCompare", globalFieldsCompare);
         model.addAttribute("rateFieldValuesMap", rateFieldValuesMap);
         model.addAttribute("newField", new GlobalField());
 
