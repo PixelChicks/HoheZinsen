@@ -46,7 +46,6 @@ public class GlobalFieldService {
         field.setFieldKey(field.getLabel().toLowerCase().replaceAll("\\s+", ""));
         GlobalField savedField = globalFieldRepository.save(field);
 
-        // Create field values for all existing interest rates
         interestRateRepository.findAll().forEach(rate -> {
             InterestRateFieldValue fv = new InterestRateFieldValue();
             fv.setInterestRate(rate);
@@ -87,6 +86,27 @@ public class GlobalFieldService {
         saveMultipleFieldsWithSortOrder(fieldsMap);
     }
 
+
+    public void updateMultipleGlobalFields(Map<String, String> allParams) {
+        Map<Integer, GlobalField> fieldsMap = parseFieldsFromParams(allParams);
+
+        for (GlobalField updatedField : fieldsMap.values()) {
+            if (updatedField.getId() != null) {
+                GlobalField existing = globalFieldRepository.findById(updatedField.getId())
+                        .orElseThrow(() -> new RuntimeException("Field not found with id: " + updatedField.getId()));
+
+                existing.setLabel(updatedField.getLabel());
+                existing.setFieldKey(generateFieldKey(updatedField.getLabel()));
+                existing.setAtTable(updatedField.isAtTable());
+                existing.setAtCompare(updatedField.isAtCompare());
+
+                globalFieldRepository.save(existing);
+            } else {
+                addGlobalField(updatedField);
+            }
+        }
+    }
+
     private Map<Integer, GlobalField> parseFieldsFromParams(Map<String, String> allParams) {
         Map<Integer, GlobalField> fieldsMap = new HashMap<>();
 
@@ -125,21 +145,6 @@ public class GlobalFieldService {
                 .atTable(false)
                 .atCompare(false)
                 .build());
-    }
-
-    private void setFieldProperty(GlobalField field, String property, String value) {
-        switch (property) {
-            case "label":
-                field.setLabel(value);
-                field.setFieldKey(generateFieldKey(value));
-                break;
-            case "atTable":
-                field.setAtTable("true".equalsIgnoreCase(value));
-                break;
-            case "atCompare":
-                field.setAtCompare("true".equalsIgnoreCase(value));
-                break;
-        }
     }
 
     private String generateFieldKey(String label) {
@@ -189,4 +194,25 @@ public class GlobalFieldService {
             fieldValueRepository.save(fieldValue);
         });
     }
+
+    private void setFieldProperty(GlobalField field, String property, String value) {
+        switch (property) {
+            case "id":
+                if (value != null && !value.isEmpty()) {
+                    field.setId(Long.parseLong(value));
+                }
+                break;
+            case "label":
+                field.setLabel(value);
+                field.setFieldKey(generateFieldKey(value));
+                break;
+            case "atTable":
+                field.setAtTable("true".equalsIgnoreCase(value));
+                break;
+            case "atCompare":
+                field.setAtCompare("true".equalsIgnoreCase(value));
+                break;
+        }
+    }
+
 }

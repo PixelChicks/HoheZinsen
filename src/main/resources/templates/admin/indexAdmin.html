@@ -1,42 +1,42 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<html xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Interest Rate Offers</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="/css/index.css">
+    <link href="/css/styles.css" rel="stylesheet">
+    <link href="/css/index.css" rel="stylesheet">
 </head>
 <body class="bg-light" th:classappend="${#authorization.expression('isAuthenticated()')} ? 'authenticated' : 'guest'">
 <div class="container py-4">
 
     <!-- Authentication Status Section -->
-    <div sec:authorize="isAuthenticated()" class="auth-section">
+    <div class="auth-section" sec:authorize="isAuthenticated()">
         <div class="user-info">
             <div>
                 <strong>Welcome, <span sec:authentication="name">User</span>!</strong>
                 <span class="text-muted">• Administrator Mode</span>
             </div>
             <div>
-                <a href="/admin/users" class="btn btn-outline-secondary btn-sm">Admin Dashboard</a>
+                <a class="btn btn-outline-secondary btn-sm" href="/admin/users">Admin Dashboard</a>
             </div>
             <div>
-                <a href="/" class="btn btn-outline-secondary btn-sm">How users see the page</a>
+                <a class="btn btn-outline-secondary btn-sm" href="/">How users see the page</a>
             </div>
             <div>
-                <a href="/logout" class="btn btn-outline-secondary btn-sm">Logout</a>
+                <a class="btn btn-outline-secondary btn-sm" href="/logout">Logout</a>
             </div>
         </div>
     </div>
 
     <!-- Guest Notice -->
-    <div sec:authorize="!isAuthenticated()" class="guest-notice">
+    <div class="guest-notice" sec:authorize="!isAuthenticated()">
         <div class="alert-heading"><strong>👁️ Read-Only Mode</strong></div>
         <p class="mb-2">You are viewing this page as a guest. All data is read-only.</p>
         <p class="mb-0">
-            <a href="/login" class="btn btn-primary btn-sm me-2">Login</a>
-            <a href="/register" class="btn btn-outline-primary btn-sm">Register</a>
+            <a class="btn btn-primary btn-sm me-2" href="/login">Login</a>
+            <a class="btn btn-outline-primary btn-sm" href="/register">Register</a>
             to access administrative features.
         </p>
     </div>
@@ -53,7 +53,8 @@
             </button>
         </div>
         <!-- Admin-only add button -->
-        <a class="btn btn-primary mt-2 mt-md-0 admin-only" href="/interest-rate/new" sec:authorize="isAuthenticated()">+ Add New Interest Rate</a>
+        <a class="btn btn-primary mt-2 mt-md-0 admin-only" href="/interest-rate/new" sec:authorize="isAuthenticated()">+
+            Add New Interest Rate</a>
     </div>
 
     <!-- Filter Section HTML -->
@@ -87,7 +88,8 @@
     </div>
 
     <!-- Admin-only form to add global fields -->
-    <form class="mb-4 admin-only" method="post" th:action="@{/fields/add}" th:object="${newField}" sec:authorize="isAuthenticated()">
+    <form class="mb-4 admin-only" method="post" sec:authorize="isAuthenticated()" th:action="@{/fields/add}"
+          th:object="${newField}">
         <div class="row g-2">
             <div class="col-md-6 col-lg-4">
                 <input class="form-control" placeholder="Label (e.g. Max Deposit)" th:field="*{label}"/>
@@ -97,14 +99,23 @@
             </div>
         </div>
     </form>
-
+    <div class="row g-2">
+        <div class="col-md-6 col-lg-4">
+            <a class="btn btn-primary mt-2 mt-md-0 admin-only" href="/fields/createMultiple" sec:authorize="isAuthenticated()">+
+                Create Fields</a>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <a class="btn btn-primary mt-2 mt-md-0 admin-only" href="/fields/editMultiple" sec:authorize="isAuthenticated()">+
+                Edit Fields</a>
+        </div>
+    </div>
     <!-- View Toggle for Mobile -->
     <div class="view-toggle d-md-none">
-        <div class="btn-group" role="group" aria-label="View toggle">
-            <button type="button" class="btn btn-outline-primary active" id="stackedView">
+        <div aria-label="View toggle" class="btn-group" role="group">
+            <button class="btn btn-outline-primary active" id="stackedView" type="button">
                 📱 Card View
             </button>
-            <button type="button" class="btn btn-outline-primary" id="scrollView">
+            <button class="btn btn-outline-primary" id="scrollView" type="button">
                 📊 Table View
             </button>
         </div>
@@ -119,7 +130,7 @@
             <div class="page-size-selector">
                 <label for="pageSize">Show:</label>
                 <select id="pageSize" onchange="changePageSize(this.value)">
-                    <option value="5" selected>5 per page</option>
+                    <option selected value="5">5 per page</option>
                     <option value="10">10 per page</option>
                     <option value="25">25 per page</option>
                     <option value="50">50 per page</option>
@@ -130,21 +141,23 @@
         <div class="pagination-controls">
             <div class="quick-nav">
                 <button class="page-btn" id="firstPageBtn" onclick="goToPage(1)" title="First page">⏮</button>
-                <button class="page-btn" id="prevPageBtn" onclick="goToPage(currentPage - 1)" title="Previous page">‹</button>
+                <button class="page-btn" id="prevPageBtn" onclick="goToPage(currentPage - 1)" title="Previous page">‹
+                </button>
             </div>
 
-            <div id="pageNumbers" class="quick-nav">
+            <div class="quick-nav" id="pageNumbers">
                 <!-- Page numbers will be generated here -->
             </div>
 
             <div class="quick-nav">
-                <button class="page-btn" id="nextPageBtn" onclick="goToPage(currentPage + 1)" title="Next page">›</button>
+                <button class="page-btn" id="nextPageBtn" onclick="goToPage(currentPage + 1)" title="Next page">›
+                </button>
                 <button class="page-btn" id="lastPageBtn" onclick="goToPage(totalPages)" title="Last page">⏭</button>
             </div>
 
             <div class="pagination-jump">
                 <span>Go to:</span>
-                <input type="number" id="pageJumpInput" class="page-input" min="1" placeholder="1">
+                <input class="page-input" id="pageJumpInput" min="1" placeholder="1" type="number">
                 <button class="page-btn" onclick="jumpToPage()">Go</button>
             </div>
         </div>
@@ -170,17 +183,17 @@
             <table class="table table-sm" id="mainTable">
                 <thead class="table">
                 <tr id="column-header-row">
-                    <th th:each="field, iterStat : ${globalFields}"
-                        th:class="${#authorization.expression('isAuthenticated()')} ? 'draggable-column sortable' : 'sortable'"
-                        th:draggable="${#authorization.expression('isAuthenticated()')}"
+                    <th onclick="sortTable(this, event)"
                         th:attr="ondragend=${#authorization.expression('isAuthenticated()')} ? 'handleDragEnd(event)' : null,
                                  ondragover=${#authorization.expression('isAuthenticated()')} ? 'handleDragOver(event)' : null,
                                  ondragstart=${#authorization.expression('isAuthenticated()')} ? 'handleDragStart(event)' : null,
                                  ondrop=${#authorization.expression('isAuthenticated()')} ? 'handleDrop(event)' : null"
-                        onclick="sortTable(this, event)"
+                        th:class="${#authorization.expression('isAuthenticated()')} ? 'draggable-column sortable' : 'sortable'"
+                        th:data-column-index="${iterStat.index}"
                         th:data-field-id="${field.id}"
                         th:data-field-key="${field.fieldKey}"
-                        th:data-column-index="${iterStat.index}">
+                        th:draggable="${#authorization.expression('isAuthenticated()')}"
+                        th:each="field, iterStat : ${globalFields}">
 
                         <!-- Admin-only drag handle -->
                         <div class="drag-handle admin-only" sec:authorize="isAuthenticated()">⋮⋮</div>
@@ -189,23 +202,24 @@
                             <span class="header-text" th:text="${field.label}"></span>
                             <!-- Admin-only edit and delete buttons -->
                             <button class="edit-header-btn admin-only"
+                                    sec:authorize="isAuthenticated()"
                                     th:onclick="'showEditForm(' + ${field.id} + ')'"
-                                    type="button"
-                                    sec:authorize="isAuthenticated()">
+                                    type="button">
                                 ✎
                             </button>
                             <button class="delete-field-btn admin-only"
+                                    onclick="handleFieldDeleteClick(this)"
+                                    sec:authorize="isAuthenticated()"
                                     th:data-id="${field.id}"
                                     th:data-label="${field.label}"
-                                    onclick="handleFieldDeleteClick(this)"
-                                    type="button"
                                     title="Delete this field"
-                                    sec:authorize="isAuthenticated()">
+                                    type="button">
                                 🗑
                             </button>
 
                             <!-- Admin-only edit form -->
-                            <div class="header-edit-form admin-only" th:id="'editForm_' + ${field.id}" sec:authorize="isAuthenticated()">
+                            <div class="header-edit-form admin-only" sec:authorize="isAuthenticated()"
+                                 th:id="'editForm_' + ${field.id}">
                                 <form method="post" th:action="@{/fields/update}">
                                     <input name="fieldId" th:value="${field.id}" type="hidden"/>
 
@@ -256,7 +270,7 @@
                 <button class="page-btn" onclick="goToPage(currentPage - 1)" title="Previous page">‹</button>
             </div>
 
-            <div id="pageNumbersBottom" class="quick-nav">
+            <div class="quick-nav" id="pageNumbersBottom">
                 <!-- Page numbers will be generated here -->
             </div>
 

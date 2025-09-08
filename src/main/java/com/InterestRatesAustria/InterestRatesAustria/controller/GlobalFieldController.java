@@ -76,4 +76,17 @@ public class GlobalFieldController {
         globalFieldService.addMultipleGlobalFields(allParams);
         return "redirect:/admin";
     }
+
+    @GetMapping("/editMultiple")
+    public String editMultipleGlobalFields(Map<String, Object> model) {
+        List<GlobalField> fields = globalFieldService.getAllGlobalFieldsOrdered();
+        model.put("fields", fields);
+        return "admin/editGlobalField";
+    }
+
+    @PostMapping("/update-multiple")
+    public String updateMultipleGlobalFields(@RequestParam Map<String, String> allParams) {
+        globalFieldService.updateMultipleGlobalFields(allParams);
+        return "redirect:/admin";
+    }
 }
