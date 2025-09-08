@@ -233,7 +233,7 @@
         .comparison-status {
             position: fixed;
             top: 20px;
-            right: 20px;
+            right: 2px;
             background: #28a745;
             color: white;
             padding: 0.5rem 1rem;
@@ -324,6 +324,42 @@
                 align-self: flex-end;
             }
         }
+
+        .quick-compare-section {
+    background: #e8f4f8;
+    border: 1px solid #17a2b8;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.compare-demo-btn {
+    background: #17a2b8;
+    border: none;
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.compare-demo-btn:hover {
+    background: #138496;
+}
+
+.compare-demo-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+
+.quick-compare-info {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.5rem;
+}
     </style>
 </head>
 <body class="bg-light" th:classappend="${#authorization.expression('isAuthenticated()')} ? 'authenticated' : 'guest'">
@@ -393,6 +429,15 @@
                 <button class="btn btn-secondary" onclick="clearAllFilters()">Clear All</button>
                 <button class="btn btn-outline-secondary" onclick="toggleFilters()">Close</button>
             </div>
+        </div>
+    </div>
+
+    <div class="quick-compare-section" id="quickCompareSection">
+        <button class="compare-demo-btn" id="quickCompareBtn" onclick="quickStartComparison()">
+            📊 Start Quick Compare
+        </button>
+        <div class="quick-compare-info">
+            Click to automatically select the first rate and open comparison view
         </div>
     </div>
 
@@ -1030,6 +1075,104 @@
             status.classList.remove('show');
         }, 3000);
     }
+
+    function quickStartComparison() {
+        const quickCompareBtn = document.getElementById('quickCompareBtn');
+
+        // Disable button temporarily
+        quickCompareBtn.disabled = true;
+        quickCompareBtn.textContent = 'Starting comparison...';
+
+        // Find the first checkbox in the current page data
+        const firstCheckbox = document.querySelector('.comparison-checkbox');
+
+        if (firstCheckbox && !firstCheckbox.checked) {
+            // Check the first checkbox
+            firstCheckbox.checked = true;
+
+            // Get the rate ID from the checkbox
+            const rateId = firstCheckbox.id.replace('compare-', '');
+
+            // Add to comparison
+            addToComparison(parseInt(rateId));
+
+            // Scroll to comparison section
+            setTimeout(() => {
+                const comparisonSection = document.getElementById('comparisonSection');
+                if (comparisonSection) {
+                    comparisonSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+
+                // Re-enable button
+                quickCompareBtn.disabled = false;
+                quickCompareBtn.innerHTML = '📊 Start Quick Compare';
+
+                // Show success message
+                showStatus('Quick comparison started! Select more rates to compare.', 'success');
+            }, 500);
+
+        } else if (firstCheckbox && firstCheckbox.checked) {
+            // If first checkbox is already checked, just scroll to comparison
+            const comparisonSection = document.getElementById('comparisonSection');
+            if (comparisonSection) {
+                comparisonSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+
+            quickCompareBtn.disabled = false;
+            quickCompareBtn.innerHTML = '📊 Start Quick Compare';
+            showStatus('Comparison section opened!', 'info');
+
+        } else {
+            // No rates available
+            quickCompareBtn.disabled = false;
+            quickCompareBtn.innerHTML = '📊 Start Quick Compare';
+            showStatus('No rates available to compare', 'warning');
+        }
+    }
+
+    // Optional: Hide the quick compare section when comparison is active
+    function updateQuickCompareVisibility() {
+        const quickCompareSection = document.getElementById('quickCompareSection');
+        const quickCompareBtn = document.getElementById('quickCompareBtn');
+
+        if (comparedRates && comparedRates.size > 0) {
+            // Hide when comparison is active
+            if (quickCompareSection) {
+                quickCompareSection.style.display = 'none';
+            }
+        } else {
+            // Show when no comparison is active
+            if (quickCompareSection) {
+                quickCompareSection.style.display = 'block';
+            }
+            // Reset button state
+            if (quickCompareBtn) {
+                quickCompareBtn.disabled = false;
+                quickCompareBtn.innerHTML = '📊 Start Quick Compare';
+            }
+        }
+    }
+
+    // Add this to your existing updateComparisonDisplay function
+    // Modify your existing updateComparisonDisplay function to include this call
+    const originalUpdateComparisonDisplay = updateComparisonDisplay;
+    updateComparisonDisplay = function() {
+        originalUpdateComparisonDisplay();
+        updateQuickCompareVisibility();
+    };
+
+    // Also update when clearing all comparisons
+    const originalClearAllComparisons = clearAllComparisons;
+    clearAllComparisons = function() {
+        originalClearAllComparisons();
+        updateQuickCompareVisibility();
+    };
 
     function showMoreInfo(rateId) {
         const rate = currentPageData.find(r => r.id === rateId);
