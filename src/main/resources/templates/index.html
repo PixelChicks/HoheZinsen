@@ -326,40 +326,63 @@
         }
 
         .quick-compare-section {
-    background: #e8f4f8;
-    border: 1px solid #17a2b8;
-    border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    text-align: center;
-}
+            background: #e8f4f8;
+            border: 1px solid #17a2b8;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
 
-.compare-demo-btn {
-    background: #17a2b8;
-    border: none;
-    color: white;
-    padding: 0.5rem 1.5rem;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
+        .compare-demo-btn {
+            background: #17a2b8;
+            border: none;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
 
-.compare-demo-btn:hover {
-    background: #138496;
-}
+        .compare-demo-btn:hover {
+            background: #138496;
+        }
 
-.compare-demo-btn:disabled {
-    background: #6c757d;
-    cursor: not-allowed;
-}
+        .compare-demo-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
 
-.quick-compare-info {
-    font-size: 0.85rem;
-    color: #666;
-    margin-top: 0.5rem;
-}
+        .quick-compare-info {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        /* Hide comparison checkboxes initially */
+        .comparison-checkbox,
+        .comparison-checkbox + label {
+            display: none;
+        }
+
+        /* Show checkboxes when comparison mode is active */
+        .comparison-mode .comparison-checkbox,
+        .comparison-mode .comparison-checkbox + label {
+            display: inline-block;
+        }
+
+        /* For mobile cards - hide the checkbox container initially */
+        .card-actions .comparison-checkbox,
+        .card-actions .comparison-checkbox + label {
+            display: none;
+        }
+
+        .comparison-mode .card-actions .comparison-checkbox,
+        .comparison-mode .card-actions .comparison-checkbox + label {
+            display: inline-block;
+        }
     </style>
 </head>
 <body class="bg-light" th:classappend="${#authorization.expression('isAuthenticated()')} ? 'authenticated' : 'guest'">
@@ -934,19 +957,28 @@
     }
 
     function clearAllComparisons() {
-        document.querySelectorAll('.comparison-checkbox').forEach(checkbox => {
-            checkbox.checked = false;
-        });
+    document.querySelectorAll('.comparison-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+    });
 
-        comparedRates.forEach((rate, rateId) => {
-            updateTableRowHighlight(rateId, false);
-        });
+    comparedRates.forEach((rate, rateId) => {
+        updateTableRowHighlight(rateId, false);
+    });
 
-        comparedRates.clear();
-        updateComparisonDisplay();
-        showWarning(false);
-        showStatus('Alle Vergleiche entfernt', 'info');
+    comparedRates.clear();
+    updateComparisonDisplay();
+    showWarning(false);
+    showStatus('All comparisons cleared', 'info');
+
+    // Remove comparison mode class to hide checkboxes
+    document.body.classList.remove('comparison-mode');
+
+    // Reset quick compare button
+    const quickCompareBtn = document.getElementById('quickCompareBtn');
+    if (quickCompareBtn) {
+        quickCompareBtn.innerHTML = '📊 Start Quick Compare';
     }
+}
 
     function updateComparisonDisplay() {
         const section = document.getElementById('comparisonSection');
@@ -1078,6 +1110,10 @@
 
     function quickStartComparison() {
         const quickCompareBtn = document.getElementById('quickCompareBtn');
+        const body = document.body;
+
+        // Add comparison mode class to body to show checkboxes
+        body.classList.add('comparison-mode');
 
         // Disable button temporarily
         quickCompareBtn.disabled = true;
@@ -1106,12 +1142,12 @@
                     });
                 }
 
-                // Re-enable button
+                // Re-enable button with new text
                 quickCompareBtn.disabled = false;
-                quickCompareBtn.innerHTML = '📊 Start Quick Compare';
+                quickCompareBtn.innerHTML = '📊 Add More to Compare';
 
                 // Show success message
-                showStatus('Quick comparison started! Select more rates to compare.', 'success');
+                showStatus('Comparison mode activated! Select more rates to compare.', 'success');
             }, 500);
 
         } else if (firstCheckbox && firstCheckbox.checked) {
@@ -1125,37 +1161,42 @@
             }
 
             quickCompareBtn.disabled = false;
-            quickCompareBtn.innerHTML = '📊 Start Quick Compare';
+            quickCompareBtn.innerHTML = '📊 Add More to Compare';
             showStatus('Comparison section opened!', 'info');
 
         } else {
             // No rates available
             quickCompareBtn.disabled = false;
-            quickCompareBtn.innerHTML = '📊 Start Quick Compare';
+            quickCompareBtn.innerHTML = '📊 Add More to Compare';
             showStatus('No rates available to compare', 'warning');
         }
     }
 
-    // Optional: Hide the quick compare section when comparison is active
+        // Optional: Hide the quick compare section when comparison is active
     function updateQuickCompareVisibility() {
         const quickCompareSection = document.getElementById('quickCompareSection');
         const quickCompareBtn = document.getElementById('quickCompareBtn');
 
         if (comparedRates && comparedRates.size > 0) {
-            // Hide when comparison is active
+            // Keep section visible but change button text
             if (quickCompareSection) {
-                quickCompareSection.style.display = 'none';
+                quickCompareSection.style.display = 'block';
+            }
+            if (quickCompareBtn) {
+                quickCompareBtn.innerHTML = '📊 Add More to Compare';
+                quickCompareBtn.disabled = false;
             }
         } else {
             // Show when no comparison is active
             if (quickCompareSection) {
                 quickCompareSection.style.display = 'block';
             }
-            // Reset button state
             if (quickCompareBtn) {
                 quickCompareBtn.disabled = false;
                 quickCompareBtn.innerHTML = '📊 Start Quick Compare';
             }
+            // Hide checkboxes when no comparisons
+            document.body.classList.remove('comparison-mode');
         }
     }
 
