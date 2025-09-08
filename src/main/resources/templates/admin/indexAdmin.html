@@ -101,12 +101,18 @@
     </form>
     <div class="row g-2">
         <div class="col-md-6 col-lg-4">
-            <a class="btn btn-primary mt-2 mt-md-0 admin-only" href="/fields/createMultiple" sec:authorize="isAuthenticated()">+
-                Create Fields</a>
+            <div class="mb-4 admin-only">
+                <a class="btn btn-primary admin-only" href="/fields/createMultiple">
+                    + Create Fields (Labels)
+                </a>
+            </div>
         </div>
         <div class="col-md-6 col-lg-4">
-            <a class="btn btn-primary mt-2 mt-md-0 admin-only" href="/fields/editMultiple" sec:authorize="isAuthenticated()">+
-                Edit Fields</a>
+            <div class="mb-4 admin-only">
+                <a class="btn btn-primary admin-only" href="/fields/editMultiple">
+                    + Edit Fields (Labels)
+                </a>
+            </div>
         </div>
     </div>
     <!-- View Toggle for Mobile -->
