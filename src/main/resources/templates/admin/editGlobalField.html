@@ -189,8 +189,27 @@
     }
 
     function removeField(button) {
-        button.closest('.field-row').remove();
-        updateFieldCount();
+        const row = button.closest('.field-row');
+        const fieldIdInput = row.querySelector('input[name*=".id"]');
+        const fieldId = fieldIdInput ? fieldIdInput.value : null;
+
+        if (fieldId) {
+            fetch(`/fields/delete/${fieldId}`, {
+                method: "POST" // or "DELETE" if you want
+            })
+            .then(response => {
+                if (response.ok) {
+                    row.remove();
+                    updateFieldCount();
+                } else {
+                    alert("Error deleting field");
+                }
+            });
+        } else {
+            // New unsaved field → just remove from DOM
+            row.remove();
+            updateFieldCount();
+        }
     }
 
     function updateFieldCount() {

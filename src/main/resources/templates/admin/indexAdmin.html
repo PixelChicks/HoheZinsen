@@ -87,18 +87,6 @@
         </div>
     </div>
 
-    <!-- Admin-only form to add global fields -->
-    <form class="mb-4 admin-only" method="post" sec:authorize="isAuthenticated()" th:action="@{/fields/add}"
-          th:object="${newField}">
-        <div class="row g-2">
-            <div class="col-md-6 col-lg-4">
-                <input class="form-control" placeholder="Label (e.g. Max Deposit)" th:field="*{label}"/>
-            </div>
-            <div class="col-md-6 col-lg-4">
-                <button class="btn btn-primary w-100">Add Field</button>
-            </div>
-        </div>
-    </form>
     <div class="row g-2">
         <div class="col-md-6 col-lg-4">
             <div class="mb-4 admin-only">

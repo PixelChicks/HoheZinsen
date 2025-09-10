@@ -8,69 +8,246 @@
     <link href="/css/styles.css" rel="stylesheet">
     <link href="/css/index.css" rel="stylesheet">
     <style>
-        /* Comparison Section Styles */
         .comparison-section {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-            padding: 1.5rem;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+    }
+
+    .comparison-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .comparison-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        color: #333;
+    }
+
+    .clear-comparison-btn {
+        background: #dc3545;
+        border: none;
+        color: white;
+        padding: 0.375rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        cursor: pointer;
+        margin-left: auto;
+    }
+
+    .clear-comparison-btn:hover {
+        background: #c82333;
+    }
+
+    /* New layout styles */
+    .comparison-container {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding-bottom: 1rem;
+    }
+
+    .comparison-labels {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        margin-top: 60px; /* Offset for card headers */
+        min-width: 120px;
+        flex-shrink: 0;
+    }
+
+    .comparison-label-row {
+        padding: 12px 8px;
+        font-weight: 500;
+        color: #333;
+        font-size: 0.85rem;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        align-items: center;
+        min-height: 44px; /* Match card row height */
+    }
+
+    .comparison-label-row:last-child {
+        border-bottom: none;
+    }
+
+    .comparison-cards-container {
+        display: flex;
+        gap: 10px;
+        flex: 1;
+    }
+
+    .comparison-card {
+        background: white;
+        border: 2px solid #00b894;
+        border-radius: 8px;
+        min-width: 350px;
+        flex-shrink: 0;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .comparison-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+        background: white;
+        border-radius: 6px 6px 0 0;
+    }
+
+    .provider-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .provider-logo {
+        width: 32px;
+        height: 32px;
+        object-fit: contain;
+        border-radius: 4px;
+    }
+
+    .provider-name {
+        font-weight: 600;
+        color: #333;
+        font-size: 0.9rem;
+    }
+
+    .remove-comparison {
+        background: none;
+        border: none;
+        color: #dc3545;
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .remove-comparison:hover {
+        color: #c82333;
+        background-color: #f8f9fa;
+        border-radius: 50%;
+    }
+
+    .comparison-values {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    .comparison-value-row {
+        padding: 12px 16px;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 0.85rem;
+        color: #333;
+        min-height: 44px; /* Match label row height */
+        display: flex;
+        align-items: center;
+        word-break: break-word;
+    }
+
+    .comparison-value-row:last-child {
+        border-bottom: none;
+    }
+
+    .empty-comparison-card {
+        border: 2px dashed #ddd;
+        border-radius: 8px;
+        min-width: 350px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: #666;
+        font-size: 0.85rem;
+        padding: 2rem 1rem;
+        background: white;
+    }
+
+    .empty-comparison-state {
+        text-align: center;
+        color: #666;
+        padding: 2rem;
+        border: 2px dashed #ddd;
+        border-radius: 8px;
+    }
+
+    .empty-comparison-state .icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.5;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .comparison-container {
+            flex-direction: column;
+        }
+
+        .comparison-labels {
+            margin-top: 0;
+            min-width: auto;
+            margin-bottom: 1rem;
+        }
+
+        .comparison-label-row {
+            padding: 8px 12px;
+            min-height: auto;
+        }
+
+        .comparison-cards-container {
+            flex-direction: column;
+        }
+
+        .comparison-card,
+        .empty-comparison-card {
+            min-width: auto;
+            width: 100%;
         }
 
         .comparison-header {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .comparison-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin: 0;
-            color: #333;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: stretch;
         }
 
         .clear-comparison-btn {
-            background: #dc3545;
-            border: none;
-            color: white;
-            padding: 0.375rem 0.75rem;
-            border-radius: 4px;
-            font-size: 0.875rem;
-            cursor: pointer;
-            margin-left: auto;
+            margin-left: 0;
+            align-self: flex-end;
         }
 
-        .clear-comparison-btn:hover {
-            background: #c82333;
+        /* Mobile: show labels inline with values */
+        .comparison-labels {
+            display: none;
         }
 
-        .comparison-container {
-            display: flex;
-            gap: 1rem;
-            overflow-x: auto;
-            padding-bottom: 1rem;
-        }
-
-        .comparison-card {
-            background: white;
-            border: 2px solid #00b894;
-            border-radius: 8px;
-            padding: 1rem;
-            min-width: 400px;
-            flex-shrink: 0;
+        .comparison-value-row {
             position: relative;
         }
 
-        .comparison-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid #eee;
+        .comparison-value-row::before {
+            content: attr(data-label) ': ';
+            font-weight: 500;
+            color: #666;
+            margin-right: 8px;
         }
+    }
 
         .provider-info {
             display: flex;
@@ -657,12 +834,11 @@
         </div>
 
         <div class="comparison-limit-warning" id="comparisonWarning">
-            Sie können maximal 3 Zinssätze gleichzeitig vergleichen. Entfernen Sie einen Vergleich, um einen neuen
-            hinzuzufügen.
+            Sie können maximal 3 Zinssätze gleichzeitig vergleichen. Entfernen Sie einen Vergleich, um einen neuen hinzuzufügen.
         </div>
 
         <div class="comparison-container" id="comparisonContainer">
-            <!-- Comparison cards will be populated here -->
+            <!-- Comparison layout will be populated here -->
         </div>
 
         <div class="empty-comparison-state" id="emptyComparisonState">
@@ -1175,13 +1351,107 @@
         }
 
         section.style.display = 'block';
-        container.innerHTML = '';
         emptyState.style.display = 'none';
 
-        comparedRates.forEach((rate, rateId) => {
-            const card = createComparisonCard(rate);
-            container.appendChild(card);
-        });
+        // Create the new layout structure
+        container.innerHTML = createComparisonLayout();
+    }
+
+    function createComparisonLayout() {
+        // Create labels column (skip image fields)
+        const labelsHtml = `
+            <div class="comparison-labels">
+                ${globalFieldsCompareCache
+                    .filter(field => !(field.fieldKey && field.fieldKey.toLowerCase().includes("img")))
+                    .map(field => `
+                        <div class="comparison-label-row">${field.label}</div>
+                    `).join('')}
+            </div>
+        `;
+
+        // Create cards container
+        const cardsHtml = `
+            <div class="comparison-cards-container">
+                ${Array.from(comparedRates.entries()).map(([rateId, rate]) => createComparisonCardNew(rate)).join('')}
+                ${comparedRates.size < maxComparisons ? createEmptyComparisonCards(maxComparisons - comparedRates.size) : ''}
+            </div>
+        `;
+
+        return labelsHtml + cardsHtml;
+    }
+
+    function createComparisonCardNew(rate) {
+        const rateFieldValues = serverRateFieldValuesMap[rate.id] || {};
+
+        // If we don't have field data, show loading state
+        if (Object.keys(rateFieldValues).length === 0) {
+            return `
+                <div class="comparison-card">
+                    <div class="comparison-card-header">
+                        <div class="provider-info">
+                            <span class="provider-name">Loading Rate #${rate.id}...</span>
+                        </div>
+                        <button class="remove-comparison" onclick="removeFromComparison(${rate.id})" title="Remove">
+                            ✕
+                        </button>
+                    </div>
+                    <div class="comparison-values">
+                        ${globalFieldsCompareCache.map(() => `
+                            <div class="comparison-value-row">Loading...</div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Find image field (first matching fieldKey containing "img")
+        let headerImage = null;
+        let headerImageFieldId = null;
+        const imageField = globalFieldsCompareCache.find(f => f.fieldKey && f.fieldKey.toLowerCase().includes("img"));
+        if (imageField) {
+            const imageUrl = rateFieldValues[imageField.id];
+            if (imageUrl && imageUrl !== "-") {
+                headerImageFieldId = imageField.id;
+                headerImage = `<img src="${imageUrl}" alt="Logo" class="comparison-logo"
+                                  style="max-height: 25px; max-width: 100px; object-fit: contain;">`;
+            }
+        }
+
+        // Generate value rows (skip the image field if it's shown in header)
+        const valueRows = globalFieldsCompareCache
+            .filter(field => field.id !== headerImageFieldId)
+            .map(field => {
+                const value = rateFieldValues[field.id] || "-";
+                return `<div class="comparison-value-row" data-label="${field.label}">${value}</div>`;
+            }).join("");
+
+        return `
+            <div class="comparison-card">
+                <div class="comparison-card-header">
+                    <div class="provider-info d-flex align-items-center">
+                        ${headerImage || '<span class="text-muted">No Logo</span>'}
+                    </div>
+                    <button class="remove-comparison" onclick="removeFromComparison(${rate.id})" title="Remove">
+                        ✕
+                    </button>
+                </div>
+                <div class="comparison-values">
+                    ${valueRows}
+                </div>
+            </div>
+        `;
+    }
+
+    function createEmptyComparisonCards(count) {
+        let cards = '';
+        for (let i = 0; i < count; i++) {
+            cards += `
+                <div class="empty-comparison-card">
+                    click a provider from the table<br>below to add to compare
+                </div>
+            `;
+        }
+        return cards;
     }
 
     function createComparisonCard(rate) {
