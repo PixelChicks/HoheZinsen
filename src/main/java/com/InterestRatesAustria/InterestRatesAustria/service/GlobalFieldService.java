@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,7 +44,7 @@ public class GlobalFieldService {
     public void addGlobalField(GlobalField field) {
         Integer maxSortOrder = globalFieldRepository.findMaxSortOrder();
         field.setSortOrder(maxSortOrder + 1);
-        field.setFieldKey(field.getLabel().toLowerCase().replaceAll("\\s+", ""));
+        field.setFieldKey(generateFieldKey(field.getLabel()));
         GlobalField savedField = globalFieldRepository.save(field);
 
         interestRateRepository.findAll().forEach(rate -> {
@@ -60,6 +61,7 @@ public class GlobalFieldService {
                 .orElseThrow(() -> new RuntimeException("Field not found with id: " + fieldId));
 
         field.setLabel(label);
+        // Field key should NOT be updated when editing existing fields
 
         globalFieldRepository.save(field);
     }
@@ -82,13 +84,12 @@ public class GlobalFieldService {
     }
 
     public void addMultipleGlobalFields(Map<String, String> allParams) {
-        Map<Integer, GlobalField> fieldsMap = parseFieldsFromParams(allParams);
+        Map<Integer, GlobalField> fieldsMap = parseFieldsFromParams(allParams, false);
         saveMultipleFieldsWithSortOrder(fieldsMap);
     }
 
-
     public void updateMultipleGlobalFields(Map<String, String> allParams) {
-        Map<Integer, GlobalField> fieldsMap = parseFieldsFromParams(allParams);
+        Map<Integer, GlobalField> fieldsMap = parseFieldsFromParams(allParams, true);
 
         for (GlobalField updatedField : fieldsMap.values()) {
             if (updatedField.getId() != null) {
@@ -96,18 +97,33 @@ public class GlobalFieldService {
                         .orElseThrow(() -> new RuntimeException("Field not found with id: " + updatedField.getId()));
 
                 existing.setLabel(updatedField.getLabel());
-                existing.setFieldKey(generateFieldKey(updatedField.getLabel()));
                 existing.setAtTable(updatedField.isAtTable());
                 existing.setAtCompare(updatedField.isAtCompare());
 
                 globalFieldRepository.save(existing);
             } else {
-                addGlobalField(updatedField);
+                updatedField.setFieldKey(generateFieldKey(updatedField.getLabel()));
+                addGlobalFieldWithoutKeyGeneration(updatedField);
             }
         }
     }
 
-    private Map<Integer, GlobalField> parseFieldsFromParams(Map<String, String> allParams) {
+    private void addGlobalFieldWithoutKeyGeneration(GlobalField field) {
+        Integer maxSortOrder = globalFieldRepository.findMaxSortOrder();
+        field.setSortOrder(maxSortOrder + 1);
+
+        GlobalField savedField = globalFieldRepository.save(field);
+
+        interestRateRepository.findAll().forEach(rate -> {
+            InterestRateFieldValue fv = new InterestRateFieldValue();
+            fv.setInterestRate(rate);
+            fv.setGlobalField(savedField);
+            fv.setValue("");
+            fieldValueRepository.save(fv);
+        });
+    }
+
+    private Map<Integer, GlobalField> parseFieldsFromParams(Map<String, String> allParams, boolean isUpdate) {
         Map<Integer, GlobalField> fieldsMap = new HashMap<>();
 
         for (Map.Entry<String, String> entry : allParams.entrySet()) {
@@ -119,7 +135,7 @@ public class GlobalFieldService {
                 String property = extractPropertyName(key);
 
                 GlobalField field = getOrCreateField(fieldsMap, fieldIndex);
-                setFieldProperty(field, property, value);
+                setFieldProperty(field, property, value, isUpdate);
             }
         }
 
@@ -148,9 +164,14 @@ public class GlobalFieldService {
     }
 
     private String generateFieldKey(String label) {
-        return label.toLowerCase()
+        Random random = new Random();
+        int randomNumber = random.nextInt(1000);
+
+        String baseKey = label.toLowerCase()
                 .replaceAll("\\s+", "_")
                 .replaceAll("[^a-z0-9_]", "");
+
+        return baseKey + randomNumber;
     }
 
     private void saveMultipleFieldsWithSortOrder(Map<Integer, GlobalField> fieldsMap) {
@@ -163,6 +184,7 @@ public class GlobalFieldService {
             GlobalField field = fieldsMap.get(index);
             if (isValidField(field)) {
                 field.setSortOrder(currentSortOrder++);
+                field.setFieldKey(generateFieldKey(field.getLabel()));
                 GlobalField savedField = globalFieldRepository.save(field);
                 createFieldValuesForExistingRates(savedField);
             }
@@ -195,7 +217,7 @@ public class GlobalFieldService {
         });
     }
 
-    private void setFieldProperty(GlobalField field, String property, String value) {
+    private void setFieldProperty(GlobalField field, String property, String value, boolean isUpdate) {
         switch (property) {
             case "id":
                 if (value != null && !value.isEmpty()) {
@@ -204,7 +226,9 @@ public class GlobalFieldService {
                 break;
             case "label":
                 field.setLabel(value);
-                field.setFieldKey(generateFieldKey(value));
+                if (!isUpdate) {
+                    field.setFieldKey(generateFieldKey(value));
+                }
                 break;
             case "atTable":
                 field.setAtTable("true".equalsIgnoreCase(value));
@@ -214,5 +238,4 @@ public class GlobalFieldService {
                 break;
         }
     }
-
 }
