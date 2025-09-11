@@ -830,7 +830,7 @@
 
     <div class="col-md-6 col-lg-4">
         <button class="compare-demo-btn" id="quickCompareBtn" onclick="quickStartComparison()">
-            Compare rates
+            Vergleichen
         </button>
     </div>
     <br>
@@ -1417,19 +1417,22 @@
         // Find image field (first matching fieldKey containing "img")
         let headerImage = null;
         let headerImageFieldId = null;
-        const imageField = globalFieldsCompareCache.find(f => f.fieldKey && f.fieldKey.toLowerCase().includes("img"));
+        const imageField = globalFieldsCompareCache.find(
+            f => f.fieldKey && f.fieldKey.toLowerCase().includes("img")
+        );
+
         if (imageField) {
             const imageUrl = rateFieldValues[imageField.id];
             if (imageUrl && imageUrl !== "-") {
-                headerImageFieldId = imageField.id;
+                headerImageFieldId = imageField.id; // only set if valid image exists
                 headerImage = `<img src="${imageUrl}" alt="Logo" class="comparison-logo"
                                   style="height: 100px; width: auto; object-fit: contain;">`;
             }
         }
 
-        // Generate value rows (skip the image field if it's shown in header)
+        // Generate value rows (skip image field if it's shown in header OR if it's an invalid/no image)
         const valueRows = globalFieldsCompareCache
-            .filter(field => field.id !== headerImageFieldId)
+            .filter(field => field.id !== headerImageFieldId && !(field.fieldKey && field.fieldKey.toLowerCase().includes("img")))
             .map(field => {
                 const value = rateFieldValues[field.id] || "-";
                 return `<div class="comparison-value-row" data-label="${field.label}">${value}</div>`;
