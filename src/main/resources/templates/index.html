@@ -57,7 +57,7 @@
         display: flex;
         flex-direction: column;
         gap: 0;
-        margin-top: 60px; /* Offset for card headers */
+        margin-top: 135px; /* Offset for card headers */
         min-width: 120px;
         flex-shrink: 0;
     }
@@ -260,6 +260,16 @@
             height: 32px;
             object-fit: contain;
             border-radius: 4px;
+        }
+
+        .comparison-logo,
+        .text-muted {
+          height: 100px;       /* same height for both */
+          width: auto;
+          display: flex;       /* flexbox for centering text */
+          align-items: center; /* vertical center */
+          justify-content: center; /* horizontal center */
+          object-fit: contain;
         }
 
         .provider-name {
@@ -903,7 +913,7 @@
 
     <div class="card border-light mb-3">
         <div class="card-body py-2">
-            <small class="text-muted">
+            <small style="font-size: 0.8em;">
                 <i class="fas fa-info-circle me-1"></i>
                 <span th:text="${lastUpdateMessage}"></span>
             </small>
@@ -1413,7 +1423,7 @@
             if (imageUrl && imageUrl !== "-") {
                 headerImageFieldId = imageField.id;
                 headerImage = `<img src="${imageUrl}" alt="Logo" class="comparison-logo"
-                                  style="max-height: 25px; max-width: 100px; object-fit: contain;">`;
+                                  style="height: 100px; width: auto; object-fit: contain;">`;
             }
         }
 

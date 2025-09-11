@@ -546,6 +546,8 @@
                             <label class="field-label" th:for="${'extra_' + field.id}">
                                 <i class="bi bi-tag-fill"></i>
                                 [[${field.label}]]
+                                <span th:if="${field.atTable}" style="font-size: 0.8em;"> - At Table</span>
+                                <span th:if="${field.atCompare}" style="font-size: 0.8em;"> - At Compare</span>
                             </label>
                             <div class="field-value"
                                  th:if="${fieldValues?.get(field.id) != null and !#strings.isEmpty(fieldValues.get(field.id))}">

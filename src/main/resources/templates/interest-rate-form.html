@@ -545,6 +545,8 @@
                             <label class="field-label" th:for="${'extra_' + field.id}">
                                 <i class="bi bi-tag-fill"></i>
                                 [[${field.label}]]
+                                <span th:if="${field.atTable}" style="font-size: 0.8em;"> - At Table</span>
+                                <span th:if="${field.atCompare}" style="font-size: 0.8em;"> - At Compare</span>
                             </label>
                             <input class="form-control"
                                    th:name="${'extra_' + field.id}"
