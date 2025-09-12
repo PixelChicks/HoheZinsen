@@ -40,7 +40,7 @@ public class FilterService {
     }
 
     public List<FilterDTO> getAvailableFilters() {
-        List<GlobalField> fields = globalFieldRepository.findByDeletedAtIsNullOrderBySortOrder();
+        List<GlobalField> fields = globalFieldRepository.findAllActiveTableFieldsOrdered();
 
         return fields.stream()
                 .filter(field -> !isImageField(field.getFieldKey()))
