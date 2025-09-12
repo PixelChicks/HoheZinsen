@@ -714,23 +714,23 @@
         }
 
         .compare-demo-btn {
-            background: #17a2b8;
-            border: none;
-            color: white;
-            padding: 0.5rem 1.5rem;
+            background: #fcfcfc;
+            color: #583f3f;
+            padding: 0.4rem 1.5rem;
             border-radius: 6px;
             font-size: 0.9rem;
-            font-weight: 500;
+            font-weight: 400;
             cursor: pointer;
             transition: background-color 0.2s ease;
+            border: 1px solid #ccc;
         }
 
         .compare-demo-btn:hover {
-            background: #138496;
+            background:  #fcfcfc;
         }
 
         .compare-demo-btn:disabled {
-            background: #6c757d;
+            background: #fcfcfc;
             cursor: not-allowed;
         }
 
@@ -766,7 +766,7 @@
         <div class="user-info">
             <div>
                 <strong>Welcome, <span sec:authentication="name">User</span>!</strong>
-                <span class="text-muted">• Administrator Mode</span>
+                <span style="font-size: 0.8em;">• Administrator Mode</span>
             </div>
             <div>
                 <a class="btn btn-outline-secondary btn-sm" href="/admin/users">Admin Dashboard</a>
@@ -828,35 +828,6 @@
         </div>
     </div>
 
-    <div class="col-md-6 col-lg-4">
-        <button class="compare-demo-btn" id="quickCompareBtn" onclick="quickStartComparison()">
-            Vergleichen
-        </button>
-    </div>
-    <br>
-
-    <div class="comparison-section" id="comparisonSection" style="display: none;">
-        <div class="comparison-header">
-            <h3 class="comparison-title">Vergleichen</h3>
-            <button class="clear-comparison-btn" onclick="clearAllComparisons()">
-                Alle entfernen
-            </button>
-        </div>
-
-        <div class="comparison-limit-warning" id="comparisonWarning">
-            Sie können maximal 3 Zinssätze gleichzeitig vergleichen. Entfernen Sie einen Vergleich, um einen neuen hinzuzufügen.
-        </div>
-
-        <div class="comparison-container" id="comparisonContainer">
-            <!-- Comparison layout will be populated here -->
-        </div>
-
-        <div class="empty-comparison-state" id="emptyComparisonState">
-            <div class="icon">📊</div>
-            <p>click a provider from the table below to add to compare</p>
-        </div>
-    </div>
-
     <!-- View Toggle for Mobile -->
     <div class="view-toggle d-md-none">
         <div aria-label="View toggle" class="btn-group" role="group">
@@ -915,8 +886,34 @@
         <div class="card-body py-2">
             <small style="font-size: 0.8em;">
                 <i class="fas fa-info-circle me-1"></i>
-                <span th:text="${lastUpdateMessage}"></span>
+                <button class="compare-demo-btn" id="quickCompareBtn" onclick="quickStartComparison()">
+                    Vergleichen
+                </button>
+                <span style="float: right;">Last updated 20 hours ago</span>
             </small>
+        </div>
+    </div>
+
+    <div class="comparison-section" id="comparisonSection" style="display: none;">
+        <div class="comparison-header">
+            <h3 class="comparison-title">Vergleichen</h3>
+            <button class="clear-comparison-btn" onclick="clearAllComparisons()">
+                Alle entfernen
+            </button>
+        </div>
+
+        <div class="comparison-limit-warning" id="comparisonWarning">
+            Sie können maximal 3 Zinssätze gleichzeitig vergleichen. Entfernen Sie einen Vergleich, um einen neuen
+            hinzuzufügen.
+        </div>
+
+        <div class="comparison-container" id="comparisonContainer">
+            <!-- Comparison layout will be populated here -->
+        </div>
+
+        <div class="empty-comparison-state" id="emptyComparisonState">
+            <div class="icon">📊</div>
+            <p>click a provider from the table below to add to compare</p>
         </div>
     </div>
 
@@ -1348,6 +1345,7 @@
 
     // Reset quick compare button
     const quickCompareBtn = document.getElementById('quickCompareBtn');
+    document.getElementById("quickCompareBtn").style.display = "inline-block";
 }
 
     function updateComparisonDisplay() {
@@ -1357,6 +1355,7 @@
 
         if (comparedRates.size === 0) {
             section.style.display = 'none';
+            document.getElementById("quickCompareBtn").style.display = "inline-block";
             return;
         }
 
@@ -1581,6 +1580,7 @@
     }
 
     function quickStartComparison() {
+        document.getElementById("quickCompareBtn").style.display = "none";
         const quickCompareBtn = document.getElementById('quickCompareBtn');
         const body = document.body;
 
