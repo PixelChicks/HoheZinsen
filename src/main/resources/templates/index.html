@@ -2199,9 +2199,8 @@
         // Insert the card container
         try {
             if (isMobileCardView) {
-                // For mobile, insert after the mobile card container
-                const mobileCardContainer = targetElement.querySelector('.mobile-interest-card') || targetElement;
-                mobileCardContainer.parentElement.insertAdjacentElement('afterend', cardContainer);
+                // For mobile, insert directly after the entire mobile card row
+                targetElement.insertAdjacentElement('afterend', cardContainer);
             } else {
                 // For desktop, insert as table row
                 targetElement.insertAdjacentElement('afterend', cardContainer);
@@ -2222,7 +2221,6 @@
     
         currentExpandedCard = rate.id;
     }
-
 
     function createRateCard(rate) {
         const card = document.createElement('div');
