@@ -2129,7 +2129,7 @@
         if (currentExpandedCard && currentExpandedCard !== rate.id) {
             closeExpandedCard(currentExpandedCard);
         }
-
+    
         let existingCard = document.getElementById(`rateCardRow_${rate.id}`);
         if (existingCard) {
             existingCard.style.display = 'none';
@@ -2138,97 +2138,88 @@
                     existingCard.parentNode.removeChild(existingCard);
                 }
             }, 0);
-
+    
             if (currentExpandedCard === rate.id) {
                 currentExpandedCard = null;
                 return;
             }
         }
-
-        // FIXED: Better debugging and target identification
-        console.log('Looking for rate ID:', rate.id);
-
+    
         // Check if we're in mobile card view
         const tableContainer = document.getElementById('tableContainer');
         const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
-
+    
+        console.log('Looking for rate ID:', rate.id);
         console.log('Mobile card view active:', isMobileCardView);
-
-        let targetRow = null;
-
+    
+        let targetElement = null;
+    
         if (isMobileCardView) {
-            // In mobile card view, look for the TR with class mobile-card-row
-            targetRow = document.querySelector(`div.mobile-card-row[data-rate-id="${rate.id}"]`);
-            console.log('Found mobile card row:', targetRow);
+            // In mobile card view, look for the mobile card div
+            targetElement = document.querySelector(`div.mobile-card-row[data-rate-id="${rate.id}"]`);
+            console.log('Found mobile card element:', targetElement);
         } else {
             // In table view, look for regular table row
-            targetRow = document.querySelector(`tr[data-rate-id="${rate.id}"]`);
-            console.log('Found table row:', targetRow);
+            targetElement = document.querySelector(`tr[data-rate-id="${rate.id}"]`);
+            console.log('Found table row:', targetElement);
         }
-
-        if (!targetRow) {
-            console.error('Target row not found for rate ID:', rate.id);
-            // Try alternative selectors as fallback
-            targetRow = document.querySelector(`[data-rate-id="${rate.id}"]`);
-            console.log('Fallback found:', targetRow);
-
-            if (!targetRow) {
+    
+        if (!targetElement) {
+            console.error('Target element not found for rate ID:', rate.id);
+            // Try fallback selector
+            targetElement = document.querySelector(`[data-rate-id="${rate.id}"]`);
+            console.log('Fallback found:', targetElement);
+            
+            if (!targetElement) {
                 console.error('No element found with rate ID:', rate.id);
                 return;
             }
-
-            // If we found a non-TR element, find its closest TR parent
-            if (targetRow.tagName !== 'TR') {
-                targetRow = targetRow.closest('tr');
-                console.log('Closest TR:', targetRow);
-            }
         }
-
-        if (!targetRow) {
-            console.error('Still no target row found');
+    
+        const card = createRateCard(rate);
+        let cardContainer;
+    
+        if (isMobileCardView) {
+            // Create a mobile-friendly container
+            cardContainer = document.createElement('div');
+            cardContainer.id = `rateCardRow_${rate.id}`;
+            cardContainer.className = 'rate-card-mobile-container show';
+            cardContainer.style.width = '100%';
+            cardContainer.style.marginTop = '10px';
+            cardContainer.appendChild(card);
+        } else {
+            // Create table row for desktop
+            cardContainer = document.createElement('tr');
+            cardContainer.id = `rateCardRow_${rate.id}`;
+            cardContainer.className = 'rate-card-row show';
+            cardContainer.innerHTML = `<td colspan="100%" class="rate-card-cell"></td>`;
+            cardContainer.querySelector('.rate-card-cell').appendChild(card);
+        }
+    
+        // Insert the card container
+        try {
+            if (isMobileCardView) {
+                // For mobile, insert after the mobile card container
+                const mobileCardContainer = targetElement.querySelector('.mobile-interest-card') || targetElement;
+                mobileCardContainer.parentElement.insertAdjacentElement('afterend', cardContainer);
+            } else {
+                // For desktop, insert as table row
+                targetElement.insertAdjacentElement('afterend', cardContainer);
+            }
+            console.log('Successfully inserted card container');
+        } catch (error) {
+            console.error('Error inserting card container:', error);
             return;
         }
-
-        console.log('Target row details:', {
-            tagName: targetRow.tagName,
-            className: targetRow.className,
-            dataRateId: targetRow.dataset.rateId,
-            nextSibling: targetRow.nextSibling,
-            nextElementSibling: targetRow.nextElementSibling
-        });
-
-        const card = createRateCard(rate);
-        const cardRow = document.createElement('tr');
-        cardRow.id = `rateCardRow_${rate.id}`;
-        cardRow.className = 'rate-card-row show';
-        cardRow.innerHTML = `<td colspan="100%" class="rate-card-cell"></td>`;
-
-        cardRow.querySelector('.rate-card-cell')
-            .appendChild(card);
-
-        // FIXED: Use insertAdjacentElement for more predictable positioning
-        try {
-            targetRow.insertAdjacentElement('afterend', cardRow);
-            console.log('Successfully inserted card row after target');
-        } catch (error) {
-            console.error('Error inserting card row:', error);
-            // Fallback to original method
-            if (targetRow.parentNode) {
-                targetRow.parentNode.insertBefore(cardRow, targetRow.nextSibling);
-                console.log('Used fallback insertion method');
-            } else {
-                console.error('Target row has no parent node');
-                return;
-            }
-        }
-
+    
+        // Scroll to the card
         setTimeout(() => {
-            card.scrollIntoView({
+            cardContainer.scrollIntoView({
                 behavior: 'smooth',
                 block: 'center'
             });
         }, 50);
-
+    
         currentExpandedCard = rate.id;
     }
 
