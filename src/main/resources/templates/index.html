@@ -2258,7 +2258,6 @@
         currentExpandedCard = rate.id;
     }
 
-
     function createRateCard(rate) {
         const card = document.createElement('div');
         card.className = 'rate-card';
@@ -2362,13 +2361,177 @@
             }
         });
 
+        const compareButton = `
+            <div class="rate-card-actions">
+                 <a class="angebot-btn"
+                       href="${rate.webLink || '#'}"
+                       target="_blank"
+                       title="Open Link"
+                       style="float: right; margin-right: 16px; margin-bottom:16px">
+                        ZUM ANGEBOT
+                 </a>
+                <button type="button"
+                        class="mehr-info-btn"
+                        onclick="startComparisonFromCard(${rate.id})"
+                        style="float: right; margin-right: 16px; margin-bottom:16px">
+                    VERGLEICHEN
+                </button>
+            </div>
+        `;
+
         card.innerHTML = `
             <div class="rate-expanded-content show">
                 ${sectionsHTML}
+                ${compareButton}
             </div>
         `;
 
         return card;
+    }
+
+    // New function to handle comparison start from rate card
+    function startComparisonFromCard(currentRateId) {
+        console.log('Starting comparison from card for rate:', currentRateId);
+
+        // Check if we're at max capacity
+        if (comparedRates.size >= maxComparisons) {
+            showStatus('Maximum number of comparisons reached (3)', 'warning');
+            return;
+        }
+
+        // Enable comparison mode first
+        document.body.classList.add('comparison-mode');
+
+        // Show the comparison section
+        const comparisonSection = document.getElementById('comparisonSection');
+        if (comparisonSection) {
+            comparisonSection.style.display = 'block';
+        }
+
+        // Hide the quick compare button since we're now in comparison mode
+        const quickCompareBtn = document.getElementById('quickCompareBtn');
+        if (quickCompareBtn) {
+            quickCompareBtn.style.display = 'none';
+        }
+
+        // If this is the first comparison, also add the first record
+        let shouldAddFirstRecord = comparedRates.size === 0;
+
+        // Add the first record to comparison ONLY if this is the very first comparison
+        if (shouldAddFirstRecord) {
+            // Get the first available rate from current data
+            let firstRateId = null;
+            if (isInfiniteScrollEnabled && allLoadedData && allLoadedData.length > 0) {
+                // In infinite scroll mode, use the first rate from all loaded data
+                firstRateId = allLoadedData[0].id;
+            } else if (currentPageData && currentPageData.length > 0) {
+                // In normal pagination mode, use the first rate from current page
+                firstRateId = currentPageData[0].id;
+            }
+
+            // Add the first rate to comparison (if it's different from current rate and we have space)
+            if (firstRateId && firstRateId !== currentRateId && comparedRates.size < maxComparisons) {
+                const firstRate = (isInfiniteScrollEnabled ? allLoadedData : currentPageData)
+                    .find(r => r.id === firstRateId);
+
+                if (firstRate) {
+                    comparedRates.set(firstRateId, firstRate);
+
+                    // Check the checkbox for the first rate
+                    const firstCheckbox = document.getElementById(`compare-${firstRateId}`);
+                    const firstMobileCheckbox = document.getElementById(`compare-mobile-${firstRateId}`);
+                    if (firstCheckbox) firstCheckbox.checked = true;
+                    if (firstMobileCheckbox) firstMobileCheckbox.checked = true;
+
+                    // Highlight the first rate row
+                    updateTableRowHighlight(firstRateId, true);
+                }
+            }
+        }
+
+        // Check if current rate is already in comparison
+        if (comparedRates.has(currentRateId)) {
+            showStatus('This rate is already in comparison', 'info');
+            scrollToComparison();
+            setTimeout(() => {
+                closeExpandedCard(currentRateId);
+            }, 1000);
+            return;
+        }
+
+        // Check if we still have space after potentially adding the first record
+        if (comparedRates.size >= maxComparisons) {
+            showStatus('Maximum number of comparisons reached (3)', 'warning');
+            return;
+        }
+
+        // Add the current rate to comparison
+        let currentRate = null;
+        if (isInfiniteScrollEnabled && allLoadedData) {
+            currentRate = allLoadedData.find(r => r.id === currentRateId);
+        } else if (currentPageData) {
+            currentRate = currentPageData.find(r => r.id === currentRateId);
+        }
+
+        // If rate not found in current data, fetch it from server
+        if (!currentRate) {
+            fetchRateDetails(currentRateId).then(fetchedRate => {
+                if (fetchedRate) {
+                    comparedRates.set(currentRateId, fetchedRate);
+
+                    // Ensure we have field values for the fetched rate
+                    if (fetchedRate.fieldValues) {
+                        serverRateFieldValuesMap[currentRateId] = fetchedRate.fieldValues;
+                    }
+
+                    updateComparisonDisplay();
+                    scrollToComparison();
+                }
+            });
+        } else {
+            comparedRates.set(currentRateId, currentRate);
+
+            // Check the checkbox for the current rate
+            const currentCheckbox = document.getElementById(`compare-${currentRateId}`);
+            const currentMobileCheckbox = document.getElementById(`compare-mobile-${currentRateId}`);
+            if (currentCheckbox) currentCheckbox.checked = true;
+            if (currentMobileCheckbox) currentMobileCheckbox.checked = true;
+
+            // Highlight the current rate row
+            updateTableRowHighlight(currentRateId, true);
+        }
+
+        // Update the comparison display
+        updateComparisonDisplay();
+
+        // Scroll to comparison section
+        scrollToComparison();
+
+        // Show success message
+        const rateCount = comparedRates.size;
+        if (rateCount === 1) {
+            showStatus('Comparison mode activated! Rate added to comparison.', 'success');
+        } else {
+            showStatus(`${rateCount} rates added to comparison!`, 'success');
+        }
+
+        // Close the expanded card after a short delay
+        setTimeout(() => {
+            closeExpandedCard(currentRateId);
+        }, 1000);
+    }
+
+    // Helper function to scroll to comparison section
+    function scrollToComparison() {
+        setTimeout(() => {
+            const comparisonSection = document.getElementById('comparisonSection');
+            if (comparisonSection) {
+                comparisonSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }, 500);
     }
 
     function closeExpandedCard(rateId) {
