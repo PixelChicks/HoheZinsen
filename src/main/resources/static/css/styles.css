@@ -142,24 +142,15 @@
   letter-spacing: 0.5px;
 }
 
-.mehr-info-btn:hover {
-  background-color: #00b894;
-  color: white;
-}
-
-.mehr-info-btn:hover:not(:disabled) {
-  background: #00b894;
-  color: white;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
-}
-
 .mehr-info-btn:disabled {
-  background: #00b894;
-  color: white;
-  cursor: not-allowed;
-  opacity: 0.6;
-  border: none;
+    background: #00b894;
+    color: white;
+    cursor: not-allowed;
+    opacity: 0.6;
+    padding: 7px 33px;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    border: none;
 }
 
 .header-container {
