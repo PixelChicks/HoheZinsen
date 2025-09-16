@@ -1030,11 +1030,8 @@ body {
 }
 
 .rate-card {
-  background: linear-gradient(135deg, #ffffff, #f8f9fa);
-  border: 1px solid #dee2e6;
   border-radius: 12px;
   margin: 15px 0;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   position: relative;
   animation: cardSlideIn 0.3s ease-out;

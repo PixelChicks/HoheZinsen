@@ -1394,8 +1394,11 @@
     function createComparisonCardNew(rate) {
         const rateFieldValues = serverRateFieldValuesMap[rate.id] || {};
 
-        // If we don't have field data, show loading state
         if (Object.keys(rateFieldValues).length === 0) {
+            fetchMissingRateData([rate.id]).then(() => {
+                updateComparisonDisplay();
+            });
+
             return `
                 <div class="comparison-card">
                     <div class="comparison-card-header">
@@ -1413,10 +1416,8 @@
                     </div>
                 </div>
             `;
-            return card;
         }
 
-        // Find image field (first matching fieldKey containing "img")
         let headerImage = null;
         let headerImageFieldId = null;
         const imageField = globalFieldsCompareCache.find(
@@ -1426,13 +1427,12 @@
         if (imageField) {
             const imageUrl = rateFieldValues[imageField.id];
             if (imageUrl && imageUrl !== "-") {
-                headerImageFieldId = imageField.id; // only set if valid image exists
+                headerImageFieldId = imageField.id;
                 headerImage = `<img src="${imageUrl}" alt="Logo" class="comparison-logo"
                                   style="height: 100px; width: auto; object-fit: contain;">`;
             }
         }
 
-        // Generate value rows (skip image field if it's shown in header OR if it's an invalid/no image)
         const valueRows = globalFieldsCompareCache
             .filter(field => field.id !== headerImageFieldId && !(field.fieldKey && field.fieldKey.toLowerCase().includes("img")))
             .map((field, index) => {
@@ -1454,11 +1454,11 @@
                 <div class="comparison-values">
                     ${valueRows}
                     <div style="display: flex; justify-content: center; align-items: center; padding-top: 16px; padding-bottom: 16px;">
-                       <a href="${rate.moreInfo ? '#' : 'javascript:void(0)'}"
+                       <a href="javascript:void(0)"
                            class="${rate.moreInfo ? '' : 'disabled'}"
                            onclick="${rate.moreInfo ? `showMoreInfo(${rate.id})` : 'return false;'}"
                            title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}"
-                           style="font-weight: bold; color: ${rate.moreInfo ? '#00b894' : '#ccc'}; text-decoration: none;">
+                           style="font-weight: bold; color: ${rate.moreInfo ? '#00b894' : '#ccc'}; text-decoration: none; cursor: pointer;">
                             ${rate.moreInfo ? 'MEHR INFO' : 'No Info'}
                        </a>
                     </div>
@@ -1611,20 +1611,6 @@
         originalClearAllComparisons();
         updateQuickCompareVisibility();
     };
-
-    function showMoreInfo(rateId) {
-        const rate = currentPageData.find(r => r.id === rateId);
-        if (rate && rate.moreInfo) {
-            const rateFieldValues = serverRateFieldValuesMap[rateId] || {};
-            const details = globalFieldsCache.map(field =>
-                `${field.label}: ${rateFieldValues[field.id] || 'N/A'}`
-            ).join('\n');
-
-            alert(`More information:\n\n${details}`);
-        } else {
-            showStatus('Keine zusätzlichen Informationen für diesen Zinssatz verfügbar.', 'info');
-        }
-    }
 
     // Integration functions for your existing code
     function integrateWithExistingTable() {
@@ -2032,27 +2018,148 @@
     function showMoreInfo(rateId) {
         let rate = currentPageData.find(r => r.id === rateId);
 
-        // If not found in current page data, try to find in all loaded data (for infinite scroll)
         if (!rate && typeof allLoadedData !== 'undefined' && allLoadedData.length > 0) {
             rate = allLoadedData.find(r => r.id === rateId);
         }
 
         if (!rate) {
-            fetchRateDetails(rateId)
+            showStatus('Loading rate details...', 'info');
+
+            fetch(`/api/interest-rate/${rateId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch rate details');
+                    }
+                    return response.json();
+                })
                 .then(rateData => {
                     if (rateData && rateData.moreInfo) {
-                        displayRateCard(rateData);
+                        if (rateData.fieldValues) {
+                            serverRateFieldValuesMap[rateId] = rateData.fieldValues;
+                        }
+
+                        displayRateCardInModal(rateData);
+                    } else {
+                        showStatus('No additional information available for this rate.', 'warning');
                     }
+                })
+                .catch(error => {
+                    console.error('Error fetching rate details:', error);
+                    showStatus('Error loading rate details: ' + error.message, 'error');
                 });
             return;
         }
 
         if (!rate.moreInfo) {
-            showDeleteNotification('No additional information available for this rate.', false);
+            showStatus('No additional information available for this rate.', 'warning');
             return;
         }
 
         displayRateCard(rate);
+    }
+
+    function displayRateCardInModal(rate) {
+        const existingModal = document.getElementById('rateInfoModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        const modal = document.createElement('div');
+        modal.id = 'rateInfoModal';
+        modal.className = 'rate-info-modal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+            overflow-y: auto;
+        `;
+
+        const modalContent = document.createElement('div');
+        modalContent.className = 'modal-content-wrapper';
+        modalContent.style.cssText = `
+            background: white;
+            border-radius: 8px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        `;
+
+        const closeButton = document.createElement('button');
+        closeButton.innerHTML = '✕';
+        closeButton.style.cssText = `
+            position: sticky;
+            top: 10px;
+            right: 10px;
+            float: right;
+            background: #f0f0f0;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+            z-index: 1;
+            margin: 10px;
+        `;
+        closeButton.onclick = () => modal.remove();
+
+        const header = document.createElement('div');
+        header.style.cssText = `
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            background: #f8f9fa;
+            border-radius: 8px 8px 0 0;
+        `;
+
+        const providerName = serverRateFieldValuesMap[rate.id]?.[1] || `Interest Rate #${rate.id}`;
+        header.innerHTML = `
+            <h4 style="margin: 0; color: #333;">
+                ${providerName}
+            </h4>
+            <small style="color: #666;">Detailed Information</small>
+        `;
+
+        const contentArea = document.createElement('div');
+        contentArea.style.cssText = 'padding: 20px;';
+
+        const rateCard = createRateCard(rate);
+        contentArea.appendChild(rateCard);
+
+        modalContent.appendChild(closeButton);
+        modalContent.appendChild(header);
+        modalContent.appendChild(contentArea);
+        modal.appendChild(modalContent);
+
+        document.body.appendChild(modal);
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                modal.remove();
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+
+        modalContent.setAttribute('tabindex', '-1');
+        modalContent.focus();
     }
 
 
