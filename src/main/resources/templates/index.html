@@ -1488,35 +1488,50 @@
             showStatus(`Aus dem Vergleich entfernt`, 'info');
             showWarning(false);
 
-            const checkbox = document.getElementById(`compare-${rateId}`);
-            if (checkbox) checkbox.checked = false;
+            // Check for external checkbox (desktop table view)
+            const externalCheckbox = document.getElementById(`external-compare-${rateId}`);
+            if (externalCheckbox) {
+                externalCheckbox.checked = false;
+            }
+
+            // Check for mobile checkbox (mobile card view)
+            const mobileCheckbox = document.getElementById(`compare-mobile-${rateId}`);
+            if (mobileCheckbox) {
+                mobileCheckbox.checked = false;
+            }
+
+            // Fallback for any remaining old-style checkboxes
+            const oldCheckbox = document.getElementById(`compare-${rateId}`);
+            if (oldCheckbox) {
+                oldCheckbox.checked = false;
+            }
         }
     }
 
-function clearAllComparisons() {
-    // Clear external checkboxes
-    document.querySelectorAll('.external-checkbox').forEach(checkbox => {
-        checkbox.checked = false;
-    });
+    function clearAllComparisons() {
+        // Clear external checkboxes
+        document.querySelectorAll('.external-checkbox').forEach(checkbox => {
+            checkbox.checked = false;
+        });
 
-    comparedRates.forEach((rate, rateId) => {
-        updateTableRowHighlight(rateId, false);
-    });
+        comparedRates.forEach((rate, rateId) => {
+            updateTableRowHighlight(rateId, false);
+        });
 
-    comparedRates.clear();
-    updateComparisonDisplay();
-    showWarning(false);
-    showStatus('All comparisons cleared', 'info');
+        comparedRates.clear();
+        updateComparisonDisplay();
+        showWarning(false);
+        showStatus('All comparisons cleared', 'info');
 
-    // Remove comparison mode class to hide checkboxes
-    document.body.classList.remove('comparison-mode');
+        // Remove comparison mode class to hide checkboxes
+        document.body.classList.remove('comparison-mode');
 
-    // Reset quick compare button
-    const quickCompareBtn = document.getElementById('quickCompareBtn');
-    if (quickCompareBtn) {
-        quickCompareBtn.style.display = "inline-block";
+        // Reset quick compare button
+        const quickCompareBtn = document.getElementById('quickCompareBtn');
+        if (quickCompareBtn) {
+            quickCompareBtn.style.display = "inline-block";
+        }
     }
-}
 
     function updateComparisonDisplay() {
         const section = document.getElementById('comparisonSection');
