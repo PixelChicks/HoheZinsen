@@ -776,9 +776,10 @@
     justify-content: flex-start;
     border-bottom: 1px solid transparent;
     box-sizing: border-box;
-    padding-top: 100px;
+    padding-top: 25px;
     padding-bottom: 20px;
     padding-left: 40px;
+    position: absolute;
 }
 
 /* Align with table header */
@@ -2208,6 +2209,7 @@ function updateExternalCheckboxes(data) {
             closeExpandedCard(rateId);
             expandedRateCards.delete(rateId);
             updateMehrInfoButton(rateId, false); // Update button to closed state
+            alignExternalCheckboxes();
             return;
         }
 
@@ -2254,6 +2256,7 @@ function updateExternalCheckboxes(data) {
         displayRateCard(rate);
         expandedRateCards.add(rateId);
         updateMehrInfoButton(rateId, true); // Update button to opened state
+        alignExternalCheckboxes();
     }
 
     function displayRateCardInModal(rate) {
@@ -4143,6 +4146,73 @@ function updateExternalCheckboxes(data) {
         console.log('All loaded data length:', allLoadedData.length);
     };
 
+    function alignExternalCheckboxes() {
+        const table = document.getElementById('mainTable');
+        const externalCheckboxes = document.getElementById('externalCheckboxes');
+
+        if (!table || !externalCheckboxes) return;
+
+        // FIXED: Only select actual data rows, exclude expanded card rows
+        const rows = table.querySelectorAll('tbody tr:not(.rate-card-row)');
+        const checkboxRows = externalCheckboxes.querySelectorAll('.external-checkbox-row');
+
+        // Clear existing checkboxes first to avoid duplicates
+        externalCheckboxes.innerHTML = '';
+
+        rows.forEach((row, index) => {
+            const rateId = row.getAttribute('data-rate-id');
+            if (!rateId) return; // Skip rows without rate ID
+
+            const rowHeight = row.offsetHeight;
+            const rowTop = row.offsetTop;
+
+            // Create checkbox row
+            const checkboxRow = document.createElement('div');
+            checkboxRow.className = 'external-checkbox-row';
+            checkboxRow.setAttribute('data-rate-id', rateId);
+
+            const checkboxContainer = document.createElement('div');
+            checkboxContainer.className = 'custom-checkbox-container';
+
+            const checkboxInput = document.createElement('input');
+            checkboxInput.type = 'checkbox';
+            checkboxInput.className = 'comparison-checkbox external-checkbox';
+            checkboxInput.id = `external-compare-${rateId}`;
+
+            // Check if this rate is already in comparison
+            const isSelected = comparedRates && comparedRates.has ? comparedRates.has(parseInt(rateId)) : false;
+            checkboxInput.checked = isSelected;
+
+            const customCheckbox = document.createElement('div');
+            customCheckbox.className = 'custom-checkbox';
+
+            checkboxContainer.appendChild(checkboxInput);
+            checkboxContainer.appendChild(customCheckbox);
+            checkboxRow.appendChild(checkboxContainer);
+
+            // Set position and height
+            checkboxRow.style.top = `${rowTop}px`;
+            checkboxRow.style.height = `${rowHeight}px`;
+
+            externalCheckboxes.appendChild(checkboxRow);
+
+            // Add event listener for comparison functionality
+            checkboxInput.addEventListener('change', () => {
+                toggleComparison(parseInt(rateId), checkboxInput.checked);
+            });
+        });
+    }
+
+
+    // Run on page load
+    window.addEventListener('load', alignExternalCheckboxes);
+    // Run on window resize
+    window.addEventListener('resize', alignExternalCheckboxes);
+
+    // Optional: Run whenever a row expands/collapses
+    function onRowToggle() {
+        alignExternalCheckboxes();
+    }
     console.log('Filter integration for infinite scroll has been fixed!');
 </script>
 </body>
