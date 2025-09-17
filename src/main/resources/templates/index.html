@@ -405,7 +405,6 @@
         /* Checked state */
         .comparison-checkbox:checked + .custom-checkbox {
             background-color: #e9ecef;
-            border-color: #00b894;
         }
 
         /* Checkmark */
@@ -749,6 +748,180 @@
         .comparison-mode .card-actions .comparison-checkbox + label {
             display: inline-block;
         }
+
+        /* External checkbox layout styles */
+.table-with-checkboxes-container {
+    position: relative;
+    width: 100%;
+}
+
+.external-checkboxes-column {
+    position: absolute;
+    left: -50px; /* Adjust this value to position checkboxes further/closer to table */
+    top: 0;
+    width: 40px;
+    z-index: 10;
+    display: none; /* Hidden by default */
+}
+
+/* Show external checkboxes when comparison mode is active */
+.comparison-mode .external-checkboxes-column {
+    display: block;
+}
+
+.external-checkbox-row {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    border-bottom: 1px solid transparent;
+    box-sizing: border-box;
+    padding-top: 100px;
+    padding-bottom: 20px;
+    padding-left: 40px;
+}
+
+/* Align with table header */
+.external-checkboxes-column::before {
+    content: '';
+    display: block;
+    height: 44px; /* Match your table header height - adjust if needed */
+    border-bottom: 1px solid transparent;
+    box-sizing: border-box;
+}
+
+/* Custom checkbox styling for external position */
+.external-checkbox-row .custom-checkbox-container {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+.external-checkbox-row .custom-checkbox {
+    width: 22px;
+    height: 22px;
+    background-color: #e9ecef;
+    border: 2px solid #dee2e6;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.external-checkbox-row .custom-checkbox:hover {
+    border-color: #00b894;
+    background-color: #f0f9f7;
+    transform: scale(1.05);
+}
+
+.external-checkbox-row .comparison-checkbox:checked + .custom-checkbox {
+    background-color: #e9ecef;
+    transform: scale(1.1);
+}
+
+.external-checkbox-row .custom-checkbox::after {
+    content: '✓';
+    color: #00b894;
+    font-size: 12px;
+    font-weight: bold;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.2s ease;
+    position: relative;
+    top: -5px;
+    right: -2px;
+}
+
+.external-checkbox-row .comparison-checkbox:checked + .custom-checkbox::after {
+    opacity: 1;
+    transform: scale(2);
+}
+
+/* Selected row styling enhancement */
+.table-row-selected {
+    background-color: #e3f2fd !important;
+    box-shadow: 3px 0 0 #1976d2 inset;
+    position: relative;
+}
+
+.table-row-selected td {
+    background-color: #e3f2fd !important;
+    color: #1565c0 !important;
+    font-weight: 500 !important;
+}
+
+/* Add padding to table container to make room for checkboxes */
+.comparison-mode .table-container {
+    margin-left: 60px; /* Adjust based on checkbox column width + spacing */
+    transition: margin-left 0.3s ease;
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+    .external-checkboxes-column {
+        left: -45px;
+        width: 35px;
+    }
+
+    .external-checkbox-row .custom-checkbox {
+        width: 20px;
+        height: 20px;
+    }
+
+    .external-checkbox-row .custom-checkbox::after {
+        font-size: 12px;
+    }
+
+    .comparison-mode .table-container {
+        margin-left: 50px;
+    }
+
+    /* For mobile card view, hide external checkboxes and use inline ones */
+    .mobile-stack .external-checkboxes-column {
+        display: none !important;
+    }
+
+    .mobile-stack.comparison-mode .table-container {
+        margin-left: 0;
+    }
+}
+
+/* Animation for when comparison mode is activated */
+.external-checkboxes-column {
+    transition: opacity 0.3s ease;
+}
+
+.comparison-mode .external-checkboxes-column {
+    animation: slideInLeft 0.3s ease;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Ensure table doesn't jump when checkboxes appear */
+.table-container {
+    transition: margin-left 0.3s ease;
+}
+
+/* Hide any remaining internal checkboxes */
+.comparison-mode .comparison-checkbox:not(.external-checkbox-row .comparison-checkbox) {
+    display: none;
+}
+
+.comparison-mode .custom-checkbox-container:not(.external-checkbox-row .custom-checkbox-container) {
+    display: none !important;
+}
     </style>
 </head>
 <body class="bg-light" th:classappend="${#authorization.expression('isAuthenticated()')} ? 'authenticated' : 'guest'">
@@ -907,7 +1080,11 @@
         </div>
     </div>
 
-    <div class="table-container">
+    <div class="table-with-checkboxes-container">
+        <!-- Checkbox column - positioned absolutely to left of table -->
+        <div class="external-checkboxes-column" id="externalCheckboxes">
+            <!-- Checkboxes will be populated here by JavaScript -->
+        </div>
         <div class="loading-overlay" id="loadingOverlay">
             <div class="loading-spinner"></div>
         </div>
@@ -1316,8 +1493,9 @@
         }
     }
 
-    function clearAllComparisons() {
-    document.querySelectorAll('.comparison-checkbox').forEach(checkbox => {
+function clearAllComparisons() {
+    // Clear external checkboxes
+    document.querySelectorAll('.external-checkbox').forEach(checkbox => {
         checkbox.checked = false;
     });
 
@@ -1335,7 +1513,9 @@
 
     // Reset quick compare button
     const quickCompareBtn = document.getElementById('quickCompareBtn');
-    document.getElementById("quickCompareBtn").style.display = "inline-block";
+    if (quickCompareBtn) {
+        quickCompareBtn.style.display = "inline-block";
+    }
 }
 
     function updateComparisonDisplay() {
@@ -1510,49 +1690,32 @@
         }, 3000);
     }
 
-    function quickStartComparison() {
-        document.getElementById("quickCompareBtn").style.display = "none";
-        const quickCompareBtn = document.getElementById('quickCompareBtn');
-        const body = document.body;
+function quickStartComparison() {
+    document.getElementById("quickCompareBtn").style.display = "none";
+    const quickCompareBtn = document.getElementById('quickCompareBtn');
+    const body = document.body;
 
-        // Add comparison mode class to body to show checkboxes
-        body.classList.add('comparison-mode');
+    // Add comparison mode class to body to show checkboxes
+    body.classList.add('comparison-mode');
 
-        // Disable button temporarily
-        quickCompareBtn.disabled = true;
+    // Disable button temporarily
+    quickCompareBtn.disabled = true;
 
-        // Find the first checkbox in the current page data
-        const firstCheckbox = document.querySelector('.comparison-checkbox');
+    // Find the first external checkbox
+    const firstCheckbox = document.querySelector('.external-checkbox');
 
-        if (firstCheckbox && !firstCheckbox.checked) {
-            // Check the first checkbox
-            firstCheckbox.checked = true;
+    if (firstCheckbox && !firstCheckbox.checked) {
+        // Check the first checkbox
+        firstCheckbox.checked = true;
 
-            // Get the rate ID from the checkbox
-            const rateId = firstCheckbox.id.replace('compare-', '');
+        // Get the rate ID from the checkbox
+        const rateId = firstCheckbox.id.replace('external-compare-', '');
 
-            // Add to comparison
-            addToComparison(parseInt(rateId));
+        // Add to comparison
+        addToComparison(parseInt(rateId));
 
-            // Scroll to comparison section
-            setTimeout(() => {
-                const comparisonSection = document.getElementById('comparisonSection');
-                if (comparisonSection) {
-                    comparisonSection.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-
-                // Re-enable button with new text
-                quickCompareBtn.disabled = false;
-
-                // Show success message
-                showStatus('Comparison mode activated! Select more rates to compare.', 'success');
-            }, 500);
-
-        } else if (firstCheckbox && firstCheckbox.checked) {
-            // If first checkbox is already checked, just scroll to comparison
+        // Scroll to comparison section
+        setTimeout(() => {
             const comparisonSection = document.getElementById('comparisonSection');
             if (comparisonSection) {
                 comparisonSection.scrollIntoView({
@@ -1561,15 +1724,44 @@
                 });
             }
 
+            // Re-enable button
             quickCompareBtn.disabled = false;
-            showStatus('Comparison section opened!', 'info');
 
-        } else {
-            // No rates available
-            quickCompareBtn.disabled = false;
-            showStatus('No rates available to compare', 'warning');
+            // Show success message
+            showStatus('Comparison mode activated! Select more rates to compare.', 'success');
+        }, 500);
+
+    } else if (firstCheckbox && firstCheckbox.checked) {
+        // If first checkbox is already checked, just scroll to comparison
+        const comparisonSection = document.getElementById('comparisonSection');
+        if (comparisonSection) {
+            comparisonSection.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
         }
+
+        quickCompareBtn.disabled = false;
+        showStatus('Comparison section opened!', 'info');
+
+    } else {
+        // No rates available
+        quickCompareBtn.disabled = false;
+        showStatus('No rates available to compare', 'warning');
     }
+}
+
+// Update the maintainComparisonState function
+function maintainComparisonState() {
+    // Re-check external checkboxes and row highlights after data refresh
+    comparedRates.forEach((rate, rateId) => {
+        const externalCheckbox = document.getElementById(`external-compare-${rateId}`);
+        if (externalCheckbox) {
+            externalCheckbox.checked = true;
+        }
+        updateTableRowHighlight(rateId, true);
+    });
+}
 
         // Optional: Hide the quick compare section when comparison is active
     function updateQuickCompareVisibility() {
@@ -1612,58 +1804,6 @@
         updateQuickCompareVisibility();
     };
 
-    // Integration functions for your existing code
-    function integrateWithExistingTable() {
-        // This function shows how to integrate with your existing renderTableRows function
-        // Replace your existing renderTableRows function content with something like this:
-
-        /*
-        function renderTableRows(data, tbody) {
-            if (!data || data.length === 0) {
-                tbody.innerHTML = '';
-                return;
-            }
-
-            tbody.innerHTML = data.map(rate => {
-                // Get current field order from headers
-                const headers = document.querySelectorAll('.draggable-column, .sortable');
-                const currentFieldOrder = Array.from(headers)
-                    .map(header => ({
-                        id: header.dataset.fieldId,
-                        fieldKey: header.dataset.fieldKey,
-                        label: header.querySelector('.header-text').textContent.trim()
-                    }));
-
-                // Add comparison checkbox as first cell
-                const comparisonCell = `
-                    <td class="data-cell" data-label="Compare">
-                        <input type="checkbox"
-                               class="comparison-checkbox"
-                               onchange="toggleComparison(${rate.id}, this.checked)"
-                               id="compare-${rate.id}">
-                    </td>
-                `;
-
-                // Generate other cells as before
-                const fieldCells = currentFieldOrder.map(field => {
-                    const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
-                    // ... your existing cell generation logic
-                });
-
-                return `
-                    <tr data-rate-id="${rate.id}">
-                        ${comparisonCell}
-                        ${fieldCells.join('')}
-                        <td data-label="Actions">
-                            ${actionButtons}
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-        */
-    }
-
     function fetchRateDetails(rateId) {
         return fetch(`/api/interest-rate/${rateId}`)
             .then(response => {
@@ -1700,96 +1840,111 @@
         maintainComparisonState();
     }
 
-    function renderTableRows(data, tbody) {
-        if (!data || data.length === 0) {
-            tbody.innerHTML = '';
-            return;
-        }
-
-        tbody.innerHTML = data.map(rate => {
-            // Get current field order from headers
-            const headers = document.querySelectorAll('.draggable-column, .sortable');
-            const currentFieldOrder = Array.from(headers)
-                .map(header => ({
-                    id: header.dataset.fieldId,
-                    fieldKey: header.dataset.fieldKey,
-                    label: header.querySelector('.header-text').textContent.trim()
-                }));
-
-            // Check if this rate is currently selected for comparison
-            const isSelected = comparedRates.has(rate.id);
-
-            // Generate cells in the new column order
-            const fieldCells = currentFieldOrder.map((field, index) => {
-                const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
-
-                if (field.fieldKey && field.fieldKey.toLowerCase().includes('img')) {
-                    return `
-                        <td class="data-cell image-cell" data-field-id="${field.id}" data-label="${field.label}">
-                            <div class="image-container">
-                                ${fieldValue ? `<img src="${fieldValue}" alt="Interest Rate Logo" class="interest-rate-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />` : ''}
-                                <div class="no-image-placeholder" style="${fieldValue ? 'display:none' : 'display:block'}">No Image</div>
-                            </div>
-                            ${index === 0 ? `
-                            <div class="custom-checkbox-container" style="margin-top: 0.5rem;">
-                                <input type="checkbox"
-                                       class="comparison-checkbox"
-                                       onchange="toggleComparison(${rate.id}, this.checked)"
-                                       id="compare-${rate.id}"
-                                       ${isSelected ? 'checked' : ''}>
-                                <div class="custom-checkbox"></div>
-                            </div>
-                            ` : ''}
-                        </td>
-                    `;
-                } else {
-                    return `
-                        <td class="data-cell" data-field-id="${field.id}" data-label="${field.label}">
-                            <div class="form-control form-control-sm text-center"
-                                 style="border: none; background: transparent; cursor: default;">
-                                ${fieldValue || '-'}
-                            </div>
-                            ${index === 0 ? `
-                            <div class="custom-checkbox-container" style="margin-top: 0.5rem;">
-                                <input type="checkbox"
-                                       class="comparison-checkbox"
-                                       onchange="toggleComparison(${rate.id}, this.checked)"
-                                       id="compare-${rate.id}"
-                                       ${isSelected ? 'checked' : ''}>
-                                <div class="custom-checkbox"></div>
-                            </div>
-                            ` : ''}
-                        </td>
-                    `;
-                }
-            }).join('');
-
-            // Action buttons without checkbox now
-            let actionButtons = `
-                <div class="action-buttons">
-                    <button class="mehr-info-btn"
-                            ${rate.moreInfo ? '' : 'disabled'}
-                            onclick="showMoreInfo(${rate.id})"
-                            title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">
-                        ${rate.moreInfo
-                            ? `MEHR INFO <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M1 1L8 8L15 1" stroke="#00AC98" stroke-width="2"/>
-                               </svg>`
-                            : 'No Info'}
-                    </button>
-                </div>
-            `;
-
-            return `
-                <tr data-rate-id="${rate.id}" ${isSelected ? 'class="table-row-selected"' : ''}>
-                    ${fieldCells}
-                    <td data-label="Actions">
-                        ${actionButtons}
-                    </td>
-                </tr>
-            `;
-        }).join('');
+function renderTableRows(data, tbody) {
+    if (!data || data.length === 0) {
+        tbody.innerHTML = '';
+        updateExternalCheckboxes([]); // Clear external checkboxes
+        return;
     }
+
+    // Render table rows without checkboxes (they're now external)
+    tbody.innerHTML = data.map(rate => {
+        // Get current field order from headers
+        const headers = document.querySelectorAll('.draggable-column, .sortable');
+        const currentFieldOrder = Array.from(headers)
+            .map(header => ({
+                id: header.dataset.fieldId,
+                fieldKey: header.dataset.fieldKey,
+                label: header.querySelector('.header-text').textContent.trim()
+            }));
+
+        // Check if this rate is currently selected for comparison
+        const isSelected = comparedRates.has(rate.id);
+
+        // Generate cells without checkboxes
+        const fieldCells = currentFieldOrder.map((field, index) => {
+            const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
+
+            if (field.fieldKey && field.fieldKey.toLowerCase().includes('img')) {
+                return `
+                    <td class="data-cell image-cell" data-field-id="${field.id}" data-label="${field.label}">
+                        <div class="image-container">
+                            ${fieldValue ? `<img src="${fieldValue}" alt="Interest Rate Logo" class="interest-rate-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />` : ''}
+                            <div class="no-image-placeholder" style="${fieldValue ? 'display:none' : 'display:block'}">No Image</div>
+                        </div>
+                    </td>
+                `;
+            } else {
+                return `
+                    <td class="data-cell" data-field-id="${field.id}" data-label="${field.label}">
+                        <div class="form-control form-control-sm text-center"
+                             style="border: none; background: transparent; cursor: default;">
+                            ${fieldValue || '-'}
+                        </div>
+                    </td>
+                `;
+            }
+        }).join('');
+
+        // Action buttons
+        let actionButtons = `
+            <div class="action-buttons">
+                <button class="mehr-info-btn"
+                        ${rate.moreInfo ? '' : 'disabled'}
+                        onclick="showMoreInfo(${rate.id})"
+                        title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">
+                    ${rate.moreInfo
+                        ? `MEHR INFO <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 1L8 8L15 1" stroke="#00AC98" stroke-width="2"/>
+                           </svg>`
+                        : 'No Info'}
+                </button>
+            </div>
+        `;
+
+        return `
+            <tr data-rate-id="${rate.id}" ${isSelected ? 'class="table-row-selected"' : ''}>
+                ${fieldCells}
+                <td data-label="Actions">
+                    ${actionButtons}
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    // Update external checkboxes
+    updateExternalCheckboxes(data);
+}
+
+// New function to manage external checkboxes
+function updateExternalCheckboxes(data) {
+    const checkboxColumn = document.getElementById('externalCheckboxes');
+    if (!checkboxColumn) return;
+
+    if (!data || data.length === 0) {
+        checkboxColumn.innerHTML = '';
+        return;
+    }
+
+    // Create header spacer and checkbox rows
+    const checkboxRows = data.map(rate => {
+        const isSelected = comparedRates.has(rate.id);
+        return `
+            <div class="external-checkbox-row" data-rate-id="${rate.id}">
+                <div class="custom-checkbox-container">
+                    <input type="checkbox"
+                           class="comparison-checkbox external-checkbox"
+                           onchange="toggleComparison(${rate.id}, this.checked)"
+                           id="external-compare-${rate.id}"
+                           ${isSelected ? 'checked' : ''}>
+                    <div class="custom-checkbox"></div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    checkboxColumn.innerHTML = checkboxRows;
+}
 
     function updateBrowserUrl(page, search, sortBy, sortDir) {
         const url = new URL(window.location);
