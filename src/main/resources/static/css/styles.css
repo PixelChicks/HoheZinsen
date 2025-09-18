@@ -142,24 +142,15 @@
   letter-spacing: 0.5px;
 }
 
-.mehr-info-btn:hover {
-  background-color: #00b894;
-  color: white;
-}
-
-.mehr-info-btn:hover:not(:disabled) {
-  background: #00b894;
-  color: white;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
-}
-
 .mehr-info-btn:disabled {
-  background: #00b894;
-  color: white;
-  cursor: not-allowed;
-  opacity: 0.6;
-  border: none;
+    background: #00b894;
+    color: white;
+    cursor: not-allowed;
+    opacity: 0.6;
+    padding: 7px 33px;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    border: none;
 }
 
 .header-container {
@@ -839,8 +830,6 @@ body {
 .action-buttons {
   display: flex;
   gap: 8px;
-  align-items: center;
-  justify-content: center;
   flex-wrap: wrap;
 }
 
@@ -1030,11 +1019,8 @@ body {
 }
 
 .rate-card {
-  background: linear-gradient(135deg, #ffffff, #f8f9fa);
-  border: 1px solid #dee2e6;
   border-radius: 12px;
   margin: 15px 0;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   position: relative;
   animation: cardSlideIn 0.3s ease-out;

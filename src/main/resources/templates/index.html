@@ -7,749 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/styles.css" rel="stylesheet">
     <link href="/css/index.css" rel="stylesheet">
-    <style>
-        .comparison-section {
-        border-radius: 8px;
-        margin-bottom: 2rem;
-        padding: 1.5rem;
-    }
-
-    .comparison-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
-
-    .comparison-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        margin: 0;
-        color: #333;
-    }
-
-    /* New layout styles */
-    .comparison-container {
-        display: flex;
-        gap: 10px;
-        overflow-x: auto;
-        padding-bottom: 1rem;
-    }
-
-    .comparison-labels {
-        display: flex;
-        flex-direction: column;
-        gap: 0;
-        margin-top: 135px; /* Offset for card headers */
-        min-width: 120px;
-        flex-shrink: 0;
-    }
-
-    .comparison-label-row {
-        padding: 12px 8px;
-        font-weight: 500;
-        color: #333;
-        font-size: 0.85rem;
-        border-bottom: 1px solid #f0f0f0;
-        display: flex;
-        align-items: center;
-        min-height: 44px; /* Match card row height */
-    }
-
-    .comparison-label-row:last-child {
-        border-bottom: none;
-    }
-
-    .comparison-cards-container {
-        display: flex;
-        gap: 10px;
-        flex: 1;
-    }
-
-    .comparison-card {
-        background: white;
-        border: 2px solid #0fcab5;
-        min-width: 350px;
-        flex-shrink: 0;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .comparison-card-header {
-        display: flex;
-        justify-content: space-between;
-        padding: 0.8rem;
-        border-bottom: 1px solid #eee;
-        background: white;
-        border-radius: 6px 6px 0 0;
-        background: #F6F6F6;
-    }
-
-    .provider-info {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .provider-logo {
-        width: 32px;
-        height: 32px;
-        object-fit: contain;
-        border-radius: 4px;
-    }
-
-    .provider-name {
-        font-weight: 600;
-        color: #333;
-        font-size: 0.9rem;
-    }
-
-    .remove-comparison {
-        background: none;
-        border: none;
-        color: #dc3545;
-        font-size: 1.1rem;
-        cursor: pointer;
-        padding: 0;
-        line-height: 1;
-        width: 20px;
-        height: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .remove-comparison:hover {
-        color: #c82333;
-        background-color: #f8f9fa;
-        border-radius: 50%;
-    }
-
-    .comparison-values {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-    }
-
-    .comparison-value-row {
-        padding: 12px 16px;
-        border-bottom: 1px solid #f0f0f0;
-        font-size: 0.85rem;
-        color: #333;
-        min-height: 44px; /* Match label row height */
-        display: flex;
-        align-items: center;
-        word-break: break-word;
-    }
-
-    .comparison-value-row:last-child {
-        border-bottom: none;
-    }
-
-    .empty-comparison-card {
-        border: 1px solid #ddd;
-        /* border-radius: 8px; */
-        min-width: 350px;
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        color: #0000004f;
-        font-size: 0.85rem;
-        padding: 2rem 1rem;
-        background: white;
-    }
-
-    .empty-comparison-state {
-        text-align: center;
-        color: #666;
-        padding: 2rem;
-        border: 2px dashed #ddd;
-        border-radius: 8px;
-    }
-
-    .empty-comparison-state .icon {
-        font-size: 2rem;
-        margin-bottom: 0.5rem;
-        opacity: 0.5;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        .comparison-container {
-            flex-direction: column;
-        }
-
-        .comparison-labels {
-            margin-top: 0;
-            min-width: auto;
-            margin-bottom: 1rem;
-        }
-
-        .comparison-label-row {
-            padding: 8px 12px;
-            min-height: auto;
-        }
-
-        .comparison-cards-container {
-            flex-direction: column;
-        }
-
-        .comparison-card,
-        .empty-comparison-card {
-            min-width: auto;
-            width: 100%;
-        }
-
-        .comparison-header {
-            flex-direction: column;
-            gap: 0.5rem;
-            align-items: stretch;
-        }
-
-        /* Mobile: show labels inline with values */
-        .comparison-labels {
-            display: none;
-        }
-
-        .comparison-value-row {
-            position: relative;
-        }
-
-        .comparison-value-row::before {
-            content: attr(data-label) ': ';
-            font-weight: 500;
-            color: #666;
-            margin-right: 8px;
-        }
-    }
-
-    .comparison-value-row {
-        padding: 12px 16px;
-        border-bottom: 1px solid #f0f0f0;
-        font-size: 14px;
-        line-height: 1.4;
-    }
-
-    .comparison-value-row:last-child {
-        border-bottom: none;
-    }
-
-    /* Striped rows - alternating white and light gray */
-    .comparison-value-row.row-even {
-        background-color: white;
-    }
-
-    .comparison-value-row.row-odd {
-        background-color: #F6F6F6; /* Bootstrap's table-striped gray color */
-    }
-
-        .provider-info {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .provider-logo {
-            width: 32px;
-            height: 32px;
-            object-fit: contain;
-            border-radius: 4px;
-        }
-
-        .comparison-logo,
-        .text-muted {
-          height: 100px;       /* same height for both */
-          width: auto;
-          display: flex;       /* flexbox for centering text */
-          align-items: center; /* vertical center */
-          justify-content: center; /* horizontal center */
-          object-fit: contain;
-          padding-left: 10px;
-        }
-
-        .provider-name {
-            font-weight: 600;
-            color: #333;
-            font-size: 0.9rem;
-        }
-
-        .remove-comparison {
-            background: none;
-            border: none;
-            color: #979797;
-            font-size: 1.1rem;
-            cursor: pointer;
-            padding: 0;
-            line-height: 1;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .remove-comparison:hover {
-            color: #979797;
-            background-color: #f8f9fa;
-            border-radius: 50%;
-        }
-
-        .comparison-details {
-            margin-bottom: 1rem;
-        }
-
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.4rem 0;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 0.85rem;
-        }
-
-        .detail-row:last-child {
-            border-bottom: none;
-        }
-
-        .detail-label {
-            font-weight: 500;
-            color: #666;
-            flex-shrink: 0;
-            margin-right: 0.5rem;
-        }
-
-        .detail-value {
-            color: #333;
-            text-align: right;
-            word-break: break-word;
-        }
-
-        .comparison-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-
-        .empty-comparison-state {
-            text-align: center;
-            color: #666;
-            padding: 2rem;
-            border: 2px dashed #ddd;
-            border-radius: 8px;
-        }
-
-        .empty-comparison-state .icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            opacity: 0.5;
-        }
-
-        /* Table modifications */
-        .comparison-checkbox {
-            width: 16px;
-            height: 16px;
-            margin: 0;
-            cursor: pointer;
-        }
-
-        .table th:first-child,
-        .table td:first-child {
-            width: 50px;
-            text-align: center;
-        }
-
-        /* ============================================================================
-           CUSTOM CHECKBOX STYLES - ADD TO YOUR EXISTING CSS
-           ============================================================================ */
-
-        /* Hide the default checkbox */
-        .comparison-checkbox {
-            position: absolute;
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        /* Custom checkbox container */
-        .custom-checkbox-container {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-        }
-
-        /* Custom checkbox appearance */
-        .custom-checkbox {
-            position: relative;
-            width: 20px;
-            height: 20px;
-            background-color: #e9ecef;
-            border: 2px solid #dee2e6;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        /* Hover state */
-        .custom-checkbox:hover {
-            border-color: #00b894;
-            background-color: #f0f9f7;
-        }
-
-        /* Checked state */
-        .comparison-checkbox:checked + .custom-checkbox {
-            background-color: #e9ecef;
-            border-color: #00b894;
-        }
-
-        /* Checkmark */
-        .custom-checkbox::after {
-            content: '✓';
-            color: #00b894;
-            font-size: 14px;
-            font-weight: bold;
-            opacity: 0;
-            transform: scale(0.5);
-            transition: all 0.2s ease;
-        }
-
-        /* Show checkmark when checked */
-        .comparison-checkbox:checked + .custom-checkbox::after {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        /* Focus state for accessibility */
-        .comparison-checkbox:focus + .custom-checkbox {
-            outline: 2px solid #00b894;
-            outline-offset: 2px;
-        }
-
-        /* Label styling */
-        .checkbox-label {
-            font-size: 0.8rem;
-            color: #333;
-            cursor: pointer;
-            user-select: none;
-            margin: 0;
-        }
-
-        /* Table cell specific styling */
-        .table .custom-checkbox-container {
-            justify-content: center;
-        }
-
-        /* Mobile card styling adjustments */
-        .mobile-card-checkbox .custom-checkbox-container {
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .mobile-card-checkbox .checkbox-label {
-            font-size: 0.8rem;
-            color: #666;
-        }
-
-        /* Update existing comparison checkbox styles to work with new structure */
-        .comparison-mode .custom-checkbox-container {
-            display: flex;
-        }
-
-        /* Hide custom checkboxes initially */
-        .custom-checkbox-container {
-            display: none;
-        }
-
-        /* Show checkboxes when comparison mode is active */
-        .comparison-mode .custom-checkbox-container {
-            display: flex;
-        }
-
-        /* Enhanced checkbox for selected rows */
-        .table-row-selected .custom-checkbox {
-            transform: scale(1.1);
-            border-color: #1976d2;
-        }
-
-        .table-row-selected .comparison-checkbox:checked + .custom-checkbox::after {
-            color: #1976d2;
-        }
-
-        /* Create a complete border using pseudo-element overlay */
-        .table-row-selected::before {
-            position: absolute;
-            top: 0;        /* Changed from -2px */
-            left: 0;       /* Changed from -2px */
-            right: 0;      /* Changed from -2px */
-            bottom: 0;     /* Changed from -2px */
-            border: 3px solid #1976d2;
-            border-radius: 4px;  /* Reduced slightly */
-            pointer-events: none;
-            z-index: 2;
-            background: #00b894;
-        }
-
-        .table-row-selected {
-            background-color: #e3f2fd !important;
-            box-shadow:
-                inset 3px 0 0 #1976d2,    /* Left border */
-                inset -3px 0 0 #1976d2,   /* Right border */
-                inset 0 3px 0 #1976d2,    /* Top border */
-                inset 0 -3px 0 #1976d2,   /* Bottom border */
-                0 2px 8px rgba(25, 118, 210, 0.15); /* Optional shadow */
-            position: relative;
-            z-index: 1;
-        }
-
-        .table-row-selected td {
-            background-color: #e3f2fd !important;
-            color: #1565c0 !important;
-            font-weight: 500 !important;
-        }
-
-        /* Alternative approach using box-shadow for cleaner borders */
-        .table-row-selected-alt {
-            background-color: #e3f2fd !important;
-            box-shadow:
-                0 0 0 2px #1976d2,
-                0 4px 12px rgba(25, 118, 210, 0.15);
-            position: relative;
-            z-index: 10;
-        }
-
-        .table-row-selected-alt td {
-            background-color: #e3f2fd !important;
-            color: #1565c0 !important;
-            font-weight: 500 !important;
-            border-color: transparent !important;
-        }
-
-        /* Smooth transitions */
-        .table tbody tr {
-            transition: all 0.2s ease;
-        }
-
-        /* Enhanced checkbox for selected rows */
-        .table-row-selected .comparison-checkbox,
-        .table-row-selected-alt .comparison-checkbox {
-            transform: scale(1.15);
-            accent-color: #1976d2;
-        }
-
-        /* Hover effects */
-        .table-row-selected:hover::before {
-            background: rgba(25, 118, 210, 0.1);
-            border-color: #0d47a1;
-        }
-
-        .table-row-selected-alt:hover {
-            box-shadow:
-                0 0 0 3px #1976d2,
-                0 6px 16px rgba(25, 118, 210, 0.2);
-        }
-
-        /* Demo table styling */
-        .demo-table {
-            width: 100%;
-            margin: 20px 0;
-        }
-
-        .demo-table td, .demo-table th {
-            padding: 12px 8px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-
-        .demo-table th {
-            background: #f8f9fa;
-            font-weight: 600;
-        }
-
-        /* Button styling for demo */
-        .demo-btn {
-            background: #1976d2;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin: 2px;
-        }
-
-        .demo-btn:hover {
-            background: #1565c0;
-        }
-
-        .demo-btn.success {
-            background: #4caf50;
-        }
-
-        /* Selection indicator */
-        .selection-status {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #1976d2;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            display: none;
-            z-index: 1000;
-        }
-
-        .selection-status.show {
-            display: block;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .comparison-limit-warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-            text-align: center;
-            padding: 0.5rem;
-            margin-bottom: 1rem;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            display: none;
-        }
-
-        .comparison-status {
-            position: fixed;
-            top: 20px;
-            right: 2px;
-            background: #28a745;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            font-size: 0.875rem;
-            z-index: 1000;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .comparison-status.show {
-            transform: translateX(0);
-        }
-
-        .comparison-status.warning {
-            background: #ffc107;
-            color: #212529;
-        }
-
-        .comparison-status.info {
-            background: #17a2b8;
-        }
-
-        /* Basic table styles */
-        .table {
-            margin-bottom: 0;
-        }
-
-        .table th {
-            background-color: #f8f9fa;
-            border-bottom: 2px solid #dee2e6;
-            font-weight: 600;
-            padding: 0.75rem;
-        }
-
-        .table td {
-            padding: 0.75rem;
-            vertical-align: middle;
-        }
-
-        .data-cell {
-            text-align: center;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: center;
-        }
-
-        /* Image display for comparison cards */
-        .comparison-image {
-            max-width: 100%;
-            max-height: 40px;
-            object-fit: contain;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .comparison-container {
-                flex-direction: column;
-            }
-
-            .comparison-card {
-                min-width: auto;
-                width: 100%;
-            }
-
-            .comparison-header {
-                flex-direction: column;
-                gap: 0.5rem;
-                align-items: stretch;
-            }
-        }
-
-        .compare-demo-btn {
-            background: #fcfcfc;
-            color: #583f3f;
-            padding: 0.4rem 1.5rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-weight: 400;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-            border: 1px solid #ccc;
-        }
-
-        .compare-demo-btn:hover {
-            background:  #fcfcfc;
-        }
-
-        .compare-demo-btn:disabled {
-            background: #fcfcfc;
-            cursor: not-allowed;
-        }
-
-        /* Hide comparison checkboxes initially */
-        .comparison-checkbox,
-        .comparison-checkbox + label {
-            display: none;
-        }
-
-        /* Show checkboxes when comparison mode is active */
-        .comparison-mode .comparison-checkbox,
-        .comparison-mode .comparison-checkbox + label {
-            display: inline-block;
-        }
-
-        /* For mobile cards - hide the checkbox container initially */
-        .card-actions .comparison-checkbox,
-        .card-actions .comparison-checkbox + label {
-            display: none;
-        }
-
-        .comparison-mode .card-actions .comparison-checkbox,
-        .comparison-mode .card-actions .comparison-checkbox + label {
-            display: inline-block;
-        }
-    </style>
 </head>
 <body class="bg-light" th:classappend="${#authorization.expression('isAuthenticated()')} ? 'authenticated' : 'guest'">
 <div class="container py-4">
@@ -907,7 +164,11 @@
         </div>
     </div>
 
-    <div class="table-container">
+    <div class="table-with-checkboxes-container">
+        <!-- Checkbox column - positioned absolutely to left of table -->
+        <div class="external-checkboxes-column" id="externalCheckboxes">
+            <!-- Checkboxes will be populated here by JavaScript -->
+        </div>
         <div class="loading-overlay" id="loadingOverlay">
             <div class="loading-spinner"></div>
         </div>
@@ -934,7 +195,7 @@
                             <span class="header-text" th:text="${field.label}"></span>
                         </div>
                     </th>
-                    <th class="no-drag">Actions</th>
+                    <th class="no-drag"></th>
                 </tr>
                 </thead>
 
@@ -1181,7 +442,6 @@
             currentPageData = data.content;
 
             // FIXED: Merge new field values with existing ones instead of replacing
-            // This preserves field data for rates that are in comparison but not on current page
             Object.assign(serverRateFieldValuesMap, data.rateFieldValuesMap || {});
 
             // Check which compared rates are no longer available and might need their data fetched
@@ -1190,7 +450,6 @@
 
             comparedRates.forEach((rate, rateId) => {
                 if (!currentRateIds.has(rateId) && !serverRateFieldValuesMap[rateId]) {
-                    // This rate is in comparison but we don't have its field data
                     comparedRatesNeedingData.push(rateId);
                 }
             });
@@ -1222,6 +481,30 @@
             hideLoading();
         });
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Re-align checkboxes when window is resized
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                if (document.body.classList.contains('comparison-mode')) {
+                    alignExternalCheckboxes();
+                }
+            }, 150);
+        });
+
+        // Re-align checkboxes when scrolling (for better positioning)
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                if (document.body.classList.contains('comparison-mode')) {
+                    positionCheckboxes();
+                }
+            }, 50);
+        });
+    });
 
     // Add this new function to fetch missing rate data
     async function fetchMissingRateData(rateIds) {
@@ -1266,18 +549,31 @@
         }
     }
 
-    // Update the showStatus message to use your provider names
+    function updateVergleichenButtonVisibility(rateId, isInComparison) {
+        const expandedCardButton = document.querySelector(`#rateCard_${rateId} button[onclick*="startComparisonFromCard(${rateId})"]`);
+        const mobileCardButton = document.querySelector(`div[data-rate-id="${rateId}"] button[onclick*="startComparisonFromCard(${rateId})"]`);
+
+        const buttons = [expandedCardButton, mobileCardButton].filter(btn => btn !== null);
+
+        buttons.forEach(button => {
+            if (isInComparison) {
+                button.style.display = 'none';
+            } else {
+                button.style.display = 'inline-block';
+            }
+        });
+    }
+
     function addToComparison(rateId) {
         if (comparedRates.size >= maxComparisons) {
             showStatus('Maximum number of comparisons reached (3)', 'warning');
-            const checkbox = document.getElementById(`compare-${rateId}`);
+            const checkbox = document.getElementById(`external-compare-${rateId}`);
             const mobileCheckbox = document.getElementById(`compare-mobile-${rateId}`);
             if (checkbox) checkbox.checked = false;
             if (mobileCheckbox) mobileCheckbox.checked = false;
             return;
         }
 
-        // Find rate in current page data or all loaded data
         let rate = currentPageData.find(r => r.id === rateId);
         if (!rate && typeof allLoadedData !== 'undefined') {
             rate = allLoadedData.find(r => r.id === rateId);
@@ -1286,7 +582,6 @@
         if (rate && !comparedRates.has(rateId)) {
             comparedRates.set(rateId, rate);
 
-            // Ensure we have field data for this rate
             if (!serverRateFieldValuesMap[rateId]) {
                 fetchMissingRateData([rateId]).then(() => {
                     updateComparisonDisplay();
@@ -1297,7 +592,8 @@
 
             updateTableRowHighlight(rateId, true);
 
-            // Get provider name for status message
+            updateVergleichenButtonVisibility(rateId, true);
+
             const providerName = serverRateFieldValuesMap[rateId]?.[1] || `Rate #${rateId}`;
             showStatus(`${providerName} added to comparison`, 'success');
         }
@@ -1308,35 +604,53 @@
             comparedRates.delete(rateId);
             updateComparisonDisplay();
             updateTableRowHighlight(rateId, false);
+
+            updateVergleichenButtonVisibility(rateId, false);
+
             showStatus(`Aus dem Vergleich entfernt`, 'info');
             showWarning(false);
 
-            const checkbox = document.getElementById(`compare-${rateId}`);
-            if (checkbox) checkbox.checked = false;
+            const externalCheckbox = document.getElementById(`external-compare-${rateId}`);
+            if (externalCheckbox) {
+                externalCheckbox.checked = false;
+            }
+
+            const mobileCheckbox = document.getElementById(`compare-mobile-${rateId}`);
+            if (mobileCheckbox) {
+                mobileCheckbox.checked = false;
+            }
+
+            const oldCheckbox = document.getElementById(`compare-${rateId}`);
+            if (oldCheckbox) {
+                oldCheckbox.checked = false;
+            }
         }
     }
 
     function clearAllComparisons() {
-    document.querySelectorAll('.comparison-checkbox').forEach(checkbox => {
-        checkbox.checked = false;
-    });
+        // Clear external checkboxes
+        document.querySelectorAll('.external-checkbox').forEach(checkbox => {
+            checkbox.checked = false;
+        });
 
-    comparedRates.forEach((rate, rateId) => {
-        updateTableRowHighlight(rateId, false);
-    });
+        comparedRates.forEach((rate, rateId) => {
+            updateTableRowHighlight(rateId, false);
+        });
 
-    comparedRates.clear();
-    updateComparisonDisplay();
-    showWarning(false);
-    showStatus('All comparisons cleared', 'info');
+        comparedRates.clear();
+        updateComparisonDisplay();
+        showWarning(false);
+        showStatus('All comparisons cleared', 'info');
 
-    // Remove comparison mode class to hide checkboxes
-    document.body.classList.remove('comparison-mode');
+        // Remove comparison mode class to hide checkboxes
+        document.body.classList.remove('comparison-mode');
 
-    // Reset quick compare button
-    const quickCompareBtn = document.getElementById('quickCompareBtn');
-    document.getElementById("quickCompareBtn").style.display = "inline-block";
-}
+        // Reset quick compare button
+        const quickCompareBtn = document.getElementById('quickCompareBtn');
+        if (quickCompareBtn) {
+            quickCompareBtn.style.display = "inline-block";
+        }
+    }
 
     function updateComparisonDisplay() {
         const section = document.getElementById('comparisonSection');
@@ -1371,7 +685,9 @@
         // Create cards container
         const cardsHtml = `
             <div class="comparison-cards-container">
-                ${Array.from(comparedRates.entries()).map(([rateId, rate]) => createComparisonCardNew(rate)).join('')}
+                ${Array.from(comparedRates.entries()).map(([rateId, rate], index) =>
+                    createComparisonCardNew(rate, index === 0) // Pass true only for the first card
+                ).join('')}
                 ${comparedRates.size < maxComparisons ? createEmptyComparisonCards(maxComparisons - comparedRates.size) : ''}
             </div>
         `;
@@ -1391,11 +707,14 @@
         return cards;
     }
 
-    function createComparisonCardNew(rate) {
+    function createComparisonCardNew(rate, isFirstCard = false) {
         const rateFieldValues = serverRateFieldValuesMap[rate.id] || {};
 
-        // If we don't have field data, show loading state
         if (Object.keys(rateFieldValues).length === 0) {
+            fetchMissingRateData([rate.id]).then(() => {
+                updateComparisonDisplay();
+            });
+
             return `
                 <div class="comparison-card">
                     <div class="comparison-card-header">
@@ -1413,10 +732,8 @@
                     </div>
                 </div>
             `;
-            return card;
         }
 
-        // Find image field (first matching fieldKey containing "img")
         let headerImage = null;
         let headerImageFieldId = null;
         const imageField = globalFieldsCompareCache.find(
@@ -1426,13 +743,12 @@
         if (imageField) {
             const imageUrl = rateFieldValues[imageField.id];
             if (imageUrl && imageUrl !== "-") {
-                headerImageFieldId = imageField.id; // only set if valid image exists
+                headerImageFieldId = imageField.id;
                 headerImage = `<img src="${imageUrl}" alt="Logo" class="comparison-logo"
                                   style="height: 100px; width: auto; object-fit: contain;">`;
             }
         }
 
-        // Generate value rows (skip image field if it's shown in header OR if it's an invalid/no image)
         const valueRows = globalFieldsCompareCache
             .filter(field => field.id !== headerImageFieldId && !(field.fieldKey && field.fieldKey.toLowerCase().includes("img")))
             .map((field, index) => {
@@ -1441,8 +757,16 @@
                 return `<div class="comparison-value-row ${rowClass}" data-label="${field.label}">${value}</div>`;
             }).join("");
 
+        const checkmarkSvg = isFirstCard ? `
+            <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; left: -15px; top: 31px;">
+              <rect width="24" height="24" rx="12" fill="#F4F4F4"></rect>
+              <path d="M5 9.5L11.5 16L22.5 5" stroke="#01AC99" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+        ` : '';
+
         return `
             <div class="comparison-card">
+                ${checkmarkSvg}
                 <div class="comparison-card-header">
                     <div class="provider-info d-flex align-items-center">
                         ${headerImage || '<span class="text-muted">No Logo</span>'}
@@ -1454,11 +778,11 @@
                 <div class="comparison-values">
                     ${valueRows}
                     <div style="display: flex; justify-content: center; align-items: center; padding-top: 16px; padding-bottom: 16px;">
-                       <a href="${rate.moreInfo ? '#' : 'javascript:void(0)'}"
+                       <a href="javascript:void(0)"
                            class="${rate.moreInfo ? '' : 'disabled'}"
                            onclick="${rate.moreInfo ? `showMoreInfo(${rate.id})` : 'return false;'}"
                            title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}"
-                           style="font-weight: bold; color: ${rate.moreInfo ? '#00b894' : '#ccc'}; text-decoration: none;">
+                           style="font-weight: bold; color: ${rate.moreInfo ? '#00b894' : '#ccc'}; text-decoration: none; cursor: pointer;">
                             ${rate.moreInfo ? 'MEHR INFO' : 'No Info'}
                        </a>
                     </div>
@@ -1468,14 +792,16 @@
     }
 
     function maintainComparisonState() {
-        // Re-check checkboxes and row highlights after data refresh
         comparedRates.forEach((rate, rateId) => {
             const checkbox = document.getElementById(`compare-${rateId}`);
             if (checkbox) {
                 checkbox.checked = true;
             }
             updateTableRowHighlight(rateId, true);
+            updateVergleichenButtonVisibility(rateId, true);
         });
+
+        refreshAllVergleichenButtons();
     }
 
     function updateTableRowHighlight(rateId, highlight) {
@@ -1515,27 +841,37 @@
         const quickCompareBtn = document.getElementById('quickCompareBtn');
         const body = document.body;
 
-        // Add comparison mode class to body to show checkboxes
         body.classList.add('comparison-mode');
 
-        // Disable button temporarily
         quickCompareBtn.disabled = true;
 
-        // Find the first checkbox in the current page data
-        const firstCheckbox = document.querySelector('.comparison-checkbox');
+        setTimeout(() => {
+            alignExternalCheckboxes();
 
-        if (firstCheckbox && !firstCheckbox.checked) {
-            // Check the first checkbox
-            firstCheckbox.checked = true;
+            const firstCheckbox = document.querySelector('.external-checkbox');
 
-            // Get the rate ID from the checkbox
-            const rateId = firstCheckbox.id.replace('compare-', '');
+            if (firstCheckbox && !firstCheckbox.checked) {
+                firstCheckbox.checked = true;
 
-            // Add to comparison
-            addToComparison(parseInt(rateId));
+                const rateId = firstCheckbox.id.replace('external-compare-', '');
 
-            // Scroll to comparison section
-            setTimeout(() => {
+                addToComparison(parseInt(rateId));
+
+                setTimeout(() => {
+                    const comparisonSection = document.getElementById('comparisonSection');
+                    if (comparisonSection) {
+                        comparisonSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+
+                    quickCompareBtn.disabled = false;
+
+                    showStatus('Comparison mode activated! Select more rates to compare.', 'success');
+                }, 500);
+
+            } else if (firstCheckbox && firstCheckbox.checked) {
                 const comparisonSection = document.getElementById('comparisonSection');
                 if (comparisonSection) {
                     comparisonSection.scrollIntoView({
@@ -1544,40 +880,31 @@
                     });
                 }
 
-                // Re-enable button with new text
                 quickCompareBtn.disabled = false;
+                showStatus('Comparison section opened!', 'info');
 
-                // Show success message
-                showStatus('Comparison mode activated! Select more rates to compare.', 'success');
-            }, 500);
-
-        } else if (firstCheckbox && firstCheckbox.checked) {
-            // If first checkbox is already checked, just scroll to comparison
-            const comparisonSection = document.getElementById('comparisonSection');
-            if (comparisonSection) {
-                comparisonSection.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+            } else {
+                quickCompareBtn.disabled = false;
+                showStatus('No rates available to compare', 'warning');
             }
-
-            quickCompareBtn.disabled = false;
-            showStatus('Comparison section opened!', 'info');
-
-        } else {
-            // No rates available
-            quickCompareBtn.disabled = false;
-            showStatus('No rates available to compare', 'warning');
-        }
+        }, 100);
     }
 
-        // Optional: Hide the quick compare section when comparison is active
+    function maintainComparisonState() {
+        comparedRates.forEach((rate, rateId) => {
+            const externalCheckbox = document.getElementById(`external-compare-${rateId}`);
+            if (externalCheckbox) {
+                externalCheckbox.checked = true;
+            }
+            updateTableRowHighlight(rateId, true);
+        });
+    }
+
     function updateQuickCompareVisibility() {
         const quickCompareSection = document.getElementById('quickCompareSection');
         const quickCompareBtn = document.getElementById('quickCompareBtn');
 
         if (comparedRates && comparedRates.size > 0) {
-            // Keep section visible but change button text
             if (quickCompareSection) {
                 quickCompareSection.style.display = 'block';
             }
@@ -1585,20 +912,16 @@
                 quickCompareBtn.disabled = false;
             }
         } else {
-            // Show when no comparison is active
             if (quickCompareSection) {
                 quickCompareSection.style.display = 'block';
             }
             if (quickCompareBtn) {
                 quickCompareBtn.disabled = false;
             }
-            // Hide checkboxes when no comparisons
             document.body.classList.remove('comparison-mode');
         }
     }
 
-    // Add this to your existing updateComparisonDisplay function
-    // Modify your existing updateComparisonDisplay function to include this call
     const originalUpdateComparisonDisplay = updateComparisonDisplay;
     updateComparisonDisplay = function() {
         originalUpdateComparisonDisplay();
@@ -1611,72 +934,6 @@
         originalClearAllComparisons();
         updateQuickCompareVisibility();
     };
-
-    function showMoreInfo(rateId) {
-        const rate = currentPageData.find(r => r.id === rateId);
-        if (rate && rate.moreInfo) {
-            const rateFieldValues = serverRateFieldValuesMap[rateId] || {};
-            const details = globalFieldsCache.map(field =>
-                `${field.label}: ${rateFieldValues[field.id] || 'N/A'}`
-            ).join('\n');
-
-            alert(`More information:\n\n${details}`);
-        } else {
-            showStatus('Keine zusätzlichen Informationen für diesen Zinssatz verfügbar.', 'info');
-        }
-    }
-
-    // Integration functions for your existing code
-    function integrateWithExistingTable() {
-        // This function shows how to integrate with your existing renderTableRows function
-        // Replace your existing renderTableRows function content with something like this:
-
-        /*
-        function renderTableRows(data, tbody) {
-            if (!data || data.length === 0) {
-                tbody.innerHTML = '';
-                return;
-            }
-
-            tbody.innerHTML = data.map(rate => {
-                // Get current field order from headers
-                const headers = document.querySelectorAll('.draggable-column, .sortable');
-                const currentFieldOrder = Array.from(headers)
-                    .map(header => ({
-                        id: header.dataset.fieldId,
-                        fieldKey: header.dataset.fieldKey,
-                        label: header.querySelector('.header-text').textContent.trim()
-                    }));
-
-                // Add comparison checkbox as first cell
-                const comparisonCell = `
-                    <td class="data-cell" data-label="Compare">
-                        <input type="checkbox"
-                               class="comparison-checkbox"
-                               onchange="toggleComparison(${rate.id}, this.checked)"
-                               id="compare-${rate.id}">
-                    </td>
-                `;
-
-                // Generate other cells as before
-                const fieldCells = currentFieldOrder.map(field => {
-                    const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
-                    // ... your existing cell generation logic
-                });
-
-                return `
-                    <tr data-rate-id="${rate.id}">
-                        ${comparisonCell}
-                        ${fieldCells.join('')}
-                        <td data-label="Actions">
-                            ${actionButtons}
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-        */
-    }
 
     function fetchRateDetails(rateId) {
         return fetch(`/api/interest-rate/${rateId}`)
@@ -1717,6 +974,7 @@
     function renderTableRows(data, tbody) {
         if (!data || data.length === 0) {
             tbody.innerHTML = '';
+            updateExternalCheckboxes([]); // Clear external checkboxes
             return;
         }
 
@@ -1733,7 +991,10 @@
             // Check if this rate is currently selected for comparison
             const isSelected = comparedRates.has(rate.id);
 
-            // Generate cells in the new column order
+            // Check if this rate is currently expanded
+            const isExpanded = expandedRateCards.has(rate.id);
+
+            // Generate cells without checkboxes
             const fieldCells = currentFieldOrder.map((field, index) => {
                 const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
 
@@ -1744,16 +1005,6 @@
                                 ${fieldValue ? `<img src="${fieldValue}" alt="Interest Rate Logo" class="interest-rate-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />` : ''}
                                 <div class="no-image-placeholder" style="${fieldValue ? 'display:none' : 'display:block'}">No Image</div>
                             </div>
-                            ${index === 0 ? `
-                            <div class="custom-checkbox-container" style="margin-top: 0.5rem;">
-                                <input type="checkbox"
-                                       class="comparison-checkbox"
-                                       onchange="toggleComparison(${rate.id}, this.checked)"
-                                       id="compare-${rate.id}"
-                                       ${isSelected ? 'checked' : ''}>
-                                <div class="custom-checkbox"></div>
-                            </div>
-                            ` : ''}
                         </td>
                     `;
                 } else {
@@ -1763,36 +1014,30 @@
                                  style="border: none; background: transparent; cursor: default;">
                                 ${fieldValue || '-'}
                             </div>
-                            ${index === 0 ? `
-                            <div class="custom-checkbox-container" style="margin-top: 0.5rem;">
-                                <input type="checkbox"
-                                       class="comparison-checkbox"
-                                       onchange="toggleComparison(${rate.id}, this.checked)"
-                                       id="compare-${rate.id}"
-                                       ${isSelected ? 'checked' : ''}>
-                                <div class="custom-checkbox"></div>
-                            </div>
-                            ` : ''}
                         </td>
                     `;
                 }
             }).join('');
 
-            // Action buttons without checkbox now
+            // Action buttons with proper initial state
             let actionButtons = `
                 <div class="action-buttons">
                     <button class="mehr-info-btn"
                             ${rate.moreInfo ? '' : 'disabled'}
                             onclick="showMoreInfo(${rate.id})"
-                            title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">
-                        ${rate.moreInfo ? 'MEHR INFO' : 'No Info'}
+                            title="${isExpanded ? 'Hide info' : (rate.moreInfo ? 'Show more info' : 'No additional info available')}">
+                        ${rate.moreInfo ?
+                            (isExpanded ?
+                                `<svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14.9995 9L7.99951 2L0.999512 9" stroke="#00AC98" stroke-width="2"/>
+                                </svg>` :
+                                `MEHR INFO <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1 1L8 8L15 1" stroke="#00AC98" stroke-width="2"/>
+                                </svg>`
+                            ) :
+                            'No Info'
+                        }
                     </button>
-                    <a class="angebot-btn"
-                       href="${rate.webLink || '#'}"
-                       target="_blank"
-                       title="Open Link">
-                        ZUM ANGEBOT
-                    </a>
                 </div>
             `;
 
@@ -1805,6 +1050,40 @@
                 </tr>
             `;
         }).join('');
+
+        setTimeout(() => {
+            alignExternalCheckboxes();
+        }, 50);
+    }
+
+    // New function to manage external checkboxes
+    function updateExternalCheckboxes(data) {
+        const checkboxColumn = document.getElementById('externalCheckboxes');
+        if (!checkboxColumn) return;
+
+        if (!data || data.length === 0) {
+            checkboxColumn.innerHTML = '';
+            return;
+        }
+
+        // Create header spacer and checkbox rows
+        const checkboxRows = data.map(rate => {
+            const isSelected = comparedRates.has(rate.id);
+            return `
+                <div class="external-checkbox-row" data-rate-id="${rate.id}">
+                    <div class="custom-checkbox-container">
+                        <input type="checkbox"
+                               class="comparison-checkbox external-checkbox"
+                               onchange="toggleComparison(${rate.id}, this.checked)"
+                               id="external-compare-${rate.id}"
+                               ${isSelected ? 'checked' : ''}>
+                        <div class="custom-checkbox"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        checkboxColumn.innerHTML = checkboxRows;
     }
 
     function updateBrowserUrl(page, search, sortBy, sortDir) {
@@ -1902,11 +1181,26 @@
         }
     }
 
-    function changePageSize(newSize) {
-        pageSize = parseInt(newSize);
-        currentPage = 1;
+function changePageSize(newSize) {
+    pageSize = parseInt(newSize);
+    currentPage = 1;
+
+    // Load new page with updated size
+    if (isInfiniteScrollEnabled) {
+        // Reset infinite scroll state
+        loadedPages.clear();
+        allLoadedData = [];
+        hasMoreData = true;
+
+        loadPageFromServerWithInfiniteScroll(1, currentSearchTerm, currentSortColumn, currentSortDirection);
+    } else if (typeof activeFilters !== 'undefined' && activeFilters.size > 0) {
+        // Load with filters if they exist
+        loadPageFromServerWithFilters(1, currentSearchTerm, currentSortColumn, currentSortDirection, activeFilters);
+    } else {
+        // Standard page load
         loadPageFromServer(1, currentSearchTerm);
     }
+}
 
     // ============================================================================
     // SEARCH FUNCTIONALITY
@@ -2029,30 +1323,174 @@
     // MORE INFO AND EXPANDED CARDS
     // ============================================================================
 
+    let expandedRateCards = new Set();
+
+    // Enhanced showMoreInfo function with button state toggle
     function showMoreInfo(rateId) {
         let rate = currentPageData.find(r => r.id === rateId);
 
-        // If not found in current page data, try to find in all loaded data (for infinite scroll)
         if (!rate && typeof allLoadedData !== 'undefined' && allLoadedData.length > 0) {
             rate = allLoadedData.find(r => r.id === rateId);
         }
 
+        // Check if this card is already expanded
+        if (expandedRateCards.has(rateId)) {
+            // Close the expanded card
+            closeExpandedCard(rateId);
+            expandedRateCards.delete(rateId);
+            updateMehrInfoButton(rateId, false); // Update button to closed state
+            alignExternalCheckboxes();
+            return;
+        }
+
         if (!rate) {
-            fetchRateDetails(rateId)
+            showStatus('Loading rate details...', 'info');
+
+            fetch(`/api/interest-rate/${rateId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch rate details');
+                    }
+                    return response.json();
+                })
                 .then(rateData => {
                     if (rateData && rateData.moreInfo) {
-                        displayRateCard(rateData);
+                        if (rateData.fieldValues) {
+                            serverRateFieldValuesMap[rateId] = rateData.fieldValues;
+                        }
+
+                        displayRateCardInModal(rateData);
+                    } else {
+                        showStatus('No additional information available for this rate.', 'warning');
                     }
+                })
+                .catch(error => {
+                    console.error('Error fetching rate details:', error);
+                    showStatus('Error loading rate details: ' + error.message, 'error');
                 });
             return;
         }
 
         if (!rate.moreInfo) {
-            showDeleteNotification('No additional information available for this rate.', false);
+            showStatus('No additional information available for this rate.', 'warning');
             return;
         }
 
+        // Close any other expanded cards first
+        if (currentExpandedCard && currentExpandedCard !== rateId) {
+            closeExpandedCard(currentExpandedCard);
+            expandedRateCards.delete(currentExpandedCard);
+            updateMehrInfoButton(currentExpandedCard, false);
+        }
+
         displayRateCard(rate);
+        expandedRateCards.add(rateId);
+        updateMehrInfoButton(rateId, true); // Update button to opened state
+        alignExternalCheckboxes();
+    }
+
+    function displayRateCardInModal(rate) {
+        const existingModal = document.getElementById('rateInfoModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        const modal = document.createElement('div');
+        modal.id = 'rateInfoModal';
+        modal.className = 'rate-info-modal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+            overflow-y: auto;
+        `;
+
+        const modalContent = document.createElement('div');
+        modalContent.className = 'modal-content-wrapper';
+        modalContent.style.cssText = `
+            background: white;
+            border-radius: 8px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        `;
+
+        const closeButton = document.createElement('button');
+        closeButton.innerHTML = '✕';
+        closeButton.style.cssText = `
+            position: sticky;
+            top: 10px;
+            right: 10px;
+            float: right;
+            background: #f0f0f0;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+            z-index: 1;
+            margin: 10px;
+        `;
+        closeButton.onclick = () => modal.remove();
+
+        const header = document.createElement('div');
+        header.style.cssText = `
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            background: #f8f9fa;
+            border-radius: 8px 8px 0 0;
+        `;
+
+        const providerName = serverRateFieldValuesMap[rate.id]?.[1] || `Interest Rate #${rate.id}`;
+        header.innerHTML = `
+            <h4 style="margin: 0; color: #333;">
+                ${providerName}
+            </h4>
+            <small style="color: #666;">Detailed Information</small>
+        `;
+
+        const contentArea = document.createElement('div');
+        contentArea.style.cssText = 'padding: 20px;';
+
+        const rateCard = createRateCard(rate);
+        contentArea.appendChild(rateCard);
+
+        modalContent.appendChild(closeButton);
+        modalContent.appendChild(header);
+        modalContent.appendChild(contentArea);
+        modal.appendChild(modalContent);
+
+        document.body.appendChild(modal);
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                modal.remove();
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+
+        modalContent.setAttribute('tabindex', '-1');
+        modalContent.focus();
     }
 
 
@@ -2153,7 +1591,6 @@
         currentExpandedCard = rate.id;
     }
 
-
     function createRateCard(rate) {
         const card = document.createElement('div');
         card.className = 'rate-card';
@@ -2244,7 +1681,6 @@
             }
         });
 
-        // Add any sections not in order
         tableSectionsMap.forEach((tableSection, identifier) => {
             if (!sectionOrder.includes(identifier)) {
                 sectionsHTML += createTableSection(tableSection);
@@ -2257,13 +1693,180 @@
             }
         });
 
+        const isInComparison = comparedRates.has(rate.id);
+        const buttonDisplay = isInComparison ? 'display: none;' : '';
+
+        const compareButton = `
+            <div class="rate-card-actions">
+                 <a class="angebot-btn"
+                       href="${rate.webLink || '#'}"
+                       target="_blank"
+                       title="Open Link"
+                       style="float: right; margin-right: 54px; margin-bottom:16px">
+                        ZUM ANGEBOT
+                 </a>
+                <button type="button"
+                        class="mehr-info-btn"
+                        onclick="startComparisonFromCard(${rate.id})"
+                        style="float: right; margin-right: 16px; margin-bottom:16px; ${buttonDisplay}">
+                    VERGLEICHEN
+                </button>
+            </div>
+        `;
+
         card.innerHTML = `
             <div class="rate-expanded-content show">
                 ${sectionsHTML}
+                ${compareButton}
             </div>
         `;
 
         return card;
+    }
+
+    // New function to handle comparison start from rate card
+    function startComparisonFromCard(currentRateId) {
+        console.log('Starting comparison from card for rate:', currentRateId);
+
+        // Check if we're at max capacity
+        if (comparedRates.size >= maxComparisons) {
+            showStatus('Maximum number of comparisons reached (3)', 'warning');
+            return;
+        }
+
+        // Enable comparison mode first
+        document.body.classList.add('comparison-mode');
+
+        // Show the comparison section
+        const comparisonSection = document.getElementById('comparisonSection');
+        if (comparisonSection) {
+            comparisonSection.style.display = 'block';
+        }
+
+        // Hide the quick compare button since we're now in comparison mode
+        const quickCompareBtn = document.getElementById('quickCompareBtn');
+        if (quickCompareBtn) {
+            quickCompareBtn.style.display = 'none';
+        }
+
+        // If this is the first comparison, also add the first record
+        let shouldAddFirstRecord = comparedRates.size === 0;
+
+        // Add the first record to comparison ONLY if this is the very first comparison
+        if (shouldAddFirstRecord) {
+            // Get the first available rate from current data
+            let firstRateId = null;
+            if (isInfiniteScrollEnabled && allLoadedData && allLoadedData.length > 0) {
+                // In infinite scroll mode, use the first rate from all loaded data
+                firstRateId = allLoadedData[0].id;
+            } else if (currentPageData && currentPageData.length > 0) {
+                // In normal pagination mode, use the first rate from current page
+                firstRateId = currentPageData[0].id;
+            }
+
+            // Add the first rate to comparison (if it's different from current rate and we have space)
+            if (firstRateId && firstRateId !== currentRateId && comparedRates.size < maxComparisons) {
+                const firstRate = (isInfiniteScrollEnabled ? allLoadedData : currentPageData)
+                    .find(r => r.id === firstRateId);
+
+                if (firstRate) {
+                    comparedRates.set(firstRateId, firstRate);
+
+                    // Check the checkbox for the first rate
+                    const firstCheckbox = document.getElementById(`external-compare-${firstRateId}`);
+                    const firstMobileCheckbox = document.getElementById(`compare-mobile-${firstRateId}`);
+                    if (firstCheckbox) firstCheckbox.checked = true;
+                    if (firstMobileCheckbox) firstMobileCheckbox.checked = true;
+
+                    // Highlight the first rate row
+                    updateTableRowHighlight(firstRateId, true);
+                }
+            }
+        }
+
+        // Check if current rate is already in comparison
+        if (comparedRates.has(currentRateId)) {
+            showStatus('This rate is already in comparison', 'info');
+            scrollToComparison();
+            setTimeout(() => {
+                closeExpandedCard(currentRateId);
+            }, 1000);
+            return;
+        }
+
+        // Check if we still have space after potentially adding the first record
+        if (comparedRates.size >= maxComparisons) {
+            showStatus('Maximum number of comparisons reached (3)', 'warning');
+            return;
+        }
+
+        // Add the current rate to comparison
+        let currentRate = null;
+        if (isInfiniteScrollEnabled && allLoadedData) {
+            currentRate = allLoadedData.find(r => r.id === currentRateId);
+        } else if (currentPageData) {
+            currentRate = currentPageData.find(r => r.id === currentRateId);
+        }
+
+        // If rate not found in current data, fetch it from server
+        if (!currentRate) {
+            fetchRateDetails(currentRateId).then(fetchedRate => {
+                if (fetchedRate) {
+                    comparedRates.set(currentRateId, fetchedRate);
+
+                    // Ensure we have field values for the fetched rate
+                    if (fetchedRate.fieldValues) {
+                        serverRateFieldValuesMap[currentRateId] = fetchedRate.fieldValues;
+                    }
+
+                    updateComparisonDisplay();
+                    scrollToComparison();
+                }
+            });
+        } else {
+            comparedRates.set(currentRateId, currentRate);
+
+            // Check the checkbox for the current rate
+            const currentCheckbox = document.getElementById(`external-compare-${currentRateId}`);
+            const currentMobileCheckbox = document.getElementById(`compare-mobile-${currentRateId}`);
+            if (currentCheckbox) currentCheckbox.checked = true;
+            if (currentMobileCheckbox) currentMobileCheckbox.checked = true;
+
+            // Highlight the current rate row
+            updateTableRowHighlight(currentRateId, true);
+        }
+
+        // Update the comparison display
+        updateComparisonDisplay();
+
+        // Scroll to comparison section
+        scrollToComparison();
+
+        // Show success message
+        const rateCount = comparedRates.size;
+        if (rateCount === 1) {
+            showStatus('Comparison mode activated! Rate added to comparison.', 'success');
+        } else {
+            showStatus(`${rateCount} rates added to comparison!`, 'success');
+        }
+
+        // Close the expanded card after a short delay
+        setTimeout(() => {
+            closeExpandedCard(currentRateId);
+        }, 1000);
+    }
+
+    // Helper function to scroll to comparison section
+    function scrollToComparison() {
+        setTimeout(() => {
+            const comparisonSection = document.getElementById('comparisonSection');
+            if (comparisonSection) {
+                comparisonSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }, 500);
     }
 
     function closeExpandedCard(rateId) {
@@ -2281,7 +1884,38 @@
             if (currentExpandedCard === rateId) {
                 currentExpandedCard = null;
             }
+
+            // Update button state
+            expandedRateCards.delete(rateId);
+            updateMehrInfoButton(rateId, false);
         }
+    }
+
+    // New function to update the MEHR INFO button state
+    function updateMehrInfoButton(rateId, isExpanded) {
+        // Find all buttons for this rate (table view and mobile view)
+        const tableButton = document.querySelector(`tr[data-rate-id="${rateId}"] .mehr-info-btn`);
+        const mobileButton = document.querySelector(`div[data-rate-id="${rateId}"] .mehr-info-btn`);
+
+        const buttons = [tableButton, mobileButton].filter(btn => btn !== null);
+
+        buttons.forEach(button => {
+            if (button && !button.disabled) {
+                if (isExpanded) {
+                    // Show up arrow (opened state)
+                    button.innerHTML = `<svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M14.9995 9L7.99951 2L0.999512 9" stroke="#00AC98" stroke-width="2"/>
+                    </svg>`;
+                    button.title = "Hide info";
+                } else {
+                    // Show down arrow with text (closed state)
+                    button.innerHTML = `MEHR INFO <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 1L8 8L15 1" stroke="#00AC98" stroke-width="2"/>
+                    </svg>`;
+                    button.title = "Show more info";
+                }
+            }
+        });
     }
 
     // ============================================================================
@@ -3071,72 +2705,90 @@
     // Replace the createMobileCard function in your existing code with this enhanced version
 
     function createMobileCard(rate) {
-        // Get current field order from headers
         const headers = document.querySelectorAll('.draggable-column, .sortable');
         const currentFieldOrder = Array.from(headers)
             .map(header => ({
                 id: header.dataset.fieldId,
                 fieldKey: header.dataset.fieldKey,
-                label: header.querySelector('.header-text')
-                    .textContent.trim()
+                label: header.querySelector('.header-text').textContent.trim()
             }));
 
-        // Generate field rows for the card
+        const isExpanded = expandedRateCards.has(rate.id);
+        const isSelected = comparedRates && comparedRates.has ? comparedRates.has(rate.id) : false;
+
+        const isInComparison = comparedRates.has(rate.id);
+        const buttonDisplay = isInComparison ? 'display: none;' : 'display: inline-block;';
+
         const fieldRows = currentFieldOrder.map(field => {
             const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
 
-    if (field.fieldKey && field.fieldKey.toLowerCase().includes('img')) {
-        // Guest view - display only
-        return `
-            <div class="card-field-row">
-                <label class="card-field-label">${field.label}:</label>
-                <div class="card-field-value">
-                    <div class="mobile-image-container readonly">
-                        ${fieldValue ? `<img src="${fieldValue}" alt="Interest Rate Logo" class="interest-rate-logo mobile-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />` : ''}
-                        <div class="no-image-placeholder mobile-placeholder" style="${fieldValue ? 'display:none' : 'display:block'}">No Image</div>
+            if (field.fieldKey && field.fieldKey.toLowerCase().includes('img')) {
+                return `
+                    <div class="card-field-row">
+                        <label class="card-field-label">${field.label}:</label>
+                        <div class="card-field-value">
+                            <div class="mobile-image-container readonly">
+                                ${fieldValue ? `<img src="${fieldValue}" alt="Interest Rate Logo" class="interest-rate-logo mobile-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />` : ''}
+                                <div class="no-image-placeholder mobile-placeholder" style="${fieldValue ? 'display:none' : 'display:block'}">No Image</div>
+                            </div>
+                        </div>
                     </div>
+                `;
+            } else {
+                return `
+                    <div class="card-field-row">
+                        <label class="card-field-label">${field.label}:</label>
+                        <div class="card-field-value">
+                            <span class="card-field-display">${fieldValue || '-'}</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }).join('');
+
+        let actionButtons = `
+            <div class="mobile-card-checkbox">
+                <div class="custom-checkbox-container">
+                    <input type="checkbox"
+                           class="comparison-checkbox"
+                           onchange="toggleComparison(${rate.id}, this.checked)"
+                           id="compare-mobile-${rate.id}"
+                           ${isSelected ? 'checked' : ''}>
+                    <div class="custom-checkbox"></div>
                 </div>
             </div>
+            <div class="card-actions">
+                <button class="mehr-info-btn"
+                        ${rate.moreInfo ? '' : 'disabled'}
+                        onclick="showMoreInfo(${rate.id})"
+                        title="${isExpanded ? 'Hide info' : (rate.moreInfo ? 'Show more info' : 'No additional info available')}">
+                    ${rate.moreInfo ?
+                        (isExpanded ?
+                            `<svg width="16" height="20" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14.9995 9L7.99951 2L0.999512 9" stroke="#00AC98" stroke-width="2"/>
+                            </svg>` :
+                            `MEHR INFO <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 1L8 8L15 1" stroke="#00AC98" stroke-width="2"/>
+                            </svg>`
+                        ) :
+                        'No Info'
+                    }
+                </button>
+                <button type="button"
+                        class="mehr-info-btn"
+                        onclick="startComparisonFromCard(${rate.id})"
+                        style="${buttonDisplay}"
+                        title="Add to comparison">
+                    VERGLEICHEN
+                </button>
+                <a class="btn btn-primary btn-sm angebot-btn-card"
+                   href="${rate.webLink || '#'}"
+                   target="_blank"
+                   title="Open Link">
+                    ZUM ANGEBOT
+                </a>
+            </div>
         `;
-    } else {
-            return `
-                <div class="card-field-row">
-                    <label class="card-field-label">${field.label}:</label>
-                    <div class="card-field-value">
-                        <span class="card-field-display">${fieldValue || '-'}</span>
-                    </div>
-                </div>
-            `;
-            }
-    }).join('');
-
-        // Action buttons (existing logic)
-        let actionButtons = '';
-            actionButtons = `
-                <div class="mobile-card-checkbox">
-                    <div class="custom-checkbox-container">
-                        <input type="checkbox"
-                               class="comparison-checkbox"
-                               onchange="toggleComparison(${rate.id}, this.checked)"
-                               id="compare-mobile-${rate.id}"
-                               ${isSelected ? 'checked' : ''}>
-                        <div class="custom-checkbox"></div>
-                    </div>
-                </div>
-                <div class="card-actions">
-                            ${rate.moreInfo ? '' : 'disabled'}
-                            onclick="showMoreInfo(${rate.id})"
-                            title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">
-                        ${rate.moreInfo ? 'MEHR INFO' : 'No Info'}
-                    </button>
-                    <a class="btn btn-primary btn-sm angebot-btn-card"
-                       href="${rate.webLink || '#'}"
-                       target="_blank"
-                       title="Open Link">
-                        ZUM ANGEBOT
-                    </a>
-                </div>
-            `;
 
         return `
             <div class="mobile-card-row" data-rate-id="${rate.id}">
@@ -3155,6 +2807,22 @@
         `;
     }
 
+    function refreshAllVergleichenButtons() {
+        const allRateIds = new Set();
+
+        if (currentPageData) {
+            currentPageData.forEach(rate => allRateIds.add(rate.id));
+        }
+
+        if (typeof allLoadedData !== 'undefined' && allLoadedData.length > 0) {
+            allLoadedData.forEach(rate => allRateIds.add(rate.id));
+        }
+
+        allRateIds.forEach(rateId => {
+            const isInComparison = comparedRates.has(rateId);
+            updateVergleichenButtonVisibility(rateId, isInComparison);
+        });
+    }
 
     function previewMobileImage(input, rateId, fieldId) {
         const file = input.files[0];
@@ -3632,6 +3300,98 @@
         console.log('All loaded data length:', allLoadedData.length);
     };
 
+    function alignExternalCheckboxes() {
+        const table = document.getElementById('mainTable');
+        const externalCheckboxes = document.getElementById('externalCheckboxes');
+
+        if (!table || !externalCheckboxes) return;
+
+        if (!document.body.classList.contains('comparison-mode')) {
+            externalCheckboxes.innerHTML = '';
+            return;
+        }
+
+        const rows = table.querySelectorAll('tbody tr:not(.rate-card-row)');
+
+        externalCheckboxes.innerHTML = '';
+
+        if (rows.length === 0) return;
+
+        rows.forEach((row, index) => {
+            const rateId = row.getAttribute('data-rate-id');
+            if (!rateId) return; // Skip rows without rate ID
+
+            // Create checkbox row
+            const checkboxRow = document.createElement('div');
+            checkboxRow.className = 'external-checkbox-row';
+            checkboxRow.setAttribute('data-rate-id', rateId);
+
+            const checkboxContainer = document.createElement('div');
+            checkboxContainer.className = 'custom-checkbox-container';
+
+            const checkboxInput = document.createElement('input');
+            checkboxInput.type = 'checkbox';
+            checkboxInput.className = 'comparison-checkbox external-checkbox';
+            checkboxInput.id = `external-compare-${rateId}`;
+
+            // Check if this rate is already in comparison
+            const isSelected = comparedRates && comparedRates.has ? comparedRates.has(parseInt(rateId)) : false;
+            checkboxInput.checked = isSelected;
+
+            const customCheckbox = document.createElement('div');
+            customCheckbox.className = 'custom-checkbox';
+
+            checkboxContainer.appendChild(checkboxInput);
+            checkboxContainer.appendChild(customCheckbox);
+            checkboxRow.appendChild(checkboxContainer);
+
+            externalCheckboxes.appendChild(checkboxRow);
+
+            // Add event listener for comparison functionality
+            checkboxInput.addEventListener('change', () => {
+                toggleComparison(parseInt(rateId), checkboxInput.checked);
+            });
+        });
+
+        requestAnimationFrame(() => {
+            positionCheckboxes();
+        });
+    }
+
+    function positionCheckboxes() {
+        const table = document.getElementById('mainTable');
+        const externalCheckboxes = document.getElementById('externalCheckboxes');
+
+        if (!table || !externalCheckboxes) return;
+
+        const rows = table.querySelectorAll('tbody tr:not(.rate-card-row)');
+        const checkboxRows = externalCheckboxes.querySelectorAll('.external-checkbox-row');
+
+        rows.forEach((row, index) => {
+            const checkboxRow = checkboxRows[index];
+            if (!checkboxRow) return;
+
+            const rowHeight = row.offsetHeight;
+            const rowTop = row.offsetTop;
+
+            checkboxRow.style.position = 'absolute';
+            checkboxRow.style.top = `${rowTop}px`;
+            checkboxRow.style.height = `${rowHeight}px`;
+            checkboxRow.style.display = 'flex';
+            checkboxRow.style.alignItems = 'center';
+        });
+    }
+
+
+    // Run on page load
+    window.addEventListener('load', alignExternalCheckboxes);
+    // Run on window resize
+    window.addEventListener('resize', alignExternalCheckboxes);
+
+    // Optional: Run whenever a row expands/collapses
+    function onRowToggle() {
+        alignExternalCheckboxes();
+    }
     console.log('Filter integration for infinite scroll has been fixed!');
 </script>
 </body>
