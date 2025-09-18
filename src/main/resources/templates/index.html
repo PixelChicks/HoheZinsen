@@ -1466,18 +1466,31 @@
         }
     }
 
-    // Update the showStatus message to use your provider names
+    function updateVergleichenButtonVisibility(rateId, isInComparison) {
+        const expandedCardButton = document.querySelector(`#rateCard_${rateId} button[onclick*="startComparisonFromCard(${rateId})"]`);
+        const mobileCardButton = document.querySelector(`div[data-rate-id="${rateId}"] button[onclick*="startComparisonFromCard(${rateId})"]`);
+
+        const buttons = [expandedCardButton, mobileCardButton].filter(btn => btn !== null);
+
+        buttons.forEach(button => {
+            if (isInComparison) {
+                button.style.display = 'none';
+            } else {
+                button.style.display = 'inline-block';
+            }
+        });
+    }
+
     function addToComparison(rateId) {
         if (comparedRates.size >= maxComparisons) {
             showStatus('Maximum number of comparisons reached (3)', 'warning');
-            const checkbox = document.getElementById(`compare-${rateId}`);
+            const checkbox = document.getElementById(`external-compare-${rateId}`);
             const mobileCheckbox = document.getElementById(`compare-mobile-${rateId}`);
             if (checkbox) checkbox.checked = false;
             if (mobileCheckbox) mobileCheckbox.checked = false;
             return;
         }
 
-        // Find rate in current page data or all loaded data
         let rate = currentPageData.find(r => r.id === rateId);
         if (!rate && typeof allLoadedData !== 'undefined') {
             rate = allLoadedData.find(r => r.id === rateId);
@@ -1486,7 +1499,6 @@
         if (rate && !comparedRates.has(rateId)) {
             comparedRates.set(rateId, rate);
 
-            // Ensure we have field data for this rate
             if (!serverRateFieldValuesMap[rateId]) {
                 fetchMissingRateData([rateId]).then(() => {
                     updateComparisonDisplay();
@@ -1497,7 +1509,8 @@
 
             updateTableRowHighlight(rateId, true);
 
-            // Get provider name for status message
+            updateVergleichenButtonVisibility(rateId, true);
+
             const providerName = serverRateFieldValuesMap[rateId]?.[1] || `Rate #${rateId}`;
             showStatus(`${providerName} added to comparison`, 'success');
         }
@@ -1508,22 +1521,22 @@
             comparedRates.delete(rateId);
             updateComparisonDisplay();
             updateTableRowHighlight(rateId, false);
+
+            updateVergleichenButtonVisibility(rateId, false);
+
             showStatus(`Aus dem Vergleich entfernt`, 'info');
             showWarning(false);
 
-            // Check for external checkbox (desktop table view)
             const externalCheckbox = document.getElementById(`external-compare-${rateId}`);
             if (externalCheckbox) {
                 externalCheckbox.checked = false;
             }
 
-            // Check for mobile checkbox (mobile card view)
             const mobileCheckbox = document.getElementById(`compare-mobile-${rateId}`);
             if (mobileCheckbox) {
                 mobileCheckbox.checked = false;
             }
 
-            // Fallback for any remaining old-style checkboxes
             const oldCheckbox = document.getElementById(`compare-${rateId}`);
             if (oldCheckbox) {
                 oldCheckbox.checked = false;
@@ -1686,14 +1699,16 @@
     }
 
     function maintainComparisonState() {
-        // Re-check checkboxes and row highlights after data refresh
         comparedRates.forEach((rate, rateId) => {
             const checkbox = document.getElementById(`compare-${rateId}`);
             if (checkbox) {
                 checkbox.checked = true;
             }
             updateTableRowHighlight(rateId, true);
+            updateVergleichenButtonVisibility(rateId, true);
         });
+
+        refreshAllVergleichenButtons();
     }
 
     function updateTableRowHighlight(rateId, highlight) {
@@ -2573,7 +2588,6 @@ function changePageSize(newSize) {
             }
         });
 
-        // Add any sections not in order
         tableSectionsMap.forEach((tableSection, identifier) => {
             if (!sectionOrder.includes(identifier)) {
                 sectionsHTML += createTableSection(tableSection);
@@ -2585,6 +2599,9 @@ function changePageSize(newSize) {
                 sectionsHTML += createTextSection(textSection);
             }
         });
+
+        const isInComparison = comparedRates.has(rate.id);
+        const buttonDisplay = isInComparison ? 'display: none;' : '';
 
         const compareButton = `
             <div class="rate-card-actions">
@@ -2598,7 +2615,7 @@ function changePageSize(newSize) {
                 <button type="button"
                         class="mehr-info-btn"
                         onclick="startComparisonFromCard(${rate.id})"
-                        style="float: right; margin-right: 16px; margin-bottom:16px">
+                        style="float: right; margin-right: 16px; margin-bottom:16px; ${buttonDisplay}">
                     VERGLEICHEN
                 </button>
             </div>
@@ -3595,7 +3612,6 @@ function changePageSize(newSize) {
     // Replace the createMobileCard function in your existing code with this enhanced version
 
     function createMobileCard(rate) {
-        // Get current field order from headers
         const headers = document.querySelectorAll('.draggable-column, .sortable');
         const currentFieldOrder = Array.from(headers)
             .map(header => ({
@@ -3604,11 +3620,12 @@ function changePageSize(newSize) {
                 label: header.querySelector('.header-text').textContent.trim()
             }));
 
-        // Check if this rate is expanded
         const isExpanded = expandedRateCards.has(rate.id);
         const isSelected = comparedRates && comparedRates.has ? comparedRates.has(rate.id) : false;
 
-        // Generate field rows for the card
+        const isInComparison = comparedRates.has(rate.id);
+        const buttonDisplay = isInComparison ? 'display: none;' : 'display: inline-block;';
+
         const fieldRows = currentFieldOrder.map(field => {
             const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
 
@@ -3636,7 +3653,6 @@ function changePageSize(newSize) {
             }
         }).join('');
 
-        // Action buttons with proper initial state
         let actionButtons = `
             <div class="mobile-card-checkbox">
                 <div class="custom-checkbox-container">
@@ -3665,6 +3681,13 @@ function changePageSize(newSize) {
                         'No Info'
                     }
                 </button>
+                <button type="button"
+                        class="mehr-info-btn"
+                        onclick="startComparisonFromCard(${rate.id})"
+                        style="${buttonDisplay}"
+                        title="Add to comparison">
+                    VERGLEICHEN
+                </button>
                 <a class="btn btn-primary btn-sm angebot-btn-card"
                    href="${rate.webLink || '#'}"
                    target="_blank"
@@ -3691,6 +3714,22 @@ function changePageSize(newSize) {
         `;
     }
 
+    function refreshAllVergleichenButtons() {
+        const allRateIds = new Set();
+
+        if (currentPageData) {
+            currentPageData.forEach(rate => allRateIds.add(rate.id));
+        }
+
+        if (typeof allLoadedData !== 'undefined' && allLoadedData.length > 0) {
+            allLoadedData.forEach(rate => allRateIds.add(rate.id));
+        }
+
+        allRateIds.forEach(rateId => {
+            const isInComparison = comparedRates.has(rateId);
+            updateVergleichenButtonVisibility(rateId, isInComparison);
+        });
+    }
 
     function previewMobileImage(input, rateId, fieldId) {
         const file = input.files[0];
