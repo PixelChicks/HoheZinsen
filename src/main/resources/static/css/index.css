@@ -2046,8 +2046,9 @@ body.guest .data-cell .form-control:focus {
 
 .action-buttons {
   display: flex;
+  justify-content: flex-end;
   gap: 0.5rem;
-  justify-content: center;
+  padding-right: 4rem;
 }
 
 /* Image display for comparison cards */
