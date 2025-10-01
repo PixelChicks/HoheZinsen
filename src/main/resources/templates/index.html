@@ -1899,8 +1899,12 @@ function changePageSize(newSize) {
 
         const buttons = [tableButton, mobileButton].filter(btn => btn !== null);
 
+        const isMobile = window.innerWidth <= 768;
+
         buttons.forEach(button => {
             if (button && !button.disabled) {
+                const isMobileButton = button.closest('.mobile-interest-card') !== null;
+
                 if (isExpanded) {
                     // Show up arrow (opened state)
                     button.innerHTML = `<svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1909,7 +1913,9 @@ function changePageSize(newSize) {
                     button.title = "Hide info";
                 } else {
                     // Show down arrow with text (closed state)
-                    button.innerHTML = `MEHR INFO <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    // Use "MEHR" only for mobile buttons, "MEHR INFO" for desktop
+                    const buttonText = isMobileButton ? 'MEHR' : 'MEHR INFO';
+                    button.innerHTML = `${buttonText} <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M1 1L8 8L15 1" stroke="#00AC98" stroke-width="2"/>
                     </svg>`;
                     button.title = "Show more info";
@@ -2702,8 +2708,6 @@ function changePageSize(newSize) {
             .join('');
     }
 
-    // Replace the createMobileCard function in your existing code with this enhanced version
-
     function createMobileCard(rate) {
         const headers = document.querySelectorAll('.draggable-column, .sortable');
         const currentFieldOrder = Array.from(headers)
@@ -2715,91 +2719,68 @@ function changePageSize(newSize) {
 
         const isExpanded = expandedRateCards.has(rate.id);
         const isSelected = comparedRates && comparedRates.has ? comparedRates.has(rate.id) : false;
-
         const isInComparison = comparedRates.has(rate.id);
-        const buttonDisplay = isInComparison ? 'display: none;' : 'display: inline-block;';
 
-        const fieldRows = currentFieldOrder.map(field => {
-            const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
+        const fieldValues = serverRateFieldValuesMap[rate.id] || {};
 
-            if (field.fieldKey && field.fieldKey.toLowerCase().includes('img')) {
-                return `
-                    <div class="card-field-row">
-                        <label class="card-field-label">${field.label}:</label>
-                        <div class="card-field-value">
-                            <div class="mobile-image-container readonly">
-                                ${fieldValue ? `<img src="${fieldValue}" alt="Interest Rate Logo" class="interest-rate-logo mobile-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />` : ''}
-                                <div class="no-image-placeholder mobile-placeholder" style="${fieldValue ? 'display:none' : 'display:block'}">No Image</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else {
-                return `
-                    <div class="card-field-row">
-                        <label class="card-field-label">${field.label}:</label>
-                        <div class="card-field-value">
-                            <span class="card-field-display">${fieldValue || '-'}</span>
-                        </div>
-                    </div>
-                `;
-            }
+        let logoHtml = '<span style="color: #6c757d; font-size: 12px;">logo</span>';
+        const imageField = currentFieldOrder.find(f => f.fieldKey && f.fieldKey.toLowerCase().includes('img'));
+        if (imageField && fieldValues[imageField.id]) {
+            logoHtml = `<img src="${fieldValues[imageField.id]}" alt="Logo" style="max-height: 50px; max-width: 100px; object-fit: contain;">`;
+        }
+
+        const displayFields = currentFieldOrder
+            .filter(field => !(field.fieldKey && field.fieldKey.toLowerCase().includes('img')))
+            .slice(1, 5);
+
+        const gridHtml = displayFields.map(field => {
+            const value = fieldValues[field.id] || '-';
+            return `
+                <div class="info-field">
+                    <div class="info-field-label">${field.label.toUpperCase()}</div>
+                    <div class="info-field-value">${value}</div>
+                </div>
+            `;
         }).join('');
 
-        let actionButtons = `
-            <div class="mobile-card-checkbox">
-                <div class="custom-checkbox-container">
-                    <input type="checkbox"
-                           class="comparison-checkbox"
-                           onchange="toggleComparison(${rate.id}, this.checked)"
-                           id="compare-mobile-${rate.id}"
-                           ${isSelected ? 'checked' : ''}>
-                    <div class="custom-checkbox"></div>
-                </div>
-            </div>
-            <div class="card-actions">
-                <button class="mehr-info-btn"
-                        ${rate.moreInfo ? '' : 'disabled'}
-                        onclick="showMoreInfo(${rate.id})"
-                        title="${isExpanded ? 'Hide info' : (rate.moreInfo ? 'Show more info' : 'No additional info available')}">
-                    ${rate.moreInfo ?
-                        (isExpanded ?
-                            `<svg width="16" height="20" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M14.9995 9L7.99951 2L0.999512 9" stroke="#00AC98" stroke-width="2"/>
-                            </svg>` :
-                            `MEHR INFO <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M1 1L8 8L15 1" stroke="#00AC98" stroke-width="2"/>
-                            </svg>`
-                        ) :
-                        'No Info'
-                    }
-                </button>
-                <button type="button"
-                        class="mehr-info-btn"
-                        onclick="startComparisonFromCard(${rate.id})"
-                        style="${buttonDisplay}"
-                        title="Add to comparison">
-                    VERGLEICHEN
-                </button>
-                <a class="btn btn-primary btn-sm angebot-btn-card"
-                   href="${rate.webLink || '#'}"
-                   target="_blank"
-                   title="Open Link">
-                    ZUM ANGEBOT
-                </a>
-            </div>
-        `;
+        const rateValue = fieldValues[currentFieldOrder[0]?.id] || '0,00';
 
         return `
             <div class="mobile-card-row" data-rate-id="${rate.id}">
-                <div colspan="100%">
-                    <div class="mobile-interest-card" data-rate-id="${rate.id}">
-                        <div class="card-header">
-                            <h6 class="card-title mb-0">Interest Rate #${rate.id}</h6>
+                <div class="mobile-interest-card" data-rate-id="${rate.id}">
+                    <!-- Comparison checkbox -->
+                    <div class="mobile-card-checkbox">
+                        <div class="custom-checkbox-container">
+                            <input type="checkbox"
+                                   class="comparison-checkbox"
+                                   onchange="toggleComparison(${rate.id}, this.checked)"
+                                   id="compare-mobile-${rate.id}"
+                                   ${isSelected ? 'checked' : ''}>
+                            <div class="custom-checkbox"></div>
                         </div>
-                        <div class="card-body">
-                            ${fieldRows}
-                            ${actionButtons}
+                    </div>
+
+                    <div class="card-header">
+                        <h6 data-rate="${rateValue}"></h6>
+                        <div class="card-logo-area">
+                            ${logoHtml}
+                        </div>
+                        <div class="card-logo-area">
+                            <button class="mehr-info-btn"
+                                    ${rate.moreInfo ? '' : 'disabled'}
+                                    onclick="showMoreInfo(${rate.id})"
+                                    title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">
+                                MEHR
+                                <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="card-info-grid">
+                            ${gridHtml}
                         </div>
                     </div>
                 </div>

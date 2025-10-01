@@ -978,10 +978,6 @@ body {
   box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
 }
 
-.table > :not(caption) > * > * {
-  background-color: #f8f9fa !important;
-}
-
 .table-container {
   position: relative;
   margin: 0 -15px;

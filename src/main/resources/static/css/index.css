@@ -733,49 +733,172 @@ body.guest .data-cell .form-control:focus {
    ============================================================================ */
 
 @media (max-width: 768px) {
-  /* Ensure cards use full width on mobile */
+  /* Mobile card container */
   .mobile-interest-card {
-    margin-left: 0;
-    margin-right: 0;
+    margin: 0 0 16px 0;
+    padding: 0;
+    border: 1px solid #00BFA5;
+    border-radius: 8px;
+    background: white;
+    overflow: hidden;
   }
 
-  /* Adjust field layout for very small screens */
-  .card-field-row {
+  /* Card header with rate and logo */
+  .mobile-interest-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #e9ecef;
+    background: white;
+  }
+
+  /* Interest rate section */
+  .mobile-interest-card .card-header h6 {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 0;
+  }
+
+  /* Large rate number */
+  .mobile-interest-card .card-header h6::before {
+    content: attr(data-rate);
+    font-size: 32px;
+    font-weight: 700;
+    color: #00BFA5;
+    line-height: 1;
+  }
+
+  /* p.a. label */
+  .mobile-interest-card .card-header h6::after {
+    content: 'p.a.';
+    font-size: 14px;
+    color: #00BFA5;
+    font-weight: 600;
+    position: relative;
+    top: -10px;
+  }
+
+  /* Logo area in header */
+  .mobile-interest-card .card-header .card-logo-area {
+    width: 100px;
+    height: 50px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Card body with info grid */
+  .mobile-interest-card .card-body {
+    padding: 16px;
+  }
+
+  /* Hide the default card field rows */
+  .mobile-interest-card .card-field-row {
+    display: none;
+  }
+
+  /* Create new 2x2 grid for key fields */
+  .mobile-interest-card .card-info-grid {
+    display: flex;
+    gap: 40px;
+  }
+
+  /* Individual info field */
+  .mobile-interest-card .info-field {
+    display: flex;
     flex-direction: column;
-    align-items: flex-start;
     gap: 4px;
   }
 
-  .card-field-label {
-    width: 100%;
-    color: #495057;
+  /* Field labels - red uppercase */
+  .mobile-interest-card .info-field-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #e74c3c;
     font-weight: 600;
+    letter-spacing: 0.5px;
   }
 
-  .card-field-value {
-    width: 100%;
-    margin-left: 0;
-    text-align: left;
-  }
-
-  .card-field-display {
-    width: 100%;
-    text-align: left;
-    background: transparent;
-    padding: 4px 0;
-    border-radius: 0;
-    border-bottom: 1px solid #e9ecef;
+  /* Field values */
+  .mobile-interest-card .info-field-value {
+    font-size: 14px;
     color: #212529;
     font-weight: 400;
   }
 
-  /* Stack action buttons vertically on very small screens */
-  .card-admin-actions {
-    flex-direction: column;
+  /* MEHR button styling */
+  .mobile-interest-card .mehr-button-container {
+    display: flex;
+    justify-content: center;
+    padding-top: 8px;
   }
 
-  .card-admin-actions .btn {
+  .mobile-interest-card .mehr-info-btn {
     width: 100%;
+    padding: 12px;
+    background-color: transparent;
+    border: 2px solid #00BFA5;
+    color: #00BFA5;
+    border-radius: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .mobile-interest-card .mehr-info-btn:hover:not(:disabled) {
+    background-color: #ffffff;
+    color: #0ac1a8;
+  }
+
+  .mobile-interest-card .mehr-info-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Hide action buttons in new layout */
+  .mobile-interest-card .card-actions {
+    display: none;
+  }
+
+  /* Checkbox positioning */
+  .mobile-card-checkbox {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 10;
+  }
+
+  /* Adjust card row wrapper */
+  .mobile-card-row {
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  /* Image handling for logo field */
+  .mobile-interest-card .mobile-image-container {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-interest-card .mobile-image-container img {
+    max-height: 50px;
+    max-width: 100px;
+    object-fit: contain;
+  }
+
+  .mobile-interest-card .no-image-placeholder {
+    font-size: 12px;
+    color: #6c757d;
   }
 }
 
