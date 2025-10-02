@@ -772,12 +772,14 @@ body.guest .data-cell .form-control:focus {
 
   /* p.a. label */
   .mobile-interest-card .card-header h6::after {
-    content: 'p.a.';
+    content: '%\A p.a.';
+    white-space: pre;
+    display: block;
     font-size: 14px;
     color: #00BFA5;
     font-weight: 600;
     position: relative;
-    top: -10px;
+    top: -15px;
   }
 
   /* Logo area in header */
@@ -1025,12 +1027,6 @@ body.guest .data-cell .form-control:focus {
 /* ============================================================================
    ACCESSIBILITY IMPROVEMENTS
    ============================================================================ */
-
-/* Focus styles for card elements */
-.mobile-interest-card:focus-within {
-  outline: 2px solid #007bff;
-  outline-offset: 2px;
-}
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {
