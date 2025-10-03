@@ -7,6 +7,20 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/styles.css" rel="stylesheet">
     <link href="/css/index.css" rel="stylesheet">
+    <style>
+        /* Mobile styles - applies on screens 768px or smaller */
+@media (max-width: 768px) {
+  .angebot-btn {
+    width: 300px;
+    padding: 12px 32px;
+  }
+}
+
+.angebot-btn:hover {
+  background: transparent;
+  color: #00b894;
+}
+    </style>
 </head>
 <body class="bg-light" th:classappend="${#authorization.expression('isAuthenticated()')} ? 'authenticated' : 'guest'">
 <div class="container py-4">
@@ -1524,8 +1538,8 @@ function changePageSize(newSize) {
         let targetElement = null;
 
         if (isMobileCardView) {
-            // In mobile card view, look for the mobile card div
-            targetElement = document.querySelector(`div.mobile-card-row[data-rate-id="${rate.id}"]`);
+            // In mobile card view, find the mobile-interest-card itself
+            targetElement = document.querySelector(`div.mobile-interest-card[data-rate-id="${rate.id}"]`);
             console.log('Found mobile card element:', targetElement);
         } else {
             // In table view, look for regular table row
@@ -1546,46 +1560,51 @@ function changePageSize(newSize) {
         }
 
         const card = createRateCard(rate);
-        let cardContainer;
 
         if (isMobileCardView) {
-            // Create a mobile-friendly container
-            cardContainer = document.createElement('div');
-            cardContainer.id = `rateCardRow_${rate.id}`;
-            cardContainer.className = 'rate-card-mobile-container show';
-            cardContainer.style.width = '100%';
-            cardContainer.style.marginTop = '10px';
-            cardContainer.appendChild(card);
+            // For mobile, append directly inside the mobile-interest-card
+            // Remove borders and add unified styling
+            card.style.borderTop = 'none';
+            card.style.borderRadius = '0 0 12px 12px';
+            card.style.marginTop = '0';
+            targetElement.appendChild(card);
+
+            // Add expanded class to the mobile card for unified styling
+            targetElement.classList.add('card-expanded');
         } else {
             // Create table row for desktop
-            cardContainer = document.createElement('tr');
+            const cardContainer = document.createElement('tr');
             cardContainer.id = `rateCardRow_${rate.id}`;
             cardContainer.className = 'rate-card-row show';
             cardContainer.innerHTML = `<td colspan="100%" class="rate-card-cell"></td>`;
             cardContainer.querySelector('.rate-card-cell').appendChild(card);
-        }
 
-        // Insert the card container
-        try {
-            if (isMobileCardView) {
-                // For mobile, insert directly after the entire mobile card row
+            // Insert the card container
+            try {
                 targetElement.insertAdjacentElement('afterend', cardContainer);
-            } else {
-                // For desktop, insert as table row
-                targetElement.insertAdjacentElement('afterend', cardContainer);
+                console.log('Successfully inserted card container');
+            } catch (error) {
+                console.error('Error inserting card container:', error);
+                return;
             }
-            console.log('Successfully inserted card container');
-        } catch (error) {
-            console.error('Error inserting card container:', error);
-            return;
         }
 
         // Scroll to the card
         setTimeout(() => {
-            cardContainer.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            });
+            if (isMobileCardView) {
+                targetElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest'
+                });
+            } else {
+                const cardRow = document.getElementById(`rateCardRow_${rate.id}`);
+                if (cardRow) {
+                    cardRow.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }
+            }
         }, 50);
 
         currentExpandedCard = rate.id;
@@ -1697,18 +1716,20 @@ function changePageSize(newSize) {
         const buttonDisplay = isInComparison ? 'display: none;' : '';
 
         const compareButton = `
-            <div class="rate-card-actions">
-                 <a class="angebot-btn"
-                       href="${rate.webLink || '#'}"
-                       target="_blank"
-                       title="Open Link"
-                       style="float: right; margin-right: 54px; margin-bottom:16px">
-                        ZUM ANGEBOT
-                 </a>
+            <div class="rate-card-actions"
+                 style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom:16px;">
+
+                <a class="angebot-btn"
+                   href="${rate.webLink || '#'}"
+                   target="_blank"
+                   title="Open Link">
+                    ZUM ANGEBOT
+                </a>
+
                 <button type="button"
                         class="mehr-info-btn"
                         onclick="startComparisonFromCard(${rate.id})"
-                        style="float: right; margin-right: 16px; margin-bottom:16px; ${buttonDisplay}">
+                        style="${buttonDisplay}">
                     VERGLEICHEN
                 </button>
             </div>
@@ -1716,6 +1737,7 @@ function changePageSize(newSize) {
 
         card.innerHTML = `
             <div class="rate-expanded-content show">
+                <hr style="border: none; border-top: 3px dotted #000; margin: 1px 0; padding-bottom: 2px;">
                 ${sectionsHTML}
                 ${compareButton}
             </div>
@@ -1870,25 +1892,44 @@ function changePageSize(newSize) {
     }
 
     function closeExpandedCard(rateId) {
-        const cardRow = document.getElementById(`rateCardRow_${rateId}`);
-        if (cardRow) {
-            cardRow.style.display = 'none';
-            cardRow.classList.remove('show');
+        // Check if we're in mobile card view
+        const tableContainer = document.getElementById('tableContainer');
+        const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
 
-            requestAnimationFrame(() => {
-                if (cardRow.parentNode) {
-                    cardRow.parentNode.removeChild(cardRow);
+        if (isMobileCardView) {
+            // In mobile, the card is directly inside the mobile-interest-card
+            const mobileCard = document.querySelector(`div.mobile-interest-card[data-rate-id="${rateId}"]`);
+            if (mobileCard) {
+                // Remove the expanded content
+                const expandedContent = mobileCard.querySelector('.rate-card');
+                if (expandedContent) {
+                    expandedContent.remove();
                 }
-            });
-
-            if (currentExpandedCard === rateId) {
-                currentExpandedCard = null;
+                // Remove expanded class
+                mobileCard.classList.remove('card-expanded');
             }
+        } else {
+            // Desktop view - remove the separate row
+            const cardRow = document.getElementById(`rateCardRow_${rateId}`);
+            if (cardRow) {
+                cardRow.style.display = 'none';
+                cardRow.classList.remove('show');
 
-            // Update button state
-            expandedRateCards.delete(rateId);
-            updateMehrInfoButton(rateId, false);
+                requestAnimationFrame(() => {
+                    if (cardRow.parentNode) {
+                        cardRow.parentNode.removeChild(cardRow);
+                    }
+                });
+            }
         }
+
+        if (currentExpandedCard === rateId) {
+            currentExpandedCard = null;
+        }
+
+        // Update button state
+        expandedRateCards.delete(rateId);
+        updateMehrInfoButton(rateId, false);
     }
 
     // New function to update the MEHR INFO button state

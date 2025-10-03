@@ -882,6 +882,7 @@ body.guest .data-cell .form-control:focus {
   .mobile-card-row {
     position: relative;
     margin-bottom: 16px;
+    padding-top: 2px;
   }
 
   /* Image handling for logo field */
@@ -1500,6 +1501,7 @@ body.guest .data-cell .form-control:focus {
   border-radius: 8px;
   margin-bottom: 2rem;
   padding: 1.5rem;
+  padding-bottom: 2px;
 }
 
 .comparison-header {
