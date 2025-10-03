@@ -8,18 +8,17 @@
     <link href="/css/styles.css" rel="stylesheet">
     <link href="/css/index.css" rel="stylesheet">
     <style>
-        /* Mobile styles - applies on screens 768px or smaller */
-@media (max-width: 768px) {
-  .angebot-btn {
-    width: 300px;
-    padding: 12px 32px;
-  }
-}
+        @media (max-width: 768px) {
+          .angebot-btn {
+            width: 300px;
+            padding: 12px 32px;
+          }
+        }
 
-.angebot-btn:hover {
-  background: transparent;
-  color: #00b894;
-}
+        .angebot-btn:hover {
+          background: transparent;
+          color: #00b894;
+        }
     </style>
 </head>
 <body class="bg-light" th:classappend="${#authorization.expression('isAuthenticated()')} ? 'authenticated' : 'guest'">
@@ -1735,13 +1734,23 @@ function changePageSize(newSize) {
             </div>
         `;
 
-        card.innerHTML = `
-            <div class="rate-expanded-content show">
-                <hr style="border: none; border-top: 3px dotted #000; margin: 1px 0; padding-bottom: 2px;">
-                ${sectionsHTML}
-                ${compareButton}
-            </div>
-        `;
+    card.innerHTML = `
+        <style>
+          @media (max-width: 768px) {
+            .mobile-hr { display: block; }
+          }
+          @media (min-width: 769px) {
+            .mobile-hr { display: none; }
+          }
+        </style>
+
+        <div class="rate-expanded-content show">
+            <hr class="mobile-hr"
+                style="border: none; border-top: 3px dotted #000; margin: 1px 0; padding-bottom: 2px;">
+            ${sectionsHTML}
+            ${compareButton}
+        </div>
+    `;
 
         return card;
     }
