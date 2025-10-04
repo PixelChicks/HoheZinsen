@@ -2467,7 +2467,6 @@ function changePageSize(newSize) {
         if (isInfiniteScrollEnabled) return;
 
         isInfiniteScrollEnabled = true;
-
         hidePaginationControls();
 
         loadedPages.clear();
@@ -2477,6 +2476,10 @@ function changePageSize(newSize) {
 
         const tableContainer = document.getElementById('tableContainer');
         const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
+
+        if (isMobileCardView) {
+            renderMobileCards(allLoadedData);
+        }
 
         if (hasMoreData) {
             showInfiniteScrollIndicator();
