@@ -673,7 +673,6 @@
 
 .draggable-section {
   cursor: move;
-  border-left: 4px solid #00b894;
 }
 
 .draggable-section.dragging {

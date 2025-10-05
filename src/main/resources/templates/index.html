@@ -10,7 +10,6 @@
     <style>
         @media (max-width: 768px) {
           .angebot-btn {
-            width: 300px;
             padding: 12px 32px;
           }
         }
@@ -19,6 +18,125 @@
           background: transparent;
           color: #00b894;
         }
+
+      @media (max-width: 768px) {
+      .angebot-btn {
+        padding: 12px 32px;
+      }
+
+      /* Mobile comparison cards */
+      .mobile-comparison-container {
+        display: flex;
+        gap: 12px;
+        padding: 16px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .mobile-comparison-card {
+        flex: 1;
+        min-width: 160px;
+        max-width: 240px;
+        background: #f8f9fa;
+        border: 2px solid #00b894;
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .mobile-comparison-card.empty {
+        border: 2px dashed #ccc;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 300px;
+      }
+
+      .mobile-comparison-header {
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-start;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      .mobile-remove-btn {
+        background: none;
+        border: none;
+        font-size: 20px;
+        color: #999;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        margin-left: 8px;
+      }
+
+      .mobile-logo-section {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 90px;
+        padding: 8px 0;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .mobile-comparison-fields {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .mobile-field-row {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .mobile-field-label {
+        font-size: 10px;
+        color: #ff6b6b;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+
+      .mobile-field-value {
+        font-size: 14px;
+        color: #333;
+        font-weight: 500;
+      }
+
+      .mobile-mehr-info-section {
+        margin-top: auto;
+        padding-top: 12px;
+        border-top: 1px solid #e0e0e0;
+        text-align: center;
+      }
+
+      .mobile-mehr-link {
+        color: #00b894;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 13px;
+      }
+
+      .mobile-mehr-link.disabled {
+        color: #ccc;
+        pointer-events: none;
+      }
+
+      .empty-card-content {
+        text-align: center;
+        padding: 20px;
+      }
+    }
+
+    .angebot-btn:hover {
+      background: transparent;
+      color: #00b894;
+    }
     </style>
 </head>
 <body class="bg-light" th:classappend="${#authorization.expression('isAuthenticated()')} ? 'authenticated' : 'guest'">
@@ -172,7 +290,6 @@
         </div>
 
         <div class="empty-comparison-state" id="emptyComparisonState">
-            <div class="icon">📊</div>
             <p>click a provider from the table below to add to compare</p>
         </div>
     </div>
@@ -550,9 +667,14 @@
         }
     }
 
-    // Comparison functionality
-    const maxComparisons = 3;
+    let maxComparisons = 3;
     let comparedRates = new Map();
+
+    function updateMaxComparisons() {
+        const tableContainer = document.getElementById('tableContainer');
+        const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
+        maxComparisons = isMobileCardView ? 2 : 3;
+    }
 
     function toggleComparison(rateId, isChecked) {
         if (isChecked) {
@@ -578,8 +700,11 @@
     }
 
     function addToComparison(rateId) {
+        updateMaxComparisons();
+
         if (comparedRates.size >= maxComparisons) {
-            showStatus('Maximum number of comparisons reached (3)', 'warning');
+            const maxText = maxComparisons === 2 ? '2' : '3';
+            showStatus(`Maximum number of comparisons reached (${maxText})`, 'warning');
             const checkbox = document.getElementById(`external-compare-${rateId}`);
             const mobileCheckbox = document.getElementById(`compare-mobile-${rateId}`);
             if (checkbox) checkbox.checked = false;
@@ -604,7 +729,6 @@
             }
 
             updateTableRowHighlight(rateId, true);
-
             updateVergleichenButtonVisibility(rateId, true);
 
             const providerName = serverRateFieldValuesMap[rateId]?.[1] || `Rate #${rateId}`;
@@ -684,7 +808,112 @@
     }
 
     function createComparisonLayout() {
-        // Create labels column (skip image fields)
+        const tableContainer = document.getElementById('tableContainer');
+        const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
+
+        if (isMobileCardView) {
+            // Mobile view - side by side cards
+            return createMobileComparisonLayout();
+        } else {
+            // Desktop view - existing table layout
+            return createDesktopComparisonLayout();
+        }
+    }
+
+    function createMobileComparisonLayout() {
+        const cardsHtml = `
+            <div class="mobile-comparison-container">
+                ${Array.from(comparedRates.entries()).map(([rateId, rate]) =>
+                    createMobileComparisonCard(rate)
+                ).join('')}
+                ${comparedRates.size < 2 ? createEmptyMobileComparisonCard() : ''}
+            </div>
+        `;
+        return cardsHtml;
+    }
+
+    function createMobileComparisonCard(rate) {
+        const rateFieldValues = serverRateFieldValuesMap[rate.id] || {};
+
+        if (Object.keys(rateFieldValues).length === 0) {
+            fetchMissingRateData([rate.id]).then(() => {
+                updateComparisonDisplay();
+            });
+            return `
+                <div class="mobile-comparison-card">
+                    <div class="mobile-comparison-header">
+                        <span class="mobile-provider-name">Loading...</span>
+                        <button class="mobile-remove-btn" onclick="removeFromComparison(${rate.id})">✕</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Get provider name (assuming it's field index 1)
+        const providerName = rateFieldValues[globalFieldsCompareCache[1]?.id] || 'Provider';
+
+        // Get logo
+        let logoHtml = '<span style="color: #999;">(logo)</span>';
+        const imageField = globalFieldsCompareCache.find(
+            f => f.fieldKey && f.fieldKey.toLowerCase().includes("img")
+        );
+        if (imageField) {
+            const imageUrl = rateFieldValues[imageField.id];
+            if (imageUrl && imageUrl !== "-") {
+                logoHtml = `<img src="${imageUrl}" alt="Logo" style="max-height: 70px; max-width: 140px; object-fit: contain;">`;
+            }
+        }
+
+        // Build field rows (skip image field)
+        const fieldRows = globalFieldsCompareCache
+            .filter(field => !(field.fieldKey && field.fieldKey.toLowerCase().includes("img")))
+            .map(field => {
+                const value = rateFieldValues[field.id] || "-";
+                return `
+                    <div class="mobile-field-row">
+                        <div class="mobile-field-label">${field.label.toUpperCase()}</div>
+                        <div class="mobile-field-value">${value}</div>
+                    </div>
+                `;
+            }).join('');
+
+        return `
+            <div class="mobile-comparison-card">
+                <div class="mobile-comparison-header">
+                    <button class="mobile-remove-btn" onclick="removeFromComparison(${rate.id})" title="Remove">✕</button>
+                </div>
+                <div class="mobile-logo-section">
+                    ${logoHtml}
+                </div>
+                <div class="mobile-comparison-fields">
+                    ${fieldRows}
+                </div>
+                <div class="mobile-mehr-info-section">
+                    <a href="javascript:void(0)"
+                       class="${rate.moreInfo ? 'mobile-mehr-link' : 'mobile-mehr-link disabled'}"
+                       onclick="${rate.moreInfo ? `showMoreInfo(${rate.id})` : 'return false;'}"
+                       style="${rate.moreInfo ? 'color: #00b894;' : 'color: #ccc; pointer-events: none;'}">
+                        ${rate.moreInfo ? 'MEHR INFO' : 'No Info'}
+                    </a>
+                </div>
+            </div>
+        `;
+    }
+
+    function createEmptyMobileComparisonCard() {
+        return `
+            <div class="mobile-comparison-card empty">
+                <div class="empty-card-content">
+                    <p style="font-size: 13px; color: #666; text-align: center; margin: 0;">
+                        Click a provider<br>to compare
+                    </p>
+                </div>
+            </div>
+        `;
+    }
+
+    function createDesktopComparisonLayout() {
+        // Original desktop layout
         const labelsHtml = `
             <div class="comparison-labels">
                 ${globalFieldsCompareCache
@@ -695,11 +924,10 @@
             </div>
         `;
 
-        // Create cards container
         const cardsHtml = `
             <div class="comparison-cards-container">
                 ${Array.from(comparedRates.entries()).map(([rateId, rate], index) =>
-                    createComparisonCardNew(rate, index === 0) // Pass true only for the first card
+                    createComparisonCardNew(rate, index === 0)
                 ).join('')}
                 ${comparedRates.size < maxComparisons ? createEmptyComparisonCards(maxComparisons - comparedRates.size) : ''}
             </div>
@@ -835,6 +1063,9 @@
 
     function showWarning(show) {
         const warning = document.getElementById('comparisonWarning');
+        updateMaxComparisons();
+        const maxText = maxComparisons === 2 ? '2' : '3';
+        warning.textContent = `Sie können maximal ${maxText} Zinssätze gleichzeitig vergleichen. Entfernen Sie einen Vergleich, um einen neuen hinzuzufügen.`;
         warning.style.display = show ? 'block' : 'none';
     }
 
@@ -855,20 +1086,40 @@
         const body = document.body;
 
         body.classList.add('comparison-mode');
-
         quickCompareBtn.disabled = true;
 
-        setTimeout(() => {
-            alignExternalCheckboxes();
+        // FIXED: Determine which data source to use
+        const dataSource = (isInfiniteScrollEnabled && allLoadedData.length > 0) ? allLoadedData : currentPageData;
 
-            const firstCheckbox = document.querySelector('.external-checkbox');
+        if (!dataSource || dataSource.length === 0) {
+            quickCompareBtn.disabled = false;
+            showStatus('No rates available to compare', 'warning');
+            return;
+        }
+
+        // Get the first available rate
+        const firstRate = dataSource[0];
+        const firstRateId = firstRate.id;
+
+        setTimeout(() => {
+            // Check if we're in mobile card view or desktop table view
+            const tableContainer = document.getElementById('tableContainer');
+            const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
+
+            // Find the appropriate checkbox based on view mode
+            let firstCheckbox;
+            if (isMobileCardView) {
+                // Mobile card view - use compare-mobile checkbox
+                firstCheckbox = document.getElementById(`compare-mobile-${firstRateId}`);
+            } else {
+                // Desktop table view - use external checkbox
+                alignExternalCheckboxes();
+                firstCheckbox = document.getElementById(`external-compare-${firstRateId}`);
+            }
 
             if (firstCheckbox && !firstCheckbox.checked) {
                 firstCheckbox.checked = true;
-
-                const rateId = firstCheckbox.id.replace('external-compare-', '');
-
-                addToComparison(parseInt(rateId));
+                addToComparison(firstRateId);
 
                 setTimeout(() => {
                     const comparisonSection = document.getElementById('comparisonSection');
@@ -880,7 +1131,6 @@
                     }
 
                     quickCompareBtn.disabled = false;
-
                     showStatus('Comparison mode activated! Select more rates to compare.', 'success');
                 }, 500);
 
@@ -970,6 +1220,13 @@
     function renderTableData(data) {
         const tbody = document.getElementById('tableBody');
         const emptyState = document.getElementById('emptyState');
+        const tableContainer = document.getElementById('tableContainer');
+
+        const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
+        if (isMobileCardView && isMobileView) {
+            renderMobileCards(data);
+            return;
+        }
 
         if (!data || data.length === 0) {
             tbody.innerHTML = '';
@@ -1622,7 +1879,7 @@ function changePageSize(newSize) {
 
         const compareButton = `
             <div class="rate-card-actions"
-                 style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom:16px;">
+                 style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom:16px; margin-right: 25px;">
 
                 <a class="angebot-btn"
                    href="${rate.webLink || '#'}"
@@ -2475,10 +2732,21 @@ function changePageSize(newSize) {
         hasMoreData = currentPage < totalPages;
 
         const tableContainer = document.getElementById('tableContainer');
+
+        if (isMobileView && tableContainer) {
+            tableContainer.classList.add('mobile-stack');
+            const stackedViewBtn = document.getElementById('stackedView');
+            const scrollViewBtn = document.getElementById('scrollView');
+            if (stackedViewBtn) stackedViewBtn.classList.add('active');
+            if (scrollViewBtn) scrollViewBtn.classList.remove('active');
+        }
+
         const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
 
         if (isMobileCardView) {
             renderMobileCards(allLoadedData);
+        } else {
+            renderTableData(allLoadedData);
         }
 
         if (hasMoreData) {
