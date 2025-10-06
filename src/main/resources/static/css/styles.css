@@ -51,6 +51,7 @@
   border-radius: 8px;
   border: 1px solid #e9ecef;
   transition: all 0.2s ease;
+  border-left: 3px solid #00b894 !important;
 }
 
 .info-table-row:last-child {
@@ -660,19 +661,10 @@
 
 .expanded-section {
   background: white;
-  border: 1px solid #e3e6ea;
-  border-radius: 10px;
   margin-bottom: 25px;
-  padding: 20px;
   position: relative;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   cursor: grab;
-}
-
-.expanded-section:hover {
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
 }
 
 .expanded-section:active {
@@ -681,7 +673,6 @@
 
 .draggable-section {
   cursor: move;
-  border-left: 4px solid #00b894;
 }
 
 .draggable-section.dragging {
@@ -978,10 +969,6 @@ body {
   box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
 }
 
-.table > :not(caption) > * > * {
-  background-color: #f8f9fa !important;
-}
-
 .table-container {
   position: relative;
   margin: 0 -15px;
@@ -1136,7 +1123,6 @@ body {
   .expanded-section {
     margin-bottom: 20px !important;
     padding: 15px !important;
-    border-radius: 8px !important;
   }
 
   .section-drag-handle {
@@ -1153,7 +1139,6 @@ body {
   }
 
   .info-table-row {
-    display: block !important;
     margin-bottom: 12px !important;
     padding: 5px !important;
     background: rgba(0, 0, 0, 0.02) !important;
@@ -1276,4 +1261,17 @@ body {
     background: rgba(220, 53, 69, 0.2);
     transform: scale(1.1);
   }
+}
+.table>:not(caption)>*>* {
+    box-shadow: none !important;
+    background-color: transparent !important; /* optional, ensures no background */
+}
+.mobile-interest-card.card-expanded {
+    /* Optional: Add smooth transition for expansion */
+    transition: all 0.3s ease;
+}
+
+.mobile-interest-card .rate-card {
+    border-top: 1px solid #e9ecef; /* Subtle separator */
+    margin-top: 0;
 }

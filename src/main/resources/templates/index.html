@@ -7,6 +7,137 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/styles.css" rel="stylesheet">
     <link href="/css/index.css" rel="stylesheet">
+    <style>
+        @media (max-width: 768px) {
+          .angebot-btn {
+            padding: 12px 32px;
+          }
+        }
+
+        .angebot-btn:hover {
+          background: transparent;
+          color: #00b894;
+        }
+
+      @media (max-width: 768px) {
+      .angebot-btn {
+        padding: 12px 32px;
+      }
+
+      /* Mobile comparison cards */
+      .mobile-comparison-container {
+        display: flex;
+        gap: 12px;
+        padding: 16px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .mobile-comparison-card {
+        flex: 1;
+        min-width: 160px;
+        max-width: 240px;
+        background: #f8f9fa;
+        border: 2px solid #00b894;
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .mobile-comparison-card.empty {
+        border: 2px dashed #ccc;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 300px;
+      }
+
+      .mobile-comparison-header {
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-start;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      .mobile-remove-btn {
+        background: none;
+        border: none;
+        font-size: 20px;
+        color: #999;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        margin-left: 8px;
+      }
+
+      .mobile-logo-section {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 90px;
+        padding: 8px 0;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .mobile-comparison-fields {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .mobile-field-row {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .mobile-field-label {
+        font-size: 10px;
+        color: #ff6b6b;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+
+      .mobile-field-value {
+        font-size: 14px;
+        color: #333;
+        font-weight: 500;
+      }
+
+      .mobile-mehr-info-section {
+        margin-top: auto;
+        padding-top: 12px;
+        border-top: 1px solid #e0e0e0;
+        text-align: center;
+      }
+
+      .mobile-mehr-link {
+        color: #00b894;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 13px;
+      }
+
+      .mobile-mehr-link.disabled {
+        color: #ccc;
+        pointer-events: none;
+      }
+
+      .empty-card-content {
+        text-align: center;
+        padding: 20px;
+      }
+    }
+
+    .angebot-btn:hover {
+      background: transparent;
+      color: #00b894;
+    }
+    </style>
 </head>
 <body class="bg-light" th:classappend="${#authorization.expression('isAuthenticated()')} ? 'authenticated' : 'guest'">
 <div class="container py-4">
@@ -159,7 +290,6 @@
         </div>
 
         <div class="empty-comparison-state" id="emptyComparisonState">
-            <div class="icon">📊</div>
             <p>click a provider from the table below to add to compare</p>
         </div>
     </div>
@@ -537,9 +667,14 @@
         }
     }
 
-    // Comparison functionality
-    const maxComparisons = 3;
+    let maxComparisons = 3;
     let comparedRates = new Map();
+
+    function updateMaxComparisons() {
+        const tableContainer = document.getElementById('tableContainer');
+        const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
+        maxComparisons = isMobileCardView ? 2 : 3;
+    }
 
     function toggleComparison(rateId, isChecked) {
         if (isChecked) {
@@ -565,8 +700,11 @@
     }
 
     function addToComparison(rateId) {
+        updateMaxComparisons();
+
         if (comparedRates.size >= maxComparisons) {
-            showStatus('Maximum number of comparisons reached (3)', 'warning');
+            const maxText = maxComparisons === 2 ? '2' : '3';
+            showStatus(`Maximum number of comparisons reached (${maxText})`, 'warning');
             const checkbox = document.getElementById(`external-compare-${rateId}`);
             const mobileCheckbox = document.getElementById(`compare-mobile-${rateId}`);
             if (checkbox) checkbox.checked = false;
@@ -591,7 +729,6 @@
             }
 
             updateTableRowHighlight(rateId, true);
-
             updateVergleichenButtonVisibility(rateId, true);
 
             const providerName = serverRateFieldValuesMap[rateId]?.[1] || `Rate #${rateId}`;
@@ -671,7 +808,112 @@
     }
 
     function createComparisonLayout() {
-        // Create labels column (skip image fields)
+        const tableContainer = document.getElementById('tableContainer');
+        const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
+
+        if (isMobileCardView) {
+            // Mobile view - side by side cards
+            return createMobileComparisonLayout();
+        } else {
+            // Desktop view - existing table layout
+            return createDesktopComparisonLayout();
+        }
+    }
+
+    function createMobileComparisonLayout() {
+        const cardsHtml = `
+            <div class="mobile-comparison-container">
+                ${Array.from(comparedRates.entries()).map(([rateId, rate]) =>
+                    createMobileComparisonCard(rate)
+                ).join('')}
+                ${comparedRates.size < 2 ? createEmptyMobileComparisonCard() : ''}
+            </div>
+        `;
+        return cardsHtml;
+    }
+
+    function createMobileComparisonCard(rate) {
+        const rateFieldValues = serverRateFieldValuesMap[rate.id] || {};
+
+        if (Object.keys(rateFieldValues).length === 0) {
+            fetchMissingRateData([rate.id]).then(() => {
+                updateComparisonDisplay();
+            });
+            return `
+                <div class="mobile-comparison-card">
+                    <div class="mobile-comparison-header">
+                        <span class="mobile-provider-name">Loading...</span>
+                        <button class="mobile-remove-btn" onclick="removeFromComparison(${rate.id})">✕</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Get provider name (assuming it's field index 1)
+        const providerName = rateFieldValues[globalFieldsCompareCache[1]?.id] || 'Provider';
+
+        // Get logo
+        let logoHtml = '<span style="color: #999;">(logo)</span>';
+        const imageField = globalFieldsCompareCache.find(
+            f => f.fieldKey && f.fieldKey.toLowerCase().includes("img")
+        );
+        if (imageField) {
+            const imageUrl = rateFieldValues[imageField.id];
+            if (imageUrl && imageUrl !== "-") {
+                logoHtml = `<img src="${imageUrl}" alt="Logo" style="max-height: 70px; max-width: 140px; object-fit: contain;">`;
+            }
+        }
+
+        // Build field rows (skip image field)
+        const fieldRows = globalFieldsCompareCache
+            .filter(field => !(field.fieldKey && field.fieldKey.toLowerCase().includes("img")))
+            .map(field => {
+                const value = rateFieldValues[field.id] || "-";
+                return `
+                    <div class="mobile-field-row">
+                        <div class="mobile-field-label">${field.label.toUpperCase()}</div>
+                        <div class="mobile-field-value">${value}</div>
+                    </div>
+                `;
+            }).join('');
+
+        return `
+            <div class="mobile-comparison-card">
+                <div class="mobile-comparison-header">
+                    <button class="mobile-remove-btn" onclick="removeFromComparison(${rate.id})" title="Remove">✕</button>
+                </div>
+                <div class="mobile-logo-section">
+                    ${logoHtml}
+                </div>
+                <div class="mobile-comparison-fields">
+                    ${fieldRows}
+                </div>
+                <div class="mobile-mehr-info-section">
+                    <a href="javascript:void(0)"
+                       class="${rate.moreInfo ? 'mobile-mehr-link' : 'mobile-mehr-link disabled'}"
+                       onclick="${rate.moreInfo ? `showMoreInfo(${rate.id})` : 'return false;'}"
+                       style="${rate.moreInfo ? 'color: #00b894;' : 'color: #ccc; pointer-events: none;'}">
+                        ${rate.moreInfo ? 'MEHR INFO' : 'No Info'}
+                    </a>
+                </div>
+            </div>
+        `;
+    }
+
+    function createEmptyMobileComparisonCard() {
+        return `
+            <div class="mobile-comparison-card empty">
+                <div class="empty-card-content">
+                    <p style="font-size: 13px; color: #666; text-align: center; margin: 0;">
+                        Click a provider<br>to compare
+                    </p>
+                </div>
+            </div>
+        `;
+    }
+
+    function createDesktopComparisonLayout() {
+        // Original desktop layout
         const labelsHtml = `
             <div class="comparison-labels">
                 ${globalFieldsCompareCache
@@ -682,11 +924,10 @@
             </div>
         `;
 
-        // Create cards container
         const cardsHtml = `
             <div class="comparison-cards-container">
                 ${Array.from(comparedRates.entries()).map(([rateId, rate], index) =>
-                    createComparisonCardNew(rate, index === 0) // Pass true only for the first card
+                    createComparisonCardNew(rate, index === 0)
                 ).join('')}
                 ${comparedRates.size < maxComparisons ? createEmptyComparisonCards(maxComparisons - comparedRates.size) : ''}
             </div>
@@ -822,6 +1063,9 @@
 
     function showWarning(show) {
         const warning = document.getElementById('comparisonWarning');
+        updateMaxComparisons();
+        const maxText = maxComparisons === 2 ? '2' : '3';
+        warning.textContent = `Sie können maximal ${maxText} Zinssätze gleichzeitig vergleichen. Entfernen Sie einen Vergleich, um einen neuen hinzuzufügen.`;
         warning.style.display = show ? 'block' : 'none';
     }
 
@@ -842,20 +1086,40 @@
         const body = document.body;
 
         body.classList.add('comparison-mode');
-
         quickCompareBtn.disabled = true;
 
-        setTimeout(() => {
-            alignExternalCheckboxes();
+        // FIXED: Determine which data source to use
+        const dataSource = (isInfiniteScrollEnabled && allLoadedData.length > 0) ? allLoadedData : currentPageData;
 
-            const firstCheckbox = document.querySelector('.external-checkbox');
+        if (!dataSource || dataSource.length === 0) {
+            quickCompareBtn.disabled = false;
+            showStatus('No rates available to compare', 'warning');
+            return;
+        }
+
+        // Get the first available rate
+        const firstRate = dataSource[0];
+        const firstRateId = firstRate.id;
+
+        setTimeout(() => {
+            // Check if we're in mobile card view or desktop table view
+            const tableContainer = document.getElementById('tableContainer');
+            const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
+
+            // Find the appropriate checkbox based on view mode
+            let firstCheckbox;
+            if (isMobileCardView) {
+                // Mobile card view - use compare-mobile checkbox
+                firstCheckbox = document.getElementById(`compare-mobile-${firstRateId}`);
+            } else {
+                // Desktop table view - use external checkbox
+                alignExternalCheckboxes();
+                firstCheckbox = document.getElementById(`external-compare-${firstRateId}`);
+            }
 
             if (firstCheckbox && !firstCheckbox.checked) {
                 firstCheckbox.checked = true;
-
-                const rateId = firstCheckbox.id.replace('external-compare-', '');
-
-                addToComparison(parseInt(rateId));
+                addToComparison(firstRateId);
 
                 setTimeout(() => {
                     const comparisonSection = document.getElementById('comparisonSection');
@@ -867,7 +1131,6 @@
                     }
 
                     quickCompareBtn.disabled = false;
-
                     showStatus('Comparison mode activated! Select more rates to compare.', 'success');
                 }, 500);
 
@@ -957,17 +1220,36 @@
     function renderTableData(data) {
         const tbody = document.getElementById('tableBody');
         const emptyState = document.getElementById('emptyState');
+        const tableContainer = document.getElementById('tableContainer');
+
+        const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
+        if (isMobileCardView && isMobileView) {
+            renderMobileCards(data);
+            return;
+        }
 
         if (!data || data.length === 0) {
             tbody.innerHTML = '';
             emptyState.style.display = 'block';
+            updateExternalCheckboxes([]);
             return;
         }
 
         emptyState.style.display = 'none';
-        renderTableRows(data, tbody);
 
-        // Maintain comparison state after re-render
+        if (isInfiniteScrollEnabled && tbody.children.length > 0) {
+            const newRows = renderTableRowsHTML(data);
+            tbody.insertAdjacentHTML('beforeend', newRows);
+        } else {
+            tbody.innerHTML = renderTableRowsHTML(data);
+        }
+
+        if (document.body.classList.contains('comparison-mode')) {
+            setTimeout(() => {
+                alignExternalCheckboxes();
+            }, 50);
+        }
+
         maintainComparisonState();
     }
 
@@ -1359,7 +1641,6 @@ function changePageSize(newSize) {
                             serverRateFieldValuesMap[rateId] = rateData.fieldValues;
                         }
 
-                        displayRateCardInModal(rateData);
                     } else {
                         showStatus('No additional information available for this rate.', 'warning');
                     }
@@ -1388,111 +1669,6 @@ function changePageSize(newSize) {
         updateMehrInfoButton(rateId, true); // Update button to opened state
         alignExternalCheckboxes();
     }
-
-    function displayRateCardInModal(rate) {
-        const existingModal = document.getElementById('rateInfoModal');
-        if (existingModal) {
-            existingModal.remove();
-        }
-
-        const modal = document.createElement('div');
-        modal.id = 'rateInfoModal';
-        modal.className = 'rate-info-modal';
-        modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            padding: 20px;
-            overflow-y: auto;
-        `;
-
-        const modalContent = document.createElement('div');
-        modalContent.className = 'modal-content-wrapper';
-        modalContent.style.cssText = `
-            background: white;
-            border-radius: 8px;
-            max-width: 900px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        `;
-
-        const closeButton = document.createElement('button');
-        closeButton.innerHTML = '✕';
-        closeButton.style.cssText = `
-            position: sticky;
-            top: 10px;
-            right: 10px;
-            float: right;
-            background: #f0f0f0;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 20px;
-            line-height: 1;
-            z-index: 1;
-            margin: 10px;
-        `;
-        closeButton.onclick = () => modal.remove();
-
-        const header = document.createElement('div');
-        header.style.cssText = `
-            padding: 20px;
-            border-bottom: 1px solid #eee;
-            background: #f8f9fa;
-            border-radius: 8px 8px 0 0;
-        `;
-
-        const providerName = serverRateFieldValuesMap[rate.id]?.[1] || `Interest Rate #${rate.id}`;
-        header.innerHTML = `
-            <h4 style="margin: 0; color: #333;">
-                ${providerName}
-            </h4>
-            <small style="color: #666;">Detailed Information</small>
-        `;
-
-        const contentArea = document.createElement('div');
-        contentArea.style.cssText = 'padding: 20px;';
-
-        const rateCard = createRateCard(rate);
-        contentArea.appendChild(rateCard);
-
-        modalContent.appendChild(closeButton);
-        modalContent.appendChild(header);
-        modalContent.appendChild(contentArea);
-        modal.appendChild(modalContent);
-
-        document.body.appendChild(modal);
-
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.remove();
-            }
-        });
-
-        const handleEscape = (e) => {
-            if (e.key === 'Escape') {
-                modal.remove();
-                document.removeEventListener('keydown', handleEscape);
-            }
-        };
-        document.addEventListener('keydown', handleEscape);
-
-        modalContent.setAttribute('tabindex', '-1');
-        modalContent.focus();
-    }
-
 
     function displayRateCard(rate) {
         if (currentExpandedCard && currentExpandedCard !== rate.id) {
@@ -1524,8 +1700,8 @@ function changePageSize(newSize) {
         let targetElement = null;
 
         if (isMobileCardView) {
-            // In mobile card view, look for the mobile card div
-            targetElement = document.querySelector(`div.mobile-card-row[data-rate-id="${rate.id}"]`);
+            // In mobile card view, find the mobile-interest-card itself
+            targetElement = document.querySelector(`div.mobile-interest-card[data-rate-id="${rate.id}"]`);
             console.log('Found mobile card element:', targetElement);
         } else {
             // In table view, look for regular table row
@@ -1546,46 +1722,51 @@ function changePageSize(newSize) {
         }
 
         const card = createRateCard(rate);
-        let cardContainer;
 
         if (isMobileCardView) {
-            // Create a mobile-friendly container
-            cardContainer = document.createElement('div');
-            cardContainer.id = `rateCardRow_${rate.id}`;
-            cardContainer.className = 'rate-card-mobile-container show';
-            cardContainer.style.width = '100%';
-            cardContainer.style.marginTop = '10px';
-            cardContainer.appendChild(card);
+            // For mobile, append directly inside the mobile-interest-card
+            // Remove borders and add unified styling
+            card.style.borderTop = 'none';
+            card.style.borderRadius = '0 0 12px 12px';
+            card.style.marginTop = '0';
+            targetElement.appendChild(card);
+
+            // Add expanded class to the mobile card for unified styling
+            targetElement.classList.add('card-expanded');
         } else {
             // Create table row for desktop
-            cardContainer = document.createElement('tr');
+            const cardContainer = document.createElement('tr');
             cardContainer.id = `rateCardRow_${rate.id}`;
             cardContainer.className = 'rate-card-row show';
             cardContainer.innerHTML = `<td colspan="100%" class="rate-card-cell"></td>`;
             cardContainer.querySelector('.rate-card-cell').appendChild(card);
-        }
 
-        // Insert the card container
-        try {
-            if (isMobileCardView) {
-                // For mobile, insert directly after the entire mobile card row
+            // Insert the card container
+            try {
                 targetElement.insertAdjacentElement('afterend', cardContainer);
-            } else {
-                // For desktop, insert as table row
-                targetElement.insertAdjacentElement('afterend', cardContainer);
+                console.log('Successfully inserted card container');
+            } catch (error) {
+                console.error('Error inserting card container:', error);
+                return;
             }
-            console.log('Successfully inserted card container');
-        } catch (error) {
-            console.error('Error inserting card container:', error);
-            return;
         }
 
         // Scroll to the card
         setTimeout(() => {
-            cardContainer.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            });
+            if (isMobileCardView) {
+                targetElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest'
+                });
+            } else {
+                const cardRow = document.getElementById(`rateCardRow_${rate.id}`);
+                if (cardRow) {
+                    cardRow.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }
+            }
         }, 50);
 
         currentExpandedCard = rate.id;
@@ -1697,29 +1878,42 @@ function changePageSize(newSize) {
         const buttonDisplay = isInComparison ? 'display: none;' : '';
 
         const compareButton = `
-            <div class="rate-card-actions">
-                 <a class="angebot-btn"
-                       href="${rate.webLink || '#'}"
-                       target="_blank"
-                       title="Open Link"
-                       style="float: right; margin-right: 54px; margin-bottom:16px">
-                        ZUM ANGEBOT
-                 </a>
+            <div class="rate-card-actions"
+                 style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom:16px; margin-right: 25px;">
+
+                <a class="angebot-btn"
+                   href="${rate.webLink || '#'}"
+                   target="_blank"
+                   title="Open Link">
+                    ZUM ANGEBOT
+                </a>
+
                 <button type="button"
                         class="mehr-info-btn"
                         onclick="startComparisonFromCard(${rate.id})"
-                        style="float: right; margin-right: 16px; margin-bottom:16px; ${buttonDisplay}">
+                        style="${buttonDisplay}">
                     VERGLEICHEN
                 </button>
             </div>
         `;
 
-        card.innerHTML = `
-            <div class="rate-expanded-content show">
-                ${sectionsHTML}
-                ${compareButton}
-            </div>
-        `;
+    card.innerHTML = `
+        <style>
+          @media (max-width: 768px) {
+            .mobile-hr { display: block; }
+          }
+          @media (min-width: 769px) {
+            .mobile-hr { display: none; }
+          }
+        </style>
+
+        <div class="rate-expanded-content show">
+            <hr class="mobile-hr"
+                style="border: none; border-top: 3px dotted #000; margin: 1px 0; padding-bottom: 2px;">
+            ${sectionsHTML}
+            ${compareButton}
+        </div>
+    `;
 
         return card;
     }
@@ -1870,25 +2064,44 @@ function changePageSize(newSize) {
     }
 
     function closeExpandedCard(rateId) {
-        const cardRow = document.getElementById(`rateCardRow_${rateId}`);
-        if (cardRow) {
-            cardRow.style.display = 'none';
-            cardRow.classList.remove('show');
+        // Check if we're in mobile card view
+        const tableContainer = document.getElementById('tableContainer');
+        const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
 
-            requestAnimationFrame(() => {
-                if (cardRow.parentNode) {
-                    cardRow.parentNode.removeChild(cardRow);
+        if (isMobileCardView) {
+            // In mobile, the card is directly inside the mobile-interest-card
+            const mobileCard = document.querySelector(`div.mobile-interest-card[data-rate-id="${rateId}"]`);
+            if (mobileCard) {
+                // Remove the expanded content
+                const expandedContent = mobileCard.querySelector('.rate-card');
+                if (expandedContent) {
+                    expandedContent.remove();
                 }
-            });
-
-            if (currentExpandedCard === rateId) {
-                currentExpandedCard = null;
+                // Remove expanded class
+                mobileCard.classList.remove('card-expanded');
             }
+        } else {
+            // Desktop view - remove the separate row
+            const cardRow = document.getElementById(`rateCardRow_${rateId}`);
+            if (cardRow) {
+                cardRow.style.display = 'none';
+                cardRow.classList.remove('show');
 
-            // Update button state
-            expandedRateCards.delete(rateId);
-            updateMehrInfoButton(rateId, false);
+                requestAnimationFrame(() => {
+                    if (cardRow.parentNode) {
+                        cardRow.parentNode.removeChild(cardRow);
+                    }
+                });
+            }
         }
+
+        if (currentExpandedCard === rateId) {
+            currentExpandedCard = null;
+        }
+
+        // Update button state
+        expandedRateCards.delete(rateId);
+        updateMehrInfoButton(rateId, false);
     }
 
     // New function to update the MEHR INFO button state
@@ -1899,8 +2112,12 @@ function changePageSize(newSize) {
 
         const buttons = [tableButton, mobileButton].filter(btn => btn !== null);
 
+        const isMobile = window.innerWidth <= 768;
+
         buttons.forEach(button => {
             if (button && !button.disabled) {
+                const isMobileButton = button.closest('.mobile-interest-card') !== null;
+
                 if (isExpanded) {
                     // Show up arrow (opened state)
                     button.innerHTML = `<svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1909,7 +2126,9 @@ function changePageSize(newSize) {
                     button.title = "Hide info";
                 } else {
                     // Show down arrow with text (closed state)
-                    button.innerHTML = `MEHR INFO <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    // Use "MEHR" only for mobile buttons, "MEHR INFO" for desktop
+                    const buttonText = isMobileButton ? 'MEHR' : 'MEHR INFO';
+                    button.innerHTML = `${buttonText} <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M1 1L8 8L15 1" stroke="#00AC98" stroke-width="2"/>
                     </svg>`;
                     button.title = "Show more info";
@@ -2417,30 +2636,27 @@ function changePageSize(newSize) {
         const wasMobile = isMobileView;
         isMobileView = window.innerWidth <= 768;
 
-        // Check if we're in card view mode
         const tableContainer = document.getElementById('tableContainer');
         const isCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
 
-        // Get current button states
         const stackedViewBtn = document.getElementById('stackedView');
         const scrollViewBtn = document.getElementById('scrollView');
 
-        // NEW: Auto-enable card view when switching to mobile
+        // Auto-enable card view when switching to mobile
         if (!wasMobile && isMobileView) {
-            // Switching from desktop to mobile - enable card view by default
             if (stackedViewBtn && scrollViewBtn && tableContainer) {
                 stackedViewBtn.classList.add('active');
                 scrollViewBtn.classList.remove('active');
                 tableContainer.classList.add('mobile-stack');
                 enableInfiniteScroll();
-                return; // Early return to avoid further logic
+                return;
             }
         }
 
         const stackedActive = stackedViewBtn && stackedViewBtn.classList.contains('active');
 
-        // Enable infinite scroll only on mobile in card view AND when stacked view is active
-        const shouldEnable = isMobileView && isCardView && stackedActive;
+        // CHANGED: Enable infinite scroll for both mobile card view AND desktop table view
+        const shouldEnable = (isMobileView && isCardView && stackedActive) || (!isMobileView && !isCardView);
 
         if (shouldEnable !== isInfiniteScrollEnabled) {
             if (shouldEnable) {
@@ -2450,22 +2666,18 @@ function changePageSize(newSize) {
             }
         }
 
-        // If switching from mobile to desktop, ensure proper table view
-        if (wasMobile && !isMobileView) {
-            // Force disable infinite scroll
-            if (isInfiniteScrollEnabled) {
-                disableInfiniteScroll();
-            }
-
-            // Ensure table view is properly set
+        // If switching from mobile to desktop, maintain infinite scroll in table view
+        if (wasMobile && !isMobileView && isInfiniteScrollEnabled) {
+            // Keep infinite scroll enabled but ensure table view
             if (tableContainer && tableContainer.classList.contains('mobile-stack')) {
                 if (scrollViewBtn && stackedViewBtn) {
                     scrollViewBtn.classList.add('active');
                     stackedViewBtn.classList.remove('active');
                     tableContainer.classList.remove('mobile-stack');
-                    renderTableData(currentPageData);
                 }
             }
+            // Re-render as table rows
+            renderTableData(allLoadedData);
         }
     }
 
@@ -2512,23 +2724,38 @@ function changePageSize(newSize) {
         if (isInfiniteScrollEnabled) return;
 
         isInfiniteScrollEnabled = true;
-
-        // Hide pagination controls
         hidePaginationControls();
 
-        // Initialize with current data
         loadedPages.clear();
         loadedPages.add(currentPage);
         allLoadedData = [...currentPageData];
         hasMoreData = currentPage < totalPages;
 
-        // Render all loaded data as cards
-        renderMobileCards(allLoadedData);
+        const tableContainer = document.getElementById('tableContainer');
 
-        // Show loading indicator at bottom
-        showInfiniteScrollIndicator();
+        if (isMobileView && tableContainer) {
+            tableContainer.classList.add('mobile-stack');
+            const stackedViewBtn = document.getElementById('stackedView');
+            const scrollViewBtn = document.getElementById('scrollView');
+            if (stackedViewBtn) stackedViewBtn.classList.add('active');
+            if (scrollViewBtn) scrollViewBtn.classList.remove('active');
+        }
 
-        console.log('Infinite scroll enabled');
+        const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
+
+        if (isMobileCardView) {
+            renderMobileCards(allLoadedData);
+        } else {
+            renderTableData(allLoadedData);
+        }
+
+        if (hasMoreData) {
+            showInfiniteScrollIndicator();
+        } else {
+            showEndOfDataIndicator();
+        }
+
+        console.log('Infinite scroll enabled for', isMobileCardView ? 'mobile' : 'desktop', '- Current page:', currentPage, 'Total pages:', totalPages);
     }
 
     function disableInfiniteScroll() {
@@ -2592,7 +2819,7 @@ function changePageSize(newSize) {
     async function loadMoreData() {
         if (isLoadingMore || !hasMoreData) return;
 
-       const nextPage = loadedPages.size + 1;
+        const nextPage = loadedPages.size + 1;
 
         if (nextPage > totalPages) {
             hasMoreData = false;
@@ -2604,30 +2831,31 @@ function changePageSize(newSize) {
         isLoadingMore = true;
         showLoadingMoreIndicator();
 
-        console.log('Loading more data, page:', nextPage); // Debug log
+        console.log('Loading more data, page:', nextPage);
 
         try {
-            // FIXED: Pass current sort and search parameters, fetchPageData will handle filters
             const data = await fetchPageData(nextPage, currentSearchTerm, currentSortColumn, currentSortDirection);
 
             if (data && data.content && data.content.length > 0) {
-                // Add new data to our collection
                 allLoadedData = [...allLoadedData, ...data.content];
                 loadedPages.add(nextPage);
 
-                // Update server data map
                 Object.assign(serverRateFieldValuesMap, data.rateFieldValuesMap || {});
 
-                // Re-render all cards with new data
-                renderMobileCards(allLoadedData);
+                const tableContainer = document.getElementById('tableContainer');
+                const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
 
-                // Update pagination info for user feedback
+                if (isMobileCardView) {
+                    renderMobileCards(allLoadedData);
+                } else {
+                    renderTableData(data.content);
+                }
+
                 updateInfiniteScrollInfo();
 
-                // Check if there's more data
                 hasMoreData = nextPage < totalPages;
 
-                console.log('Loaded page:', nextPage, 'Total items now:', allLoadedData.length); // Debug log
+                console.log('Loaded page:', nextPage, 'Total items now:', allLoadedData.length);
 
                 if (!hasMoreData) {
                     hideInfiniteScrollIndicator();
@@ -2702,8 +2930,6 @@ function changePageSize(newSize) {
             .join('');
     }
 
-    // Replace the createMobileCard function in your existing code with this enhanced version
-
     function createMobileCard(rate) {
         const headers = document.querySelectorAll('.draggable-column, .sortable');
         const currentFieldOrder = Array.from(headers)
@@ -2715,91 +2941,68 @@ function changePageSize(newSize) {
 
         const isExpanded = expandedRateCards.has(rate.id);
         const isSelected = comparedRates && comparedRates.has ? comparedRates.has(rate.id) : false;
-
         const isInComparison = comparedRates.has(rate.id);
-        const buttonDisplay = isInComparison ? 'display: none;' : 'display: inline-block;';
 
-        const fieldRows = currentFieldOrder.map(field => {
-            const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
+        const fieldValues = serverRateFieldValuesMap[rate.id] || {};
 
-            if (field.fieldKey && field.fieldKey.toLowerCase().includes('img')) {
-                return `
-                    <div class="card-field-row">
-                        <label class="card-field-label">${field.label}:</label>
-                        <div class="card-field-value">
-                            <div class="mobile-image-container readonly">
-                                ${fieldValue ? `<img src="${fieldValue}" alt="Interest Rate Logo" class="interest-rate-logo mobile-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />` : ''}
-                                <div class="no-image-placeholder mobile-placeholder" style="${fieldValue ? 'display:none' : 'display:block'}">No Image</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else {
-                return `
-                    <div class="card-field-row">
-                        <label class="card-field-label">${field.label}:</label>
-                        <div class="card-field-value">
-                            <span class="card-field-display">${fieldValue || '-'}</span>
-                        </div>
-                    </div>
-                `;
-            }
+        let logoHtml = '<span style="color: #6c757d; font-size: 12px;">logo</span>';
+        const imageField = currentFieldOrder.find(f => f.fieldKey && f.fieldKey.toLowerCase().includes('img'));
+        if (imageField && fieldValues[imageField.id]) {
+            logoHtml = `<img src="${fieldValues[imageField.id]}" alt="Logo" style="max-height: 50px; max-width: 100px; object-fit: contain;">`;
+        }
+
+        const displayFields = currentFieldOrder
+            .filter(field => !(field.fieldKey && field.fieldKey.toLowerCase().includes('img')))
+            .slice(1, 5);
+
+        const gridHtml = displayFields.map(field => {
+            const value = fieldValues[field.id] || '-';
+            return `
+                <div class="info-field">
+                    <div class="info-field-label">${field.label.toUpperCase()}</div>
+                    <div class="info-field-value">${value}</div>
+                </div>
+            `;
         }).join('');
 
-        let actionButtons = `
-            <div class="mobile-card-checkbox">
-                <div class="custom-checkbox-container">
-                    <input type="checkbox"
-                           class="comparison-checkbox"
-                           onchange="toggleComparison(${rate.id}, this.checked)"
-                           id="compare-mobile-${rate.id}"
-                           ${isSelected ? 'checked' : ''}>
-                    <div class="custom-checkbox"></div>
-                </div>
-            </div>
-            <div class="card-actions">
-                <button class="mehr-info-btn"
-                        ${rate.moreInfo ? '' : 'disabled'}
-                        onclick="showMoreInfo(${rate.id})"
-                        title="${isExpanded ? 'Hide info' : (rate.moreInfo ? 'Show more info' : 'No additional info available')}">
-                    ${rate.moreInfo ?
-                        (isExpanded ?
-                            `<svg width="16" height="20" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M14.9995 9L7.99951 2L0.999512 9" stroke="#00AC98" stroke-width="2"/>
-                            </svg>` :
-                            `MEHR INFO <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M1 1L8 8L15 1" stroke="#00AC98" stroke-width="2"/>
-                            </svg>`
-                        ) :
-                        'No Info'
-                    }
-                </button>
-                <button type="button"
-                        class="mehr-info-btn"
-                        onclick="startComparisonFromCard(${rate.id})"
-                        style="${buttonDisplay}"
-                        title="Add to comparison">
-                    VERGLEICHEN
-                </button>
-                <a class="btn btn-primary btn-sm angebot-btn-card"
-                   href="${rate.webLink || '#'}"
-                   target="_blank"
-                   title="Open Link">
-                    ZUM ANGEBOT
-                </a>
-            </div>
-        `;
+        const rateValue = fieldValues[currentFieldOrder[0]?.id] || '0,00';
 
         return `
             <div class="mobile-card-row" data-rate-id="${rate.id}">
-                <div colspan="100%">
-                    <div class="mobile-interest-card" data-rate-id="${rate.id}">
-                        <div class="card-header">
-                            <h6 class="card-title mb-0">Interest Rate #${rate.id}</h6>
+                <div class="mobile-interest-card" data-rate-id="${rate.id}">
+                    <!-- Comparison checkbox -->
+                    <div class="mobile-card-checkbox">
+                        <div class="custom-checkbox-container">
+                            <input type="checkbox"
+                                   class="comparison-checkbox"
+                                   onchange="toggleComparison(${rate.id}, this.checked)"
+                                   id="compare-mobile-${rate.id}"
+                                   ${isSelected ? 'checked' : ''}>
+                            <div class="custom-checkbox"></div>
                         </div>
-                        <div class="card-body">
-                            ${fieldRows}
-                            ${actionButtons}
+                    </div>
+
+                    <div class="card-header">
+                        <h6 data-rate="${rateValue}"></h6>
+                        <div class="card-logo-area">
+                            ${logoHtml}
+                        </div>
+                        <div class="card-logo-area">
+                            <button class="mehr-info-btn"
+                                    ${rate.moreInfo ? '' : 'disabled'}
+                                    onclick="showMoreInfo(${rate.id})"
+                                    title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">
+                                MEHR
+                                <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="card-info-grid">
+                            ${gridHtml}
                         </div>
                     </div>
                 </div>
@@ -3392,7 +3595,83 @@ function changePageSize(newSize) {
     function onRowToggle() {
         alignExternalCheckboxes();
     }
-    console.log('Filter integration for infinite scroll has been fixed!');
+
+   function renderTableRowsHTML(data) {
+        if (!data || data.length === 0) return '';
+
+        const headers = document.querySelectorAll('.draggable-column, .sortable');
+        const currentFieldOrder = Array.from(headers)
+            .map(header => ({
+                id: header.dataset.fieldId,
+                fieldKey: header.dataset.fieldKey,
+                label: header.querySelector('.header-text').textContent.trim()
+            }));
+
+        return data.map(rate => {
+            const isSelected = comparedRates.has(rate.id);
+
+            const fieldCells = currentFieldOrder.map((field) => {
+                const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
+
+                if (field.fieldKey && field.fieldKey.toLowerCase().includes('img')) {
+                    return `
+                        <td class="data-cell image-cell" data-field-id="${field.id}" data-label="${field.label}">
+                            <div class="image-container">
+                                ${fieldValue ? `<img src="${fieldValue}" alt="Interest Rate Logo" class="interest-rate-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />` : ''}
+                                <div class="no-image-placeholder" style="${fieldValue ? 'display:none' : 'display:block'}">No Image</div>
+                            </div>
+                        </td>
+                    `;
+                } else {
+                    return `
+                        <td class="data-cell" data-field-id="${field.id}" data-label="${field.label}">
+                            <div class="form-control form-control-sm text-center"
+                                 style="border: none; background: transparent; cursor: default;">
+                                ${fieldValue || '-'}
+                            </div>
+                        </td>
+                    `;
+                }
+            }).join('');
+
+            const isExpanded = expandedRateCards.has(rate.id);
+            const actionButtons = `
+                <div class="action-buttons">
+                    <button class="mehr-info-btn"
+                            ${rate.moreInfo ? '' : 'disabled'}
+                            onclick="showMoreInfo(${rate.id})"
+                            title="${isExpanded ? 'Hide info' : (rate.moreInfo ? 'Show more info' : 'No additional info available')}">
+                        ${rate.moreInfo ?
+                            (isExpanded ?
+                                `<svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14.9995 9L7.99951 2L0.999512 9" stroke="#00AC98" stroke-width="2"/>
+                                </svg>` :
+                                `MEHR INFO <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1 1L8 8L15 1" stroke="#00AC98" stroke-width="2"/>
+                                </svg>`
+                            ) :
+                            'No Info'
+                        }
+                    </button>
+                </div>
+            `;
+
+            return `
+                <tr data-rate-id="${rate.id}" ${isSelected ? 'class="table-row-selected"' : ''}>
+                    ${fieldCells}
+                    <td data-label="Actions">
+                        ${actionButtons}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+   }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!isMobileView) {
+            enableInfiniteScroll();
+        }
+    });
 </script>
 </body>
 </html>
