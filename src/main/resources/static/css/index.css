@@ -1,4 +1,7 @@
-/* All your existing styles remain the same */
+/* ============================================
+   TABLE BASICS
+   ============================================ */
+
 .table-responsive {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -42,74 +45,376 @@
   min-width: 200px;
 }
 
-@media (max-width: 768px) {
-  .table-responsive.mobile-stack {
-    overflow-x: visible;
-    border: none;
-    box-shadow: none;
-  }
-
-  .table-responsive.mobile-stack #mainTable {
-    min-width: auto;
-  }
-
-  .table-responsive.mobile-stack #mainTable th,
-  .table-responsive.mobile-stack #mainTable td {
-    min-width: auto;
-    white-space: normal;
-  }
+.table th {
+  border-top: none;
+  background-color: #f8f9fa;
+  font-weight: 600;
 }
 
-.rate-card-row {
-  margin: 0 !important;
-  padding: 0 !important;
-  border: none !important;
-  background: transparent !important;
+.table>:not(caption)>*>* {
+    box-shadow: none !important;
+    background-color: transparent !important;
 }
 
-.rate-card-row td {
-  margin: 0 !important;
-  padding: 0 !important;
-  border: none !important;
-  background: transparent !important;
-  line-height: 0 !important;
-  height: auto !important;
+
+/* ============================================
+   IMAGES & LOGOS
+   ============================================ */
+
+.image-cell {
+  text-align: center;
+  z-index: 0;
+  vertical-align: middle;
+  min-width: 80px;
+  position: relative;
+  padding: 8px !important;
 }
 
-.rate-card {
-  margin: 0 !important;
-  line-height: normal !important;
+.image-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 5px;
+  position: relative;
+  min-height: 100px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
 }
 
-tr.rate-card-row {
+.image-container:hover {
+  border-color: #007bff;
+  background-color: #f8f9fa;
+}
+
+.clickable-image {
+  cursor: pointer;
+  position: relative;
+}
+
+.clickable-image:hover::after {
+  content: "📁 Click to upload";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 123, 255, 0.9);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 5;
+}
+
+.interest-rate-logo {
+  max-width: 100px;
+  max-height: 100px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+  justify-content: center;
+  align-items: center;
+}
+
+.interest-rate-logo:hover {
+  transform: scale(1.1);
+  cursor: pointer;
+}
+
+.no-image-placeholder {
+  font-size: 11px;
+  color: #999;
+  padding: 8px 4px;
+  background: #f8f9fa;
+  border-radius: 3px;
+  min-width: 50px;
+  border: 1px dashed #dee2e6;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.no-image-placeholder span {
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.no-image-placeholder small {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+
+/* ============================================
+   IMAGE UPLOAD - DESKTOP
+   ============================================ */
+
+.image-upload-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
+  border: 2px solid #007bff;
+  border-radius: 4px;
+  padding: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  min-height: 50px;
+}
+
+.image-upload-form {
+  height: 40%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.upload-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-input,
+.hidden-file-input {
   display: none;
 }
 
-tr.rate-card-row.show {
-  display: table-row;
+.upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: 2px dashed #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #fafafa;
+  min-height: 30px;
+  width: 40%;
 }
 
-.scroll-indicator {
+.upload-label:hover {
+  border-color: #007bff;
+  background: #f0f7ff;
+}
+
+.upload-icon {
+  font-size: 10px;
+  margin-bottom: 5px;
+}
+
+.upload-label span {
+  color: #666;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.image-preview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-height: 70px;
+  overflow: hidden;
+}
+
+.image-preview img {
+  max-width: 100%;
+  max-height: 70px;
+  object-fit: contain;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.upload-buttons {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  margin-top: auto;
+}
+
+.upload-buttons .btn {
+  padding: 4px 12px;
+  font-size: 11px;
+  min-width: 60px;
+}
+
+.upload-buttons .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+/* ============================================
+   IMAGE UPLOAD - MOBILE
+   ============================================ */
+
+.mobile-image-container {
+  position: relative;
+  width: 100%;
+  min-height: 100px;
+}
+
+.mobile-image-container.readonly {
+  cursor: default;
+}
+
+.mobile-image-container .image-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  background: #f8f9fa;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mobile-image-container .image-display:hover:not(.readonly .image-display) {
+  border-color: #007bff;
+  background: #e3f2fd;
+}
+
+.mobile-image-container .mobile-image {
+  max-width: 100%;
+  max-height: 80px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.mobile-image-container .mobile-placeholder {
+  text-align: center;
+  color: #6c757d;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.mobile-image-container .mobile-placeholder span {
+  font-weight: 500;
+}
+
+.mobile-image-container .mobile-placeholder small {
+  font-size: 0.8em;
+  color: #9ca3af;
+}
+
+.mobile-image-upload {
   position: absolute;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 5px 10px;
-  border-radius: 15px;
-  font-size: 12px;
-  opacity: 0;
-  transition: opacity 0.3s;
-  pointer-events: none;
-  z-index: 1000;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  padding: 15px;
 }
 
-.scroll-indicator.show {
-  opacity: 1;
+.mobile-upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
-/* Pagination Styles */
+.mobile-upload-area {
+  position: relative;
+}
+
+.mobile-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.mobile-upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border: 2px dashed #007bff;
+  border-radius: 8px;
+  background: #f8f9ff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.mobile-upload-label:hover {
+  background: #e3f2fd;
+  border-color: #0056b3;
+}
+
+.mobile-upload-icon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.mobile-upload-label span {
+  color: #007bff;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.mobile-image-preview {
+  text-align: center;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #f8f9fa;
+}
+
+.mobile-preview-img {
+  max-width: 100%;
+  max-height: 120px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.mobile-upload-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.mobile-upload-btn,
+.mobile-delete-btn,
+.mobile-cancel-btn {
+  flex: 1;
+  min-width: 80px;
+  font-size: 0.85rem;
+  padding: 8px 12px;
+}
+
+.mobile-upload-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+
 .pagination-container {
   display: flex;
   justify-content: space-between;
@@ -194,7 +499,31 @@ tr.rate-card-row.show {
   border-left: 1px solid #eee;
 }
 
-/* Loading overlay styles */
+.quick-nav {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.quick-nav .page-btn {
+  padding: 6px 10px;
+  font-size: 12px;
+  min-width: 35px;
+}
+
+.results-info {
+  background: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  border: 1px solid #e9ecef;
+}
+
+
+/* ============================================
+   LOADING & EMPTY STATES
+   ============================================ */
+
 .loading-overlay {
   position: absolute;
   top: 0;
@@ -226,12 +555,8 @@ tr.rate-card-row.show {
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .table-container {
@@ -250,120 +575,11 @@ tr.rate-card-row.show {
   color: #ddd;
 }
 
-@media (max-width: 768px) {
-  .pagination-container {
-    flex-direction: column;
-    gap: 15px;
-    align-items: stretch;
-  }
 
-  .pagination-info {
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-  }
+/* ============================================
+   FILTERS
+   ============================================ */
 
-  .pagination-controls {
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .pagination-jump {
-    margin-left: 0;
-    padding-left: 0;
-    border-left: none;
-    border-top: 1px solid #eee;
-    padding-top: 15px;
-    justify-content: center;
-  }
-}
-
-.quick-nav {
-  display: flex;
-  gap: 5px;
-  align-items: center;
-}
-
-.quick-nav .page-btn {
-  padding: 6px 10px;
-  font-size: 12px;
-  min-width: 35px;
-}
-
-.results-info {
-  background: #f8f9fa;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 13px;
-  border: 1px solid #e9ecef;
-}
-
-/* Authentication styles */
-.auth-section {
-  background: #f8f9fa;
-  padding: 10px 15px;
-  border-radius: 5px;
-  margin-bottom: 20px;
-  border-left: 4px solid #007bff;
-}
-
-.user-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.guest-notice {
-  background: #fff3cd;
-  border: 1px solid #ffeaa7;
-  border-radius: 5px;
-  padding: 10px 15px;
-  margin-bottom: 20px;
-}
-
-.guest-notice .alert-heading {
-  color: #856404;
-  margin-bottom: 5px;
-}
-
-.readonly-notice {
-  font-size: 0.9em;
-  color: #6c757d;
-  font-style: italic;
-}
-
-/* Admin-only elements should be hidden by default for guests */
-.admin-only {
-  display: none;
-}
-
-/* Show admin elements when user is authenticated */
-body.authenticated .admin-only {
-  display: block;
-}
-
-body.authenticated .inline-admin-only {
-  display: inline-block;
-}
-
-body.authenticated .flex-admin-only {
-  display: flex;
-}
-/* Guest-specific styles */
-body.guest .data-cell .form-control {
-  border: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  cursor: default;
-  padding: 8px 12px;
-}
-
-body.guest .data-cell .form-control:focus {
-  outline: none;
-  box-shadow: none;
-}
 .filter-section {
   background: white;
   border-radius: 8px;
@@ -532,21 +748,80 @@ body.guest .data-cell .form-control:focus {
   margin-bottom: 10px;
 }
 
-@media (max-width: 768px) {
-  .filter-grid {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
 
-  .filter-actions {
-    flex-direction: column;
-  }
+/* ============================================
+   AUTHENTICATION & USER INFO
+   ============================================ */
+
+.auth-section {
+  background: #f8f9fa;
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  border-left: 4px solid #007bff;
 }
-/* ============================================================================
-   MOBILE CARD LAYOUT STYLES - ADD TO YOUR EXISTING CSS
-   ============================================================================ */
 
-/* Mobile Interest Rate Cards */
+.user-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.guest-notice {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 5px;
+  padding: 10px 15px;
+  margin-bottom: 20px;
+}
+
+.guest-notice .alert-heading {
+  color: #856404;
+  margin-bottom: 5px;
+}
+
+.readonly-notice {
+  font-size: 0.9em;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.admin-only {
+  display: none;
+}
+
+body.authenticated .admin-only {
+  display: block;
+}
+
+body.authenticated .inline-admin-only {
+  display: inline-block;
+}
+
+body.authenticated .flex-admin-only {
+  display: flex;
+}
+
+body.guest .data-cell .form-control {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  cursor: default;
+  padding: 8px 12px;
+}
+
+body.guest .data-cell .form-control:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+
+/* ============================================
+   MOBILE CARD LAYOUT
+   ============================================ */
+
 .mobile-interest-card {
   background: #ffffff;
   border: 1px solid #e0e0e0;
@@ -578,7 +853,6 @@ body.guest .data-cell .form-control:focus {
   padding: 16px;
 }
 
-/* Card Field Rows */
 .card-field-row {
   display: flex;
   justify-content: space-between;
@@ -634,7 +908,6 @@ body.guest .data-cell .form-control:focus {
   text-align: center;
 }
 
-/* Card Actions */
 .card-actions {
   display: flex;
   flex-direction: column;
@@ -682,7 +955,6 @@ body.guest .data-cell .form-control:focus {
   flex: 1;
 }
 
-/* Mobile Card Row Styling */
 .mobile-card-row {
   border: none !important;
 }
@@ -692,9 +964,19 @@ body.guest .data-cell .form-control:focus {
   padding: 0 !important;
 }
 
-/* ============================================================================
+.mobile-interest-card.card-expanded {
+  transition: all 0.3s ease;
+}
+
+.mobile-interest-card .rate-card {
+  border-top: 1px solid #e9ecef;
+  margin-top: 0;
+}
+
+
+/* ============================================
    INFINITE SCROLL INDICATORS
-   ============================================================================ */
+   ============================================ */
 
 .infinite-scroll-indicator,
 .loading-more-indicator,
@@ -709,6 +991,13 @@ body.guest .data-cell .form-control:focus {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border: 1px solid #dee2e6;
   color: #6c757d;
+  animation: pulse 2s ease-in-out infinite;
+  transform: translateZ(0);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 .loading-more-indicator {
@@ -728,773 +1017,10 @@ body.guest .data-cell .form-control:focus {
   margin-bottom: 8px;
 }
 
-/* ============================================================================
-   MOBILE RESPONSIVE ADJUSTMENTS
-   ============================================================================ */
 
-@media (max-width: 768px) {
-  /* Mobile card container */
-  .mobile-interest-card {
-    margin: 0 0 16px 0;
-    padding: 0;
-    border: 1px solid #00BFA5;
-    border-radius: 8px;
-    background: white;
-    overflow: hidden;
-  }
-
-  /* Card header with rate and logo */
-  .mobile-interest-card .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    border-bottom: 1px solid #e9ecef;
-    background: white;
-  }
-
-  /* Interest rate section */
-  .mobile-interest-card .card-header h6 {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    margin: 0;
-  }
-
-  /* Large rate number */
-  .mobile-interest-card .card-header h6::before {
-    content: attr(data-rate);
-    font-size: 32px;
-    font-weight: 700;
-    color: #00BFA5;
-    line-height: 1;
-  }
-
-  /* p.a. label */
-  .mobile-interest-card .card-header h6::after {
-    content: '%\A p.a.';
-    white-space: pre;
-    display: block;
-    font-size: 14px;
-    color: #00BFA5;
-    font-weight: 600;
-    position: relative;
-    top: -15px;
-  }
-
-  /* Logo area in header */
-  .mobile-interest-card .card-header .card-logo-area {
-    width: 100px;
-    height: 50px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* Card body with info grid */
-  .mobile-interest-card .card-body {
-    padding: 16px;
-  }
-
-  /* Hide the default card field rows */
-  .mobile-interest-card .card-field-row {
-    display: none;
-  }
-
-  /* Create new 2x2 grid for key fields */
-  .mobile-interest-card .card-info-grid {
-    display: flex;
-    gap: 40px;
-  }
-
-  /* Individual info field */
-  .mobile-interest-card .info-field {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  /* Field labels - red uppercase */
-  .mobile-interest-card .info-field-label {
-    font-size: 10px;
-    text-transform: uppercase;
-    color: #e74c3c;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-  }
-
-  /* Field values */
-  .mobile-interest-card .info-field-value {
-    font-size: 14px;
-    color: #212529;
-    font-weight: 400;
-  }
-
-  /* MEHR button styling */
-  .mobile-interest-card .mehr-button-container {
-    display: flex;
-    justify-content: center;
-    padding-top: 8px;
-  }
-
-  .mobile-interest-card .mehr-info-btn {
-    padding: 12px;
-    background-color: transparent;
-    border: 2px solid #00BFA5;
-    color: #00BFA5;
-    border-radius: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 14px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-
-  .mobile-interest-card .mehr-info-btn:hover:not(:disabled) {
-    background-color: #ffffff;
-    color: #0ac1a8;
-  }
-
-  .mobile-interest-card .mehr-info-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  /* Hide action buttons in new layout */
-  .mobile-interest-card .card-actions {
-    display: none;
-  }
-
-  /* Checkbox positioning */
-  .mobile-card-checkbox {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    z-index: 10;
-  }
-
-  /* Adjust card row wrapper */
-  .mobile-card-row {
-    position: relative;
-    margin-bottom: 16px;
-    padding-top: 2px;
-  }
-
-  /* Image handling for logo field */
-  .mobile-interest-card .mobile-image-container {
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .mobile-interest-card .mobile-image-container img {
-    max-height: 50px;
-    max-width: 100px;
-    object-fit: contain;
-  }
-
-  .mobile-interest-card .no-image-placeholder {
-    font-size: 12px;
-    color: #6c757d;
-  }
-}
-
-/* ============================================================================
-   TABLE CONTAINER MODIFICATIONS FOR MOBILE CARDS
-   ============================================================================ */
-
-/* When in mobile-stack mode, modify table display */
-.table-container.mobile-stack .table {
-  border: none;
-}
-
-.table-container.mobile-stack .table thead {
-  display: none; /* Hide table headers in card view */
-}
-
-.table-container.mobile-stack .table tbody {
-  display: block;
-}
-
-.table-container.mobile-stack .mobile-card-row {
-  display: block;
-  width: 100%;
-}
-
-/* Ensure normal table rows are hidden in mobile stack mode */
-.table-container.mobile-stack tr:not(.mobile-card-row):not(.rate-card-row) {
-  display: none;
-}
-
-/* ============================================================================
-   VIEW TOGGLE ENHANCEMENTS
-   ============================================================================ */
-
-.view-toggle {
-  margin-bottom: 15px;
-}
-
-.view-toggle .btn-group {
-  width: 100%;
-}
-
-.view-toggle .btn {
-  flex: 1;
-  font-size: 14px;
-  padding: 8px 12px;
-}
-
-/* ============================================================================
-   INTEGRATION WITH EXISTING STYLES
-   ============================================================================ */
-
-/* Ensure mobile cards work well with existing filter system */
-.mobile-interest-card[data-filtered="true"] {
-  display: block;
-}
-
-.mobile-interest-card[data-filtered="false"] {
-  display: none;
-}
-
-/* Integration with existing more info expansion */
-.mobile-interest-card .mehr-info-btn-card:hover {
-  background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
-}
-
-/* Ensure proper spacing with existing elements */
-.mobile-interest-card + .rate-card-row {
-  margin-top: -16px; /* Adjust for expanded more info */
-}
-
-/* ============================================================================
-   PERFORMANCE OPTIMIZATIONS
-   ============================================================================ */
-
-/* Use GPU acceleration for smooth scrolling */
-.mobile-interest-card {
-  will-change: transform;
-  backface-visibility: hidden;
-  transform: translateZ(0); /* Force hardware acceleration */
-}
-
-/* Optimize animations */
-.infinite-scroll-indicator,
-.loading-more-indicator {
-  transform: translateZ(0); /* Force hardware acceleration */
-}
-
-/* ============================================================================
-   SMOOTH LOADING ANIMATIONS
-   ============================================================================ */
-
-/* Fade in animation for new cards */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.mobile-interest-card {
-  animation: fadeInUp 0.3s ease-out;
-}
-
-/* Pulse effect for scroll indicator */
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-}
-
-.infinite-scroll-indicator {
-  animation: pulse 2s ease-in-out infinite;
-}
-
-/* ============================================================================
-   ACCESSIBILITY IMPROVEMENTS
-   ============================================================================ */
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  .mobile-interest-card {
-    border: 2px solid #000;
-  }
-
-  .card-field-display {
-    background: #fff;
-    border: 1px solid #000;
-  }
-
-  .infinite-scroll-indicator,
-  .loading-more-indicator,
-  .end-of-data-indicator {
-    border: 2px solid #000;
-  }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  .mobile-interest-card,
-  .infinite-scroll-indicator {
-    animation: none;
-    transition: none;
-  }
-}
-
-/* Image cell styling */
-.image-cell {
-  text-align: center;
-  z-index: 0;
-  vertical-align: middle;
-  min-width: 80px;
-}
-
-.image-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 5px;
-}
-
-.interest-rate-logo {
-  max-width: 100px;
-  max-height: 100px;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease;
-}
-
-.interest-rate-logo:hover {
-  transform: scale(1.1);
-  cursor: pointer;
-}
-
-.no-image-placeholder {
-  font-size: 11px;
-  color: #999;
-  padding: 8px 4px;
-  background: #f8f9fa;
-  border-radius: 3px;
-  min-width: 50px;
-  border: 1px dashed #dee2e6;
-}
-
-/* Mobile card view image styling */
-.mobile-interest-card .card-field-row .image-container {
-  margin: 5px 0;
-}
-
-.mobile-interest-card .interest-rate-logo {
-  max-width: 100px;
-  max-height: 100px;
-}
-
-/* Image cell styling */
-.image-cell {
-  position: relative;
-  z-index: 0;
-  padding: 8px !important;
-}
-
-.image-container {
-  position: relative;
-  min-height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-}
-
-.image-container:hover {
-  border-color: #007bff;
-  background-color: #f8f9fa;
-}
-
-.clickable-image {
-  cursor: pointer;
-  position: relative;
-}
-
-.clickable-image:hover::after {
-  content: "📁 Click to upload";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(0, 123, 255, 0.9);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  z-index: 5;
-}
-
-.interest-rate-logo {
-  max-width: 100px;
-  max-height: 100px;
-  object-fit: contain;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  justify-content: center; /* horizontal */
-  align-items: center; /* vertical */
-}
-
-.no-image-placeholder {
-  text-align: center;
-  color: #999;
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.no-image-placeholder span {
-  font-size: 14px;
-  margin-bottom: 2px;
-}
-
-.no-image-placeholder small {
-  font-size: 11px;
-  opacity: 0.8;
-}
-
-/* Upload overlay */
-.image-upload-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: white;
-  border: 2px solid #007bff;
-  border-radius: 4px;
-  padding: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  min-height: 50px;
-}
-
-.image-upload-form {
-  height: 40%;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-/* File upload area */
-.upload-area {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.file-input {
-  display: none;
-}
-
-.upload-label {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2px;
-  border: 2px dashed #ddd;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background: #fafafa;
-  min-height: 30px;
-  width: 40%;
-}
-
-.upload-label:hover {
-  border-color: #007bff;
-  background: #f0f7ff;
-}
-
-.upload-icon {
-  font-size: 10px;
-  margin-bottom: 5px;
-}
-
-.upload-label span {
-  color: #666;
-  font-size: 10px;
-  font-weight: 500;
-}
-
-/* Image preview */
-.image-preview {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  max-height: 70px;
-  overflow: hidden;
-}
-
-.image-preview img {
-  max-width: 100%;
-  max-height: 70px;
-  object-fit: contain;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-}
-
-/* Upload buttons */
-.upload-buttons {
-  display: flex;
-  gap: 4px;
-  justify-content: center;
-  margin-top: auto;
-}
-
-.upload-buttons .btn {
-  padding: 4px 12px;
-  font-size: 11px;
-  min-width: 60px;
-}
-
-.upload-buttons .btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-/* Mobile Image Upload Styles */
-.mobile-image-container {
-  position: relative;
-  width: 100%;
-  min-height: 100px;
-}
-
-.mobile-image-container.readonly {
-  cursor: default;
-}
-
-.mobile-image-container .image-display {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 80px;
-  border: 2px dashed #ddd;
-  border-radius: 8px;
-  padding: 10px;
-  background: #f8f9fa;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.mobile-image-container .image-display:hover:not(.readonly .image-display) {
-  border-color: #007bff;
-  background: #e3f2fd;
-}
-
-.mobile-image-container .mobile-image {
-  max-width: 100%;
-  max-height: 80px;
-  object-fit: contain;
-  border-radius: 4px;
-}
-
-.mobile-image-container .mobile-placeholder {
-  text-align: center;
-  color: #6c757d;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.mobile-image-container .mobile-placeholder span {
-  font-weight: 500;
-}
-
-.mobile-image-container .mobile-placeholder small {
-  font-size: 0.8em;
-  color: #9ca3af;
-}
-
-.mobile-image-upload {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 10;
-  padding: 15px;
-}
-
-.mobile-upload-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.mobile-upload-area {
-  position: relative;
-}
-
-.mobile-file-input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.mobile-upload-label {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  border: 2px dashed #007bff;
-  border-radius: 8px;
-  background: #f8f9ff;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: center;
-}
-
-.mobile-upload-label:hover {
-  background: #e3f2fd;
-  border-color: #0056b3;
-}
-
-.mobile-upload-icon {
-  font-size: 2rem;
-  margin-bottom: 8px;
-}
-
-.mobile-upload-label span {
-  color: #007bff;
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-.mobile-image-preview {
-  text-align: center;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: #f8f9fa;
-}
-
-.mobile-preview-img {
-  max-width: 100%;
-  max-height: 120px;
-  object-fit: contain;
-  border-radius: 4px;
-}
-
-.mobile-upload-buttons {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.mobile-upload-btn,
-.mobile-delete-btn,
-.mobile-cancel-btn {
-  flex: 1;
-  min-width: 80px;
-  font-size: 0.85rem;
-  padding: 8px 12px;
-}
-
-.mobile-upload-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Mobile card specific styles */
-.mobile-interest-card .card-field-row {
-  margin-bottom: 15px;
-}
-
-.mobile-interest-card .card-field-label {
-  display: block;
-  font-weight: 600;
-  color: #495057;
-  margin-bottom: 5px;
-  font-size: 0.9rem;
-}
-
-.mobile-interest-card .card-field-value {
-  position: relative;
-}
-
-/* Responsive adjustments */
-@media (max-width: 480px) {
-  .mobile-image-upload {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    max-width: 350px;
-    z-index: 1050;
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    max-height: 80vh;
-    overflow-y: auto;
-  }
-
-  .mobile-upload-buttons {
-    flex-direction: column;
-  }
-
-  .mobile-upload-btn,
-  .mobile-delete-btn,
-  .mobile-cancel-btn {
-    width: 100%;
-    margin-bottom: 5px;
-  }
-}
-
-/* Add overlay for modal-style upload on very small screens */
-@media (max-width: 480px) {
-  .mobile-image-upload::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: -1;
-  }
-}
-
-.hidden-file-input {
-  display: none;
-}
+/* ============================================
+   COMPARISON FEATURE
+   ============================================ */
 
 .comparison-section {
   border-radius: 8px;
@@ -1516,7 +1042,6 @@ body.guest .data-cell .form-control:focus {
   color: #333;
 }
 
-/* New layout styles */
 .comparison-container {
   display: flex;
   gap: 10px;
@@ -1528,7 +1053,7 @@ body.guest .data-cell .form-control:focus {
   display: flex;
   flex-direction: column;
   gap: 0;
-  margin-top: 135px; /* Offset for card headers */
+  margin-top: 135px;
   min-width: 120px;
   flex-shrink: 0;
 }
@@ -1541,7 +1066,7 @@ body.guest .data-cell .form-control:focus {
   border-bottom: 1px solid #f0f0f0;
   display: flex;
   align-items: center;
-  min-height: 44px; /* Match card row height */
+  min-height: 44px;
 }
 
 .comparison-label-row:last-child {
@@ -1569,9 +1094,8 @@ body.guest .data-cell .form-control:focus {
   justify-content: space-between;
   padding: 0.8rem;
   border-bottom: 1px solid #eee;
-  background: white;
-  border-radius: 6px 6px 0 0;
   background: #f6f6f6;
+  border-radius: 6px 6px 0 0;
 }
 
 .provider-info {
@@ -1596,7 +1120,7 @@ body.guest .data-cell .form-control:focus {
 .remove-comparison {
   background: none;
   border: none;
-  color: #dc3545;
+  color: #979797;
   font-size: 1.1rem;
   cursor: pointer;
   padding: 0;
@@ -1609,7 +1133,7 @@ body.guest .data-cell .form-control:focus {
 }
 
 .remove-comparison:hover {
-  color: #c82333;
+  color: #979797;
   background-color: #f8f9fa;
   border-radius: 50%;
 }
@@ -1623,9 +1147,9 @@ body.guest .data-cell .form-control:focus {
 .comparison-value-row {
   padding: 12px 16px;
   border-bottom: 1px solid #f0f0f0;
-  font-size: 0.85rem;
-  color: #333;
-  min-height: 44px; /* Match label row height */
+  font-size: 14px;
+  line-height: 1.4;
+  min-height: 44px;
   display: flex;
   align-items: center;
   word-break: break-word;
@@ -1635,9 +1159,27 @@ body.guest .data-cell .form-control:focus {
   border-bottom: none;
 }
 
+.comparison-value-row.row-even {
+  background-color: white;
+}
+
+.comparison-value-row.row-odd {
+  background-color: #f6f6f6;
+}
+
+.comparison-logo,
+.text-muted {
+  height: 100px;
+  width: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  object-fit: contain;
+  padding-left: 10px;
+}
+
 .empty-comparison-card {
   border: 1px solid #ddd;
-  /* border-radius: 8px; */
   min-width: 350px;
   flex-shrink: 0;
   display: flex;
@@ -1662,444 +1204,6 @@ body.guest .data-cell .form-control:focus {
   font-size: 2rem;
   margin-bottom: 0.5rem;
   opacity: 0.5;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .comparison-container {
-    flex-direction: column;
-  }
-
-  .comparison-labels {
-    margin-top: 0;
-    min-width: auto;
-    margin-bottom: 1rem;
-  }
-
-  .comparison-label-row {
-    padding: 8px 12px;
-    min-height: auto;
-  }
-
-  .comparison-cards-container {
-    flex-direction: column;
-  }
-
-  .comparison-card,
-  .empty-comparison-card {
-    min-width: auto;
-    width: 100%;
-  }
-
-  .comparison-header {
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: stretch;
-  }
-
-  /* Mobile: show labels inline with values */
-  .comparison-labels {
-    display: none;
-  }
-
-  .comparison-value-row {
-    position: relative;
-  }
-
-  .comparison-value-row::before {
-    content: attr(data-label) ": ";
-    font-weight: 500;
-    color: #666;
-    margin-right: 8px;
-  }
-}
-
-.comparison-value-row {
-  padding: 12px 16px;
-  border-bottom: 1px solid #f0f0f0;
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-.comparison-value-row:last-child {
-  border-bottom: none;
-}
-
-/* Striped rows - alternating white and light gray */
-.comparison-value-row.row-even {
-  background-color: white;
-}
-
-.comparison-value-row.row-odd {
-  background-color: #f6f6f6; /* Bootstrap's table-striped gray color */
-}
-
-.provider-info {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.provider-logo {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-  border-radius: 4px;
-}
-
-.comparison-logo,
-.text-muted {
-  height: 100px; /* same height for both */
-  width: auto;
-  display: flex; /* flexbox for centering text */
-  align-items: center; /* vertical center */
-  justify-content: center; /* horizontal center */
-  object-fit: contain;
-  padding-left: 10px;
-}
-
-.provider-name {
-  font-weight: 600;
-  color: #333;
-  font-size: 0.9rem;
-}
-
-.remove-comparison {
-  background: none;
-  border: none;
-  color: #979797;
-  font-size: 1.1rem;
-  cursor: pointer;
-  padding: 0;
-  line-height: 1;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.remove-comparison:hover {
-  color: #979797;
-  background-color: #f8f9fa;
-  border-radius: 50%;
-}
-
-.comparison-details {
-  margin-bottom: 1rem;
-}
-
-.detail-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.4rem 0;
-  border-bottom: 1px solid #f0f0f0;
-  font-size: 0.85rem;
-}
-
-.detail-row:last-child {
-  border-bottom: none;
-}
-
-.detail-label {
-  font-weight: 500;
-  color: #666;
-  flex-shrink: 0;
-  margin-right: 0.5rem;
-}
-
-.detail-value {
-  color: #333;
-  text-align: right;
-  word-break: break-word;
-}
-
-.comparison-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.empty-comparison-state {
-  text-align: center;
-  color: #666;
-  padding: 2rem;
-  border: 2px dashed #ddd;
-  border-radius: 8px;
-}
-
-.empty-comparison-state .icon {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-  opacity: 0.5;
-}
-
-/* Table modifications */
-.comparison-checkbox {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  cursor: pointer;
-}
-
-.table th:first-child,
-.table td:first-child {
-  width: 50px;
-  text-align: center;
-}
-
-/* ============================================================================
-           CUSTOM CHECKBOX STYLES - ADD TO YOUR EXISTING CSS
-           ============================================================================ */
-
-/* Hide the default checkbox */
-.comparison-checkbox {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-/* Custom checkbox container */
-.custom-checkbox-container {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-}
-
-/* Custom checkbox appearance */
-.custom-checkbox {
-  position: relative;
-  width: 20px;
-  height: 20px;
-  background-color: #e9ecef;
-  border: 2px solid #dee2e6;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-/* Hover state */
-.custom-checkbox:hover {
-  border-color: #00b894;
-  background-color: #f0f9f7;
-}
-
-/* Checked state */
-.comparison-checkbox:checked + .custom-checkbox {
-  background-color: #e9ecef;
-}
-
-/* Checkmark */
-.custom-checkbox::after {
-  content: "✓";
-  color: #00b894;
-  font-size: 14px;
-  font-weight: bold;
-  opacity: 0;
-  transform: scale(0.5);
-  transition: all 0.2s ease;
-}
-
-/* Show checkmark when checked */
-.comparison-checkbox:checked + .custom-checkbox::after {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* Focus state for accessibility */
-.comparison-checkbox:focus + .custom-checkbox {
-  outline: 2px solid #00b894;
-  outline-offset: 2px;
-}
-
-/* Label styling */
-.checkbox-label {
-  font-size: 0.8rem;
-  color: #333;
-  cursor: pointer;
-  user-select: none;
-  margin: 0;
-}
-
-/* Table cell specific styling */
-.table .custom-checkbox-container {
-  justify-content: center;
-}
-
-/* Mobile card styling adjustments */
-.mobile-card-checkbox .custom-checkbox-container {
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.mobile-card-checkbox .checkbox-label {
-  font-size: 0.8rem;
-  color: #666;
-}
-
-/* Update existing comparison checkbox styles to work with new structure */
-.comparison-mode .custom-checkbox-container {
-  display: flex;
-}
-
-/* Hide custom checkboxes initially */
-.custom-checkbox-container {
-  display: none;
-}
-
-/* Show checkboxes when comparison mode is active */
-.comparison-mode .custom-checkbox-container {
-  display: flex;
-}
-
-/* Enhanced checkbox for selected rows */
-.table-row-selected .custom-checkbox {
-  transform: scale(1.1);
-  border-color: #1976d2;
-}
-
-.table-row-selected .comparison-checkbox:checked + .custom-checkbox::after {
-  color: #1976d2;
-}
-
-/* Create a complete border using pseudo-element overlay */
-.table-row-selected::before {
-  position: absolute;
-  top: 0; /* Changed from -2px */
-  left: 0; /* Changed from -2px */
-  right: 0; /* Changed from -2px */
-  bottom: 0; /* Changed from -2px */
-  border: 3px solid #1976d2;
-  border-radius: 4px; /* Reduced slightly */
-  pointer-events: none;
-  z-index: 2;
-  background: #00b894;
-}
-
-.table-row-selected {
-  background-color: #e3f2fd !important;
-  box-shadow: inset 3px 0 0 #1976d2, /* Left border */ inset -3px 0 0 #1976d2,
-    /* Right border */ inset 0 3px 0 #1976d2,
-    /* Top border */ inset 0 -3px 0 #1976d2,
-    /* Bottom border */ 0 2px 8px rgba(25, 118, 210, 0.15); /* Optional shadow */
-  position: relative;
-  z-index: 1;
-}
-
-.table-row-selected td {
-  background-color: #e3f2fd !important;
-  color: #1565c0 !important;
-  font-weight: 500 !important;
-}
-
-/* Alternative approach using box-shadow for cleaner borders */
-.table-row-selected-alt {
-  background-color: #e3f2fd !important;
-  box-shadow: 0 0 0 2px #1976d2, 0 4px 12px rgba(25, 118, 210, 0.15);
-  position: relative;
-  z-index: 10;
-}
-
-.table-row-selected-alt td {
-  background-color: #e3f2fd !important;
-  color: #1565c0 !important;
-  font-weight: 500 !important;
-  border-color: transparent !important;
-}
-
-/* Smooth transitions */
-.table tbody tr {
-  transition: all 0.2s ease;
-}
-
-/* Enhanced checkbox for selected rows */
-.table-row-selected .comparison-checkbox,
-.table-row-selected-alt .comparison-checkbox {
-  transform: scale(1.15);
-  accent-color: #1976d2;
-}
-
-/* Hover effects */
-.table-row-selected:hover::before {
-  background: rgba(25, 118, 210, 0.1);
-  border-color: #0d47a1;
-}
-
-.table-row-selected-alt:hover {
-  box-shadow: 0 0 0 3px #1976d2, 0 6px 16px rgba(25, 118, 210, 0.2);
-}
-
-/* Demo table styling */
-.demo-table {
-  width: 100%;
-  margin: 20px 0;
-}
-
-.demo-table td,
-.demo-table th {
-  padding: 12px 8px;
-  text-align: center;
-  border: 1px solid #ddd;
-}
-
-.demo-table th {
-  background: #f8f9fa;
-  font-weight: 600;
-}
-
-/* Button styling for demo */
-.demo-btn {
-  background: #1976d2;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin: 2px;
-}
-
-.demo-btn:hover {
-  background: #1565c0;
-}
-
-.demo-btn.success {
-  background: #4caf50;
-}
-
-/* Selection indicator */
-.selection-status {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: #1976d2;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 12px;
-  display: none;
-  z-index: 1000;
-}
-
-.selection-status.show {
-  display: block;
-  animation: slideIn 0.3s ease;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
 }
 
 .comparison-limit-warning {
@@ -2142,59 +1246,6 @@ body.guest .data-cell .form-control:focus {
   background: #17a2b8;
 }
 
-/* Basic table styles */
-.table {
-  margin-bottom: 0;
-}
-
-.table th {
-  background-color: #f8f9fa;
-  border-bottom: 2px solid #dee2e6;
-  font-weight: 600;
-  padding: 0.75rem;
-}
-
-.table td {
-  padding: 0.75rem;
-  vertical-align: middle;
-}
-
-.data-cell {
-  text-align: center;
-}
-
-.action-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  padding-right: 4rem;
-}
-
-/* Image display for comparison cards */
-.comparison-image {
-  max-width: 100%;
-  max-height: 40px;
-  object-fit: contain;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .comparison-container {
-    flex-direction: column;
-  }
-
-  .comparison-card {
-    min-width: auto;
-    width: 100%;
-  }
-
-  .comparison-header {
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: stretch;
-  }
-}
-
 .compare-demo-btn {
   background: #fcfcfc;
   color: #583f3f;
@@ -2216,30 +1267,111 @@ body.guest .data-cell .form-control:focus {
   cursor: not-allowed;
 }
 
-/* Hide comparison checkboxes initially */
+
+/* ============================================
+   COMPARISON CHECKBOXES
+   ============================================ */
+
+/* Hide checkboxes by default */
 .comparison-checkbox,
-.comparison-checkbox + label {
+.comparison-checkbox + label,
+.custom-checkbox-container {
   display: none;
 }
 
-/* Show checkboxes when comparison mode is active */
+/* Show when comparison mode is active */
 .comparison-mode .comparison-checkbox,
-.comparison-mode .comparison-checkbox + label {
-  display: inline-block;
+.comparison-mode .comparison-checkbox + label,
+.comparison-mode .custom-checkbox-container {
+  display: flex;
 }
 
-/* For mobile cards - hide the checkbox container initially */
-.card-actions .comparison-checkbox,
-.card-actions .comparison-checkbox + label {
-  display: none;
+/* Custom checkbox styling */
+.comparison-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
-.comparison-mode .card-actions .comparison-checkbox,
-.comparison-mode .card-actions .comparison-checkbox + label {
-  display: inline-block;
+.custom-checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
 }
 
-/* External checkbox layout styles */
+.custom-checkbox {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  background-color: #e9ecef;
+  border: 2px solid #dee2e6;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.custom-checkbox:hover {
+  border-color: #00b894;
+  background-color: #f0f9f7;
+}
+
+.comparison-checkbox:checked + .custom-checkbox {
+  background-color: #e9ecef;
+}
+
+.custom-checkbox::after {
+  content: "✓";
+  color: #00b894;
+  font-size: 14px;
+  font-weight: bold;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.2s ease;
+}
+
+.comparison-checkbox:checked + .custom-checkbox::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.comparison-checkbox:focus + .custom-checkbox {
+  outline: 2px solid #00b894;
+  outline-offset: 2px;
+}
+
+.checkbox-label {
+  font-size: 0.8rem;
+  color: #333;
+  cursor: pointer;
+  user-select: none;
+  margin: 0;
+}
+
+.table .custom-checkbox-container {
+  justify-content: center;
+}
+
+.mobile-card-checkbox .custom-checkbox-container {
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.mobile-card-checkbox .checkbox-label {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+
+/* ============================================
+   EXTERNAL CHECKBOXES (Left Side)
+   ============================================ */
+
 .table-with-checkboxes-container {
   position: relative;
   width: 100%;
@@ -2247,16 +1379,36 @@ body.guest .data-cell .form-control:focus {
 
 .external-checkboxes-column {
   position: absolute;
-  left: -50px; /* Adjust this value to position checkboxes further/closer to table */
+  left: -50px;
   top: 0;
   width: 40px;
   z-index: 10;
-  display: none; /* Hidden by default */
+  display: none;
+  transition: opacity 0.3s ease;
 }
 
-/* Show external checkboxes when comparison mode is active */
 .comparison-mode .external-checkboxes-column {
   display: block;
+  animation: slideInLeft 0.3s ease;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.external-checkboxes-column::before {
+  content: "";
+  display: block;
+  height: 44px;
+  border-bottom: 1px solid transparent;
+  box-sizing: border-box;
 }
 
 .external-checkbox-row {
@@ -2272,16 +1424,6 @@ body.guest .data-cell .form-control:focus {
   position: absolute;
 }
 
-/* Align with table header */
-.external-checkboxes-column::before {
-  content: "";
-  display: block;
-  height: 44px; /* Match your table header height - adjust if needed */
-  border-bottom: 1px solid transparent;
-  box-sizing: border-box;
-}
-
-/* Custom checkbox styling for external position */
 .external-checkbox-row .custom-checkbox-container {
   display: flex !important;
   align-items: center;
@@ -2291,51 +1433,60 @@ body.guest .data-cell .form-control:focus {
 .external-checkbox-row .custom-checkbox {
   width: 22px;
   height: 22px;
-  background-color: #e9ecef;
-  border: 2px solid #dee2e6;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
 }
 
 .external-checkbox-row .custom-checkbox:hover {
-  border-color: #00b894;
-  background-color: #f0f9f7;
   transform: scale(1.05);
 }
 
 .external-checkbox-row .comparison-checkbox:checked + .custom-checkbox {
-  background-color: #e9ecef;
   transform: scale(1.1);
 }
 
 .external-checkbox-row .custom-checkbox::after {
-  content: "✓";
-  color: #00b894;
   font-size: 12px;
-  font-weight: bold;
-  opacity: 0;
-  transform: scale(0.5);
-  transition: all 0.2s ease;
   position: relative;
   top: -5px;
   right: -2px;
 }
 
 .external-checkbox-row .comparison-checkbox:checked + .custom-checkbox::after {
-  opacity: 1;
   transform: scale(2);
 }
 
-/* Selected row styling enhancement */
+.comparison-mode .table-container {
+  margin-left: 60px;
+  transition: margin-left 0.3s ease;
+}
+
+.table-container {
+  transition: margin-left 0.3s ease;
+}
+
+/* Hide internal checkboxes when using external */
+.comparison-mode .comparison-checkbox:not(.external-checkbox-row .comparison-checkbox) {
+  display: none;
+}
+
+.comparison-mode .custom-checkbox-container:not(.external-checkbox-row .custom-checkbox-container) {
+  display: none !important;
+}
+
+
+/* ============================================
+   SELECTED ROW STYLING
+   ============================================ */
+
 .table-row-selected {
   background-color: #e3f2fd !important;
-  box-shadow: 3px 0 0 #1976d2 inset;
+  box-shadow: inset 3px 0 0 #1976d2,
+              inset -3px 0 0 #1976d2,
+              inset 0 3px 0 #1976d2,
+              inset 0 -3px 0 #1976d2,
+              0 2px 8px rgba(25, 118, 210, 0.15);
   position: relative;
+  z-index: 1;
+  transition: all 0.2s ease;
 }
 
 .table-row-selected td {
@@ -2344,14 +1495,366 @@ body.guest .data-cell .form-control:focus {
   font-weight: 500 !important;
 }
 
-/* Add padding to table container to make room for checkboxes */
-.comparison-mode .table-container {
-  margin-left: 60px; /* Adjust based on checkbox column width + spacing */
-  transition: margin-left 0.3s ease;
+.table-row-selected .custom-checkbox {
+  transform: scale(1.1);
+  border-color: #1976d2;
 }
 
-/* Responsive behavior */
+.table-row-selected .comparison-checkbox:checked + .custom-checkbox::after {
+  color: #1976d2;
+}
+
+.table-row-selected:hover {
+  box-shadow: 0 0 0 3px #1976d2,
+              0 6px 16px rgba(25, 118, 210, 0.2);
+}
+
+.table tbody tr {
+  transition: all 0.2s ease;
+}
+
+
+/* ============================================
+   RATE CARD (EXPANDED INFO)
+   ============================================ */
+
+.rate-card-row {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.rate-card-row td {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  line-height: 0 !important;
+  height: auto !important;
+}
+
+.rate-card {
+  margin: 0 !important;
+  line-height: normal !important;
+}
+
+tr.rate-card-row {
+  display: none;
+}
+
+tr.rate-card-row.show {
+  display: table-row;
+}
+
+.scroll-indicator {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.scroll-indicator.show {
+  opacity: 1;
+}
+
+
+/* ============================================
+   MOBILE RESPONSIVE
+   ============================================ */
+
 @media (max-width: 768px) {
+  /* Table stacking */
+  .table-responsive.mobile-stack {
+    overflow-x: visible;
+    border: none;
+    box-shadow: none;
+  }
+
+  .table-responsive.mobile-stack #mainTable {
+    min-width: auto;
+  }
+
+  .table-responsive.mobile-stack #mainTable th,
+  .table-responsive.mobile-stack #mainTable td {
+    min-width: auto;
+    white-space: normal;
+  }
+
+  /* Pagination mobile layout */
+  .pagination-container {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+
+  .pagination-info {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .pagination-controls {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .pagination-jump {
+    margin-left: 0;
+    padding-left: 0;
+    border-left: none;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+    justify-content: center;
+  }
+
+  /* Filter mobile layout */
+  .filter-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .filter-actions {
+    flex-direction: column;
+  }
+
+  /* Mobile image upload */
+  .mobile-image-container .card-field-row .image-container {
+    margin: 5px 0;
+  }
+
+  .mobile-interest-card .interest-rate-logo {
+    max-width: 100px;
+    max-height: 100px;
+  }
+
+  /* Mobile card specific layout */
+  .mobile-interest-card {
+    margin: 0 0 16px 0;
+    padding: 0;
+    border: 1px solid #00BFA5;
+    border-radius: 8px;
+  }
+
+  .mobile-interest-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .mobile-interest-card .card-header h6 {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 0;
+  }
+
+  .mobile-interest-card .card-header h6::before {
+    content: attr(data-rate);
+    font-size: 32px;
+    font-weight: 700;
+    color: #00BFA5;
+    line-height: 1;
+  }
+
+  .mobile-interest-card .card-header h6::after {
+    content: '%\A p.a.';
+    white-space: pre;
+    display: block;
+    font-size: 14px;
+    color: #00BFA5;
+    font-weight: 600;
+    position: relative;
+    top: -15px;
+  }
+
+  .mobile-interest-card .card-header .card-logo-area {
+    width: 100px;
+    height: 50px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-interest-card .card-field-row {
+    display: none;
+  }
+
+  .mobile-interest-card .card-info-grid {
+    display: flex;
+    gap: 40px;
+  }
+
+  .mobile-interest-card .info-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .mobile-interest-card .info-field-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #e74c3c;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .mobile-interest-card .info-field-value {
+    font-size: 14px;
+    color: #212529;
+    font-weight: 400;
+  }
+
+  .mobile-interest-card .mehr-button-container {
+    display: flex;
+    justify-content: center;
+    padding-top: 8px;
+  }
+
+  .mobile-interest-card .mehr-info-btn {
+    padding: 12px;
+    background-color: transparent;
+    border: 2px solid #00BFA5;
+    color: #00BFA5;
+    border-radius: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .mobile-interest-card .mehr-info-btn:hover:not(:disabled) {
+    background-color: #ffffff;
+    color: #0ac1a8;
+  }
+
+  .mobile-interest-card .mehr-info-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .mobile-interest-card .card-actions {
+    display: none;
+  }
+
+  .mobile-card-checkbox {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 10;
+  }
+
+  .mobile-card-row {
+    position: relative;
+    margin-bottom: 16px;
+    padding-top: 2px;
+  }
+
+  .mobile-interest-card .mobile-image-container {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-interest-card .mobile-image-container img {
+    max-height: 50px;
+    max-width: 100px;
+    object-fit: contain;
+  }
+
+  .mobile-interest-card .no-image-placeholder {
+    font-size: 12px;
+    color: #6c757d;
+  }
+
+  /* Table container modifications */
+  .table-container.mobile-stack .table {
+    border: none;
+  }
+
+  .table-container.mobile-stack .table thead {
+    display: none;
+  }
+
+  .table-container.mobile-stack .table tbody {
+    display: block;
+  }
+
+  .table-container.mobile-stack .mobile-card-row {
+    display: block;
+    width: 100%;
+  }
+
+  .table-container.mobile-stack tr:not(.mobile-card-row):not(.rate-card-row) {
+    display: none;
+  }
+
+  /* External checkboxes - hide on mobile */
+  .mobile-stack .external-checkboxes-column {
+    display: none !important;
+  }
+
+  .mobile-stack.comparison-mode .table-container {
+    margin-left: 0;
+  }
+
+  /* Comparison mobile adjustments */
+  .comparison-container {
+    flex-direction: column;
+  }
+
+  .comparison-labels {
+    margin-top: 0;
+    min-width: auto;
+    margin-bottom: 1rem;
+    display: none;
+  }
+
+  .comparison-label-row {
+    padding: 8px 12px;
+    min-height: auto;
+  }
+
+  .comparison-cards-container {
+    flex-direction: column;
+  }
+
+  .comparison-card,
+  .empty-comparison-card {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .comparison-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+
+  .comparison-value-row::before {
+    content: attr(data-label) ": ";
+    font-weight: 500;
+    color: #666;
+    margin-right: 8px;
+  }
+
   .external-checkboxes-column {
     left: -45px;
     width: 35px;
@@ -2369,50 +1872,102 @@ body.guest .data-cell .form-control:focus {
   .comparison-mode .table-container {
     margin-left: 50px;
   }
+}
 
-  /* For mobile card view, hide external checkboxes and use inline ones */
-  .mobile-stack .external-checkboxes-column {
-    display: none !important;
+/* Very small screens */
+@media (max-width: 480px) {
+  .mobile-image-upload {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 350px;
+    z-index: 1050;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    max-height: 80vh;
+    overflow-y: auto;
   }
 
-  .mobile-stack.comparison-mode .table-container {
-    margin-left: 0;
+  .mobile-image-upload::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+  }
+
+  .mobile-upload-buttons {
+    flex-direction: column;
+  }
+
+  .mobile-upload-btn,
+  .mobile-delete-btn,
+  .mobile-cancel-btn {
+    width: 100%;
+    margin-bottom: 5px;
   }
 }
 
-/* Animation for when comparison mode is activated */
-.external-checkboxes-column {
-  transition: opacity 0.3s ease;
-}
 
-.comparison-mode .external-checkboxes-column {
-  animation: slideInLeft 0.3s ease;
-}
+/* ============================================
+   ANIMATIONS & PERFORMANCE
+   ============================================ */
 
-@keyframes slideInLeft {
+@keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateX(-20px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
   }
 }
-/* Ensure table doesn't jump when checkboxes appear */
-.table-container {
-  transition: margin-left 0.3s ease;
+
+.mobile-interest-card {
+  animation: fadeInUp 0.3s ease-out;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
-/* Hide any remaining internal checkboxes */
-.comparison-mode
-  .comparison-checkbox:not(.external-checkbox-row .comparison-checkbox) {
-  display: none;
+.infinite-scroll-indicator,
+.loading-more-indicator {
+  transform: translateZ(0);
 }
 
-.comparison-mode
-  .custom-checkbox-container:not(
-    .external-checkbox-row .custom-checkbox-container
-  ) {
-  display: none !important;
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+@media (prefers-contrast: high) {
+  .mobile-interest-card {
+    border: 2px solid #000;
+  }
+
+  .card-field-display {
+    background: #fff;
+    border: 1px solid #000;
+  }
+
+  .infinite-scroll-indicator,
+  .loading-more-indicator,
+  .end-of-data-indicator {
+    border: 2px solid #000;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-interest-card,
+  .infinite-scroll-indicator {
+    animation: none;
+    transition: none;
+  }
 }
