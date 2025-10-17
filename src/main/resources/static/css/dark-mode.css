@@ -101,6 +101,7 @@ body.dark-mode .card,
 body.dark-mode .card-body {
   border-color: var(--dark-border);
   color: #111827;
+  background: var(--dark-primary);
 }
 
 body.dark-mode h1,
@@ -2249,6 +2250,2569 @@ body.dark-mode meta[name="theme-color"] {
   body.dark-mode .delete-field-btn {
     display: none !important;
   }
+}
+/* ============================================================================
+   IMAGE UPLOAD & FORM EDITING DARK MODE STYLES
+   ============================================================================ */
+
+/* Image Upload Container */
+body.dark-mode .image-upload-container {
+    margin-top: 10px;
+}
+
+body.dark-mode .image-upload-area {
+    width: 100%;
+}
+
+/* Upload Zone */
+body.dark-mode .upload-zone {
+    border: 2px dashed var(--dark-border-light);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--dark-bg-secondary);
+    position: relative;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.dark-mode .upload-zone:hover {
+    border-color: var(--dark-accent);
+    background: rgba(0, 184, 148, 0.08);
+}
+
+body.dark-mode .upload-zone.drag-over {
+    border-color: var(--dark-success);
+    background: rgba(16, 185, 129, 0.1);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+/* Upload Placeholder */
+body.dark-mode .upload-placeholder {
+    text-align: center;
+}
+
+body.dark-mode .upload-placeholder i {
+    font-size: 2rem;
+    color: var(--dark-text-muted);
+    margin-bottom: 10px;
+}
+
+body.dark-mode .upload-placeholder p {
+    margin: 8px 0 4px 0;
+    font-weight: 500;
+    color: var(--dark-text-primary);
+}
+
+body.dark-mode .upload-placeholder small {
+    color: var(--dark-text-muted);
+}
+
+/* Image Preview */
+body.dark-mode .image-preview {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+body.dark-mode .preview-image {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px var(--dark-shadow);
+    border: 1px solid var(--dark-border);
+}
+
+body.dark-mode .image-overlay {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+body.dark-mode .image-preview:hover .image-overlay {
+    opacity: 1;
+}
+
+body.dark-mode .remove-image {
+    background: rgba(239, 68, 68, 0.9);
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .remove-image:hover {
+    background: var(--dark-error);
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+/* Upload Progress */
+body.dark-mode .upload-progress {
+    margin-top: 10px;
+}
+
+body.dark-mode .upload-progress .progress {
+    height: 6px;
+    background: var(--dark-bg-tertiary);
+    border-radius: 3px;
+    overflow: hidden;
+    border: 1px solid var(--dark-border);
+}
+
+body.dark-mode .upload-progress .progress-bar {
+    background: linear-gradient(45deg, var(--dark-accent), #0a8f7a);
+    transition: width 0.3s ease;
+    height: 100%;
+}
+
+/* Upload Success Animation */
+@keyframes uploadSuccess {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+body.dark-mode .upload-success {
+    animation: uploadSuccess 0.6s ease;
+}
+
+/* Upload Notification */
+body.dark-mode #upload-notification {
+    box-shadow: 0 4px 12px var(--dark-shadow);
+    border: 1px solid var(--dark-border);
+    background-color: var(--dark-bg-card);
+    color: var(--dark-text-primary);
+}
+
+/* ============================================================================
+   EDIT CONTAINER
+   ============================================================================ */
+
+body.dark-mode .edit-container {
+    background: var(--dark-bg-card);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px var(--dark-shadow);
+    overflow: hidden;
+    margin: 20px 0;
+    border: 1px solid var(--dark-border);
+}
+
+body.dark-mode .edit-header {
+    background: linear-gradient(135deg, var(--dark-bg-secondary), var(--dark-bg-tertiary));
+    color: var(--dark-text-primary);
+    padding: 25px 30px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 2px solid var(--dark-accent);
+}
+
+body.dark-mode .edit-header h1 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: var(--dark-text-primary);
+}
+
+body.dark-mode .edit-badge {
+    background: rgba(0, 184, 148, 0.2);
+    padding: 8px 16px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--dark-accent);
+    border: 1px solid var(--dark-accent);
+}
+
+/* ============================================================================
+   SECTION HEADERS
+   ============================================================================ */
+
+body.dark-mode .section-header {
+    background: linear-gradient(135deg, var(--dark-bg-secondary), var(--dark-bg-tertiary));
+    border-left: 5px solid var(--dark-warning);
+    padding: 15px 20px;
+    margin: 25px 0 15px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px var(--dark-shadow-light);
+}
+
+body.dark-mode .section-header h5 {
+    margin: 0;
+    color: var(--dark-text-primary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ============================================================================
+   DYNAMIC SECTIONS
+   ============================================================================ */
+
+body.dark-mode .dynamic-section {
+    background: linear-gradient(135deg, var(--dark-bg-card), var(--dark-bg-secondary));
+    border: 2px solid var(--dark-border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .dynamic-section:hover {
+    border-color: var(--dark-accent);
+    box-shadow: 0 4px 12px rgba(0, 184, 148, 0.2);
+}
+
+body.dark-mode .section-controls {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    gap: 8px;
+}
+
+body.dark-mode .section-type-badge {
+    background: linear-gradient(135deg, var(--dark-accent), #0a8f7a);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    position: absolute;
+    top: 15px;
+    left: 15px;
+}
+
+body.dark-mode .remove-section-btn {
+    background: linear-gradient(135deg, var(--dark-error), #b71c1c);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.dark-mode .remove-section-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+body.dark-mode .add-section-btn {
+    background: linear-gradient(135deg, var(--dark-success), var(--dark-accent));
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 5px;
+}
+
+body.dark-mode .add-section-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 184, 148, 0.3);
+}
+
+/* ============================================================================
+   MINI TABLE ROWS
+   ============================================================================ */
+
+body.dark-mode .mini-table-row {
+    background: linear-gradient(135deg, var(--dark-bg-card), var(--dark-bg-secondary));
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    border: 2px solid var(--dark-border);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .mini-table-row:hover {
+    border-color: var(--dark-accent);
+    box-shadow: 0 4px 12px rgba(0, 184, 148, 0.2);
+}
+
+body.dark-mode .remove-row-btn {
+    background: linear-gradient(135deg, var(--dark-error), #b71c1c);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+body.dark-mode .remove-row-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+body.dark-mode .add-row-btn {
+    background: linear-gradient(135deg, var(--dark-success), var(--dark-accent));
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+body.dark-mode .add-row-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 184, 148, 0.2);
+}
+
+/* ============================================================================
+   RICH TEXT EDITOR
+   ============================================================================ */
+
+body.dark-mode .rich-text-container {
+    border: 2px solid var(--dark-border);
+    border-radius: 10px;
+    background: var(--dark-bg-card);
+    overflow: hidden;
+    transition: border-color 0.3s ease;
+}
+
+body.dark-mode .rich-text-container:focus-within {
+    border-color: var(--dark-accent);
+    box-shadow: 0 0 0 3px rgba(0, 184, 148, 0.15);
+}
+
+body.dark-mode .ql-toolbar {
+    border: none;
+    border-bottom: 2px solid var(--dark-border);
+    background: var(--dark-bg-secondary);
+}
+
+body.dark-mode .ql-toolbar .ql-stroke {
+    stroke: var(--dark-text-primary);
+}
+
+body.dark-mode .ql-toolbar .ql-fill {
+    fill: var(--dark-text-primary);
+}
+
+body.dark-mode .ql-toolbar .ql-picker-label {
+    color: var(--dark-text-primary);
+}
+
+body.dark-mode .ql-toolbar button:hover,
+body.dark-mode .ql-toolbar button.ql-active {
+    color: var(--dark-accent);
+}
+
+body.dark-mode .ql-toolbar button:hover .ql-stroke,
+body.dark-mode .ql-toolbar button.ql-active .ql-stroke {
+    stroke: var(--dark-accent);
+}
+
+body.dark-mode .ql-container {
+    border: none;
+    font-family: inherit;
+    background: var(--dark-bg-card);
+}
+
+body.dark-mode .ql-editor {
+    min-height: 150px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--dark-text-primary);
+}
+
+body.dark-mode .ql-editor.ql-blank::before {
+    color: var(--dark-text-muted);
+}
+
+/* Format Toolbar */
+body.dark-mode .format-toolbar {
+    background: linear-gradient(135deg, var(--dark-bg-secondary), var(--dark-bg-tertiary));
+    border: 1px solid var(--dark-border);
+    border-radius: 8px 8px 0 0;
+    padding: 10px 15px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+body.dark-mode .format-btn {
+    background: var(--dark-bg-card);
+    border: 2px solid var(--dark-border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 600;
+    color: var(--dark-text-primary);
+}
+
+body.dark-mode .format-btn:hover {
+    background: var(--dark-bg-tertiary);
+    transform: translateY(-1px);
+    border-color: var(--dark-accent);
+}
+
+body.dark-mode .format-btn.active {
+    background: var(--dark-accent);
+    color: white;
+    border-color: var(--dark-accent);
+}
+
+body.dark-mode .simple-editor {
+    border: 1px solid var(--dark-border);
+    border-radius: 0 0 8px 8px;
+    min-height: 100px;
+    padding: 15px;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: vertical;
+    background: var(--dark-bg-card);
+    color: var(--dark-text-primary);
+}
+
+body.dark-mode .simple-editor:focus {
+    outline: none;
+    border-color: var(--dark-accent);
+    box-shadow: 0 0 0 0.25rem rgba(0, 184, 148, 0.25);
+}
+
+/* ============================================================================
+   EMPTY SECTIONS MESSAGE
+   ============================================================================ */
+
+body.dark-mode .empty-sections-message {
+    text-align: center;
+    color: var(--dark-text-muted);
+    padding: 40px 20px;
+}
+
+body.dark-mode .empty-sections-message i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    opacity: 0.5;
+    color: var(--dark-text-muted);
+}
+
+body.dark-mode .empty-sections-message p {
+    color: var(--dark-text-secondary);
+}
+
+/* ============================================================================
+   FIELD GROUP
+   ============================================================================ */
+
+body.dark-mode .field-group {
+    background: var(--dark-bg-secondary);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 15px;
+    border: 1px solid var(--dark-border);
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .field-group:hover {
+    box-shadow: 0 4px 12px var(--dark-shadow);
+    transform: translateY(-2px);
+    border-color: var(--dark-accent);
+}
+
+body.dark-mode .field-label {
+    font-weight: 600;
+    color: var(--dark-text-primary);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+body.dark-mode .field-value {
+    font-size: 0.9rem;
+    color: var(--dark-text-secondary);
+    margin-bottom: 5px;
+}
+
+/* ============================================================================
+   FORM CONTROLS OVERRIDE
+   ============================================================================ */
+
+body.dark-mode .edit-container .form-control,
+body.dark-mode .dynamic-section .form-control,
+body.dark-mode .mini-table-row .form-control {
+    border-radius: 8px;
+    border: 2px solid var(--dark-border);
+    transition: all 0.3s ease;
+    background-color: var(--dark-bg-secondary);
+    color: var(--dark-text-primary);
+}
+
+body.dark-mode .edit-container .form-control:focus,
+body.dark-mode .dynamic-section .form-control:focus,
+body.dark-mode .mini-table-row .form-control:focus {
+    border-color: var(--dark-accent);
+    box-shadow: 0 0 0 0.2rem rgba(0, 184, 148, 0.25);
+    background-color: var(--dark-bg-tertiary);
+}
+
+body.dark-mode .edit-container .form-control::placeholder,
+body.dark-mode .dynamic-section .form-control::placeholder,
+body.dark-mode .mini-table-row .form-control::placeholder {
+    color: var(--dark-text-muted);
+}
+
+/* Labels in Dynamic Sections */
+body.dark-mode .dynamic-section label,
+body.dark-mode .mini-table-row label {
+    color: var(--dark-text-primary);
+}
+
+/* ============================================================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    body.dark-mode .upload-zone {
+        padding: 15px;
+        min-height: 100px;
+    }
+
+    body.dark-mode .upload-placeholder i {
+        font-size: 1.5rem;
+    }
+
+    body.dark-mode .preview-image {
+        max-height: 150px;
+    }
+
+    body.dark-mode .dynamic-section {
+        padding: 15px;
+    }
+
+    body.dark-mode .section-controls {
+        position: relative;
+        top: auto;
+        right: auto;
+        justify-content: center;
+        margin-bottom: 15px;
+    }
+
+    body.dark-mode .section-type-badge {
+        position: relative;
+        top: auto;
+        left: auto;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+
+    body.dark-mode .edit-header h1 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    body.dark-mode .edit-container {
+        border-radius: 10px;
+        margin: 10px 0;
+    }
+
+    body.dark-mode .form-container {
+        padding: 20px;
+    }
+
+    body.dark-mode .sections-container {
+        padding: 15px;
+    }
+}
+
+/* ============================================================================
+   HIGH CONTRAST MODE
+   ============================================================================ */
+
+@media (prefers-contrast: high) {
+    body.dark-mode .edit-container,
+    body.dark-mode .dynamic-section,
+    body.dark-mode .mini-table-row,
+    body.dark-mode .upload-zone {
+        border-width: 3px;
+    }
+
+    body.dark-mode .form-control {
+        border-width: 3px;
+    }
+}
+
+/* ============================================================================
+   REDUCED MOTION
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    body.dark-mode .upload-zone,
+    body.dark-mode .dynamic-section,
+    body.dark-mode .mini-table-row,
+    body.dark-mode .add-section-btn,
+    body.dark-mode .add-row-btn,
+    body.dark-mode .remove-section-btn,
+    body.dark-mode .remove-row-btn,
+    body.dark-mode .upload-success {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* ============================================================================
+   SMOOTH TRANSITIONS
+   ============================================================================ */
+
+body.dark-mode .edit-container,
+body.dark-mode .dynamic-section,
+body.dark-mode .mini-table-row,
+body.dark-mode .upload-zone,
+body.dark-mode .rich-text-container,
+body.dark-mode .field-group,
+body.dark-mode .form-control {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+/* ============================================================================
+   SECTIONS CONTAINER DARK MODE STYLES
+   ============================================================================ */
+
+/* Sections Container Base */
+body.dark-mode .sections-container {
+    min-height: 200px;
+    border: 2px dashed var(--dark-border-light);
+    border-radius: 10px;
+    padding: 20px;
+    background: var(--dark-bg-secondary);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* Sections Container Hover State */
+body.dark-mode .sections-container:hover {
+    border-color: var(--dark-accent);
+    background: var(--dark-bg-tertiary);
+    box-shadow: 0 2px 8px var(--dark-shadow-light);
+}
+
+/* Sections Container Empty State */
+body.dark-mode .sections-container:empty::before,
+body.dark-mode .sections-container.empty::before {
+    content: "Drag sections here or add new sections";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--dark-text-muted);
+    font-size: 1rem;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+/* Sections Container with Content */
+body.dark-mode .sections-container:not(:empty) {
+    background: var(--dark-bg-primary);
+    border-style: solid;
+    border-color: var(--dark-border);
+}
+
+/* Sections Container Active/Drag Over State */
+body.dark-mode .sections-container.drag-over,
+body.dark-mode .sections-container.active {
+    border-color: var(--dark-accent);
+    background: linear-gradient(135deg, rgba(0, 184, 148, 0.05), rgba(0, 184, 148, 0.1));
+    box-shadow: 0 0 0 3px rgba(0, 184, 148, 0.15);
+}
+
+/* Sections Container Dragging State */
+body.dark-mode .sections-container.dragging {
+    border-color: var(--dark-accent);
+    background: rgba(0, 184, 148, 0.08);
+}
+
+/* Section Items Inside Container */
+body.dark-mode .sections-container .section-item,
+body.dark-mode .sections-container .draggable-section {
+    background: var(--dark-bg-card);
+    border: 1px solid var(--dark-border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .sections-container .section-item:hover,
+body.dark-mode .sections-container .draggable-section:hover {
+    background: var(--dark-bg-secondary);
+    border-color: var(--dark-border-light);
+    box-shadow: 0 2px 8px var(--dark-shadow);
+}
+
+body.dark-mode .sections-container .section-item:last-child,
+body.dark-mode .sections-container .draggable-section:last-child {
+    margin-bottom: 0;
+}
+
+/* Section Headers Inside Container */
+body.dark-mode .sections-container .section-header,
+body.dark-mode .sections-container .section-title {
+    color: var(--dark-text-primary);
+    border-bottom: 1px solid var(--dark-border);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Section Content Inside Container */
+body.dark-mode .sections-container .section-content,
+body.dark-mode .sections-container .section-body {
+    color: var(--dark-text-secondary);
+}
+
+/* Section Controls/Actions */
+body.dark-mode .sections-container .section-controls,
+body.dark-mode .sections-container .section-actions {
+    background-color: transparent;
+}
+
+body.dark-mode .sections-container .section-controls .btn,
+body.dark-mode .sections-container .section-actions .btn {
+    background-color: var(--dark-bg-tertiary);
+    border-color: var(--dark-border);
+    color: var(--dark-text-primary);
+}
+
+body.dark-mode .sections-container .section-controls .btn:hover,
+body.dark-mode .sections-container .section-actions .btn:hover {
+    background-color: var(--dark-hover-bg);
+    border-color: var(--dark-border-light);
+}
+
+/* Section Drag Handle */
+body.dark-mode .sections-container .section-drag-handle,
+body.dark-mode .sections-container .drag-handle {
+    color: var(--dark-text-muted);
+    cursor: grab;
+}
+
+body.dark-mode .sections-container .section-item:hover .section-drag-handle,
+body.dark-mode .sections-container .draggable-section:hover .drag-handle {
+    color: var(--dark-accent);
+}
+
+body.dark-mode .sections-container .section-drag-handle:active,
+body.dark-mode .sections-container .drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Section Delete Button */
+body.dark-mode .sections-container .delete-section-btn,
+body.dark-mode .sections-container .remove-section-btn {
+    background-color: transparent;
+    border-color: var(--dark-error);
+    color: var(--dark-error);
+}
+
+body.dark-mode .sections-container .delete-section-btn:hover,
+body.dark-mode .sections-container .remove-section-btn:hover {
+    background-color: var(--dark-error);
+    border-color: var(--dark-error);
+    color: white;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+/* Section Type Indicator */
+body.dark-mode .sections-container .section-type-indicator {
+    background: linear-gradient(135deg, var(--dark-accent), #0d8f78);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+body.dark-mode .sections-container .section-type-indicator.table-section {
+    background: linear-gradient(135deg, var(--dark-success), var(--dark-accent));
+}
+
+body.dark-mode .sections-container .section-type-indicator.text-section {
+    background: linear-gradient(135deg, var(--dark-warning), #e6a800);
+    color: #000;
+}
+
+/* Section Being Dragged */
+body.dark-mode .sections-container .section-item.dragging,
+body.dark-mode .sections-container .draggable-section.dragging {
+    opacity: 0.5;
+    transform: scale(0.98);
+    box-shadow: 0 8px 25px var(--dark-shadow);
+}
+
+/* Drop Indicator/Placeholder */
+body.dark-mode .sections-container .drop-indicator,
+body.dark-mode .sections-container .section-placeholder {
+    background: var(--dark-accent);
+    border: 2px dashed var(--dark-accent);
+    opacity: 0.3;
+    height: 60px;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+/* Sections Container Loading State */
+body.dark-mode .sections-container.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+body.dark-mode .sections-container.loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--dark-border);
+    border-top-color: var(--dark-accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Section Separator Line */
+body.dark-mode .sections-container .section-separator {
+    border-top: 1px solid var(--dark-border);
+    margin: 1.5rem 0;
+    opacity: 0.5;
+}
+
+/* Add Section Button Inside Container */
+body.dark-mode .sections-container .add-section-btn {
+    background: linear-gradient(135deg, var(--dark-accent), #0a8f7a);
+    border: 2px solid var(--dark-accent);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .sections-container .add-section-btn:hover {
+    background: linear-gradient(135deg, var(--dark-accent-hover), var(--dark-accent));
+    box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);
+    transform: translateY(-2px);
+}
+
+body.dark-mode .sections-container .add-section-btn i,
+body.dark-mode .sections-container .add-section-btn svg {
+    margin-right: 0.5rem;
+}
+
+/* Sections Container Error State */
+body.dark-mode .sections-container.error {
+    border-color: var(--dark-error);
+    background: rgba(239, 68, 68, 0.05);
+}
+
+body.dark-mode .sections-container.error::before {
+    color: var(--dark-error);
+}
+
+/* Sections Container Success State */
+body.dark-mode .sections-container.success {
+    border-color: var(--dark-success);
+    background: rgba(16, 185, 129, 0.05);
+}
+
+/* Section Numbers/Badges */
+body.dark-mode .sections-container .section-number,
+body.dark-mode .sections-container .section-badge {
+    background-color: var(--dark-accent);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+/* Section Expand/Collapse Button */
+body.dark-mode .sections-container .section-toggle,
+body.dark-mode .sections-container .expand-btn {
+    background-color: var(--dark-bg-tertiary);
+    border-color: var(--dark-border);
+    color: var(--dark-text-primary);
+}
+
+body.dark-mode .sections-container .section-toggle:hover,
+body.dark-mode .sections-container .expand-btn:hover {
+    background-color: var(--dark-hover-bg);
+    color: var(--dark-accent);
+}
+
+/* Section Collapsed State */
+body.dark-mode .sections-container .section-item.collapsed,
+body.dark-mode .sections-container .draggable-section.collapsed {
+    background: var(--dark-bg-tertiary);
+    border-color: var(--dark-border-light);
+}
+
+body.dark-mode .sections-container .section-item.collapsed .section-content,
+body.dark-mode .sections-container .draggable-section.collapsed .section-body {
+    display: none;
+}
+
+/* Nested Sections Container */
+body.dark-mode .sections-container .sections-container {
+    background: var(--dark-bg-tertiary);
+    border-color: var(--dark-border);
+    min-height: 100px;
+}
+
+/* Section Grid Layout */
+body.dark-mode .sections-container.grid-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+/* Section List Layout */
+body.dark-mode .sections-container.list-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Sections Container Footer */
+body.dark-mode .sections-container-footer {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--dark-border);
+}
+
+body.dark-mode .sections-container-footer .btn {
+    background-color: var(--dark-bg-tertiary);
+    border-color: var(--dark-border);
+    color: var(--dark-text-primary);
+}
+
+body.dark-mode .sections-container-footer .btn:hover {
+    background-color: var(--dark-hover-bg);
+}
+
+/* Smooth Transitions */
+body.dark-mode .sections-container,
+body.dark-mode .sections-container .section-item,
+body.dark-mode .sections-container .draggable-section,
+body.dark-mode .sections-container .btn {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    body.dark-mode .sections-container {
+        padding: 15px;
+        min-height: 150px;
+    }
+
+    body.dark-mode .sections-container .section-item,
+    body.dark-mode .sections-container .draggable-section {
+        padding: 0.75rem;
+    }
+
+    body.dark-mode .sections-container.grid-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 576px) {
+    body.dark-mode .sections-container {
+        padding: 10px;
+        border-radius: 6px;
+    }
+
+    body.dark-mode .sections-container .add-section-btn {
+        width: 100%;
+        padding: 0.6rem 1rem;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    body.dark-mode .sections-container {
+        border-width: 3px;
+        border-color: var(--dark-accent);
+    }
+
+    body.dark-mode .sections-container .section-item,
+    body.dark-mode .sections-container .draggable-section {
+        border-width: 2px;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    body.dark-mode .sections-container,
+    body.dark-mode .sections-container *,
+    body.dark-mode .sections-container .add-section-btn {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* Print Styles */
+@media print {
+    body.dark-mode .sections-container {
+        background: white !important;
+        border-color: #000 !important;
+    }
+
+    body.dark-mode .sections-container .section-drag-handle,
+    body.dark-mode .sections-container .delete-section-btn,
+    body.dark-mode .sections-container .add-section-btn {
+        display: none !important;
+    }
+}
+/* ============================================================================
+   ADDITIONAL DARK MODE STYLES FOR MISSING COMPONENTS
+   ============================================================================ */
+
+/* Dark mode color variables reference */
+:root {
+  --dark-bg-primary: #111827;
+  --dark-bg-secondary: #1f2937;
+  --dark-bg-tertiary: #374151;
+  --dark-bg-card: #1f2937;
+  --dark-text-primary: #f9fafb;
+  --dark-text-secondary: #d1d5db;
+  --dark-text-muted: #9ca3af;
+  --dark-border: #374151;
+  --dark-border-light: #4b5563;
+  --dark-accent: #00b894;
+  --dark-accent-hover: #00d9a8;
+  --dark-error: #ef4444;
+  --dark-warning: #f59e0b;
+  --dark-success: #10b981;
+  --dark-shadow: rgba(0, 0, 0, 0.7);
+  --dark-shadow-light: rgba(0, 0, 0, 0.4);
+  --dark-hover-bg: #374151;
+}
+
+/* ============================================================================
+   CREATE CONTAINER STYLES
+   ============================================================================ */
+
+body.dark-mode .create-container {
+  background: var(--dark-bg-card);
+  border-radius: 15px;
+  box-shadow: 0 10px 30px var(--dark-shadow);
+  overflow: hidden;
+  margin: 20px 0;
+  border: 1px solid var(--dark-border);
+}
+
+body.dark-mode .create-header {
+  background: linear-gradient(135deg, var(--dark-bg-secondary), var(--dark-bg-tertiary));
+  color: var(--dark-text-primary);
+  padding: 25px 30px;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 2px solid var(--dark-accent);
+}
+
+body.dark-mode .create-header h1 {
+  margin: 0;
+  font-weight: 700;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode .create-badge {
+  background: rgba(0, 184, 148, 0.2);
+  padding: 8px 16px;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--dark-accent);
+  border: 1px solid var(--dark-accent);
+}
+
+/* ============================================================================
+   FORM CONTAINER
+   ============================================================================ */
+
+body.dark-mode .form-container {
+  padding: 30px;
+  background: var(--dark-bg-card);
+  color: var(--dark-text-primary);
+}
+
+/* ============================================================================
+   SECTION HEADER (CREATE/EDIT FORMS)
+   ============================================================================ */
+
+body.dark-mode .section-header {
+  background: linear-gradient(135deg, var(--dark-bg-secondary), var(--dark-bg-tertiary));
+  border-left: 5px solid var(--dark-warning);
+  padding: 15px 20px;
+  margin: 25px 0 15px 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px var(--dark-shadow-light);
+}
+
+body.dark-mode .section-header h5 {
+  margin: 0;
+  color: var(--dark-text-primary);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+body.dark-mode .section-header i,
+body.dark-mode .section-header svg {
+  color: var(--dark-warning);
+}
+
+/* ============================================================================
+   DYNAMIC SECTIONS (CREATE/EDIT FORMS)
+   ============================================================================ */
+
+body.dark-mode .dynamic-section {
+  background: linear-gradient(135deg, var(--dark-bg-card), var(--dark-bg-secondary));
+  border: 2px solid var(--dark-border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+body.dark-mode .dynamic-section:hover {
+  border-color: var(--dark-accent);
+  box-shadow: 0 4px 12px rgba(0, 184, 148, 0.2);
+}
+
+body.dark-mode .section-controls {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  gap: 8px;
+  background-color: transparent;
+}
+
+body.dark-mode .section-type-badge {
+  background: linear-gradient(135deg, var(--dark-accent), #0a8f7a);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  box-shadow: 0 2px 4px var(--dark-shadow-light);
+}
+
+body.dark-mode .remove-section-btn {
+  background: linear-gradient(135deg, var(--dark-error), #b71c1c);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.dark-mode .remove-section-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+  background: var(--dark-error);
+}
+
+body.dark-mode .add-section-btn {
+  background: linear-gradient(135deg, var(--dark-success), var(--dark-accent));
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 5px;
+}
+
+body.dark-mode .add-section-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 184, 148, 0.3);
+  background: linear-gradient(135deg, var(--dark-accent-hover), var(--dark-success));
+}
+
+body.dark-mode .add-section-btn i,
+body.dark-mode .add-section-btn svg {
+  font-size: 1rem;
+}
+
+/* ============================================================================
+   MINI TABLE ROWS
+   ============================================================================ */
+
+body.dark-mode .mini-table-row {
+  background: linear-gradient(135deg, var(--dark-bg-card), var(--dark-bg-secondary));
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  border: 2px solid var(--dark-border);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+body.dark-mode .mini-table-row:hover {
+  border-color: var(--dark-accent);
+  box-shadow: 0 4px 12px rgba(0, 184, 148, 0.2);
+  background: linear-gradient(135deg, var(--dark-bg-secondary), var(--dark-bg-tertiary));
+}
+
+body.dark-mode .remove-row-btn {
+  background: linear-gradient(135deg, var(--dark-error), #b71c1c);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.dark-mode .remove-row-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+  background: var(--dark-error);
+}
+
+body.dark-mode .add-row-btn {
+  background: linear-gradient(135deg, var(--dark-success), var(--dark-accent));
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+body.dark-mode .add-row-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 184, 148, 0.2);
+  background: linear-gradient(135deg, var(--dark-accent-hover), var(--dark-success));
+}
+
+/* ============================================================================
+   RICH TEXT EDITOR
+   ============================================================================ */
+
+body.dark-mode .rich-text-container {
+  border: 2px solid var(--dark-border);
+  border-radius: 10px;
+  background: var(--dark-bg-card);
+  overflow: hidden;
+  transition: border-color 0.3s ease;
+}
+
+body.dark-mode .rich-text-container:focus-within {
+  border-color: var(--dark-accent);
+  box-shadow: 0 0 0 3px rgba(0, 184, 148, 0.15);
+}
+
+body.dark-mode .ql-toolbar {
+  border: none;
+  border-bottom: 2px solid var(--dark-border);
+  background: var(--dark-bg-secondary);
+}
+
+body.dark-mode .ql-toolbar .ql-stroke {
+  stroke: var(--dark-text-primary);
+}
+
+body.dark-mode .ql-toolbar .ql-fill {
+  fill: var(--dark-text-primary);
+}
+
+body.dark-mode .ql-toolbar .ql-picker-label {
+  color: var(--dark-text-primary);
+  border-color: var(--dark-border);
+}
+
+body.dark-mode .ql-toolbar .ql-picker-options {
+  background-color: var(--dark-bg-card);
+  border-color: var(--dark-border);
+}
+
+body.dark-mode .ql-toolbar .ql-picker-item {
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode .ql-toolbar .ql-picker-item:hover {
+  background-color: var(--dark-bg-tertiary);
+}
+
+body.dark-mode .ql-toolbar button:hover,
+body.dark-mode .ql-toolbar button.ql-active {
+  color: var(--dark-accent);
+}
+
+body.dark-mode .ql-toolbar button:hover .ql-stroke,
+body.dark-mode .ql-toolbar button.ql-active .ql-stroke {
+  stroke: var(--dark-accent);
+}
+
+body.dark-mode .ql-toolbar button:hover .ql-fill,
+body.dark-mode .ql-toolbar button.ql-active .ql-fill {
+  fill: var(--dark-accent);
+}
+
+body.dark-mode .ql-container {
+  border: none;
+  font-family: inherit;
+  background: var(--dark-bg-card);
+}
+
+body.dark-mode .ql-editor {
+  min-height: 150px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode .ql-editor.ql-blank::before {
+  color: var(--dark-text-muted);
+  font-style: italic;
+}
+
+body.dark-mode .ql-editor h1,
+body.dark-mode .ql-editor h2,
+body.dark-mode .ql-editor h3,
+body.dark-mode .ql-editor h4,
+body.dark-mode .ql-editor h5,
+body.dark-mode .ql-editor h6 {
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode .ql-editor a {
+  color: var(--dark-accent);
+}
+
+body.dark-mode .ql-editor blockquote {
+  border-left-color: var(--dark-accent);
+  color: var(--dark-text-secondary);
+}
+
+body.dark-mode .ql-editor code,
+body.dark-mode .ql-editor pre {
+  background-color: var(--dark-bg-tertiary);
+  color: var(--dark-accent);
+  border-color: var(--dark-border);
+}
+
+/* ============================================================================
+   FORMAT TOOLBAR (SIMPLE EDITOR)
+   ============================================================================ */
+
+body.dark-mode .format-toolbar {
+  background: linear-gradient(135deg, var(--dark-bg-secondary), var(--dark-bg-tertiary));
+  border: 1px solid var(--dark-border);
+  border-radius: 8px 8px 0 0;
+  padding: 10px 15px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+body.dark-mode .format-btn {
+  background: var(--dark-bg-card);
+  border: 2px solid var(--dark-border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 600;
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode .format-btn:hover {
+  background: var(--dark-bg-tertiary);
+  transform: translateY(-1px);
+  border-color: var(--dark-accent);
+}
+
+body.dark-mode .format-btn.active {
+  background: var(--dark-accent);
+  color: white;
+  border-color: var(--dark-accent);
+}
+
+body.dark-mode .simple-editor {
+  border: 1px solid var(--dark-border);
+  border-radius: 0 0 8px 8px;
+  min-height: 100px;
+  padding: 15px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: vertical;
+  background: var(--dark-bg-card);
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode .simple-editor:focus {
+  outline: none;
+  border-color: var(--dark-accent);
+  box-shadow: 0 0 0 0.25rem rgba(0, 184, 148, 0.25);
+}
+
+body.dark-mode .simple-editor::placeholder {
+  color: var(--dark-text-muted);
+}
+
+/* ============================================================================
+   EMPTY SECTIONS MESSAGE
+   ============================================================================ */
+
+body.dark-mode .empty-sections-message {
+  text-align: center;
+  color: var(--dark-text-muted);
+  padding: 40px 20px;
+}
+
+body.dark-mode .empty-sections-message i,
+body.dark-mode .empty-sections-message svg {
+  font-size: 3rem;
+  margin-bottom: 15px;
+  opacity: 0.5;
+  color: var(--dark-text-muted);
+}
+
+body.dark-mode .empty-sections-message p {
+  color: var(--dark-text-secondary);
+  font-size: 1rem;
+  margin: 0;
+}
+
+body.dark-mode .empty-sections-message small {
+  color: var(--dark-text-muted);
+  font-size: 0.875rem;
+}
+
+/* ============================================================================
+   FIELD GROUP
+   ============================================================================ */
+
+body.dark-mode .field-group {
+  background: var(--dark-bg-secondary);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 15px;
+  border: 1px solid var(--dark-border);
+  transition: all 0.3s ease;
+}
+
+body.dark-mode .field-group:hover {
+  box-shadow: 0 4px 12px var(--dark-shadow);
+  transform: translateY(-2px);
+  border-color: var(--dark-accent);
+}
+
+body.dark-mode .field-label {
+  font-weight: 600;
+  color: var(--dark-text-primary);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+body.dark-mode .field-label i,
+body.dark-mode .field-label svg {
+  color: var(--dark-accent);
+}
+
+body.dark-mode .field-value {
+  font-size: 0.9rem;
+  color: var(--dark-text-secondary);
+  margin-bottom: 5px;
+}
+
+/* ============================================================================
+   FORM CONTROL OVERRIDES FOR CREATE/EDIT FORMS
+   ============================================================================ */
+
+body.dark-mode .create-container .form-control,
+body.dark-mode .form-container .form-control,
+body.dark-mode .dynamic-section .form-control,
+body.dark-mode .mini-table-row .form-control {
+  border-radius: 8px;
+  border: 2px solid var(--dark-border);
+  transition: all 0.3s ease;
+  background-color: var(--dark-bg-secondary);
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode .create-container .form-control:focus,
+body.dark-mode .form-container .form-control:focus,
+body.dark-mode .dynamic-section .form-control:focus,
+body.dark-mode .mini-table-row .form-control:focus {
+  border-color: var(--dark-accent);
+  box-shadow: 0 0 0 0.2rem rgba(0, 184, 148, 0.25);
+  background-color: var(--dark-bg-tertiary);
+  outline: none;
+}
+
+body.dark-mode .create-container .form-control::placeholder,
+body.dark-mode .form-container .form-control::placeholder,
+body.dark-mode .dynamic-section .form-control::placeholder,
+body.dark-mode .mini-table-row .form-control::placeholder {
+  color: var(--dark-text-muted);
+}
+
+body.dark-mode .create-container .form-control:disabled,
+body.dark-mode .form-container .form-control:disabled,
+body.dark-mode .dynamic-section .form-control:disabled,
+body.dark-mode .mini-table-row .form-control:disabled {
+  background-color: var(--dark-bg-tertiary);
+  color: var(--dark-text-muted);
+  opacity: 0.6;
+}
+
+/* ============================================================================
+   LABELS IN DYNAMIC SECTIONS AND FORMS
+   ============================================================================ */
+
+body.dark-mode .create-container label,
+body.dark-mode .form-container label,
+body.dark-mode .dynamic-section label,
+body.dark-mode .mini-table-row label {
+  color: var(--dark-text-primary);
+  font-weight: 500;
+}
+
+body.dark-mode .create-container label.required::after,
+body.dark-mode .form-container label.required::after,
+body.dark-mode .dynamic-section label.required::after,
+body.dark-mode .mini-table-row label.required::after {
+  content: " *";
+  color: var(--dark-error);
+}
+
+/* ============================================================================
+   SELECT DROPDOWNS IN FORMS
+   ============================================================================ */
+
+body.dark-mode .create-container select,
+body.dark-mode .form-container select,
+body.dark-mode .dynamic-section select,
+body.dark-mode .mini-table-row select {
+  background-color: var(--dark-bg-secondary);
+  border-color: var(--dark-border);
+  color: var(--dark-text-primary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23d1d5db' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 16px 12px;
+  padding-right: 2.5rem;
+}
+
+body.dark-mode .create-container select:focus,
+body.dark-mode .form-container select:focus,
+body.dark-mode .dynamic-section select:focus,
+body.dark-mode .mini-table-row select:focus {
+  border-color: var(--dark-accent);
+  box-shadow: 0 0 0 0.2rem rgba(0, 184, 148, 0.25);
+  background-color: var(--dark-bg-tertiary);
+}
+
+body.dark-mode .create-container select option,
+body.dark-mode .form-container select option,
+body.dark-mode .dynamic-section select option,
+body.dark-mode .mini-table-row select option {
+  background-color: var(--dark-bg-card);
+  color: var(--dark-text-primary);
+}
+
+/* ============================================================================
+   TEXTAREA IN FORMS
+   ============================================================================ */
+
+body.dark-mode .create-container textarea,
+body.dark-mode .form-container textarea,
+body.dark-mode .dynamic-section textarea,
+body.dark-mode .mini-table-row textarea {
+  background-color: var(--dark-bg-secondary);
+  border-color: var(--dark-border);
+  color: var(--dark-text-primary);
+  resize: vertical;
+  min-height: 100px;
+}
+
+body.dark-mode .create-container textarea:focus,
+body.dark-mode .form-container textarea:focus,
+body.dark-mode .dynamic-section textarea:focus,
+body.dark-mode .mini-table-row textarea:focus {
+  border-color: var(--dark-accent);
+  box-shadow: 0 0 0 0.2rem rgba(0, 184, 148, 0.25);
+  background-color: var(--dark-bg-tertiary);
+}
+
+/* ============================================================================
+   INPUT GROUPS
+   ============================================================================ */
+
+body.dark-mode .input-group {
+  display: flex;
+}
+
+body.dark-mode .input-group .input-group-text {
+  background-color: var(--dark-bg-tertiary);
+  border-color: var(--dark-border);
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode .input-group .form-control {
+  border-left: none;
+}
+
+body.dark-mode .input-group .form-control:focus {
+  border-color: var(--dark-accent);
+  box-shadow: -2px 0 0 0 var(--dark-accent), 0 0 0 0.2rem rgba(0, 184, 148, 0.25);
+}
+
+body.dark-mode .input-group .btn {
+  border-color: var(--dark-border);
+}
+
+/* ============================================================================
+   FORM VALIDATION STATES
+   ============================================================================ */
+
+body.dark-mode .form-control.is-invalid,
+body.dark-mode .was-validated .form-control:invalid {
+  border-color: var(--dark-error);
+  background-image: none;
+}
+
+body.dark-mode .form-control.is-invalid:focus,
+body.dark-mode .was-validated .form-control:invalid:focus {
+  border-color: var(--dark-error);
+  box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.25);
+}
+
+body.dark-mode .invalid-feedback {
+  color: var(--dark-error);
+}
+
+body.dark-mode .form-control.is-valid,
+body.dark-mode .was-validated .form-control:valid {
+  border-color: var(--dark-success);
+  background-image: none;
+}
+
+body.dark-mode .form-control.is-valid:focus,
+body.dark-mode .was-validated .form-control:valid:focus {
+  border-color: var(--dark-success);
+  box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.25);
+}
+
+body.dark-mode .valid-feedback {
+  color: var(--dark-success);
+}
+
+/* ============================================================================
+   HELP TEXT
+   ============================================================================ */
+
+body.dark-mode .form-text,
+body.dark-mode .help-text,
+body.dark-mode small.text-muted {
+  color: var(--dark-text-muted);
+}
+
+/* ============================================================================
+   DIVIDERS IN FORMS
+   ============================================================================ */
+
+body.dark-mode .form-divider,
+body.dark-mode .section-divider {
+  border-top: 1px solid var(--dark-border);
+  margin: 20px 0;
+  opacity: 0.5;
+}
+
+/* ============================================================================
+   FORM LEGENDS AND FIELDSETS
+   ============================================================================ */
+
+body.dark-mode fieldset {
+  border-color: var(--dark-border);
+}
+
+body.dark-mode legend {
+  color: var(--dark-text-primary);
+  font-weight: 600;
+}
+
+/* ============================================================================
+   CHECKBOX AND RADIO GROUPS IN FORMS
+   ============================================================================ */
+
+body.dark-mode .form-check {
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode .form-check-input {
+  background-color: var(--dark-bg-secondary);
+  border-color: var(--dark-border);
+}
+
+body.dark-mode .form-check-input:checked {
+  background-color: var(--dark-accent);
+  border-color: var(--dark-accent);
+}
+
+body.dark-mode .form-check-input:focus {
+  border-color: var(--dark-accent);
+  box-shadow: 0 0 0 0.2rem rgba(0, 184, 148, 0.25);
+}
+
+body.dark-mode .form-check-label {
+  color: var(--dark-text-secondary);
+}
+
+body.dark-mode .form-switch .form-check-input {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23d1d5db'/%3e%3c/svg%3e");
+}
+
+body.dark-mode .form-switch .form-check-input:checked {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+}
+
+/* ============================================================================
+   FILE INPUT
+   ============================================================================ */
+
+body.dark-mode .form-control[type="file"] {
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode .form-control[type="file"]::file-selector-button {
+  background-color: var(--dark-bg-tertiary);
+  border: 1px solid var(--dark-border);
+  color: var(--dark-text-primary);
+  padding: 0.375rem 0.75rem;
+  margin-right: 0.75rem;
+  border-radius: 0.25rem;
+}
+
+body.dark-mode .form-control[type="file"]::file-selector-button:hover {
+  background-color: var(--dark-hover-bg);
+}
+
+/* ============================================================================
+   RANGE INPUT
+   ============================================================================ */
+
+body.dark-mode .form-range {
+  background-color: transparent;
+}
+
+body.dark-mode .form-range::-webkit-slider-track {
+  background-color: var(--dark-bg-tertiary);
+  border-color: var(--dark-border);
+}
+
+body.dark-mode .form-range::-webkit-slider-thumb {
+  background-color: var(--dark-accent);
+}
+
+body.dark-mode .form-range:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 0.2rem rgba(0, 184, 148, 0.25);
+}
+
+body.dark-mode .form-range::-moz-range-track {
+  background-color: var(--dark-bg-tertiary);
+  border-color: var(--dark-border);
+}
+
+body.dark-mode .form-range::-moz-range-thumb {
+  background-color: var(--dark-accent);
+}
+
+/* ============================================================================
+   FORM FLOATING LABELS
+   ============================================================================ */
+
+body.dark-mode .form-floating > .form-control,
+body.dark-mode .form-floating > .form-select {
+  background-color: var(--dark-bg-secondary);
+  border-color: var(--dark-border);
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode .form-floating > .form-control:focus,
+body.dark-mode .form-floating > .form-select:focus {
+  border-color: var(--dark-accent);
+  box-shadow: 0 0 0 0.2rem rgba(0, 184, 148, 0.25);
+}
+
+body.dark-mode .form-floating > label {
+  color: var(--dark-text-muted);
+}
+
+body.dark-mode .form-floating > .form-control:focus ~ label,
+body.dark-mode .form-floating > .form-control:not(:placeholder-shown) ~ label,
+body.dark-mode .form-floating > .form-select ~ label {
+  color: var(--dark-accent);
+}
+
+/* ============================================================================
+   PROGRESS INDICATORS IN FORMS
+   ============================================================================ */
+
+body.dark-mode .form-progress,
+body.dark-mode .upload-progress {
+  background-color: var(--dark-bg-tertiary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+body.dark-mode .form-progress-bar,
+body.dark-mode .upload-progress-bar {
+  background: linear-gradient(45deg, var(--dark-accent), #0a8f7a);
+}
+
+/* ============================================================================
+   FORM STEPPER / WIZARD
+   ============================================================================ */
+
+body.dark-mode .form-stepper {
+  background-color: var(--dark-bg-secondary);
+  border: 1px solid var(--dark-border);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+body.dark-mode .stepper-step {
+  color: var(--dark-text-muted);
+  border-color: var(--dark-border);
+}
+
+body.dark-mode .stepper-step.active {
+  color: var(--dark-accent);
+  border-color: var(--dark-accent);
+}
+
+body.dark-mode .stepper-step.completed {
+  color: var(--dark-success);
+  border-color: var(--dark-success);
+}
+
+body.dark-mode .stepper-line {
+  background-color: var(--dark-border);
+}
+
+body.dark-mode .stepper-line.completed {
+  background-color: var(--dark-success);
+}
+
+/* ============================================================================
+   BUTTON GROUPS IN FORMS
+   ============================================================================ */
+
+body.dark-mode .btn-group .btn {
+  border-color: var(--dark-border);
+}
+
+body.dark-mode .btn-group .btn:not(:last-child) {
+  border-right-color: var(--dark-border);
+}
+
+body.dark-mode .btn-group .btn-outline-primary {
+  color: var(--dark-accent);
+  border-color: var(--dark-border);
+}
+
+body.dark-mode .btn-group .btn-outline-primary:hover,
+body.dark-mode .btn-group .btn-outline-primary.active {
+  background-color: var(--dark-accent);
+  border-color: var(--dark-accent);
+  color: white;
+}
+
+/* ============================================================================
+   ACCORDION IN FORMS
+   ============================================================================ */
+
+body.dark-mode .accordion {
+  background-color: transparent;
+}
+
+body.dark-mode .accordion-item {
+  background-color: var(--dark-bg-card);
+  border: 1px solid var(--dark-border);
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode .accordion-header {
+  background-color: transparent;
+}
+
+body.dark-mode .accordion-button {
+  background-color: var(--dark-bg-secondary);
+  color: var(--dark-text-primary);
+  border-color: var(--dark-border);
+}
+
+body.dark-mode .accordion-button:not(.collapsed) {
+  background-color: var(--dark-bg-tertiary);
+  color: var(--dark-accent);
+  box-shadow: inset 0 -1px 0 var(--dark-border);
+}
+
+body.dark-mode .accordion-button:focus {
+  border-color: var(--dark-accent);
+  box-shadow: 0 0 0 0.2rem rgba(0, 184, 148, 0.25);
+}
+
+body.dark-mode .accordion-button::after {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+body.dark-mode .accordion-body {
+  background-color: var(--dark-bg-card);
+  color: var(--dark-text-primary);
+  border-top: 1px solid var(--dark-border);
+}
+
+/* ============================================================================
+   TABS IN FORMS
+   ============================================================================ */
+
+body.dark-mode .nav-tabs {
+  border-bottom-color: var(--dark-border);
+}
+
+body.dark-mode .nav-tabs .nav-link {
+  color: var(--dark-text-secondary);
+  border-color: transparent;
+  background-color: transparent;
+}
+
+body.dark-mode .nav-tabs .nav-link:hover {
+  border-color: var(--dark-border);
+  color: var(--dark-text-primary);
+  background-color: var(--dark-bg-tertiary);
+}
+
+body.dark-mode .nav-tabs .nav-link.active {
+  background-color: var(--dark-bg-card);
+  border-color: var(--dark-border) var(--dark-border) var(--dark-bg-card);
+  color: var(--dark-accent);
+}
+
+body.dark-mode .tab-content {
+  background-color: var(--dark-bg-card);
+  border: 1px solid var(--dark-border);
+  border-top: none;
+  padding: 1.5rem;
+  border-radius: 0 0 8px 8px;
+}
+
+/* ============================================================================
+   PILLS NAVIGATION
+   ============================================================================ */
+
+body.dark-mode .nav-pills .nav-link {
+  color: var(--dark-text-secondary);
+  background-color: transparent;
+}
+
+body.dark-mode .nav-pills .nav-link:hover {
+  background-color: var(--dark-bg-tertiary);
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode .nav-pills .nav-link.active {
+  background-color: var(--dark-accent);
+  color: white;
+}
+
+/* ============================================================================
+   TOOLTIPS SPECIFIC TO FORMS
+   ============================================================================ */
+
+body.dark-mode .form-tooltip,
+body.dark-mode [data-bs-toggle="tooltip"] {
+  position: relative;
+}
+
+body.dark-mode .tooltip {
+  opacity: 1;
+}
+
+body.dark-mode .tooltip .tooltip-inner {
+  background-color: var(--dark-bg-tertiary);
+  color: var(--dark-text-primary);
+  box-shadow: 0 2px 8px var(--dark-shadow);
+  border: 1px solid var(--dark-border);
+}
+
+body.dark-mode .tooltip .tooltip-arrow::before {
+  border-top-color: var(--dark-bg-tertiary);
+}
+
+/* ============================================================================
+   POPOVERS IN FORMS
+   ============================================================================ */
+
+body.dark-mode .popover {
+  background-color: var(--dark-bg-card);
+  border-color: var(--dark-border);
+  box-shadow: 0 4px 12px var(--dark-shadow);
+}
+
+body.dark-mode .popover-header {
+  background-color: var(--dark-bg-secondary);
+  border-bottom-color: var(--dark-border);
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode .popover-body {
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode .popover .popover-arrow::before {
+  border-top-color: var(--dark-border);
+}
+
+body.dark-mode .popover .popover-arrow::after {
+  border-top-color: var(--dark-bg-card);
+}
+
+/* ============================================================================
+   COLOR PICKER INPUT
+   ============================================================================ */
+
+body.dark-mode input[type="color"] {
+  background-color: var(--dark-bg-secondary);
+  border-color: var(--dark-border);
+  height: 40px;
+  cursor: pointer;
+}
+
+body.dark-mode input[type="color"]:focus {
+  border-color: var(--dark-accent);
+  box-shadow: 0 0 0 0.2rem rgba(0, 184, 148, 0.25);
+}
+
+/* ============================================================================
+   DATE AND TIME INPUTS
+   ============================================================================ */
+
+body.dark-mode input[type="date"],
+body.dark-mode input[type="time"],
+body.dark-mode input[type="datetime-local"],
+body.dark-mode input[type="week"],
+body.dark-mode input[type="month"] {
+  background-color: var(--dark-bg-secondary);
+  border-color: var(--dark-border);
+  color: var(--dark-text-primary);
+  color-scheme: dark;
+}
+
+body.dark-mode input[type="date"]::-webkit-calendar-picker-indicator,
+body.dark-mode input[type="time"]::-webkit-calendar-picker-indicator,
+body.dark-mode input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+body.dark-mode input[type="date"]:focus,
+body.dark-mode input[type="time"]:focus,
+body.dark-mode input[type="datetime-local"]:focus {
+  border-color: var(--dark-accent);
+  box-shadow: 0 0 0 0.2rem rgba(0, 184, 148, 0.25);
+}
+
+/* ============================================================================
+   NUMBER INPUT SPINNERS
+   ============================================================================ */
+
+body.dark-mode input[type="number"]::-webkit-inner-spin-button,
+body.dark-mode input[type="number"]::-webkit-outer-spin-button {
+  opacity: 0.7;
+  filter: invert(1);
+}
+
+body.dark-mode input[type="number"]:hover::-webkit-inner-spin-button,
+body.dark-mode input[type="number"]:hover::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+/* ============================================================================
+   SEARCH INPUT
+   ============================================================================ */
+
+body.dark-mode input[type="search"]::-webkit-search-cancel-button {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+/* ============================================================================
+   FORM LAYOUT GRID
+   ============================================================================ */
+
+body.dark-mode .form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+body.dark-mode .form-col {
+  flex: 1;
+}
+
+body.dark-mode .form-col label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+/* ============================================================================
+   RESPONSIVE ADJUSTMENTS FOR FORMS
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  body.dark-mode .create-container,
+  body.dark-mode .form-container {
+    padding: 20px;
+  }
+
+  body.dark-mode .create-header h1 {
+    font-size: 1.5rem;
+  }
+
+  body.dark-mode .dynamic-section {
+    padding: 15px;
+  }
+
+  body.dark-mode .section-controls {
+    position: relative;
+    top: auto;
+    right: auto;
+    justify-content: center;
+    margin-bottom: 15px;
+  }
+
+  body.dark-mode .section-type-badge {
+    position: relative;
+    top: auto;
+    left: auto;
+    display: inline-block;
+    margin-bottom: 10px;
+  }
+
+  body.dark-mode .action-buttons {
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  body.dark-mode .action-buttons .btn {
+    width: 100%;
+  }
+
+  body.dark-mode .form-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  body.dark-mode .mini-table-row {
+    padding: 12px;
+  }
+
+  body.dark-mode .add-section-btn,
+  body.dark-mode .add-row-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 576px) {
+  body.dark-mode .create-container {
+    border-radius: 10px;
+    margin: 10px 0;
+  }
+
+  body.dark-mode .create-header {
+    padding: 20px;
+  }
+
+  body.dark-mode .create-header h1 {
+    font-size: 1.25rem;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  body.dark-mode .create-badge {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+
+  body.dark-mode .section-header {
+    padding: 12px 15px;
+    margin: 20px 0 12px 0;
+  }
+
+  body.dark-mode .field-group {
+    padding: 15px;
+  }
+
+  body.dark-mode .action-buttons {
+    padding: 15px;
+  }
+}
+
+/* ============================================================================
+   HIGH CONTRAST MODE FOR FORMS
+   ============================================================================ */
+
+@media (prefers-contrast: high) {
+  body.dark-mode .create-container,
+  body.dark-mode .dynamic-section,
+  body.dark-mode .mini-table-row,
+  body.dark-mode .field-group {
+    border-width: 3px;
+  }
+
+  body.dark-mode .form-control,
+  body.dark-mode select,
+  body.dark-mode textarea {
+    border-width: 3px;
+  }
+
+  body.dark-mode .section-type-badge {
+    border: 2px solid white;
+  }
+
+  body.dark-mode .btn {
+    border-width: 2px;
+  }
+}
+
+/* ============================================================================
+   REDUCED MOTION FOR FORMS
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  body.dark-mode .create-container *,
+  body.dark-mode .form-container *,
+  body.dark-mode .dynamic-section,
+  body.dark-mode .mini-table-row,
+  body.dark-mode .add-section-btn,
+  body.dark-mode .add-row-btn,
+  body.dark-mode .remove-section-btn,
+  body.dark-mode .remove-row-btn,
+  body.dark-mode .field-group {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ============================================================================
+   PRINT STYLES FOR FORMS
+   ============================================================================ */
+
+@media print {
+  body.dark-mode .create-container,
+  body.dark-mode .form-container,
+  body.dark-mode .dynamic-section,
+  body.dark-mode .mini-table-row {
+    background: white !important;
+    color: black !important;
+    border-color: #000 !important;
+  }
+
+  body.dark-mode .section-controls,
+  body.dark-mode .remove-section-btn,
+  body.dark-mode .remove-row-btn,
+  body.dark-mode .add-section-btn,
+  body.dark-mode .add-row-btn,
+  body.dark-mode .action-buttons {
+    display: none !important;
+  }
+
+  body.dark-mode .form-control,
+  body.dark-mode select,
+  body.dark-mode textarea {
+    border: 1px solid #000 !important;
+    background: white !important;
+    color: black !important;
+  }
+}
+
+/* ============================================================================
+   SMOOTH TRANSITIONS FOR ALL FORM ELEMENTS
+   ============================================================================ */
+
+body.dark-mode .create-container,
+body.dark-mode .form-container,
+body.dark-mode .dynamic-section,
+body.dark-mode .mini-table-row,
+body.dark-mode .field-group,
+body.dark-mode .form-control,
+body.dark-mode .btn,
+body.dark-mode select,
+body.dark-mode textarea,
+body.dark-mode .section-header,
+body.dark-mode .action-buttons,
+body.dark-mode .rich-text-container,
+body.dark-mode .format-toolbar,
+body.dark-mode .simple-editor {
+  transition: background-color 0.3s ease,
+              color 0.3s ease,
+              border-color 0.3s ease,
+              box-shadow 0.3s ease,
+              transform 0.3s ease;
+}
+
+/* ============================================================================
+   FOCUS VISIBLE IMPROVEMENTS
+   ============================================================================ */
+
+body.dark-mode .form-control:focus-visible,
+body.dark-mode select:focus-visible,
+body.dark-mode textarea:focus-visible,
+body.dark-mode .btn:focus-visible,
+body.dark-mode .add-section-btn:focus-visible,
+body.dark-mode .add-row-btn:focus-visible {
+  outline: 2px solid var(--dark-accent);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   ACCESSIBILITY - SCREEN READER ONLY TEXT
+   ============================================================================ */
+
+body.dark-mode .sr-only,
+body.dark-mode .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ============================================================================
+   LOADING STATES IN FORMS
+   ============================================================================ */
+
+body.dark-mode .form-loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+body.dark-mode .form-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--dark-border);
+  border-top-color: var(--dark-accent);
+  border-radius: 50%;
+  animation: formSpinner 0.8s linear infinite;
+}
+
+@keyframes formSpinner {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* ============================================================================
+   SUCCESS STATES IN FORMS
+   ============================================================================ */
+
+body.dark-mode .form-success {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-color: var(--dark-success);
+  color: var(--dark-success);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+body.dark-mode .form-success i,
+body.dark-mode .form-success svg {
+  color: var(--dark-success);
+  margin-right: 0.5rem;
+}
+
+/* ============================================================================
+   ERROR STATES IN FORMS
+   ============================================================================ */
+
+body.dark-mode .form-error {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: var(--dark-error);
+  color: var(--dark-error);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+body.dark-mode .form-error i,
+body.dark-mode .form-error svg {
+  color: var(--dark-error);
+  margin-right: 0.5rem;
+}
+
+/* ============================================================================
+   WARNING STATES IN FORMS
+   ============================================================================ */
+
+body.dark-mode .form-warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-color: var(--dark-warning);
+  color: var(--dark-warning);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+body.dark-mode .form-warning i,
+body.dark-mode .form-warning svg {
+  color: var(--dark-warning);
+  margin-right: 0.5rem;
+}
+
+/* ============================================================================
+   INFO STATES IN FORMS
+   ============================================================================ */
+
+body.dark-mode .form-info {
+  background-color: rgba(0, 184, 148, 0.1);
+  border-color: var(--dark-accent);
+  color: var(--dark-accent);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+body.dark-mode .form-info i,
+body.dark-mode .form-info svg {
+  color: var(--dark-accent);
+  margin-right: 0.5rem;
+}
+
+/* ============================================================================
+   CUSTOM SCROLLBAR FOR FORM CONTAINERS
+   ============================================================================ */
+
+body.dark-mode .form-container::-webkit-scrollbar,
+body.dark-mode .dynamic-section::-webkit-scrollbar,
+body.dark-mode .ql-editor::-webkit-scrollbar,
+body.dark-mode .simple-editor::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+body.dark-mode .form-container::-webkit-scrollbar-track,
+body.dark-mode .dynamic-section::-webkit-scrollbar-track,
+body.dark-mode .ql-editor::-webkit-scrollbar-track,
+body.dark-mode .simple-editor::-webkit-scrollbar-track {
+  background: var(--dark-bg-secondary);
+  border-radius: 4px;
+}
+
+body.dark-mode .form-container::-webkit-scrollbar-thumb,
+body.dark-mode .dynamic-section::-webkit-scrollbar-thumb,
+body.dark-mode .ql-editor::-webkit-scrollbar-thumb,
+body.dark-mode .simple-editor::-webkit-scrollbar-thumb {
+  background: var(--dark-bg-tertiary);
+  border-radius: 4px;
+}
+
+body.dark-mode .form-container::-webkit-scrollbar-thumb:hover,
+body.dark-mode .dynamic-section::-webkit-scrollbar-thumb:hover,
+body.dark-mode .ql-editor::-webkit-scrollbar-thumb:hover,
+body.dark-mode .simple-editor::-webkit-scrollbar-thumb:hover {
+  background: var(--dark-border-light);
 }
 
 /* ============================================================================
