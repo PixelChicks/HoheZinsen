@@ -1368,18 +1368,40 @@
         checkboxColumn.innerHTML = checkboxRows;
     }
 
-    function updateBrowserUrl(page, search, sortBy, sortDir) {
+    function updateBrowserUrlWithFilters() {
         const url = new URL(window.location);
-        url.searchParams.set('page', page - 1); // 0-based for URL consistency
-        if (search) {
-            url.searchParams.set('search', search);
-        } else {
-            url.searchParams.delete('search');
-        }
-        url.searchParams.set('sortBy', sortBy || currentSortColumn);
-        url.searchParams.set('sortDir', sortDir || currentSortDirection);
-        url.searchParams.set('size', pageSize);
 
+        // Clear all existing parameters
+        url.search = '';
+
+        // Build parameters in consistent order: page, sortBy, sortDir, size, search, then filters
+        const params = new URLSearchParams();
+
+        // 1. Page parameter
+        params.set('page', currentPage - 1);
+
+        // 2. Sort parameters
+        params.set('sortBy', currentSortColumn);
+        params.set('sortDir', currentSortDirection);
+
+        // 3. Size parameter
+        params.set('size', pageSize);
+
+        // 4. Search parameter (if exists)
+        if (currentSearchTerm) {
+            params.set('search', currentSearchTerm);
+        }
+
+        // 5. Filter parameters (sorted by field ID for consistency)
+        const sortedFilters = Array.from(activeFilters.entries()).sort((a, b) => a[0] - b[0]);
+        sortedFilters.forEach(([fieldId, values]) => {
+            if (values.size > 0) {
+                const filterValue = Array.from(values).join('|');
+                params.set(`filter_${fieldId}`, encodeURIComponent(filterValue));
+            }
+        });
+
+        url.search = params.toString();
         window.history.replaceState({}, '', url);
     }
 
