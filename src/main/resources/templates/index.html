@@ -1566,9 +1566,36 @@ function changePageSize(newSize) {
             });
         headerElement.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
 
-        // Load data with new sort
+        currentSortColumn = sortBy;
+        currentSortDirection = sortDirection;
+
         currentPage = 1;
-        loadPageFromServer(1, currentSearchTerm, sortBy, sortDirection);
+
+        if (isInfiniteScrollEnabled) {
+            loadedPages.clear();
+            allLoadedData = [];
+            hasMoreData = true;
+
+            hideInfiniteScrollIndicator();
+            hideLoadingMoreIndicator();
+            const endIndicator = document.getElementById('endOfDataIndicator');
+            if (endIndicator) endIndicator.style.display = 'none';
+
+            const tbody = document.getElementById('tableBody');
+            if (tbody) tbody.innerHTML = '';
+
+            if (typeof activeFilters !== 'undefined' && activeFilters.size > 0) {
+                loadPageFromServerWithInfiniteScroll(1, currentSearchTerm, sortBy, sortDirection);
+            } else {
+                loadPageFromServerWithInfiniteScroll(1, currentSearchTerm, sortBy, sortDirection);
+            }
+        } else {
+            if (typeof activeFilters !== 'undefined' && activeFilters.size > 0) {
+                loadPageFromServerWithFilters(1, currentSearchTerm, sortBy, sortDirection, activeFilters);
+            } else {
+                loadPageFromServer(1, currentSearchTerm, sortBy, sortDirection);
+            }
+        }
     }
 
     // ============================================================================
@@ -2409,7 +2436,7 @@ function changePageSize(newSize) {
             params.set('search', currentSearchTerm);
         }
 
-        // FIXED: Add filter parameters using pipe separator instead of comma
+        // Add filter parameters using pipe separator instead of comma
         activeFilters.forEach((values, fieldId) => {
             if (values.size > 0) {
                 // Use pipe (|) as separator and URL encode the entire value
@@ -2432,18 +2459,17 @@ function changePageSize(newSize) {
             const endIndicator = document.getElementById('endOfDataIndicator');
             if (endIndicator) endIndicator.style.display = 'none';
 
-            // Load first page with filters in infinite scroll mode
+            const tbody = document.getElementById('tableBody');
+            if (tbody) tbody.innerHTML = '';
+
             loadPageFromServerWithInfiniteScroll(1, currentSearchTerm, currentSortColumn, currentSortDirection);
         } else {
-            // Normal pagination mode
             currentPage = 1;
             loadPageFromServerWithFilters(1, currentSearchTerm, currentSortColumn, currentSortDirection, activeFilters);
         }
 
-        // Update URL
         updateBrowserUrlWithFilters();
 
-        // Close filters panel on mobile after applying
         if (window.innerWidth <= 768) {
             toggleFilters();
         }
@@ -2831,12 +2857,14 @@ function changePageSize(newSize) {
         isLoadingMore = true;
         showLoadingMoreIndicator();
 
-        console.log('Loading more data, page:', nextPage);
+        console.log('Loading more data, page:', nextPage, 'with sort:', currentSortColumn, currentSortDirection);
 
         try {
+            // IMPORTANT: Pass current sort parameters
             const data = await fetchPageData(nextPage, currentSearchTerm, currentSortColumn, currentSortDirection);
 
             if (data && data.content && data.content.length > 0) {
+                // APPEND to existing data
                 allLoadedData = [...allLoadedData, ...data.content];
                 loadedPages.add(nextPage);
 
@@ -2848,11 +2876,18 @@ function changePageSize(newSize) {
                 if (isMobileCardView) {
                     renderMobileCards(allLoadedData);
                 } else {
-                    renderTableData(data.content);
+                    const tbody = document.getElementById('tableBody');
+                    const newRows = renderTableRowsHTML(data.content);
+                    tbody.insertAdjacentHTML('beforeend', newRows);
+
+                    if (document.body.classList.contains('comparison-mode')) {
+                        setTimeout(() => {
+                            alignExternalCheckboxes();
+                        }, 50);
+                    }
                 }
 
                 updateInfiniteScrollInfo();
-
                 hasMoreData = nextPage < totalPages;
 
                 console.log('Loaded page:', nextPage, 'Total items now:', allLoadedData.length);
@@ -2861,6 +2896,8 @@ function changePageSize(newSize) {
                     hideInfiniteScrollIndicator();
                     showEndOfDataIndicator();
                 }
+
+                maintainComparisonState();
             } else {
                 hasMoreData = false;
                 hideInfiniteScrollIndicator();
@@ -3381,14 +3418,12 @@ function changePageSize(newSize) {
         }
     };
 
-    // Special function for loading data in infinite scroll mode
     async function loadPageFromServerWithInfiniteScroll(page, searchTerm = '', sortBy = null, sortDir = null) {
-        if (isLoadingMore && page > 1) return; // Only block additional page loads, not filter resets
+        if (isLoadingMore && page > 1) return;
 
         showLoading();
 
         try {
-            // FIXED: Use the enhanced fetchPageData which now includes filters
             const data = await fetchPageData(page, searchTerm, sortBy, sortDir);
 
             // Update pagination state
@@ -3401,20 +3436,41 @@ function changePageSize(newSize) {
             if (sortBy) currentSortColumn = sortBy;
             if (sortDir) currentSortDirection = sortDir;
 
-            // Initialize infinite scroll data
-            loadedPages.clear();
+            if (page === 1) {
+                loadedPages.clear();
+                allLoadedData = [];
+            }
+
             loadedPages.add(page);
             allLoadedData = [...data.content];
-            serverRateFieldValuesMap = data.rateFieldValuesMap || {};
 
-            // Render cards
-            renderMobileCards(allLoadedData);
+            Object.assign(serverRateFieldValuesMap, data.rateFieldValuesMap || {});
 
-            // Update UI
+            const currentRateIds = new Set(data.content.map(rate => rate.id));
+            const comparedRatesNeedingData = [];
+
+            comparedRates.forEach((rate, rateId) => {
+                if (!currentRateIds.has(rateId) && !serverRateFieldValuesMap[rateId]) {
+                    comparedRatesNeedingData.push(rateId);
+                }
+            });
+
+            if (comparedRatesNeedingData.length > 0) {
+                await fetchMissingRateData(comparedRatesNeedingData);
+                updateComparisonDisplay();
+            }
+
+            const tableContainer = document.getElementById('tableContainer');
+            const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
+
+            if (isMobileCardView) {
+                renderMobileCards(allLoadedData);
+            } else {
+                renderTableData(allLoadedData);
+            }
+
             updateInfiniteScrollInfo();
             hasMoreData = page < totalPages;
-
-            console.log('Loaded page:', page, 'Total pages:', totalPages, 'Has more:', hasMoreData); // Debug log
 
             if (hasMoreData) {
                 showInfiniteScrollIndicator();
@@ -3424,6 +3480,10 @@ function changePageSize(newSize) {
             }
 
             hideLoading();
+
+            maintainComparisonState();
+
+            console.log('Loaded page:', page, 'Total pages:', totalPages, 'Has more:', hasMoreData);
         } catch (error) {
             console.error('Error loading page:', error);
             showDeleteNotification('Error loading data: ' + error.message, true);
@@ -3431,7 +3491,6 @@ function changePageSize(newSize) {
         }
     }
 
-    // Handle clicks on custom checkbox containers
     document.addEventListener('click', function(e) {
         const container = e.target.closest('.custom-checkbox-container');
         if (container && (e.target.classList.contains('custom-checkbox') || e.target.classList.contains('checkbox-label'))) {
@@ -3470,37 +3529,6 @@ function changePageSize(newSize) {
         loadMoreData,
         renderMobileCards,
         checkMobileView
-    };
-
-
-    // FIXED: Override the original functions to use the fixed versions
-    window.createMobileCard = createMobileCard;
-    window.showMoreInfo = showMoreInfo;
-    window.displayRateCard = displayRateCard;
-    window.enableMobileCardView = enableMobileCardView;
-    window.disableMobileCardView = disableMobileCardView;
-    window.disableInfiniteScroll = disableInfiniteScroll;
-    window.resetToNormalPagination = resetToNormalPagination;
-    window.checkMobileView = checkMobileView;
-    window.initializeMobileScrolling = initializeMobileScrolling;
-    window.applyFilters = applyFilters;
-    window.removeFilterTag = removeFilterTag;
-    window.clearAllFilters = clearAllFilters;
-    window.performSearch = performSearch;
-    window.clearSearch = clearSearch;
-    window.loadMoreData = loadMoreData;
-    window.fetchPageData = fetchPageData;
-    window.loadPageFromServerWithInfiniteScroll = loadPageFromServerWithInfiniteScroll;
-
-    // Debug function to check current filter state
-    window.debugFilters = function () {
-        console.log('Active filters:', activeFilters);
-        console.log('Is infinite scroll enabled:', isInfiniteScrollEnabled);
-        console.log('Current page:', currentPage);
-        console.log('Total pages:', totalPages);
-        console.log('Has more data:', hasMoreData);
-        console.log('Loaded pages:', loadedPages);
-        console.log('All loaded data length:', allLoadedData.length);
     };
 
     function alignExternalCheckboxes() {

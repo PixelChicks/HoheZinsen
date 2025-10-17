@@ -40,11 +40,6 @@
   min-width: 120px;
 }
 
-#mainTable th:last-child,
-#mainTable td:last-child {
-  min-width: 200px;
-}
-
 .table th {
   border-top: none;
   background-color: #f8f9fa;
