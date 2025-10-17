@@ -833,7 +833,6 @@ body.guest .data-cell .form-control:focus {
 }
 
 .mobile-interest-card .card-header {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border-bottom: 1px solid #e0e0e0;
   padding: 12px 16px;
 }

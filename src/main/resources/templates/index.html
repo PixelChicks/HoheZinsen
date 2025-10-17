@@ -137,6 +137,12 @@
       background: transparent;
       color: #00b894;
     }
+
+    @media (max-width: 768px) {
+      #quickCompareBtn {
+        display: none;
+      }
+    }
     </style>
 </head>
 <body class="bg-light" th:classappend="${#authorization.expression('isAuthenticated()')} ? 'authenticated' : 'guest'">
@@ -1636,6 +1642,9 @@ function changePageSize(newSize) {
         currentPage = 1;
 
         if (isInfiniteScrollEnabled) {
+            // Prevent double loading by setting isLoadingMore flag
+            isLoadingMore = true;
+
             loadedPages.clear();
             allLoadedData = [];
             hasMoreData = true;
@@ -3084,18 +3093,6 @@ function changePageSize(newSize) {
         return `
             <div class="mobile-card-row" data-rate-id="${rate.id}">
                 <div class="mobile-interest-card" data-rate-id="${rate.id}">
-                    <!-- Comparison checkbox -->
-                    <div class="mobile-card-checkbox">
-                        <div class="custom-checkbox-container">
-                            <input type="checkbox"
-                                   class="comparison-checkbox"
-                                   onchange="toggleComparison(${rate.id}, this.checked)"
-                                   id="compare-mobile-${rate.id}"
-                                   ${isSelected ? 'checked' : ''}>
-                            <div class="custom-checkbox"></div>
-                        </div>
-                    </div>
-
                     <div class="card-header">
                         <h6 data-rate="${rateValue}"></h6>
                         <div class="card-logo-area">
@@ -3558,6 +3555,11 @@ function changePageSize(newSize) {
 
             hideLoading();
 
+            // Reset the loading flag after a short delay to prevent immediate scroll triggers
+            setTimeout(() => {
+                isLoadingMore = false;
+            }, 300);
+
             maintainComparisonState();
 
             console.log('Loaded page:', page, 'Total pages:', totalPages, 'Has more:', hasMoreData);
@@ -3565,6 +3567,7 @@ function changePageSize(newSize) {
             console.error('Error loading page:', error);
             showDeleteNotification('Error loading data: ' + error.message, true);
             hideLoading();
+            isLoadingMore = false;
         }
     }
 
