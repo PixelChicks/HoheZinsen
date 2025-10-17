@@ -74,6 +74,7 @@
   min-height: 100px;
   border-radius: 4px;
   transition: all 0.2s ease;
+  justify-content: space-around;
 }
 
 .image-container:hover {
@@ -1964,4 +1965,140 @@ tr.rate-card-row.show {
     animation: none;
     transition: none;
   }
+}
+
+@media (max-width: 768px) {
+  .angebot-btn {
+    padding: 12px 32px;
+  }
+}
+
+.angebot-btn:hover {
+  background: transparent;
+  color: #00b894;
+}
+
+@media (max-width: 768px) {
+.angebot-btn {
+padding: 12px 32px;
+}
+
+/* Mobile comparison cards */
+.mobile-comparison-container {
+display: flex;
+gap: 12px;
+padding: 16px;
+overflow-x: auto;
+-webkit-overflow-scrolling: touch;
+}
+
+.mobile-comparison-card {
+flex: 1;
+min-width: 160px;
+max-width: 240px;
+background: #f8f9fa;
+border: 2px solid #00b894;
+border-radius: 12px;
+padding: 16px;
+display: flex;
+flex-direction: column;
+}
+
+.mobile-comparison-card.empty {
+border: 2px dashed #ccc;
+background: #fff;
+display: flex;
+align-items: center;
+justify-content: center;
+min-height: 300px;
+}
+
+.mobile-comparison-header {
+display: flex;
+justify-content: flex-end;
+align-items: flex-start;
+font-size: 14px;
+font-weight: 600;
+margin-bottom: 8px;
+}
+
+.mobile-remove-btn {
+background: none;
+border: none;
+font-size: 20px;
+color: #999;
+cursor: pointer;
+padding: 0;
+line-height: 1;
+margin-left: 8px;
+}
+
+.mobile-logo-section {
+display: flex;
+justify-content: center;
+align-items: center;
+min-height: 90px;
+padding: 8px 0;
+border-bottom: 1px solid #e0e0e0;
+}
+
+.mobile-comparison-fields {
+display: flex;
+flex-direction: column;
+gap: 12px;
+}
+
+.mobile-field-row {
+display: flex;
+flex-direction: column;
+gap: 4px;
+}
+
+.mobile-field-label {
+font-size: 10px;
+color: #ff6b6b;
+font-weight: 600;
+letter-spacing: 0.5px;
+}
+
+.mobile-field-value {
+font-size: 14px;
+color: #333;
+font-weight: 500;
+}
+
+.mobile-mehr-info-section {
+margin-top: auto;
+padding-top: 12px;
+border-top: 1px solid #e0e0e0;
+text-align: center;
+}
+
+.mobile-mehr-link {
+color: #00b894;
+text-decoration: none;
+font-weight: 600;
+font-size: 13px;
+}
+
+.mobile-mehr-link.disabled {
+color: #ccc;
+pointer-events: none;
+}
+
+.empty-card-content {
+text-align: center;
+padding: 20px;
+}
+}
+
+.angebot-btn:hover {
+background: transparent;
+color: #00b894;
+}
+
+@media (max-width: 768px) {
+#quickCompareBtn {
+display: none;
+}
 }
