@@ -408,7 +408,7 @@
     let pendingFieldDeleteId = null;
     let draggedSection = null;
     let currentRateId = null;
-
+    let isInitialLoadComplete = false;
     // ============================================================================
     // INITIALIZATION AND DOCUMENT READY
     // ============================================================================
@@ -422,6 +422,11 @@
 
         // Render the initial data from server
         renderInitialData();
+
+        // Mark initial load as complete BEFORE initializing mobile scrolling
+        isInitialLoadComplete = true;
+
+        // Now initialize mobile scrolling (which will enable infinite scroll on desktop)
         initializeMobileScrolling();
     });
 
@@ -669,6 +674,43 @@
 
     let maxComparisons = 3;
     let comparedRates = new Map();
+
+    function updateBrowserUrl(page, search, sortBy, sortDir) {
+        const url = new URL(window.location);
+
+        // Clear all parameters and rebuild in consistent order
+        url.search = '';
+        const params = new URLSearchParams();
+
+        // 1. Page parameter
+        params.set('page', page - 1);
+
+        // 2. Sort parameters
+        params.set('sortBy', sortBy || currentSortColumn);
+        params.set('sortDir', sortDir || currentSortDirection);
+
+        // 3. Size parameter
+        params.set('size', pageSize);
+
+        // 4. Search parameter (if exists)
+        if (search) {
+            params.set('search', search);
+        }
+
+        // 5. Filter parameters (if exists, sorted by field ID)
+        if (typeof activeFilters !== 'undefined' && activeFilters.size > 0) {
+            const sortedFilters = Array.from(activeFilters.entries()).sort((a, b) => a[0] - b[0]);
+            sortedFilters.forEach(([fieldId, values]) => {
+                if (values.size > 0) {
+                    const filterValue = Array.from(values).join('|');
+                    params.set(`filter_${fieldId}`, encodeURIComponent(filterValue));
+                }
+            });
+        }
+
+        url.search = params.toString();
+        window.history.replaceState({}, '', url);
+    }
 
     function updateMaxComparisons() {
         const tableContainer = document.getElementById('tableContainer');
@@ -2284,7 +2326,7 @@ function changePageSize(newSize) {
         for (const [key, value] of urlParams.entries()) {
             if (key.startsWith('filter_')) {
                 const fieldId = key.substring(7);
-                // FIXED: Decode the URL-encoded value and split by pipe
+                // Decode the URL-encoded value and split by pipe
                 const decodedValue = decodeURIComponent(value);
                 const values = decodedValue.includes('|') ? decodedValue.split('|') : [decodedValue];
                 activeFilters.set(fieldId, new Set(values));
@@ -2294,6 +2336,7 @@ function changePageSize(newSize) {
         if (activeFilters.size > 0) {
             updateActiveFiltersDisplay();
             updateFilterCheckboxes();
+            // Don't reload - data is already loaded from server
         }
     }
 
@@ -2448,24 +2491,37 @@ function changePageSize(newSize) {
         // Build filter parameters for the API call
         const params = new URLSearchParams();
 
-        // Add existing parameters
+        // Add existing parameters in consistent order
         params.set('page', '0'); // Reset to first page when applying filters
-        params.set('size', pageSize.toString());
         params.set('sortBy', currentSortColumn);
         params.set('sortDir', currentSortDirection);
+        params.set('size', pageSize.toString());
 
         if (currentSearchTerm) {
             params.set('search', currentSearchTerm);
         }
 
-        // Add filter parameters using pipe separator instead of comma
-        activeFilters.forEach((values, fieldId) => {
+        // Add filter parameters using pipe separator - sorted by field ID
+        const sortedFilters = Array.from(activeFilters.entries()).sort((a, b) => a[0] - b[0]);
+        sortedFilters.forEach(([fieldId, values]) => {
             if (values.size > 0) {
-                // Use pipe (|) as separator and URL encode the entire value
                 const filterValue = Array.from(values).join('|');
                 params.set(`filter_${fieldId}`, encodeURIComponent(filterValue));
             }
         });
+
+        // Check if URL would actually change to prevent duplicate loads
+        const currentUrl = new URL(window.location);
+        const newUrl = new URL(window.location);
+        newUrl.search = params.toString();
+
+        if (currentUrl.toString() === newUrl.toString()) {
+            console.log('URL unchanged, skipping duplicate load');
+            if (window.innerWidth <= 768) {
+                toggleFilters();
+            }
+            return;
+        }
 
         // Check if we're in infinite scroll mode and handle accordingly
         if (isInfiniteScrollEnabled) {
@@ -2585,43 +2641,34 @@ function changePageSize(newSize) {
     function updateBrowserUrlWithFilters() {
         const url = new URL(window.location);
 
-        // Clear existing filter parameters
-        for (const [key] of url.searchParams.entries()) {
-            if (key.startsWith('filter_')) {
-                url.searchParams.delete(key);
-            }
+        url.search = '';
+
+        const params = new URLSearchParams();
+
+        params.set('page', currentPage - 1);
+
+        params.set('sortBy', currentSortColumn);
+        params.set('sortDir', currentSortDirection);
+
+        params.set('size', pageSize);
+
+        if (currentSearchTerm) {
+            params.set('search', currentSearchTerm);
         }
 
-        // FIXED: Add current filter parameters using pipe separator
-        activeFilters.forEach((values, fieldId) => {
+        const sortedFilters = Array.from(activeFilters.entries()).sort((a, b) => a[0] - b[0]);
+        sortedFilters.forEach(([fieldId, values]) => {
             if (values.size > 0) {
                 const filterValue = Array.from(values).join('|');
-                url.searchParams.set(`filter_${fieldId}`, encodeURIComponent(filterValue));
+                params.set(`filter_${fieldId}`, encodeURIComponent(filterValue));
             }
         });
 
-        // Update other parameters
-        url.searchParams.set('page', currentPage - 1);
-        if (currentSearchTerm) {
-            url.searchParams.set('search', currentSearchTerm);
-        } else {
-            url.searchParams.delete('search');
-        }
-        url.searchParams.set('sortBy', currentSortColumn);
-        url.searchParams.set('sortDir', currentSortDirection);
-        url.searchParams.set('size', pageSize);
-
+        url.search = params.toString();
         window.history.replaceState({}, '', url);
     }
 
-    // Override the existing loadPageFromServer function to support filters
-    const originalLoadPageFromServer = window.loadPageFromServer;
-    window.d = function (page, searchTerm = '', sortBy = null, sortDir = null) {
-        loadPageFromServerWithFilters(page, searchTerm, sortBy, sortDir, activeFilters);
-    };
 
-
-    // Add filter refresh capability
     function refreshFiltersFromServer() {
         initializeFilters();
     }
@@ -2679,7 +2726,6 @@ function changePageSize(newSize) {
         }
     }
 
-
     function checkMobileView() {
         const wasMobile = isMobileView;
         isMobileView = window.innerWidth <= 768;
@@ -2690,25 +2736,27 @@ function changePageSize(newSize) {
         const stackedViewBtn = document.getElementById('stackedView');
         const scrollViewBtn = document.getElementById('scrollView');
 
-        // Auto-enable card view when switching to mobile
         if (!wasMobile && isMobileView) {
             if (stackedViewBtn && scrollViewBtn && tableContainer) {
                 stackedViewBtn.classList.add('active');
                 scrollViewBtn.classList.remove('active');
                 tableContainer.classList.add('mobile-stack');
-                enableInfiniteScroll();
+                if (isInitialLoadComplete) {
+                    enableInfiniteScroll();
+                }
                 return;
             }
         }
 
         const stackedActive = stackedViewBtn && stackedViewBtn.classList.contains('active');
 
-        // CHANGED: Enable infinite scroll for both mobile card view AND desktop table view
         const shouldEnable = (isMobileView && isCardView && stackedActive) || (!isMobileView && !isCardView);
 
         if (shouldEnable !== isInfiniteScrollEnabled) {
             if (shouldEnable) {
-                enableInfiniteScroll();
+                if (isInitialLoadComplete) {
+                    enableInfiniteScroll();
+                }
             } else {
                 disableInfiniteScroll();
             }
@@ -2791,10 +2839,17 @@ function changePageSize(newSize) {
 
         const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
 
-        if (isMobileCardView) {
-            renderMobileCards(allLoadedData);
-        } else {
-            renderTableData(allLoadedData);
+        const shouldRender = isInitialLoadComplete && (
+            (isMobileCardView && document.getElementById('tableBody').querySelector('tr')) ||
+            (!isMobileCardView && document.getElementById('tableBody').querySelector('.mobile-interest-card'))
+        );
+
+        if (shouldRender) {
+            if (isMobileCardView) {
+                renderMobileCards(allLoadedData);
+            } else {
+                renderTableData(allLoadedData);
+            }
         }
 
         if (hasMoreData) {
@@ -3717,11 +3772,6 @@ function changePageSize(newSize) {
         }).join('');
    }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        if (!isMobileView) {
-            enableInfiniteScroll();
-        }
-    });
 </script>
 </body>
 </html>
