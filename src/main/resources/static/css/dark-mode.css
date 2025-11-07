@@ -179,6 +179,10 @@ body.dark-mode .form-check-label {
   color: var(--dark-text-secondary);
 }
 
+body.dark-mode .form-label {
+  color: var(--dark-text-secondary);
+}
+
 body.dark-mode .form-check-input {
   background-color: var(--dark-bg-secondary);
   border: 1px solid var(--dark-border-light);

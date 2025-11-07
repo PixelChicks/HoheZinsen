@@ -2,27 +2,27 @@
 // DARK MODE FUNCTIONALITY
 // ============================================================================
 
-// Initialize dark mode on page load
+// The logic inside initializeDarkMode runs when the DOM is ready,
+// guaranteeing elements like #darkModeToggleContainer are available.
 document.addEventListener('DOMContentLoaded', function() {
     initializeDarkMode();
 });
 
 function initializeDarkMode() {
-    // Check if user has a saved preference
-    const savedMode = localStorage.getItem('darkMode');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // The class should have been applied by the inline script in the <head>.
+    const isDarkModeApplied = document.documentElement.classList.contains('dark-mode');
 
-    // Apply dark mode if saved preference is 'enabled' or if user prefers dark and no preference is saved
-    if (savedMode === 'enabled' || (savedMode === null && prefersDark)) {
+    // 1. Stabilize the current state (set theme color meta tag, etc.)
+    if (isDarkModeApplied) {
         enableDarkMode();
     } else {
         disableDarkMode();
     }
 
-    // Create dark mode toggle button
+    // 2. Create the toggle button UI
     createDarkModeToggle();
 
-    // Listen for system theme changes (optional)
+    // 3. Listen for system theme changes (only if the user hasn't set a manual preference)
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
         if (localStorage.getItem('darkMode') === null) {
             if (e.matches) {
@@ -35,19 +35,21 @@ function initializeDarkMode() {
 }
 
 function createDarkModeToggle() {
-    // Check if toggle already exists
+    const container = document.getElementById('darkModeToggleContainer');
+    if (!container) {
+        return;
+    }
+
     if (document.getElementById('darkModeToggle')) {
         return;
     }
 
-    // Create toggle button
     const toggle = document.createElement('button');
     toggle.id = 'darkModeToggle';
     toggle.className = 'dark-mode-toggle';
     toggle.setAttribute('aria-label', 'Toggle dark mode');
     toggle.setAttribute('title', 'Toggle dark mode');
 
-    // Add icons
     toggle.innerHTML = `
         <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="5"></circle>
@@ -65,11 +67,8 @@ function createDarkModeToggle() {
         </svg>
     `;
 
-    // Add click event
     toggle.addEventListener('click', toggleDarkMode);
-
-    // Add to page
-    document.body.appendChild(toggle);
+    container.appendChild(toggle);
 }
 
 function toggleDarkMode() {
@@ -86,8 +85,8 @@ function toggleDarkMode() {
 
 function enableDarkMode() {
     document.body.classList.add('dark-mode');
+    document.documentElement.classList.add('dark-mode');
 
-    // Update meta theme-color for mobile browsers (optional)
     let metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (!metaThemeColor) {
         metaThemeColor = document.createElement('meta');
@@ -95,23 +94,18 @@ function enableDarkMode() {
         document.head.appendChild(metaThemeColor);
     }
     metaThemeColor.content = '#111827';
-
-    console.log('Dark mode enabled');
 }
 
 function disableDarkMode() {
     document.body.classList.remove('dark-mode');
+    document.documentElement.classList.remove('dark-mode');
 
-    // Update meta theme-color for mobile browsers (optional)
     let metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
         metaThemeColor.content = '#ffffff';
     }
-
-    console.log('Dark mode disabled');
 }
 
-// Export functions for manual control (optional)
 window.darkModeControls = {
     enable: enableDarkMode,
     disable: disableDarkMode,

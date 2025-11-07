@@ -7,7 +7,10 @@ import com.InterestRatesAustria.InterestRatesAustria.model.entity.InterestRate;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.InterestRateFieldValue;
 import com.InterestRatesAustria.InterestRatesAustria.repository.GlobalFieldRepository;
 import com.InterestRatesAustria.InterestRatesAustria.repository.InterestRateRepository;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.SetJoin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -293,6 +296,7 @@ public class FilterService {
         return new PageImpl<>(pageContent, PageRequest.of(page, size), results.size());
     }
 
+
     private Specification<InterestRate> createFilterSpecification(Map<Long, List<String>> filters, String search) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -303,16 +307,17 @@ public class FilterService {
                     List<String> selectedValues = filterEntry.getValue();
 
                     if (selectedValues != null && !selectedValues.isEmpty()) {
-                        Predicate fieldPredicate = root.join("fieldValues")
-                                .get("globalField")
-                                .get("id")
-                                .in(fieldId);
+                        Join<Object, Object> fieldValuesJoin =
+                                root.join("fieldValues");
 
-                        Predicate valuePredicate = root.join("fieldValues")
-                                .get("value")
-                                .in(selectedValues);
+                        Predicate fieldIdMatch = criteriaBuilder.equal(
+                                fieldValuesJoin.get("globalField").get("id"), fieldId);
 
-                        predicates.add(criteriaBuilder.and(fieldPredicate, valuePredicate));
+                        Predicate valueInList = fieldValuesJoin.get("value").in(selectedValues);
+
+                        Predicate singleFilterPredicate = criteriaBuilder.and(fieldIdMatch, valueInList);
+
+                        predicates.add(singleFilterPredicate);
                     }
                 }
             }
@@ -320,11 +325,14 @@ public class FilterService {
             if (search != null && !search.trim().isEmpty()) {
                 String searchPattern = "%" + search.toLowerCase() + "%";
 
+                Join<Object, Object> searchJoin =
+                        root.join("fieldValues");
+
                 Predicate webLinkPredicate = criteriaBuilder.like(
                         criteriaBuilder.lower(root.get("webLink")), searchPattern);
 
                 Predicate fieldValuePredicate = criteriaBuilder.like(
-                        criteriaBuilder.lower(root.join("fieldValues").get("value")), searchPattern);
+                        criteriaBuilder.lower(searchJoin.get("value")), searchPattern);
 
                 predicates.add(criteriaBuilder.or(webLinkPredicate, fieldValuePredicate));
             }

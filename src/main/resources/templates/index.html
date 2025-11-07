@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Interest Rate Offers</title>
+    <script src="/js/theme-persistence.js" defer></script>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/styles.css" rel="stylesheet">
     <link href="/css/index.css" rel="stylesheet">
@@ -16,7 +18,7 @@
         }
     </style>
 </head>
-<body class="bg-light" th:classappend="${#authorization.expression('isAuthenticated()')} ? 'authenticated' : 'guest'">
+<body th:classappend="${#authorization.expression('isAuthenticated()')} ? 'authenticated' : 'guest'">
 <div class="container py-4">
 
     <!-- Authentication Status Section -->
@@ -53,6 +55,7 @@
         <div class="d-flex align-items-center flex-wrap">
             <h2 class="me-3 mb-2 mb-md-0">Interest Rate Offers</h2>
         </div>
+        <div id="darkModeToggleContainer"></div>
     </div>
 
     <!-- Filter Section HTML -->
@@ -94,48 +97,6 @@
             <button class="btn btn-outline-primary" id="scrollView" type="button">
                 📊 Table View
             </button>
-        </div>
-    </div>
-
-    <!-- Pagination Controls - Top -->
-    <div class="pagination-container">
-        <div class="pagination-info">
-            <div class="results-info" id="resultsInfo">
-                Showing 1-5 of 25 results
-            </div>
-            <div class="page-size-selector">
-                <label for="pageSize">Show:</label>
-                <select id="pageSize" onchange="changePageSize(this.value)">
-                    <option selected value="5">5 per page</option>
-                    <option value="10">10 per page</option>
-                    <option value="25">25 per page</option>
-                    <option value="50">50 per page</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="pagination-controls">
-            <div class="quick-nav">
-                <button class="page-btn" id="firstPageBtn" onclick="goToPage(1)" title="First page">⏮</button>
-                <button class="page-btn" id="prevPageBtn" onclick="goToPage(currentPage - 1)" title="Previous page">‹
-                </button>
-            </div>
-
-            <div class="quick-nav" id="pageNumbers">
-                <!-- Page numbers will be generated here -->
-            </div>
-
-            <div class="quick-nav">
-                <button class="page-btn" id="nextPageBtn" onclick="goToPage(currentPage + 1)" title="Next page">›
-                </button>
-                <button class="page-btn" id="lastPageBtn" onclick="goToPage(totalPages)" title="Last page">⏭</button>
-            </div>
-
-            <div class="pagination-jump">
-                <span>Go to:</span>
-                <input class="page-input" id="pageJumpInput" min="1" placeholder="1" type="number">
-                <button class="page-btn" onclick="jumpToPage()">Go</button>
-            </div>
         </div>
     </div>
 
@@ -219,136 +180,568 @@
         </div>
     </div>
 
-    <!-- Status notification -->
-    <div class="comparison-status" id="comparisonStatus"></div>
-
-    <!-- Pagination Controls - Bottom -->
-    <div class="pagination-container">
-        <div class="pagination-info">
-            <div class="results-info" id="resultsInfoBottom">
-                Showing 1-5 of 25 results
+    <div class="load-more-container mt-4 mb-4 text-center">
+        <div class="loading-more-indicator" id="loadingMoreIndicator" style="display: none;">
+            <div class="text-center py-4">
+                <div class="spinner-border spinner-border-sm me-2" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <span class="text-muted">Loading more rates...</span>
             </div>
         </div>
 
-        <div class="pagination-controls">
-            <div class="quick-nav">
-                <button class="page-btn" onclick="goToPage(1)" title="First page">⏮</button>
-                <button class="page-btn" onclick="goToPage(currentPage - 1)" title="Previous page">‹</button>
-            </div>
+        <button class="btn btn-primary btn-lg" id="loadMoreBtn" onclick="loadMoreData()">
+            Load More Interest Rates
+        </button>
 
-            <div class="quick-nav" id="pageNumbersBottom">
-                <!-- Page numbers will be generated here -->
+        <div class="end-of-data-indicator mt-3" id="endOfDataIndicator" style="display: none;">
+            <div class="text-muted">
+                <div>📊</div>
+                <small>You've reached the end of the results</small>
             </div>
+        </div>
 
-            <div class="quick-nav">
-                <button class="page-btn" onclick="goToPage(currentPage + 1)" title="Next page">›</button>
-                <button class="page-btn" onclick="goToPage(totalPages)" title="Last page">⏭</button>
-            </div>
+        <div class="results-info-footer mt-2" id="resultsInfoFooter">
         </div>
     </div>
+
+    <div class="comparison-status" id="comparisonStatus"></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-
-<script src="/js/dark-mode.js"></script>
-<script src="/js/dark-mode.js"></script>
 <script th:inline="javascript">
     // ============================================================================
     // GLOBAL VARIABLES AND STATE
     // ============================================================================
 
-    // Add authentication state to JavaScript
     const isAuthenticated = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false;
 
-    // Global pagination variables
-    let currentPage = /*[[${currentPage}]]*/ 1;
-    let pageSize = /*[[${pageSize}]]*/ 5;
-    let totalRecords = /*[[${totalElements}]]*/ 0;
-    let totalPages = /*[[${totalPages}]]*/ 0;
+    let initialRates = /*[[${interestRates}]]*/ [];
+    let initialTotalElements = /*[[${totalElements}]]*/ 0;
+    let initialPageSize = /*[[${pageSize}]]*/ 5;
+
+    let currentPage = 1;
+    let pageSize = initialPageSize;
+    let totalRecords = initialTotalElements;
+    let totalPages = Math.ceil(totalRecords / pageSize);
+
     let currentSortColumn = /*[[${sortBy}]]*/ 'id';
     let currentSortDirection = /*[[${sortDir}]]*/ 'asc';
     let currentSearchTerm = /*[[${search}]]*/ '';
 
-    // Server data
     let serverRateFieldValuesMap = /*[[${rateFieldValuesMap}]]*/ {};
     let globalFieldsCache = /*[[${globalFields}]]*/ [];
     let globalFieldsCompareCache = /*[[${globalFieldsCompare}]]*/ [];
-    let currentPageData = /*[[${interestRates}]]*/ [];
+    let allLoadedData = [...initialRates];
 
-    // UI state variables
     let isLoading = false;
+    let isLoadingMore = false;
+    let hasMoreData = totalPages > 1;
     let currentExpandedCard = null;
     let currentEditForm = null;
-    let draggedElement = null;
-    let orderChanged = false;
-    let originalOrder = [];
-    let pendingDeleteId = null;
-    let pendingFieldDeleteId = null;
-    let draggedSection = null;
-    let currentRateId = null;
     let isInitialLoadComplete = false;
+    let comparedRates = new Map();
+    let expandedRateCards = new Set();
+    let maxComparisons = 3;
+
+    let availableFilters = [];
+    let activeFilters = new Map();
+    let filterExpanded = false;
+
+    // ============================================================================
+    // UTILITY FUNCTIONS (Loading, Comparisons, etc.)
+    // ============================================================================
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    async function fetchMissingRateData(rateIds) {
+        try {
+            const promises = rateIds.map(rateId =>
+                fetch(`/api/interest-rate/${rateId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Failed to fetch rate ${rateId}`);
+                        }
+                        return response.json();
+                    })
+                    .then(rateData => {
+                        if (rateData && rateData.fieldValues) {
+                            serverRateFieldValuesMap[rateId] = rateData.fieldValues;
+                        }
+                        return rateData;
+                    })
+                    .catch(error => {
+                        console.warn(`Could not fetch data for rate ${rateId}:`, error);
+                        return null;
+                    })
+            );
+
+            await Promise.all(promises);
+            console.log('Successfully fetched missing rate data');
+        } catch (error) {
+            console.error('Error fetching missing rate data:', error);
+        }
+    }
+
+    function maintainComparisonState() {
+        comparedRates.forEach((rate, rateId) => {
+            const externalCheckbox = document.getElementById(`external-compare-${rateId}`);
+            if (externalCheckbox) {
+                externalCheckbox.checked = true;
+            }
+            updateTableRowHighlight(rateId, true);
+        });
+        refreshAllVergleichenButtons();
+    }
+
+    function showLoading() {
+        isLoading = true;
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) overlay.classList.add('show');
+    }
+
+    function hideLoading() {
+        isLoading = false;
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) overlay.classList.remove('show');
+    }
+
+    function showDeleteNotification(message, isError) {
+        const notification = document.getElementById('comparisonStatus');
+        if (notification) {
+            notification.textContent = message;
+            notification.className = `comparison-status ${isError ? 'error' : 'success'}`;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    }
+
+    function updateMaxComparisons() {
+        const tableContainer = document.getElementById('tableContainer');
+        const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
+        maxComparisons = isMobileCardView ? 2 : 3;
+    }
+
+    function showStatus(message, type = 'success') {
+        const status = document.getElementById('comparisonStatus');
+        status.textContent = message;
+        status.className = `comparison-status ${type}`;
+        status.classList.add('show');
+
+        setTimeout(() => {
+            status.classList.remove('show');
+        }, 3000);
+    }
+
+    function updateTableRowHighlight(rateId, highlight) {
+        const row = document.querySelector(`tr[data-rate-id="${rateId}"]`);
+        if (row) {
+            if (highlight) {
+                row.classList.add('table-row-selected');
+                row.classList.add('just-selected');
+                setTimeout(() => {
+                    row.classList.remove('just-selected');
+                }, 600);
+            } else {
+                row.classList.remove('table-row-selected', 'just-selected');
+            }
+        }
+    }
+
+    function updateVergleichenButtonVisibility(rateId, isInComparison) {
+        const expandedCardButton = document.querySelector(`#rateCard_${rateId} button[onclick*="startComparisonFromCard(${rateId})"]`);
+        const mobileCardButton = document.querySelector(`div[data-rate-id="${rateId}"] button[onclick*="startComparisonFromCard(${rateId})"]`);
+
+        const buttons = [expandedCardButton, mobileCardButton].filter(btn => btn !== null);
+
+        buttons.forEach(button => {
+            if (isInComparison) {
+                button.style.display = 'none';
+            } else {
+                button.style.display = 'inline-block';
+            }
+        });
+    }
+
+    function refreshAllVergleichenButtons() {
+        const allRateIds = new Set(allLoadedData.map(rate => rate.id));
+
+        allRateIds.forEach(rateId => {
+            const isInComparison = comparedRates.has(rateId);
+            updateVergleichenButtonVisibility(rateId, isInComparison);
+        });
+    }
+
+    // ============================================================================
+    // LOAD MORE DATA LOGIC
+    // ============================================================================
+
+    function updateLoadMoreButtonState() {
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        const loadingMoreIndicator = document.getElementById('loadingMoreIndicator');
+        const endOfDataIndicator = document.getElementById('endOfDataIndicator');
+
+        if (isLoadingMore) {
+            if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+            if (loadingMoreIndicator) loadingMoreIndicator.style.display = 'block';
+            if (endOfDataIndicator) endOfDataIndicator.style.display = 'none';
+        } else if (hasMoreData) {
+            if (loadMoreBtn) {
+                loadMoreBtn.style.display = 'inline-block';
+                loadMoreBtn.disabled = false;
+            }
+            if (loadingMoreIndicator) loadingMoreIndicator.style.display = 'none';
+            if (endOfDataIndicator) endOfDataIndicator.style.display = 'none';
+        } else {
+            if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+            if (loadingMoreIndicator) loadingMoreIndicator.style.display = 'none';
+            if (endOfDataIndicator) endOfDataIndicator.style.display = 'block';
+        }
+    }
+
+    function updateResultsInfo() {
+        const infoFooter = document.getElementById('resultsInfoFooter');
+        const endRecord = allLoadedData.length;
+
+        const infoText = `Showing ${endRecord} of ${totalRecords} results`;
+        if (infoFooter) infoFooter.textContent = infoText;
+    }
+
+    async function loadMoreData() {
+        if (isLoadingMore || !hasMoreData || isLoading) return;
+
+        const nextPage = Math.floor(allLoadedData.length / pageSize) + 1;
+
+        if (nextPage > totalPages) {
+            hasMoreData = false;
+            updateLoadMoreButtonState();
+            return;
+        }
+
+        isLoadingMore = true;
+        updateLoadMoreButtonState();
+
+        try {
+            const data = await fetchPageData(nextPage, currentSearchTerm, currentSortColumn, currentSortDirection);
+
+            if (data && data.content && data.content.length > 0) {
+                const existingIds = new Set(allLoadedData.map(r => r.id));
+                const uniqueNewContent = data.content.filter(r => !existingIds.has(r.id));
+
+                if (uniqueNewContent.length > 0) {
+                    totalPages = data.totalPages;
+                    totalRecords = data.totalElements;
+
+                    allLoadedData = [...allLoadedData, ...uniqueNewContent];
+
+                    Object.assign(serverRateFieldValuesMap, data.rateFieldValuesMap || {});
+
+                    renderTableData(uniqueNewContent, true);
+
+                    updateResultsInfo();
+                }
+
+                hasMoreData = allLoadedData.length < totalRecords;
+
+                const currentRateIds = new Set(data.content.map(rate => rate.id));
+                const comparedRatesNeedingData = [];
+                comparedRates.forEach((rate, rateId) => {
+                    if (!currentRateIds.has(rateId) && !serverRateFieldValuesMap[rateId]) {
+                        comparedRatesNeedingData.push(rateId);
+                    }
+                });
+
+                if (comparedRatesNeedingData.length > 0) {
+                    await fetchMissingRateData(comparedRatesNeedingData);
+                    updateComparisonDisplay();
+                }
+
+                maintainComparisonState();
+            } else {
+                hasMoreData = false;
+            }
+        } catch (error) {
+            console.error('Error loading more data:', error);
+            showDeleteNotification('Error loading more data: ' + error.message, true);
+        } finally {
+            isLoadingMore = false;
+            updateLoadMoreButtonState();
+        }
+    }
+
+    async function fetchPageData(page, searchTerm = '', sortBy = null, sortDir = null) {
+        const params = new URLSearchParams({
+            page: page - 1,
+            size: pageSize,
+            sortBy: sortBy || currentSortColumn,
+            sortDir: sortDir || currentSortDirection
+        });
+
+        if (searchTerm && searchTerm.trim()) {
+            params.append('search', searchTerm.trim());
+        }
+
+        if (typeof activeFilters !== 'undefined' && activeFilters.size > 0) {
+            activeFilters.forEach((values, fieldId) => {
+                if (values.size > 0) {
+                    const filterValue = Array.from(values).join('|');
+                    params.set(`filter_${fieldId}`, encodeURIComponent(filterValue));
+                }
+            });
+        }
+
+        const response = await fetch(`/api/interest-rates?${params.toString()}`);
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch data');
+        }
+
+        return await response.json();
+    }
+
+    async function reloadDataFromServer(searchTerm = '', sortBy = null, sortDir = null) {
+        if (isLoading) return;
+
+        showLoading();
+        isLoadingMore = true;
+        updateLoadMoreButtonState();
+
+        try {
+            const data = await fetchPageData(1, searchTerm, sortBy, sortDir);
+
+            currentPage = 1;
+            totalPages = data.totalPages;
+            totalRecords = data.totalElements;
+            currentSearchTerm = searchTerm || '';
+            currentSortColumn = sortBy || currentSortColumn;
+            currentSortDirection = sortDir || currentSortDirection;
+            pageSize = data.size || pageSize;
+
+            allLoadedData = data.content;
+            Object.assign(serverRateFieldValuesMap, data.rateFieldValuesMap || {});
+
+            renderTableData(allLoadedData, false);
+
+            updateResultsInfo();
+            hasMoreData = allLoadedData.length < totalRecords;
+            updateLoadMoreButtonState();
+
+            if (currentExpandedCard) closeExpandedCard(currentExpandedCard);
+            maintainComparisonState();
+
+            updateBrowserUrlWithFilters();
+
+        } catch (error) {
+            console.error('Error loading page:', error);
+            showDeleteNotification('Error loading data: ' + error.message, true);
+        } finally {
+            hideLoading();
+            isLoadingMore = false;
+            updateLoadMoreButtonState();
+        }
+    }
+
     // ============================================================================
     // INITIALIZATION AND DOCUMENT READY
     // ============================================================================
 
     document.addEventListener('DOMContentLoaded', function () {
-        // Initialize pagination with server data
-        initializePagination();
+        totalPages = Math.ceil(totalRecords / pageSize);
+        hasMoreData = totalPages > 1;
 
+        initializeComparisonState();
         initializeSortableHeaders();
         initializeSearch();
+        initializeMobileViewToggle();
 
-        // Render the initial data from server
-        renderInitialData();
+        renderTableData(allLoadedData, false);
 
-        // Mark initial load as complete BEFORE initializing mobile scrolling
+        updateResultsInfo();
+        updateLoadMoreButtonState();
+
         isInitialLoadComplete = true;
 
-        // Now initialize mobile scrolling (which will enable infinite scroll on desktop)
-        initializeMobileScrolling();
+        initializeFilters();
     });
 
-    document.addEventListener('DOMContentLoaded', function () {
-        const stackedViewBtn = document.getElementById('stackedView');
-        const scrollViewBtn = document.getElementById('scrollView');
-        const tableContainer = document.getElementById('tableContainer');
-
-        if (stackedViewBtn && scrollViewBtn && tableContainer) {
-            stackedViewBtn.addEventListener('click', function () {
-                stackedViewBtn.classList.add('active');
-                scrollViewBtn.classList.remove('active');
-                tableContainer.classList.add('mobile-stack');
-            });
-
-            scrollViewBtn.addEventListener('click', function () {
-                scrollViewBtn.classList.add('active');
-                stackedViewBtn.classList.remove('active');
-                tableContainer.classList.remove('mobile-stack');
-            });
-        }
-    });
-
-    function initializePagination() {
-        // Set pagination controls based on server data
-        updatePaginationControls();
-        updatePaginationInfo();
-
-        // Set initial page size selector
-        const pageSizeSelect = document.getElementById('pageSize');
-        if (pageSizeSelect) {
-            pageSizeSelect.value = pageSize;
-        }
+    function initializeComparisonState() {
+        window.addEventListener('resize', debounce(updateMaxComparisons, 250));
+        updateMaxComparisons();
     }
 
     function initializeSortableHeaders() {
-        const headers = document.querySelectorAll('.draggable-column, .sortable');
-        headers.forEach(header => {
+        document.querySelectorAll('.draggable-column, .sortable').forEach(header => {
             header.classList.add('sortable');
         });
     }
 
+    function initializeMobileViewToggle() {
+        const stackedViewBtn = document.getElementById('stackedView');
+        const scrollViewBtn = document.getElementById('scrollView');
+        const tableContainer = document.getElementById('tableContainer');
+        const isMobile = window.innerWidth <= 768;
+
+        if (stackedViewBtn && scrollViewBtn && tableContainer) {
+            // Initial state based on screen size
+            if (isMobile) {
+                tableContainer.classList.add('mobile-stack');
+                stackedViewBtn.classList.add('active');
+                scrollViewBtn.classList.remove('active');
+            } else {
+                tableContainer.classList.remove('mobile-stack');
+                scrollViewBtn.classList.add('active');
+                stackedViewBtn.classList.remove('active');
+            }
+
+            stackedViewBtn.addEventListener('click', function() {
+                tableContainer.classList.add('mobile-stack');
+                stackedViewBtn.classList.add('active');
+                scrollViewBtn.classList.remove('active');
+                renderTableData(allLoadedData, false);
+                updateMaxComparisons();
+            });
+
+            scrollViewBtn.addEventListener('click', function() {
+                tableContainer.classList.remove('mobile-stack');
+                scrollViewBtn.classList.add('active');
+                stackedViewBtn.classList.remove('active');
+                renderTableData(allLoadedData, false);
+                updateMaxComparisons();
+            });
+        }
+    }
+
+    // ============================================================================
+    // TABLE RENDERING AND DATA DISPLAY
+    // ============================================================================
+
+    function renderTableData(data, append = false) {
+        const tbody = document.getElementById('tableBody');
+        const emptyState = document.getElementById('emptyState');
+        const tableContainer = document.getElementById('tableContainer');
+
+        const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
+
+        if (!allLoadedData || allLoadedData.length === 0) {
+            tbody.innerHTML = '';
+            emptyState.style.display = 'block';
+            updateExternalCheckboxes([]);
+            return;
+        }
+
+        emptyState.style.display = 'none';
+
+        const contentHtml = isMobileCardView ? renderMobileCardsHTML(data) : renderTableRowsHTML(data);
+
+        if (append) {
+            tbody.insertAdjacentHTML('beforeend', contentHtml);
+        } else {
+            const allContentHtml = isMobileCardView ? renderMobileCardsHTML(allLoadedData) : renderTableRowsHTML(allLoadedData);
+            tbody.innerHTML = allContentHtml;
+        }
+
+        if (document.body.classList.contains('comparison-mode')) {
+            setTimeout(() => {
+                alignExternalCheckboxes();
+            }, 50);
+        }
+
+        maintainComparisonState();
+    }
+
+    function renderMobileCardsHTML(data) {
+        return data.map(rate => createMobileCard(rate)).join('');
+    }
+
+    function renderTableRowsHTML(data) {
+        if (!data || data.length === 0) return '';
+
+        const headers = document.querySelectorAll('.draggable-column, .sortable');
+        const currentFieldOrder = Array.from(headers)
+            .map(header => ({
+                id: header.dataset.fieldId,
+                fieldKey: header.dataset.fieldKey,
+                label: header.querySelector('.header-text').textContent.trim()
+            }));
+
+        return data.map(rate => {
+            const isSelected = comparedRates.has(rate.id);
+
+            const fieldCells = currentFieldOrder.map((field) => {
+                const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
+
+                if (field.fieldKey && field.fieldKey.toLowerCase().includes('img')) {
+                    return `
+                        <td class="data-cell image-cell" data-field-id="${field.id}" data-label="${field.label}">
+                            <div class="image-container">
+                                ${fieldValue ? `<img src="${fieldValue}" alt="Interest Rate Logo" class="interest-rate-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />` : ''}
+                                <div class="no-image-placeholder" style="${fieldValue ? 'display:none' : 'display:block'}">No Image</div>
+                            </div>
+                        </td>
+                    `;
+                } else {
+                    return `
+                        <td class="data-cell" data-field-id="${field.id}" data-label="${field.label}">
+                            <div class="form-control form-control-sm text-center"
+                                 style="border: none; background: transparent; cursor: default;">
+                                ${fieldValue || '-'}
+                            </div>
+                        </td>
+                    `;
+                }
+            }).join('');
+
+            const isExpanded = expandedRateCards.has(rate.id);
+            const actionButtons = `
+                <div class="action-buttons">
+                    <button class="mehr-info-btn"
+                            ${rate.moreInfo ? '' : 'disabled'}
+                            onclick="showMoreInfo(${rate.id})"
+                            title="${isExpanded ? 'Hide info' : (rate.moreInfo ? 'Show more info' : 'No additional info available')}">
+                        ${rate.moreInfo ?
+                            (isExpanded ?
+                                `<svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14.9995 9L7.99951 2L0.999512 9" stroke="#00AC98" stroke-width="2"/>
+                                </svg>` :
+                                `MEHR INFO <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1 1L8 8L15 1" stroke="#00AC98" stroke-width="2"/>
+                                </svg>`
+                            ) :
+                            'No Info'
+                        }
+                    </button>
+                </div>
+            `;
+
+            return `
+                <tr data-rate-id="${rate.id}" ${isSelected ? 'class="table-row-selected"' : ''}>
+                    ${fieldCells}
+                    <td data-label="Actions">
+                        ${actionButtons}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // ============================================================================
+    // SEARCH, SORT, AND FILTER
+    // ============================================================================
+
     function initializeSearch() {
-        // Create search input if it doesn't exist
         let searchContainer = document.querySelector('.search-container');
         if (!searchContainer) {
             searchContainer = document.createElement('div');
@@ -370,18 +763,11 @@
                     </div>
                 </div>
             `;
-
-            // Insert after the view toggle or before the pagination
             const viewToggle = document.querySelector('.view-toggle');
-            const paginationTop = document.querySelector('.pagination-container');
             if (viewToggle) {
                 viewToggle.parentNode.insertBefore(searchContainer, viewToggle.nextSibling);
-            } else if (paginationTop) {
-                paginationTop.parentNode.insertBefore(searchContainer, paginationTop);
             }
         }
-
-        // Add enter key support
         const searchInput = document.getElementById('searchInput');
         if (searchInput) {
             searchInput.addEventListener('keypress', function (e) {
@@ -392,209 +778,263 @@
         }
     }
 
-    window.addEventListener("load", () => {
-        const emptyState = document.getElementById("emptyState");
+    function performSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const searchTerm = searchInput ? searchInput.value.trim() : '';
+        reloadDataFromServer(searchTerm, currentSortColumn, currentSortDirection);
+    }
 
-        if (emptyState && emptyState.style.display !== "none") {
-            const params = new URLSearchParams(window.location.search);
-            let page = parseInt(params.get("page") || "1", 10);
+    function clearSearch() {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+        reloadDataFromServer('', currentSortColumn, currentSortDirection);
+    }
 
-            if (page >= 1) {
-                params.set("page", page - 1);
-                window.location.href = `/?${params.toString()}`;
+    function sortTable(headerElement, event) {
+        if (event && event.type === 'click' && headerElement.classList.contains('dragging')) {
+            return;
+        }
+
+        const fieldId = headerElement.dataset.fieldId;
+        const sortBy = `field_${fieldId}`;
+
+        let sortDirection = 'asc';
+        if (currentSortColumn === sortBy) {
+            sortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+        }
+
+        document.querySelectorAll('.sortable')
+            .forEach(th => {
+                th.classList.remove('sort-asc', 'sort-desc');
+            });
+        headerElement.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+
+        reloadDataFromServer(currentSearchTerm, sortBy, sortDirection);
+    }
+
+    function applyFilters() {
+        const searchInput = document.getElementById('searchInput');
+
+        if (activeFilters.size > 0) {
+            if (searchInput) {
+                searchInput.value = '';
+            }
+            reloadDataFromServer('', currentSortColumn, currentSortDirection);
+        } else {
+            reloadDataFromServer(currentSearchTerm, currentSortColumn, currentSortDirection);
+        }
+
+        updateBrowserUrlWithFilters();
+        if (window.innerWidth <= 768) {
+            toggleFilters();
+        }
+    }
+
+    function clearAllFilters() {
+        activeFilters.clear();
+        updateFilterCheckboxes();
+        updateActiveFiltersDisplay();
+        updateFilterSummary();
+
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.value = currentSearchTerm;
+        }
+
+        reloadDataFromServer(currentSearchTerm, currentSortColumn, currentSortDirection);
+
+        updateBrowserUrlWithFilters();
+    }
+
+    function removeFilterTag(fieldId, value) {
+        if (activeFilters.has(fieldId)) {
+            activeFilters.get(fieldId).delete(value);
+            if (activeFilters.get(fieldId).size === 0) {
+                activeFilters.delete(fieldId);
             }
         }
-    });
-
-    // ============================================================================
-    // DATA LOADING AND API CALLS
-    // ============================================================================
-
-    function renderInitialData() {
-        // Render the data that was already loaded from server
-        renderTableData(currentPageData);
+        updateFilterCheckboxes();
+        updateActiveFiltersDisplay();
+        updateFilterSummary();
+        applyFilters();
     }
 
-    // Load page from server - this is the main pagination function
-    function loadPageFromServer(page, searchTerm = '', sortBy = null, sortDir = null) {
-    if (isLoading) return;
 
-    showLoading();
-
-    const params = new URLSearchParams({
-        page: page - 1, // Convert to 0-based for backend
-        size: pageSize,
-        sortBy: sortBy || currentSortColumn,
-        sortDir: sortDir || currentSortDirection
-    });
-
-    if (searchTerm && searchTerm.trim()) {
-        params.append('search', searchTerm.trim());
+    function initializeFilters() {
+        fetch('/filters/available')
+            .then(response => {
+                if (response.ok) return response.json();
+                throw new Error('Failed to load filters');
+            })
+            .then(data => {
+                availableFilters = data;
+                renderFilterGrid();
+                initializeFromUrlParams();
+                updateFilterSummary();
+            })
+            .catch(error => {
+                console.error('Error loading filters:', error);
+            });
     }
 
-    // Use the correct endpoint that matches your controller
-    fetch(`/api/interest-rates?${params.toString()}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to fetch data');
+    function initializeFromUrlParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        for (const [key, value] of urlParams.entries()) {
+            if (key.startsWith('filter_')) {
+                const fieldId = key.substring(7);
+                const decodedValue = decodeURIComponent(value);
+                const values = decodedValue.includes('|') ? decodedValue.split('|') : [decodedValue];
+                activeFilters.set(fieldId, new Set(values));
             }
-            return response.json();
-        })
-        .then(data => {
-            // Update all pagination state
-            currentPage = page;
-            totalPages = data.totalPages;
-            totalRecords = data.totalElements;
-            currentSearchTerm = searchTerm || '';
+        }
 
-            // Update sort state if provided
-            if (sortBy) currentSortColumn = sortBy;
-            if (sortDir) currentSortDirection = sortDir;
+        if (activeFilters.size > 0) {
+            updateActiveFiltersDisplay();
+            updateFilterCheckboxes();
+        }
+    }
 
-            // Update data arrays
-            currentPageData = data.content;
+    function toggleFilters() {
+        const content = document.getElementById('filterContent');
+        const toggle = document.getElementById('filterToggle');
+        filterExpanded = !filterExpanded;
+        if (filterExpanded) {
+            content.classList.add('show');
+            toggle.classList.add('expanded');
+        } else {
+            content.classList.remove('show');
+            toggle.classList.remove('expanded');
+        }
+    }
 
-            // FIXED: Merge new field values with existing ones instead of replacing
-            Object.assign(serverRateFieldValuesMap, data.rateFieldValuesMap || {});
+    function renderFilterGrid() {
+        const grid = document.getElementById('filterGrid');
+        grid.innerHTML = availableFilters.map(filter => `
+            <div class="filter-item" data-field-id="${filter.fieldId}">
+                <h6>
+                    ${filter.label}
+                    <span class="text-muted">(${filter.options.length})</span>
+                </h6>
+                <div class="filter-options" id="options_${filter.fieldId}">
+                    ${filter.options.map(option => `
+                        <div class="filter-option" onclick="toggleFilterOption(${filter.fieldId}, '${option.value}')">
+                            <input type="checkbox"
+                                   id="filter_${filter.fieldId}_${option.value.replace(/[^a-zA-Z0-9]/g, '_')}"
+                                   value="${option.value}">
+                            <label for="filter_${filter.fieldId}_${option.value.replace(/[^a-zA-Z0-9]/g, '_')}">
+                                ${option.label}
+                            </label>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+    }
 
-            // Check which compared rates are no longer available and might need their data fetched
-            const currentRateIds = new Set(data.content.map(rate => rate.id));
-            const comparedRatesNeedingData = [];
+    function toggleFilterOption(fieldId, value) {
+        const fieldIdStr = fieldId.toString();
 
-            comparedRates.forEach((rate, rateId) => {
-                if (!currentRateIds.has(rateId) && !serverRateFieldValuesMap[rateId]) {
-                    comparedRatesNeedingData.push(rateId);
+        if (!activeFilters.has(fieldIdStr)) {
+            activeFilters.set(fieldIdStr, new Set());
+        }
+
+        const fieldFilters = activeFilters.get(fieldIdStr);
+
+        if (fieldFilters.has(value)) {
+            fieldFilters.delete(value);
+            if (fieldFilters.size === 0) {
+                activeFilters.delete(fieldIdStr);
+            }
+        } else {
+            fieldFilters.add(value);
+        }
+
+        updateFilterCheckboxes();
+        updateActiveFiltersDisplay();
+        updateFilterSummary();
+    }
+
+    function updateFilterCheckboxes() {
+        availableFilters.forEach(filter => {
+            const fieldIdStr = filter.fieldId.toString();
+            const selectedValues = activeFilters.get(fieldIdStr) || new Set();
+
+            filter.options.forEach(option => {
+                const checkboxId = `filter_${filter.fieldId}_${option.value.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                const checkbox = document.getElementById(checkboxId);
+                if (checkbox) {
+                    checkbox.checked = selectedValues.has(option.value);
                 }
             });
+        });
+    }
 
-            // If we have compared rates that need their data fetched, get them
-            if (comparedRatesNeedingData.length > 0) {
-                fetchMissingRateData(comparedRatesNeedingData).then(() => {
-                    updateComparisonDisplay();
+    function updateActiveFiltersDisplay() {
+        const container = document.getElementById('activeFilters');
+        const tags = [];
+
+        activeFilters.forEach((values, fieldId) => {
+            const filter = availableFilters.find(f => f.fieldId.toString() === fieldId);
+            if (filter) {
+                values.forEach(value => {
+                    tags.push(`
+                        <span class="filter-tag">
+                            ${filter.label}: ${value}
+                            <button class="remove-filter" onclick="removeFilterTag('${fieldId}', '${value}')" title="Remove filter">
+                                ✕
+                            </button>
+                        </span>
+                    `);
                 });
             }
-
-            // Render the new data
-            renderTableData(data.content);
-            updatePaginationControls();
-            updatePaginationInfo();
-            hideLoading();
-
-            // Close any expanded cards when changing pages
-            if (currentExpandedCard) {
-                closeExpandedCard(currentExpandedCard);
-            }
-
-            // Update URL without page reload (optional)
-            updateBrowserUrl(page, searchTerm, sortBy, sortDir);
-        })
-        .catch(error => {
-            console.error('Error loading page:', error);
-            showDeleteNotification('Error loading data: ' + error.message, true);
-            hideLoading();
         });
+
+        container.innerHTML = tags.join('');
+        container.style.display = tags.length > 0 ? 'flex' : 'none';
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        // Re-align checkboxes when window is resized
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                if (document.body.classList.contains('comparison-mode')) {
-                    alignExternalCheckboxes();
-                }
-            }, 150);
-        });
+    function updateFilterSummary() {
+        const summary = document.getElementById('filterSummary');
+        const totalActive = Array.from(activeFilters.values())
+            .reduce((sum, set) => sum + set.size, 0);
 
-        // Re-align checkboxes when scrolling (for better positioning)
-        let scrollTimeout;
-        window.addEventListener('scroll', () => {
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
-                if (document.body.classList.contains('comparison-mode')) {
-                    positionCheckboxes();
-                }
-            }, 50);
-        });
-    });
-
-    // Add this new function to fetch missing rate data
-    async function fetchMissingRateData(rateIds) {
-        try {
-            const promises = rateIds.map(rateId =>
-                fetch(`/api/interest-rate/${rateId}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`Failed to fetch rate ${rateId}`);
-                        }
-                        return response.json();
-                    })
-                    .then(rateData => {
-                        // Store the rate data and its field values
-                        if (rateData && rateData.fieldValues) {
-                            serverRateFieldValuesMap[rateId] = rateData.fieldValues;
-                        }
-                        return rateData;
-                    })
-                    .catch(error => {
-                        console.warn(`Could not fetch data for rate ${rateId}:`, error);
-                        return null;
-                    })
-            );
-
-            await Promise.all(promises);
-            console.log('Successfully fetched missing rate data');
-        } catch (error) {
-            console.error('Error fetching missing rate data:', error);
+        if (totalActive === 0) {
+            summary.textContent = 'Click to add filters';
+            summary.style.color = '#666';
+        } else {
+            summary.textContent = `${totalActive} filter${totalActive > 1 ? 's' : ''} active`;
+            summary.style.color = '#007bff';
+            summary.style.fontWeight = '600';
         }
     }
 
-    let maxComparisons = 3;
-    let comparedRates = new Map();
-
-    function updateBrowserUrl(page, search, sortBy, sortDir) {
+    function updateBrowserUrlWithFilters() {
         const url = new URL(window.location);
-
-        // Clear all parameters and rebuild in consistent order
         url.search = '';
         const params = new URLSearchParams();
-
-        // 1. Page parameter
-        params.set('page', page - 1);
-
-        // 2. Sort parameters
-        params.set('sortBy', sortBy || currentSortColumn);
-        params.set('sortDir', sortDir || currentSortDirection);
-
-        // 3. Size parameter
+        params.set('sortBy', currentSortColumn);
+        params.set('sortDir', currentSortDirection);
         params.set('size', pageSize);
-
-        // 4. Search parameter (if exists)
-        if (search) {
-            params.set('search', search);
+        if (currentSearchTerm) {
+            params.set('search', currentSearchTerm);
         }
-
-        // 5. Filter parameters (if exists, sorted by field ID)
-        if (typeof activeFilters !== 'undefined' && activeFilters.size > 0) {
-            const sortedFilters = Array.from(activeFilters.entries()).sort((a, b) => a[0] - b[0]);
-            sortedFilters.forEach(([fieldId, values]) => {
-                if (values.size > 0) {
-                    const filterValue = Array.from(values).join('|');
-                    params.set(`filter_${fieldId}`, encodeURIComponent(filterValue));
-                }
-            });
-        }
-
+        const sortedFilters = Array.from(activeFilters.entries()).sort((a, b) => a[0] - b[0]);
+        sortedFilters.forEach(([fieldId, values]) => {
+            if (values.size > 0) {
+                const filterValue = Array.from(values).join('|');
+                params.set(`filter_${fieldId}`, encodeURIComponent(filterValue));
+            }
+        });
         url.search = params.toString();
         window.history.replaceState({}, '', url);
     }
 
-    function updateMaxComparisons() {
-        const tableContainer = document.getElementById('tableContainer');
-        const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
-        maxComparisons = isMobileCardView ? 2 : 3;
-    }
+    // ============================================================================
+    // COMPARISON & MORE INFO
+    // ============================================================================
 
     function toggleComparison(rateId, isChecked) {
         if (isChecked) {
@@ -604,21 +1044,6 @@
         }
     }
 
-    function updateVergleichenButtonVisibility(rateId, isInComparison) {
-        const expandedCardButton = document.querySelector(`#rateCard_${rateId} button[onclick*="startComparisonFromCard(${rateId})"]`);
-        const mobileCardButton = document.querySelector(`div[data-rate-id="${rateId}"] button[onclick*="startComparisonFromCard(${rateId})"]`);
-
-        const buttons = [expandedCardButton, mobileCardButton].filter(btn => btn !== null);
-
-        buttons.forEach(button => {
-            if (isInComparison) {
-                button.style.display = 'none';
-            } else {
-                button.style.display = 'inline-block';
-            }
-        });
-    }
-
     function addToComparison(rateId) {
         updateMaxComparisons();
 
@@ -626,16 +1051,11 @@
             const maxText = maxComparisons === 2 ? '2' : '3';
             showStatus(`Maximum number of comparisons reached (${maxText})`, 'warning');
             const checkbox = document.getElementById(`external-compare-${rateId}`);
-            const mobileCheckbox = document.getElementById(`compare-mobile-${rateId}`);
             if (checkbox) checkbox.checked = false;
-            if (mobileCheckbox) mobileCheckbox.checked = false;
             return;
         }
 
-        let rate = currentPageData.find(r => r.id === rateId);
-        if (!rate && typeof allLoadedData !== 'undefined') {
-            rate = allLoadedData.find(r => r.id === rateId);
-        }
+        let rate = allLoadedData.find(r => r.id === rateId);
 
         if (rate && !comparedRates.has(rateId)) {
             comparedRates.set(rateId, rate);
@@ -665,44 +1085,28 @@
             updateVergleichenButtonVisibility(rateId, false);
 
             showStatus(`Aus dem Vergleich entfernt`, 'info');
-            showWarning(false);
 
             const externalCheckbox = document.getElementById(`external-compare-${rateId}`);
             if (externalCheckbox) {
                 externalCheckbox.checked = false;
             }
-
-            const mobileCheckbox = document.getElementById(`compare-mobile-${rateId}`);
-            if (mobileCheckbox) {
-                mobileCheckbox.checked = false;
-            }
-
-            const oldCheckbox = document.getElementById(`compare-${rateId}`);
-            if (oldCheckbox) {
-                oldCheckbox.checked = false;
-            }
         }
     }
 
     function clearAllComparisons() {
-        // Clear external checkboxes
         document.querySelectorAll('.external-checkbox').forEach(checkbox => {
             checkbox.checked = false;
         });
 
         comparedRates.forEach((rate, rateId) => {
             updateTableRowHighlight(rateId, false);
+            updateVergleichenButtonVisibility(rateId, false);
         });
 
         comparedRates.clear();
         updateComparisonDisplay();
-        showWarning(false);
         showStatus('All comparisons cleared', 'info');
-
-        // Remove comparison mode class to hide checkboxes
         document.body.classList.remove('comparison-mode');
-
-        // Reset quick compare button
         const quickCompareBtn = document.getElementById('quickCompareBtn');
         if (quickCompareBtn) {
             quickCompareBtn.style.display = "inline-block";
@@ -723,7 +1127,6 @@
         section.style.display = 'block';
         emptyState.style.display = 'none';
 
-        // Create the new layout structure
         container.innerHTML = createComparisonLayout();
     }
 
@@ -732,10 +1135,8 @@
         const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
 
         if (isMobileCardView) {
-            // Mobile view - side by side cards
             return createMobileComparisonLayout();
         } else {
-            // Desktop view - existing table layout
             return createDesktopComparisonLayout();
         }
     }
@@ -769,10 +1170,8 @@
             `;
         }
 
-        // Get provider name (assuming it's field index 1)
         const providerName = rateFieldValues[globalFieldsCompareCache[1]?.id] || 'Provider';
 
-        // Get logo
         let logoHtml = '<span style="color: #999;">(logo)</span>';
         const imageField = globalFieldsCompareCache.find(
             f => f.fieldKey && f.fieldKey.toLowerCase().includes("img")
@@ -784,7 +1183,6 @@
             }
         }
 
-        // Build field rows (skip image field)
         const fieldRows = globalFieldsCompareCache
             .filter(field => !(field.fieldKey && field.fieldKey.toLowerCase().includes("img")))
             .map(field => {
@@ -833,7 +1231,6 @@
     }
 
     function createDesktopComparisonLayout() {
-        // Original desktop layout
         const labelsHtml = `
             <div class="comparison-labels">
                 ${globalFieldsCompareCache
@@ -952,675 +1349,32 @@
         `;
     }
 
-    function maintainComparisonState() {
-        comparedRates.forEach((rate, rateId) => {
-            const checkbox = document.getElementById(`compare-${rateId}`);
-            if (checkbox) {
-                checkbox.checked = true;
-            }
-            updateTableRowHighlight(rateId, true);
-            updateVergleichenButtonVisibility(rateId, true);
-        });
-
-        refreshAllVergleichenButtons();
-    }
-
-    function updateTableRowHighlight(rateId, highlight) {
-    const row = document.querySelector(`tr[data-rate-id="${rateId}"]`);
-    if (row) {
-        if (highlight) {
-            row.classList.add('table-row-selected');
-            // Add pulse animation for newly selected items
-            row.classList.add('just-selected');
-            setTimeout(() => {
-                row.classList.remove('just-selected');
-            }, 600);
-        } else {
-            row.classList.remove('table-row-selected', 'just-selected');
-        }
-    }
-}
-
-    function showWarning(show) {
-        const warning = document.getElementById('comparisonWarning');
-        updateMaxComparisons();
-        const maxText = maxComparisons === 2 ? '2' : '3';
-        warning.textContent = `Sie können maximal ${maxText} Zinssätze gleichzeitig vergleichen. Entfernen Sie einen Vergleich, um einen neuen hinzuzufügen.`;
-        warning.style.display = show ? 'block' : 'none';
-    }
-
-    function showStatus(message, type = 'success') {
-        const status = document.getElementById('comparisonStatus');
-        status.textContent = message;
-        status.className = `comparison-status ${type}`;
-        status.classList.add('show');
-
-        setTimeout(() => {
-            status.classList.remove('show');
-        }, 3000);
-    }
-
-    function quickStartComparison() {
-        document.getElementById("quickCompareBtn").style.display = "none";
-        const quickCompareBtn = document.getElementById('quickCompareBtn');
-        const body = document.body;
-
-        body.classList.add('comparison-mode');
-        quickCompareBtn.disabled = true;
-
-        // FIXED: Determine which data source to use
-        const dataSource = (isInfiniteScrollEnabled && allLoadedData.length > 0) ? allLoadedData : currentPageData;
-
-        if (!dataSource || dataSource.length === 0) {
-            quickCompareBtn.disabled = false;
-            showStatus('No rates available to compare', 'warning');
-            return;
-        }
-
-        // Get the first available rate
-        const firstRate = dataSource[0];
-        const firstRateId = firstRate.id;
-
-        setTimeout(() => {
-            // Check if we're in mobile card view or desktop table view
-            const tableContainer = document.getElementById('tableContainer');
-            const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
-
-            // Find the appropriate checkbox based on view mode
-            let firstCheckbox;
-            if (isMobileCardView) {
-                // Mobile card view - use compare-mobile checkbox
-                firstCheckbox = document.getElementById(`compare-mobile-${firstRateId}`);
-            } else {
-                // Desktop table view - use external checkbox
-                alignExternalCheckboxes();
-                firstCheckbox = document.getElementById(`external-compare-${firstRateId}`);
-            }
-
-            if (firstCheckbox && !firstCheckbox.checked) {
-                firstCheckbox.checked = true;
-                addToComparison(firstRateId);
-
-                setTimeout(() => {
-                    const comparisonSection = document.getElementById('comparisonSection');
-                    if (comparisonSection) {
-                        comparisonSection.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    }
-
-                    quickCompareBtn.disabled = false;
-                    showStatus('Comparison mode activated! Select more rates to compare.', 'success');
-                }, 500);
-
-            } else if (firstCheckbox && firstCheckbox.checked) {
-                const comparisonSection = document.getElementById('comparisonSection');
-                if (comparisonSection) {
-                    comparisonSection.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-
-                quickCompareBtn.disabled = false;
-                showStatus('Comparison section opened!', 'info');
-
-            } else {
-                quickCompareBtn.disabled = false;
-                showStatus('No rates available to compare', 'warning');
-            }
-        }, 100);
-    }
-
-    function maintainComparisonState() {
-        comparedRates.forEach((rate, rateId) => {
-            const externalCheckbox = document.getElementById(`external-compare-${rateId}`);
-            if (externalCheckbox) {
-                externalCheckbox.checked = true;
-            }
-            updateTableRowHighlight(rateId, true);
-        });
-    }
-
-    function updateQuickCompareVisibility() {
-        const quickCompareSection = document.getElementById('quickCompareSection');
-        const quickCompareBtn = document.getElementById('quickCompareBtn');
-
-        if (comparedRates && comparedRates.size > 0) {
-            if (quickCompareSection) {
-                quickCompareSection.style.display = 'block';
-            }
-            if (quickCompareBtn) {
-                quickCompareBtn.disabled = false;
-            }
-        } else {
-            if (quickCompareSection) {
-                quickCompareSection.style.display = 'block';
-            }
-            if (quickCompareBtn) {
-                quickCompareBtn.disabled = false;
-            }
-            document.body.classList.remove('comparison-mode');
-        }
-    }
-
-    const originalUpdateComparisonDisplay = updateComparisonDisplay;
-    updateComparisonDisplay = function() {
-        originalUpdateComparisonDisplay();
-        updateQuickCompareVisibility();
-    };
-
-    // Also update when clearing all comparisons
-    const originalClearAllComparisons = clearAllComparisons;
-    clearAllComparisons = function() {
-        originalClearAllComparisons();
-        updateQuickCompareVisibility();
-    };
-
-    function fetchRateDetails(rateId) {
-        return fetch(`/api/interest-rate/${rateId}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch rate details');
-                }
-                return response.json();
-            })
-            .catch(error => {
-                console.error('Error fetching rate details:', error);
-                showDeleteNotification('Error loading rate details: ' + error.message, true);
-                return null;
-            });
-    }
-
-    // ============================================================================
-    // TABLE RENDERING AND DATA DISPLAY
-    // ============================================================================
-
-    function renderTableData(data) {
-        const tbody = document.getElementById('tableBody');
-        const emptyState = document.getElementById('emptyState');
-        const tableContainer = document.getElementById('tableContainer');
-
-        const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
-        if (isMobileCardView && isMobileView) {
-            renderMobileCards(data);
-            return;
-        }
-
-        if (!data || data.length === 0) {
-            tbody.innerHTML = '';
-            emptyState.style.display = 'block';
-            updateExternalCheckboxes([]);
-            return;
-        }
-
-        emptyState.style.display = 'none';
-
-        if (isInfiniteScrollEnabled && tbody.children.length > 0) {
-            const newRows = renderTableRowsHTML(data);
-            tbody.insertAdjacentHTML('beforeend', newRows);
-        } else {
-            tbody.innerHTML = renderTableRowsHTML(data);
-        }
-
-        if (document.body.classList.contains('comparison-mode')) {
-            setTimeout(() => {
-                alignExternalCheckboxes();
-            }, 50);
-        }
-
-        maintainComparisonState();
-    }
-
-    function renderTableRows(data, tbody) {
-        if (!data || data.length === 0) {
-            tbody.innerHTML = '';
-            updateExternalCheckboxes([]); // Clear external checkboxes
-            return;
-        }
-
-        tbody.innerHTML = data.map(rate => {
-            // Get current field order from headers
-            const headers = document.querySelectorAll('.draggable-column, .sortable');
-            const currentFieldOrder = Array.from(headers)
-                .map(header => ({
-                    id: header.dataset.fieldId,
-                    fieldKey: header.dataset.fieldKey,
-                    label: header.querySelector('.header-text').textContent.trim()
-                }));
-
-            // Check if this rate is currently selected for comparison
-            const isSelected = comparedRates.has(rate.id);
-
-            // Check if this rate is currently expanded
-            const isExpanded = expandedRateCards.has(rate.id);
-
-            // Generate cells without checkboxes
-            const fieldCells = currentFieldOrder.map((field, index) => {
-                const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
-
-                if (field.fieldKey && field.fieldKey.toLowerCase().includes('img')) {
-                    return `
-                        <td class="data-cell image-cell" data-field-id="${field.id}" data-label="${field.label}">
-                            <div class="image-container">
-                                ${fieldValue ? `<img src="${fieldValue}" alt="Interest Rate Logo" class="interest-rate-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />` : ''}
-                                <div class="no-image-placeholder" style="${fieldValue ? 'display:none' : 'display:block'}">No Image</div>
-                            </div>
-                        </td>
-                    `;
-                } else {
-                    return `
-                        <td class="data-cell" data-field-id="${field.id}" data-label="${field.label}">
-                            <div class="form-control form-control-sm text-center"
-                                 style="border: none; background: transparent; cursor: default;">
-                                ${fieldValue || '-'}
-                            </div>
-                        </td>
-                    `;
-                }
-            }).join('');
-
-            // Action buttons with proper initial state
-            let actionButtons = `
-                <div class="action-buttons">
-                    <button class="mehr-info-btn"
-                            ${rate.moreInfo ? '' : 'disabled'}
-                            onclick="showMoreInfo(${rate.id})"
-                            title="${isExpanded ? 'Hide info' : (rate.moreInfo ? 'Show more info' : 'No additional info available')}">
-                        ${rate.moreInfo ?
-                            (isExpanded ?
-                                `<svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M14.9995 9L7.99951 2L0.999512 9" stroke="#00AC98" stroke-width="2"/>
-                                </svg>` :
-                                `MEHR INFO <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M1 1L8 8L15 1" stroke="#00AC98" stroke-width="2"/>
-                                </svg>`
-                            ) :
-                            'No Info'
-                        }
-                    </button>
-                </div>
-            `;
-
-            return `
-                <tr data-rate-id="${rate.id}" ${isSelected ? 'class="table-row-selected"' : ''}>
-                    ${fieldCells}
-                    <td data-label="Actions">
-                        ${actionButtons}
-                    </td>
-                </tr>
-            `;
-        }).join('');
-
-        setTimeout(() => {
-            alignExternalCheckboxes();
-        }, 50);
-    }
-
-    // New function to manage external checkboxes
-    function updateExternalCheckboxes(data) {
-        const checkboxColumn = document.getElementById('externalCheckboxes');
-        if (!checkboxColumn) return;
-
-        if (!data || data.length === 0) {
-            checkboxColumn.innerHTML = '';
-            return;
-        }
-
-        // Create header spacer and checkbox rows
-        const checkboxRows = data.map(rate => {
-            const isSelected = comparedRates.has(rate.id);
-            return `
-                <div class="external-checkbox-row" data-rate-id="${rate.id}">
-                    <div class="custom-checkbox-container">
-                        <input type="checkbox"
-                               class="comparison-checkbox external-checkbox"
-                               onchange="toggleComparison(${rate.id}, this.checked)"
-                               id="external-compare-${rate.id}"
-                               ${isSelected ? 'checked' : ''}>
-                        <div class="custom-checkbox"></div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-
-        checkboxColumn.innerHTML = checkboxRows;
-    }
-
-    function updateBrowserUrlWithFilters() {
-        const url = new URL(window.location);
-
-        // Clear all existing parameters
-        url.search = '';
-
-        // Build parameters in consistent order: page, sortBy, sortDir, size, search, then filters
-        const params = new URLSearchParams();
-
-        // 1. Page parameter
-        params.set('page', currentPage - 1);
-
-        // 2. Sort parameters
-        params.set('sortBy', currentSortColumn);
-        params.set('sortDir', currentSortDirection);
-
-        // 3. Size parameter
-        params.set('size', pageSize);
-
-        // 4. Search parameter (if exists)
-        if (currentSearchTerm) {
-            params.set('search', currentSearchTerm);
-        }
-
-        // 5. Filter parameters (sorted by field ID for consistency)
-        const sortedFilters = Array.from(activeFilters.entries()).sort((a, b) => a[0] - b[0]);
-        sortedFilters.forEach(([fieldId, values]) => {
-            if (values.size > 0) {
-                const filterValue = Array.from(values).join('|');
-                params.set(`filter_${fieldId}`, encodeURIComponent(filterValue));
-            }
-        });
-
-        url.search = params.toString();
-        window.history.replaceState({}, '', url);
-    }
-
-    // ============================================================================
-    // PAGINATION FUNCTIONALITY
-    // ============================================================================
-
-    function updatePaginationControls() {
-        const firstPageBtn = document.getElementById('firstPageBtn');
-        const prevPageBtn = document.getElementById('prevPageBtn');
-        const nextPageBtn = document.getElementById('nextPageBtn');
-        const lastPageBtn = document.getElementById('lastPageBtn');
-
-        if (firstPageBtn) firstPageBtn.disabled = currentPage === 1;
-        if (prevPageBtn) prevPageBtn.disabled = currentPage === 1;
-        if (nextPageBtn) nextPageBtn.disabled = currentPage >= totalPages;
-        if (lastPageBtn) lastPageBtn.disabled = currentPage >= totalPages;
-
-        updatePageNumbers();
-
-        const pageJumpInput = document.getElementById('pageJumpInput');
-        if (pageJumpInput) {
-            pageJumpInput.max = totalPages;
-            pageJumpInput.placeholder = currentPage;
-        }
-    }
-
-    function updatePageNumbers() {
-        const pageNumbers = document.getElementById('pageNumbers');
-        const pageNumbersBottom = document.getElementById('pageNumbersBottom');
-
-        if (!pageNumbers) return;
-
-        let startPage = Math.max(1, currentPage - 2);
-        let endPage = Math.min(totalPages, startPage + 4);
-
-        if (endPage - startPage < 4) {
-            startPage = Math.max(1, endPage - 4);
-        }
-
-        let html = '';
-        for (let i = startPage; i <= endPage; i++) {
-            html += `
-                <button class="page-btn ${i === currentPage ? 'active' : ''}"
-                        onclick="goToPage(${i})">${i}</button>
-            `;
-        }
-
-        pageNumbers.innerHTML = html;
-        if (pageNumbersBottom) {
-            pageNumbersBottom.innerHTML = html;
-        }
-    }
-
-    function updatePaginationInfo() {
-        const startRecord = totalRecords === 0 ? 0 : (currentPage - 1) * pageSize + 1;
-        const endRecord = Math.min(currentPage * pageSize, totalRecords);
-
-        const infoText = `Showing ${startRecord}-${endRecord} of ${totalRecords} results`;
-
-        const resultsInfo = document.getElementById('resultsInfo');
-        const resultsInfoBottom = document.getElementById('resultsInfoBottom');
-
-        if (resultsInfo) resultsInfo.textContent = infoText;
-        if (resultsInfoBottom) resultsInfoBottom.textContent = infoText;
-    }
-
-    // Main navigation function - always loads from server
-    function goToPage(page) {
-        if (page < 1 || page > totalPages || page === currentPage || isLoading) return;
-        loadPageFromServer(page, currentSearchTerm);
-    }
-
-    function jumpToPage() {
-        const input = document.getElementById('pageJumpInput');
-        const page = parseInt(input.value);
-
-        if (page && page >= 1 && page <= totalPages) {
-            goToPage(page);
-            input.value = '';
-        }
-    }
-
-function changePageSize(newSize) {
-    pageSize = parseInt(newSize);
-    currentPage = 1;
-
-    // Load new page with updated size
-    if (isInfiniteScrollEnabled) {
-        // Reset infinite scroll state
-        loadedPages.clear();
-        allLoadedData = [];
-        hasMoreData = true;
-
-        loadPageFromServerWithInfiniteScroll(1, currentSearchTerm, currentSortColumn, currentSortDirection);
-    } else if (typeof activeFilters !== 'undefined' && activeFilters.size > 0) {
-        // Load with filters if they exist
-        loadPageFromServerWithFilters(1, currentSearchTerm, currentSortColumn, currentSortDirection, activeFilters);
-    } else {
-        // Standard page load
-        loadPageFromServer(1, currentSearchTerm);
-    }
-}
-
-    // ============================================================================
-    // SEARCH FUNCTIONALITY
-    // ============================================================================
-
-    function performSearch() {
-        const searchInput = document.getElementById('searchInput');
-        const searchTerm = searchInput ? searchInput.value.trim() : '';
-
-        if (isInfiniteScrollEnabled) {
-            // Reset infinite scroll state
-            loadedPages.clear();
-            allLoadedData = [];
-            hasMoreData = true;
-            currentPage = 1;
-
-            // Hide indicators
-            hideInfiniteScrollIndicator();
-            hideLoadingMoreIndicator();
-            const endIndicator = document.getElementById('endOfDataIndicator');
-            if (endIndicator) endIndicator.style.display = 'none';
-
-            // Load first page with search and current filters
-            loadPageFromServerWithInfiniteScroll(1, searchTerm, currentSortColumn, currentSortDirection);
-        } else {
-            // Use normal search with filters
-            currentPage = 1;
-            loadPageFromServerWithFilters(1, searchTerm, currentSortColumn, currentSortDirection, activeFilters);
-        }
-    }
-
-    function clearSearch() {
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.value = '';
-        }
-
-        if (isInfiniteScrollEnabled) {
-            // Reset infinite scroll state
-            loadedPages.clear();
-            allLoadedData = [];
-            hasMoreData = true;
-            currentPage = 1;
-
-            // Hide indicators
-            hideInfiniteScrollIndicator();
-            hideLoadingMoreIndicator();
-            const endIndicator = document.getElementById('endOfDataIndicator');
-            if (endIndicator) endIndicator.style.display = 'none';
-
-            // Load first page without search but with current filters
-            loadPageFromServerWithInfiniteScroll(1, '', currentSortColumn, currentSortDirection);
-        } else {
-            // Use normal clear with filters
-            currentPage = 1;
-            loadPageFromServerWithFilters(1, '', currentSortColumn, currentSortDirection, activeFilters);
-        }
-    }
-
-    // ============================================================================
-    // SORTING FUNCTIONALITY
-    // ============================================================================
-
-    function sortTable(headerElement, event) {
-        if (event && event.type === 'click' && headerElement.classList.contains('dragging')) {
-            return;
-        }
-
-        const fieldId = headerElement.dataset.fieldId;
-        const sortBy = `field_${fieldId}`;
-
-        let sortDirection = 'asc';
-        if (currentSortColumn === sortBy) {
-            sortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
-        }
-
-        // Update UI indicators
-        document.querySelectorAll('.sortable')
-            .forEach(th => {
-                th.classList.remove('sort-asc', 'sort-desc');
-            });
-        headerElement.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
-
-        currentSortColumn = sortBy;
-        currentSortDirection = sortDirection;
-
-        currentPage = 1;
-
-        if (isInfiniteScrollEnabled) {
-            // Prevent double loading by setting isLoadingMore flag
-            isLoadingMore = true;
-
-            loadedPages.clear();
-            allLoadedData = [];
-            hasMoreData = true;
-
-            hideInfiniteScrollIndicator();
-            hideLoadingMoreIndicator();
-            const endIndicator = document.getElementById('endOfDataIndicator');
-            if (endIndicator) endIndicator.style.display = 'none';
-
-            const tbody = document.getElementById('tableBody');
-            if (tbody) tbody.innerHTML = '';
-
-            if (typeof activeFilters !== 'undefined' && activeFilters.size > 0) {
-                loadPageFromServerWithInfiniteScroll(1, currentSearchTerm, sortBy, sortDirection);
-            } else {
-                loadPageFromServerWithInfiniteScroll(1, currentSearchTerm, sortBy, sortDirection);
-            }
-        } else {
-            if (typeof activeFilters !== 'undefined' && activeFilters.size > 0) {
-                loadPageFromServerWithFilters(1, currentSearchTerm, sortBy, sortDirection, activeFilters);
-            } else {
-                loadPageFromServer(1, currentSearchTerm, sortBy, sortDirection);
-            }
-        }
-    }
-
-    // ============================================================================
-    // LOADING STATES AND UI FEEDBACK
-    // ============================================================================
-
-    function showLoading() {
-        isLoading = true;
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) overlay.classList.add('show');
-    }
-
-    function hideLoading() {
-        isLoading = false;
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) overlay.classList.remove('show');
-    }
-
-    function showDeleteNotification(message, isError) {
-        const notification = document.getElementById('deleteNotification');
-        if (notification) {
-            notification.textContent = message;
-            notification.classList.toggle('error', isError);
-            notification.classList.toggle('success', !isError);
-            notification.classList.add('show');
-
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
-        }
-    }
-
-    // ============================================================================
-    // MORE INFO AND EXPANDED CARDS
-    // ============================================================================
-
-    let expandedRateCards = new Set();
-
-    // Enhanced showMoreInfo function with button state toggle
     function showMoreInfo(rateId) {
-        let rate = currentPageData.find(r => r.id === rateId);
+        let rate = allLoadedData.find(r => r.id === rateId);
 
-        if (!rate && typeof allLoadedData !== 'undefined' && allLoadedData.length > 0) {
-            rate = allLoadedData.find(r => r.id === rateId);
-        }
-
-        // Check if this card is already expanded
         if (expandedRateCards.has(rateId)) {
-            // Close the expanded card
             closeExpandedCard(rateId);
             expandedRateCards.delete(rateId);
-            updateMehrInfoButton(rateId, false); // Update button to closed state
+            updateMehrInfoButton(rateId, false);
             alignExternalCheckboxes();
             return;
         }
 
         if (!rate) {
-            showStatus('Loading rate details...', 'info');
-
-            fetch(`/api/interest-rate/${rateId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch rate details');
+            showStatus('Rate data not found locally, fetching details...', 'info');
+            fetchRateDetails(rateId).then(rateData => {
+                if (rateData && rateData.moreInfo) {
+                    if (rateData.fieldValues) {
+                        serverRateFieldValuesMap[rateId] = rateData.fieldValues;
                     }
-                    return response.json();
-                })
-                .then(rateData => {
-                    if (rateData && rateData.moreInfo) {
-                        if (rateData.fieldValues) {
-                            serverRateFieldValuesMap[rateId] = rateData.fieldValues;
-                        }
-
-                    } else {
-                        showStatus('No additional information available for this rate.', 'warning');
+                    if (!allLoadedData.find(r => r.id === rateId)) {
+                        allLoadedData.push(rateData);
                     }
-                })
-                .catch(error => {
-                    console.error('Error fetching rate details:', error);
-                    showStatus('Error loading rate details: ' + error.message, 'error');
-                });
+                    displayRateCard(rateData);
+                } else {
+                    showStatus('No additional information available for this rate.', 'warning');
+                }
+            });
             return;
         }
 
@@ -1629,7 +1383,6 @@ function changePageSize(newSize) {
             return;
         }
 
-        // Close any other expanded cards first
         if (currentExpandedCard && currentExpandedCard !== rateId) {
             closeExpandedCard(currentExpandedCard);
             expandedRateCards.delete(currentExpandedCard);
@@ -1638,15 +1391,11 @@ function changePageSize(newSize) {
 
         displayRateCard(rate);
         expandedRateCards.add(rateId);
-        updateMehrInfoButton(rateId, true); // Update button to opened state
+        updateMehrInfoButton(rateId, true);
         alignExternalCheckboxes();
     }
 
     function displayRateCard(rate) {
-        if (currentExpandedCard && currentExpandedCard !== rate.id) {
-            closeExpandedCard(currentExpandedCard);
-        }
-
         let existingCard = document.getElementById(`rateCardRow_${rate.id}`);
         if (existingCard) {
             existingCard.style.display = 'none';
@@ -1662,68 +1411,33 @@ function changePageSize(newSize) {
             }
         }
 
-        // Check if we're in mobile card view
         const tableContainer = document.getElementById('tableContainer');
         const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
 
-        console.log('Looking for rate ID:', rate.id);
-        console.log('Mobile card view active:', isMobileCardView);
-
-        let targetElement = null;
-
-        if (isMobileCardView) {
-            // In mobile card view, find the mobile-interest-card itself
-            targetElement = document.querySelector(`div.mobile-interest-card[data-rate-id="${rate.id}"]`);
-            console.log('Found mobile card element:', targetElement);
-        } else {
-            // In table view, look for regular table row
-            targetElement = document.querySelector(`tr[data-rate-id="${rate.id}"]`);
-            console.log('Found table row:', targetElement);
-        }
+        let targetElement = document.querySelector(isMobileCardView ? `div.mobile-interest-card[data-rate-id="${rate.id}"]` : `tr[data-rate-id="${rate.id}"]`);
 
         if (!targetElement) {
             console.error('Target element not found for rate ID:', rate.id);
-            // Try fallback selector
-            targetElement = document.querySelector(`[data-rate-id="${rate.id}"]`);
-            console.log('Fallback found:', targetElement);
-
-            if (!targetElement) {
-                console.error('No element found with rate ID:', rate.id);
-                return;
-            }
+            return;
         }
 
         const card = createRateCard(rate);
 
         if (isMobileCardView) {
-            // For mobile, append directly inside the mobile-interest-card
-            // Remove borders and add unified styling
             card.style.borderTop = 'none';
             card.style.borderRadius = '0 0 12px 12px';
             card.style.marginTop = '0';
             targetElement.appendChild(card);
-
-            // Add expanded class to the mobile card for unified styling
             targetElement.classList.add('card-expanded');
         } else {
-            // Create table row for desktop
             const cardContainer = document.createElement('tr');
             cardContainer.id = `rateCardRow_${rate.id}`;
             cardContainer.className = 'rate-card-row show';
             cardContainer.innerHTML = `<td colspan="100%" class="rate-card-cell"></td>`;
             cardContainer.querySelector('.rate-card-cell').appendChild(card);
-
-            // Insert the card container
-            try {
-                targetElement.insertAdjacentElement('afterend', cardContainer);
-                console.log('Successfully inserted card container');
-            } catch (error) {
-                console.error('Error inserting card container:', error);
-                return;
-            }
+            targetElement.insertAdjacentElement('afterend', cardContainer);
         }
 
-        // Scroll to the card
         setTimeout(() => {
             if (isMobileCardView) {
                 targetElement.scrollIntoView({
@@ -1772,18 +1486,10 @@ function changePageSize(newSize) {
             if (!tableSection || !tableSection.title || !tableSection.miniTableRows || tableSection.miniTableRows.length === 0) {
                 return '';
             }
-
-            let dragAttributes = '';
-            let dragHandle = '';
-            let sectionControls = '';
-
             return `
                 <div class="expanded-section ${isAuthenticated ? 'draggable-section' : ''} table-section"
                      data-section-type="table"
-                     data-section-id="${tableSection.sectionIdentifier}"
-                     ${dragAttributes}>
-                    ${dragHandle}
-                    ${sectionControls}
+                     data-section-id="${tableSection.sectionIdentifier}">
                     <h5 class="section-title">${tableSection.title}</h5>
                     <div class="info-table">
                         ${tableSection.miniTableRows.map(row => `
@@ -1802,17 +1508,10 @@ function changePageSize(newSize) {
                 return '';
             }
 
-            let dragAttributes = '';
-            let dragHandle = '';
-            let sectionControls = '';
-
             return `
                 <div class="expanded-section ${isAuthenticated ? 'draggable-section' : ''} text-section"
                      data-section-type="text"
-                     data-section-id="${textSection.sectionIdentifier}"
-                     ${dragAttributes}>
-                    ${dragHandle}
-                    ${sectionControls}
+                     data-section-id="${textSection.sectionIdentifier}">
                     ${textSection.title ? `<h5 class="section-title">${textSection.title}</h5>` : ''}
                     <div class="text-content" style="text-align: left;">${textSection.content || ''}</div>
                 </div>
@@ -1890,67 +1589,44 @@ function changePageSize(newSize) {
         return card;
     }
 
-    // New function to handle comparison start from rate card
     function startComparisonFromCard(currentRateId) {
-        console.log('Starting comparison from card for rate:', currentRateId);
-
-        // Check if we're at max capacity
         if (comparedRates.size >= maxComparisons) {
             showStatus('Maximum number of comparisons reached (3)', 'warning');
             return;
         }
 
-        // Enable comparison mode first
+        // 1. Activate Comparison Mode
         document.body.classList.add('comparison-mode');
 
-        // Show the comparison section
+        // **CRITICAL FIX: Align checkboxes immediately**
+        alignExternalCheckboxes();
+
         const comparisonSection = document.getElementById('comparisonSection');
         if (comparisonSection) {
             comparisonSection.style.display = 'block';
         }
 
-        // Hide the quick compare button since we're now in comparison mode
         const quickCompareBtn = document.getElementById('quickCompareBtn');
         if (quickCompareBtn) {
             quickCompareBtn.style.display = 'none';
         }
 
-        // If this is the first comparison, also add the first record
         let shouldAddFirstRecord = comparedRates.size === 0;
 
-        // Add the first record to comparison ONLY if this is the very first comparison
         if (shouldAddFirstRecord) {
-            // Get the first available rate from current data
-            let firstRateId = null;
-            if (isInfiniteScrollEnabled && allLoadedData && allLoadedData.length > 0) {
-                // In infinite scroll mode, use the first rate from all loaded data
-                firstRateId = allLoadedData[0].id;
-            } else if (currentPageData && currentPageData.length > 0) {
-                // In normal pagination mode, use the first rate from current page
-                firstRateId = currentPageData[0].id;
-            }
+            let firstRateId = allLoadedData.length > 0 ? allLoadedData[0].id : null;
 
-            // Add the first rate to comparison (if it's different from current rate and we have space)
             if (firstRateId && firstRateId !== currentRateId && comparedRates.size < maxComparisons) {
-                const firstRate = (isInfiniteScrollEnabled ? allLoadedData : currentPageData)
-                    .find(r => r.id === firstRateId);
-
+                const firstRate = allLoadedData.find(r => r.id === firstRateId);
                 if (firstRate) {
                     comparedRates.set(firstRateId, firstRate);
-
-                    // Check the checkbox for the first rate
                     const firstCheckbox = document.getElementById(`external-compare-${firstRateId}`);
-                    const firstMobileCheckbox = document.getElementById(`compare-mobile-${firstRateId}`);
                     if (firstCheckbox) firstCheckbox.checked = true;
-                    if (firstMobileCheckbox) firstMobileCheckbox.checked = true;
-
-                    // Highlight the first rate row
                     updateTableRowHighlight(firstRateId, true);
                 }
             }
         }
 
-        // Check if current rate is already in comparison
         if (comparedRates.has(currentRateId)) {
             showStatus('This rate is already in comparison', 'info');
             scrollToComparison();
@@ -1960,55 +1636,33 @@ function changePageSize(newSize) {
             return;
         }
 
-        // Check if we still have space after potentially adding the first record
         if (comparedRates.size >= maxComparisons) {
             showStatus('Maximum number of comparisons reached (3)', 'warning');
             return;
         }
 
-        // Add the current rate to comparison
-        let currentRate = null;
-        if (isInfiniteScrollEnabled && allLoadedData) {
-            currentRate = allLoadedData.find(r => r.id === currentRateId);
-        } else if (currentPageData) {
-            currentRate = currentPageData.find(r => r.id === currentRateId);
-        }
-
-        // If rate not found in current data, fetch it from server
+        let currentRate = allLoadedData.find(r => r.id === currentRateId);
         if (!currentRate) {
             fetchRateDetails(currentRateId).then(fetchedRate => {
                 if (fetchedRate) {
                     comparedRates.set(currentRateId, fetchedRate);
-
-                    // Ensure we have field values for the fetched rate
                     if (fetchedRate.fieldValues) {
                         serverRateFieldValuesMap[currentRateId] = fetchedRate.fieldValues;
                     }
-
                     updateComparisonDisplay();
                     scrollToComparison();
                 }
             });
         } else {
             comparedRates.set(currentRateId, currentRate);
-
-            // Check the checkbox for the current rate
             const currentCheckbox = document.getElementById(`external-compare-${currentRateId}`);
-            const currentMobileCheckbox = document.getElementById(`compare-mobile-${currentRateId}`);
             if (currentCheckbox) currentCheckbox.checked = true;
-            if (currentMobileCheckbox) currentMobileCheckbox.checked = true;
-
-            // Highlight the current rate row
             updateTableRowHighlight(currentRateId, true);
         }
 
-        // Update the comparison display
         updateComparisonDisplay();
-
-        // Scroll to comparison section
         scrollToComparison();
 
-        // Show success message
         const rateCount = comparedRates.size;
         if (rateCount === 1) {
             showStatus('Comparison mode activated! Rate added to comparison.', 'success');
@@ -2016,13 +1670,11 @@ function changePageSize(newSize) {
             showStatus(`${rateCount} rates added to comparison!`, 'success');
         }
 
-        // Close the expanded card after a short delay
         setTimeout(() => {
             closeExpandedCard(currentRateId);
         }, 1000);
     }
 
-    // Helper function to scroll to comparison section
     function scrollToComparison() {
         setTimeout(() => {
             const comparisonSection = document.getElementById('comparisonSection');
@@ -2036,29 +1688,23 @@ function changePageSize(newSize) {
     }
 
     function closeExpandedCard(rateId) {
-        // Check if we're in mobile card view
         const tableContainer = document.getElementById('tableContainer');
         const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
 
         if (isMobileCardView) {
-            // In mobile, the card is directly inside the mobile-interest-card
             const mobileCard = document.querySelector(`div.mobile-interest-card[data-rate-id="${rateId}"]`);
             if (mobileCard) {
-                // Remove the expanded content
                 const expandedContent = mobileCard.querySelector('.rate-card');
                 if (expandedContent) {
                     expandedContent.remove();
                 }
-                // Remove expanded class
                 mobileCard.classList.remove('card-expanded');
             }
         } else {
-            // Desktop view - remove the separate row
             const cardRow = document.getElementById(`rateCardRow_${rateId}`);
             if (cardRow) {
                 cardRow.style.display = 'none';
                 cardRow.classList.remove('show');
-
                 requestAnimationFrame(() => {
                     if (cardRow.parentNode) {
                         cardRow.parentNode.removeChild(cardRow);
@@ -2071,34 +1717,26 @@ function changePageSize(newSize) {
             currentExpandedCard = null;
         }
 
-        // Update button state
         expandedRateCards.delete(rateId);
         updateMehrInfoButton(rateId, false);
     }
 
-    // New function to update the MEHR INFO button state
     function updateMehrInfoButton(rateId, isExpanded) {
-        // Find all buttons for this rate (table view and mobile view)
         const tableButton = document.querySelector(`tr[data-rate-id="${rateId}"] .mehr-info-btn`);
         const mobileButton = document.querySelector(`div[data-rate-id="${rateId}"] .mehr-info-btn`);
 
         const buttons = [tableButton, mobileButton].filter(btn => btn !== null);
-
-        const isMobile = window.innerWidth <= 768;
 
         buttons.forEach(button => {
             if (button && !button.disabled) {
                 const isMobileButton = button.closest('.mobile-interest-card') !== null;
 
                 if (isExpanded) {
-                    // Show up arrow (opened state)
                     button.innerHTML = `<svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M14.9995 9L7.99951 2L0.999512 9" stroke="#00AC98" stroke-width="2"/>
                     </svg>`;
                     button.title = "Hide info";
                 } else {
-                    // Show down arrow with text (closed state)
-                    // Use "MEHR" only for mobile buttons, "MEHR INFO" for desktop
                     const buttonText = isMobileButton ? 'MEHR' : 'MEHR INFO';
                     button.innerHTML = `${buttonText} <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M1 1L8 8L15 1" stroke="#00AC98" stroke-width="2"/>
@@ -2109,1379 +1747,88 @@ function changePageSize(newSize) {
         });
     }
 
-    // ============================================================================
-    // UTILITY FUNCTIONS
-    // ============================================================================
-
-    function getCsrfToken() {
-        const tokenMeta = document.querySelector('meta[name="_csrf"]');
-        return tokenMeta ? tokenMeta.getAttribute('content') : '';
-    }
-
-    // ============================================================================
-    // EVENT LISTENERS AND KEYBOARD NAVIGATION
-    // ============================================================================
-
-    // Close edit forms when clicking outside
-    document.addEventListener('click', function (e) {
-        if (currentEditForm && !currentEditForm.contains(e.target) && !e.target.classList.contains('edit-header-btn')) {
-            currentEditForm.classList.remove('show');
-            currentEditForm = null;
-        }
-    });
-
-    // Enhanced keyboard navigation for pagination
-    document.addEventListener('keydown', function (e) {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-        switch (e.key) {
-        case 'ArrowLeft':
-            if (currentPage > 1) {
-                e.preventDefault();
-                goToPage(currentPage - 1);
-            }
-            break;
-        case 'ArrowRight':
-            if (currentPage < totalPages) {
-                e.preventDefault();
-                goToPage(currentPage + 1);
-            }
-            break;
-        case 'Home':
-            e.preventDefault();
-            goToPage(1);
-            break;
-        case 'End':
-            e.preventDefault();
-            goToPage(totalPages);
-            break;
-        }
-    });
-
-    // Handle Enter key in page jump input
-    document.addEventListener('DOMContentLoaded', function () {
-        const pageJumpInput = document.getElementById('pageJumpInput');
-        if (pageJumpInput) {
-            pageJumpInput.addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') {
-                    jumpToPage();
-                }
-            });
-        }
-    });
-
-    // ============================================================================
-    // FILTERS
-    // ============================================================================
-
-    // Filter Management JavaScript
-    let availableFilters = [];
-    let activeFilters = new Map(); // fieldId -> Set of selected values
-    let filterExpanded = false;
-
-    // Initialize filters when page loads
-    document.addEventListener('DOMContentLoaded', function () {
-        initializeFilters();
-    });
-
-    async function initializeFilters() {
-        try {
-            // Load available filters from server
-            const response = await fetch('/filters/available');
-            if (response.ok) {
-                availableFilters = await response.json();
-                renderFilterGrid();
-
-                // Initialize with any existing filters from URL
-                initializeFromUrlParams();
-                updateFilterSummary();
-            }
-        } catch (error) {
-            console.error('Error loading filters:', error);
-        }
-    }
-
-    function initializeFromUrlParams() {
-        const urlParams = new URLSearchParams(window.location.search);
-
-        for (const [key, value] of urlParams.entries()) {
-            if (key.startsWith('filter_')) {
-                const fieldId = key.substring(7);
-                // Decode the URL-encoded value and split by pipe
-                const decodedValue = decodeURIComponent(value);
-                const values = decodedValue.includes('|') ? decodedValue.split('|') : [decodedValue];
-                activeFilters.set(fieldId, new Set(values));
-            }
-        }
-
-        if (activeFilters.size > 0) {
-            updateActiveFiltersDisplay();
-            updateFilterCheckboxes();
-            // Don't reload - data is already loaded from server
-        }
-    }
-
-    function toggleFilters() {
-        const content = document.getElementById('filterContent');
-        const toggle = document.getElementById('filterToggle');
-
-        filterExpanded = !filterExpanded;
-
-        if (filterExpanded) {
-            content.classList.add('show');
-            toggle.classList.add('expanded');
-        } else {
-            content.classList.remove('show');
-            toggle.classList.remove('expanded');
-        }
-    }
-
-    function renderFilterGrid() {
-        const grid = document.getElementById('filterGrid');
-
-        grid.innerHTML = availableFilters.map(filter => `
-            <div class="filter-item" data-field-id="${filter.fieldId}">
-                <h6>
-                    ${filter.label}
-                    <span class="text-muted">(${filter.options.length})</span>
-                </h6>
-                <div class="filter-options" id="options_${filter.fieldId}">
-                    ${filter.options.map(option => `
-                        <div class="filter-option" onclick="toggleFilterOption(${filter.fieldId}, '${option.value}')">
-                            <input type="checkbox"
-                                   id="filter_${filter.fieldId}_${option.value.replace(/[^a-zA-Z0-9]/g, '_')}"
-                                   value="${option.value}">
-                            <label for="filter_${filter.fieldId}_${option.value.replace(/[^a-zA-Z0-9]/g, '_')}">
-                                ${option.label}
-                            </label>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `)
-            .join('');
-    }
-
-    function toggleFilterOption(fieldId, value) {
-        const fieldIdStr = fieldId.toString();
-
-        if (!activeFilters.has(fieldIdStr)) {
-            activeFilters.set(fieldIdStr, new Set());
-        }
-
-        const fieldFilters = activeFilters.get(fieldIdStr);
-
-        if (fieldFilters.has(value)) {
-            fieldFilters.delete(value);
-            if (fieldFilters.size === 0) {
-                activeFilters.delete(fieldIdStr);
-            }
-        } else {
-            fieldFilters.add(value);
-        }
-
-        updateFilterCheckboxes();
-        updateActiveFiltersDisplay();
-        updateFilterSummary();
-    }
-
-    function updateFilterCheckboxes() {
-        availableFilters.forEach(filter => {
-            const fieldIdStr = filter.fieldId.toString();
-            const selectedValues = activeFilters.get(fieldIdStr) || new Set();
-
-            filter.options.forEach(option => {
-                const checkboxId = `filter_${filter.fieldId}_${option.value.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                const checkbox = document.getElementById(checkboxId);
-                if (checkbox) {
-                    checkbox.checked = selectedValues.has(option.value);
-                }
-            });
-        });
-    }
-
-    function updateActiveFiltersDisplay() {
-        const container = document.getElementById('activeFilters');
-        const tags = [];
-
-        activeFilters.forEach((values, fieldId) => {
-            const filter = availableFilters.find(f => f.fieldId.toString() === fieldId);
-            if (filter) {
-                values.forEach(value => {
-                    tags.push(`
-                        <span class="filter-tag">
-                            ${filter.label}: ${value}
-                            <button class="remove-filter" onclick="removeFilterTag('${fieldId}', '${value}')" title="Remove filter">
-                                ✕
-                            </button>
-                        </span>
-                    `);
-                });
-            }
-        });
-
-        container.innerHTML = tags.join('');
-        container.style.display = tags.length > 0 ? 'flex' : 'none';
-    }
-
-    function updateFilterSummary() {
-        const summary = document.getElementById('filterSummary');
-        const totalActive = Array.from(activeFilters.values())
-            .reduce((sum, set) => sum + set.size, 0);
-
-        if (totalActive === 0) {
-            summary.textContent = 'Click to add filters';
-            summary.style.color = '#666';
-        } else {
-            summary.textContent = `${totalActive} filter${totalActive > 1 ? 's' : ''} active`;
-            summary.style.color = '#007bff';
-            summary.style.fontWeight = '600';
-        }
-    }
-
-    function removeFilterTag(fieldId, value) {
-        if (activeFilters.has(fieldId)) {
-            activeFilters.get(fieldId)
-                .delete(value);
-            if (activeFilters.get(fieldId)
-                .size === 0) {
-                activeFilters.delete(fieldId);
-            }
-        }
-
-        updateFilterCheckboxes();
-        updateActiveFiltersDisplay();
-        updateFilterSummary();
-
-        // FIXED: Auto-apply filters when removing tags, with proper infinite scroll handling
-        applyFilters();
-    }
-
-    function clearAllFilters() {
-        activeFilters.clear();
-        updateFilterCheckboxes();
-        updateActiveFiltersDisplay();
-        updateFilterSummary();
-
-        // FIXED: Apply cleared filters with proper infinite scroll handling
-        applyFilters();
-    }
-
-
-    function applyFilters() {
-        // Build filter parameters for the API call
-        const params = new URLSearchParams();
-
-        // Add existing parameters in consistent order
-        params.set('page', '0'); // Reset to first page when applying filters
-        params.set('sortBy', currentSortColumn);
-        params.set('sortDir', currentSortDirection);
-        params.set('size', pageSize.toString());
-
-        if (currentSearchTerm) {
-            params.set('search', currentSearchTerm);
-        }
-
-        // Add filter parameters using pipe separator - sorted by field ID
-        const sortedFilters = Array.from(activeFilters.entries()).sort((a, b) => a[0] - b[0]);
-        sortedFilters.forEach(([fieldId, values]) => {
-            if (values.size > 0) {
-                const filterValue = Array.from(values).join('|');
-                params.set(`filter_${fieldId}`, encodeURIComponent(filterValue));
-            }
-        });
-
-        // Check if URL would actually change to prevent duplicate loads
-        const currentUrl = new URL(window.location);
-        const newUrl = new URL(window.location);
-        newUrl.search = params.toString();
-
-        if (currentUrl.toString() === newUrl.toString()) {
-            console.log('URL unchanged, skipping duplicate load');
-            if (window.innerWidth <= 768) {
-                toggleFilters();
-            }
-            return;
-        }
-
-        // Check if we're in infinite scroll mode and handle accordingly
-        if (isInfiniteScrollEnabled) {
-            // Reset infinite scroll state for filters
-            loadedPages.clear();
-            allLoadedData = [];
-            hasMoreData = true;
-            currentPage = 1;
-
-            // Hide indicators while loading
-            hideInfiniteScrollIndicator();
-            hideLoadingMoreIndicator();
-            const endIndicator = document.getElementById('endOfDataIndicator');
-            if (endIndicator) endIndicator.style.display = 'none';
-
-            const tbody = document.getElementById('tableBody');
-            if (tbody) tbody.innerHTML = '';
-
-            loadPageFromServerWithInfiniteScroll(1, currentSearchTerm, currentSortColumn, currentSortDirection);
-        } else {
-            currentPage = 1;
-            loadPageFromServerWithFilters(1, currentSearchTerm, currentSortColumn, currentSortDirection, activeFilters);
-        }
-
-        updateBrowserUrlWithFilters();
-
-        if (window.innerWidth <= 768) {
-            toggleFilters();
-        }
-    }
-
-    function loadPageFromServerWithFilters(page, searchTerm = '', sortBy = null, sortDir = null, filters = new Map()) {
-        if (isLoading) return;
-
-        showLoading();
-
-        const params = new URLSearchParams({
-            page: page - 1, // Convert to 0-based for backend
-            size: pageSize,
-            sortBy: sortBy || currentSortColumn,
-            sortDir: sortDir || currentSortDirection
-        });
-
-        if (searchTerm && searchTerm.trim()) {
-            params.append('search', searchTerm.trim());
-        }
-
-        // Add filter parameters using pipe separator
-        filters.forEach((values, fieldId) => {
-            if (values.size > 0) {
-                const filterValue = Array.from(values).join('|');
-                params.set(`filter_${fieldId}`, encodeURIComponent(filterValue));
-            }
-        });
-
-        fetch(`/api/interest-rates?${params.toString()}`)
+    function fetchRateDetails(rateId) {
+        return fetch(`/api/interest-rate/${rateId}`)
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Failed to fetch data');
+                    throw new Error('Failed to fetch rate details');
                 }
                 return response.json();
             })
-            .then(data => {
-                // Update all pagination state
-                currentPage = page;
-                totalPages = data.totalPages;
-                totalRecords = data.totalElements;
-                currentSearchTerm = searchTerm || '';
-
-                // Update sort state if provided
-                if (sortBy) currentSortColumn = sortBy;
-                if (sortDir) currentSortDirection = sortDir;
-
-                // Update data arrays
-                currentPageData = data.content;
-
-                // FIXED: Merge field values instead of replacing
-                Object.assign(serverRateFieldValuesMap, data.rateFieldValuesMap || {});
-
-                // Check for compared rates needing data
-                const currentRateIds = new Set(data.content.map(rate => rate.id));
-                const comparedRatesNeedingData = [];
-
-                comparedRates.forEach((rate, rateId) => {
-                    if (!currentRateIds.has(rateId) && !serverRateFieldValuesMap[rateId]) {
-                        comparedRatesNeedingData.push(rateId);
-                    }
-                });
-
-                if (comparedRatesNeedingData.length > 0) {
-                    fetchMissingRateData(comparedRatesNeedingData).then(() => {
-                        updateComparisonDisplay();
-                    });
-                }
-
-                // Render the new data
-                renderTableData(data.content);
-                updatePaginationControls();
-                updatePaginationInfo();
-                hideLoading();
-
-                // Close any expanded cards when changing pages
-                if (currentExpandedCard) {
-                    closeExpandedCard(currentExpandedCard);
-                }
-
-                // Update URL without page reload
-                updateBrowserUrlWithFilters();
-            })
             .catch(error => {
-                console.error('Error loading page:', error);
-                showDeleteNotification('Error loading data: ' + error.message, true);
-                hideLoading();
+                console.error('Error fetching rate details:', error);
+                showDeleteNotification('Error loading rate details: ' + error.message, true);
+                return null;
             });
     }
 
-    function updateBrowserUrlWithFilters() {
-        const url = new URL(window.location);
-
-        url.search = '';
-
-        const params = new URLSearchParams();
-
-        params.set('page', currentPage - 1);
-
-        params.set('sortBy', currentSortColumn);
-        params.set('sortDir', currentSortDirection);
-
-        params.set('size', pageSize);
-
-        if (currentSearchTerm) {
-            params.set('search', currentSearchTerm);
-        }
-
-        const sortedFilters = Array.from(activeFilters.entries()).sort((a, b) => a[0] - b[0]);
-        sortedFilters.forEach(([fieldId, values]) => {
-            if (values.size > 0) {
-                const filterValue = Array.from(values).join('|');
-                params.set(`filter_${fieldId}`, encodeURIComponent(filterValue));
-            }
-        });
-
-        url.search = params.toString();
-        window.history.replaceState({}, '', url);
-    }
-
-
-    function refreshFiltersFromServer() {
-        initializeFilters();
-    }
-
-    // Export functions for use in main application
-    window.filterFunctions = {
-        toggleFilters,
-        applyFilters,
-        clearAllFilters,
-        refreshFiltersFromServer,
-        loadPageFromServerWithFilters
-    };
-
-    // ============================================================================
-    // MOBILE INFINITE SCROLL FUNCTIONALITY
-    // ============================================================================
-
-    // Mobile-specific variables
-    let isMobileView = false;
-    let isInfiniteScrollEnabled = false;
-    let loadedPages = new Set();
-    let allLoadedData = [];
-    let isLoadingMore = false;
-    let hasMoreData = true;
-    let scrollThreshold = 200; // pixels from bottom to trigger load
-    // FIXED: Enhanced mobile scroll initialization
-    function initializeMobileScrolling() {
-        // Detect mobile view changes
-        checkMobileView();
-        window.addEventListener('resize', debounce(checkMobileView, 250));
-
-        // Initialize scroll listener
-        window.addEventListener('scroll', debounce(handleScroll, 100));
-
-        // FIXED: Better monitor view toggle buttons with enhanced event handling
-        const stackedViewBtn = document.getElementById('stackedView');
-        const scrollViewBtn = document.getElementById('scrollView');
-
-        if (stackedViewBtn && scrollViewBtn) {
-            // Remove any existing listeners
-            stackedViewBtn.replaceWith(stackedViewBtn.cloneNode(true));
-            scrollViewBtn.replaceWith(scrollViewBtn.cloneNode(true));
-
-            // Get the new elements and add fresh listeners
-            const newStackedBtn = document.getElementById('stackedView');
-            const newScrollBtn = document.getElementById('scrollView');
-
-            newStackedBtn.addEventListener('click', function () {
-                enableMobileCardView();
-            });
-
-            newScrollBtn.addEventListener('click', function () {
-                disableMobileCardView();
-            });
-        }
-    }
-
-    function checkMobileView() {
-        const wasMobile = isMobileView;
-        isMobileView = window.innerWidth <= 768;
-
-        const tableContainer = document.getElementById('tableContainer');
-        const isCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
-
-        const stackedViewBtn = document.getElementById('stackedView');
-        const scrollViewBtn = document.getElementById('scrollView');
-
-        if (!wasMobile && isMobileView) {
-            if (stackedViewBtn && scrollViewBtn && tableContainer) {
-                stackedViewBtn.classList.add('active');
-                scrollViewBtn.classList.remove('active');
-                tableContainer.classList.add('mobile-stack');
-                if (isInitialLoadComplete) {
-                    enableInfiniteScroll();
-                }
-                return;
-            }
-        }
-
-        const stackedActive = stackedViewBtn && stackedViewBtn.classList.contains('active');
-
-        const shouldEnable = (isMobileView && isCardView && stackedActive) || (!isMobileView && !isCardView);
-
-        if (shouldEnable !== isInfiniteScrollEnabled) {
-            if (shouldEnable) {
-                if (isInitialLoadComplete) {
-                    enableInfiniteScroll();
-                }
-            } else {
-                disableInfiniteScroll();
-            }
-        }
-
-        // If switching from mobile to desktop, maintain infinite scroll in table view
-        if (wasMobile && !isMobileView && isInfiniteScrollEnabled) {
-            // Keep infinite scroll enabled but ensure table view
-            if (tableContainer && tableContainer.classList.contains('mobile-stack')) {
-                if (scrollViewBtn && stackedViewBtn) {
-                    scrollViewBtn.classList.add('active');
-                    stackedViewBtn.classList.remove('active');
-                    tableContainer.classList.remove('mobile-stack');
-                }
-            }
-            // Re-render as table rows
-            renderTableData(allLoadedData);
-        }
-    }
-
-    function enableMobileCardView() {
-        const stackedViewBtn = document.getElementById('stackedView');
-        const scrollViewBtn = document.getElementById('scrollView');
-        const tableContainer = document.getElementById('tableContainer');
-
-        if (stackedViewBtn && scrollViewBtn && tableContainer) {
-            stackedViewBtn.classList.add('active');
-            scrollViewBtn.classList.remove('active');
-            tableContainer.classList.add('mobile-stack');
-
-            // Enable infinite scroll if on mobile
-            if (isMobileView) {
-                enableInfiniteScroll();
-            }
-        }
-    }
-
-    function disableMobileCardView() {
-        const stackedViewBtn = document.getElementById('stackedView');
-        const scrollViewBtn = document.getElementById('scrollView');
-        const tableContainer = document.getElementById('tableContainer');
-
-        if (stackedViewBtn && scrollViewBtn && tableContainer) {
-            scrollViewBtn.classList.add('active');
-            stackedViewBtn.classList.remove('active');
-            tableContainer.classList.remove('mobile-stack');
-
-            // FIXED: Disable infinite scroll and revert to normal table
-            if (isInfiniteScrollEnabled) {
-                disableInfiniteScroll();
-            }
-
-            // FIXED: Force re-render as normal table
-            setTimeout(() => {
-                renderTableData(currentPageData);
-            }, 100);
-        }
-    }
-
-    function enableInfiniteScroll() {
-        if (isInfiniteScrollEnabled) return;
-
-        isInfiniteScrollEnabled = true;
-        hidePaginationControls();
-
-        loadedPages.clear();
-        loadedPages.add(currentPage);
-        allLoadedData = [...currentPageData];
-        hasMoreData = currentPage < totalPages;
-
-        const tableContainer = document.getElementById('tableContainer');
-
-        if (isMobileView && tableContainer) {
-            tableContainer.classList.add('mobile-stack');
-            const stackedViewBtn = document.getElementById('stackedView');
-            const scrollViewBtn = document.getElementById('scrollView');
-            if (stackedViewBtn) stackedViewBtn.classList.add('active');
-            if (scrollViewBtn) scrollViewBtn.classList.remove('active');
-        }
-
-        const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
-
-        const shouldRender = isInitialLoadComplete && (
-            (isMobileCardView && document.getElementById('tableBody').querySelector('tr')) ||
-            (!isMobileCardView && document.getElementById('tableBody').querySelector('.mobile-interest-card'))
-        );
-
-        if (shouldRender) {
-            if (isMobileCardView) {
-                renderMobileCards(allLoadedData);
-            } else {
-                renderTableData(allLoadedData);
-            }
-        }
-
-        if (hasMoreData) {
-            showInfiniteScrollIndicator();
-        } else {
-            showEndOfDataIndicator();
-        }
-
-        console.log('Infinite scroll enabled for', isMobileCardView ? 'mobile' : 'desktop', '- Current page:', currentPage, 'Total pages:', totalPages);
-    }
-
-    function disableInfiniteScroll() {
-        if (!isInfiniteScrollEnabled) return;
-
-        isInfiniteScrollEnabled = false;
-        isLoadingMore = false;
-
-        // Show pagination controls
-        showPaginationControls();
-
-        // Hide infinite scroll indicators
-        hideInfiniteScrollIndicator();
-        hideLoadingMoreIndicator();
-        const endIndicator = document.getElementById('endOfDataIndicator');
-        if (endIndicator) endIndicator.style.display = 'none';
-
-        // FIXED: Reset to normal table view with proper data
-        resetToNormalPagination();
-
-        console.log('Infinite scroll disabled');
-    }
-
-
-    function resetToNormalPagination() {
-        // Reset data arrays
-        loadedPages.clear();
-        allLoadedData = [];
-        hasMoreData = true;
-
-        // FIXED: Use current page data if available, otherwise reload
-        if (currentPageData && currentPageData.length > 0) {
-            renderTableData(currentPageData);
-            updatePaginationControls();
-            updatePaginationInfo();
-        } else {
-            // Reload current page normally
-            loadPageFromServer(currentPage, currentSearchTerm, currentSortColumn, currentSortDirection);
-        }
-    }
-
-    // ============================================================================
-    // SCROLL HANDLING
-    // ============================================================================
-
-    function handleScroll() {
-        if (!isInfiniteScrollEnabled || isLoadingMore || !hasMoreData) return;
-
-        // Check if we're near the bottom of the page
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const windowHeight = window.innerHeight;
-        const documentHeight = document.documentElement.scrollHeight;
-
-        const distanceFromBottom = documentHeight - (scrollTop + windowHeight);
-
-        if (distanceFromBottom <= scrollThreshold) {
-            loadMoreData();
-        }
-    }
-
-    async function loadMoreData() {
-        if (isLoadingMore || !hasMoreData) return;
-
-        const nextPage = loadedPages.size + 1;
-
-        if (nextPage > totalPages) {
-            hasMoreData = false;
-            hideInfiniteScrollIndicator();
-            showEndOfDataIndicator();
+    function quickStartComparison() {
+        if (!allLoadedData || allLoadedData.length === 0) {
+            showStatus('No rates available to compare.', 'warning');
             return;
         }
 
-        isLoadingMore = true;
-        showLoadingMoreIndicator();
+        const firstRate = allLoadedData[0];
+        const firstRateId = firstRate.id;
 
-        console.log('Loading more data, page:', nextPage, 'with sort:', currentSortColumn, currentSortDirection);
+        document.getElementById("quickCompareBtn").style.display = "none";
+        document.body.classList.add('comparison-mode');
 
-        try {
-            // IMPORTANT: Pass current sort parameters
-            const data = await fetchPageData(nextPage, currentSearchTerm, currentSortColumn, currentSortDirection);
+        alignExternalCheckboxes();
 
-            if (data && data.content && data.content.length > 0) {
-                // APPEND to existing data
-                allLoadedData = [...allLoadedData, ...data.content];
-                loadedPages.add(nextPage);
+        const comparisonSection = document.getElementById('comparisonSection');
+        if (comparisonSection) {
+            comparisonSection.style.display = 'block';
+        }
 
-                Object.assign(serverRateFieldValuesMap, data.rateFieldValuesMap || {});
+        if (!comparedRates.has(firstRateId)) {
+            const rate = allLoadedData.find(r => r.id === firstRateId);
 
-                const tableContainer = document.getElementById('tableContainer');
-                const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
+            if (rate) {
+                comparedRates.set(firstRateId, rate);
 
-                if (isMobileCardView) {
-                    renderMobileCards(allLoadedData);
+                const firstCheckbox = document.getElementById(`external-compare-${firstRateId}`);
+                if (firstCheckbox) {
+                    firstCheckbox.checked = true;
+                    firstCheckbox.dispatchEvent(new Event('change'));
                 } else {
-                    const tbody = document.getElementById('tableBody');
-                    const newRows = renderTableRowsHTML(data.content);
-                    tbody.insertAdjacentHTML('beforeend', newRows);
-
-                    if (document.body.classList.contains('comparison-mode')) {
-                        setTimeout(() => {
-                            alignExternalCheckboxes();
-                        }, 50);
-                    }
+                    updateTableRowHighlight(firstRateId, true);
                 }
-
-                updateInfiniteScrollInfo();
-                hasMoreData = nextPage < totalPages;
-
-                console.log('Loaded page:', nextPage, 'Total items now:', allLoadedData.length);
-
-                if (!hasMoreData) {
-                    hideInfiniteScrollIndicator();
-                    showEndOfDataIndicator();
-                }
-
-                maintainComparisonState();
-            } else {
-                hasMoreData = false;
-                hideInfiniteScrollIndicator();
-                showEndOfDataIndicator();
             }
-        } catch (error) {
-            console.error('Error loading more data:', error);
-            showDeleteNotification('Error loading more data: ' + error.message, true);
-        } finally {
-            isLoadingMore = false;
-            hideLoadingMoreIndicator();
         }
+
+        updateComparisonDisplay();
+        scrollToComparison();
+
+        const rateCount = comparedRates.size;
+        showStatus(`Comparison mode activated! ${rateCount} rate${rateCount === 1 ? ' is' : 's are'} selected.`, 'success');
     }
 
-
-   async function fetchPageData(page, searchTerm = '', sortBy = null, sortDir = null) {
-        const params = new URLSearchParams({
-            page: page - 1, // Convert to 0-based for backend
-            size: pageSize,
-            sortBy: sortBy || currentSortColumn,
-            sortDir: sortDir || currentSortDirection
-        });
-
-        if (searchTerm && searchTerm.trim()) {
-            params.append('search', searchTerm.trim());
-        }
-
-        // FIXED: Add filter parameters from activeFilters using pipe separator
-        if (typeof activeFilters !== 'undefined' && activeFilters.size > 0) {
-            activeFilters.forEach((values, fieldId) => {
-                if (values.size > 0) {
-                    const filterValue = Array.from(values).join('|');
-                    params.set(`filter_${fieldId}`, encodeURIComponent(filterValue));
-                }
-            });
-        }
-
-        console.log('Fetching page with params:', params.toString()); // Debug log
-
-        const response = await fetch(`/api/interest-rates?${params.toString()}`);
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch data');
-        }
-
-        return await response.json();
-    }
-
-    // ============================================================================
-    // MOBILE CARD RENDERING
-    // ============================================================================
-
-    function renderMobileCards(data) {
-        const tbody = document.getElementById('tableBody');
-        const emptyState = document.getElementById('emptyState');
+    function updateExternalCheckboxes(data) {
+        const checkboxColumn = document.getElementById('externalCheckboxes');
+        if (!checkboxColumn) return;
 
         if (!data || data.length === 0) {
-            tbody.innerHTML = '';
-            emptyState.style.display = 'block';
+            checkboxColumn.innerHTML = '';
             return;
         }
 
-        emptyState.style.display = 'none';
-
-        // Create card-based layout for mobile
-        tbody.innerHTML = data.map(rate => createMobileCard(rate))
-            .join('');
-    }
-
-    function createMobileCard(rate) {
-        const headers = document.querySelectorAll('.draggable-column, .sortable');
-        const currentFieldOrder = Array.from(headers)
-            .map(header => ({
-                id: header.dataset.fieldId,
-                fieldKey: header.dataset.fieldKey,
-                label: header.querySelector('.header-text').textContent.trim()
-            }));
-
-        const isExpanded = expandedRateCards.has(rate.id);
-        const isSelected = comparedRates && comparedRates.has ? comparedRates.has(rate.id) : false;
-        const isInComparison = comparedRates.has(rate.id);
-
-        const fieldValues = serverRateFieldValuesMap[rate.id] || {};
-
-        let logoHtml = '<span style="color: #6c757d; font-size: 12px;">logo</span>';
-        const imageField = currentFieldOrder.find(f => f.fieldKey && f.fieldKey.toLowerCase().includes('img'));
-        if (imageField && fieldValues[imageField.id]) {
-            logoHtml = `<img src="${fieldValues[imageField.id]}" alt="Logo" style="max-height: 50px; max-width: 100px; object-fit: contain;">`;
-        }
-
-        const displayFields = currentFieldOrder
-            .filter(field => !(field.fieldKey && field.fieldKey.toLowerCase().includes('img')))
-            .slice(1, 5);
-
-        const gridHtml = displayFields.map(field => {
-            const value = fieldValues[field.id] || '-';
+        const checkboxRows = data.map(rate => {
+            const isSelected = comparedRates.has(rate.id);
             return `
-                <div class="info-field">
-                    <div class="info-field-label">${field.label.toUpperCase()}</div>
-                    <div class="info-field-value">${value}</div>
+                <div class="external-checkbox-row" data-rate-id="${rate.id}">
+                    <div class="custom-checkbox-container">
+                        <input type="checkbox"
+                               class="comparison-checkbox external-checkbox"
+                               onchange="toggleComparison(${rate.id}, this.checked)"
+                               id="external-compare-${rate.id}"
+                               ${isSelected ? 'checked' : ''}>
+                        <div class="custom-checkbox"></div>
+                    </div>
                 </div>
             `;
         }).join('');
-
-        const rateValue = fieldValues[currentFieldOrder[0]?.id] || '0,00';
-
-        return `
-            <div class="mobile-card-row" data-rate-id="${rate.id}">
-                <div class="mobile-interest-card" data-rate-id="${rate.id}">
-                    <div class="card-header">
-                        <h6 data-rate="${rateValue}"></h6>
-                        <div class="card-logo-area">
-                            ${logoHtml}
-                        </div>
-                        <div class="card-logo-area">
-                            <button class="mehr-info-btn"
-                                    ${rate.moreInfo ? '' : 'disabled'}
-                                    onclick="showMoreInfo(${rate.id})"
-                                    title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">
-                                MEHR
-                                <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="2"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="card-body">
-                        <div class="card-info-grid">
-                            ${gridHtml}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
     }
-
-    function refreshAllVergleichenButtons() {
-        const allRateIds = new Set();
-
-        if (currentPageData) {
-            currentPageData.forEach(rate => allRateIds.add(rate.id));
-        }
-
-        if (typeof allLoadedData !== 'undefined' && allLoadedData.length > 0) {
-            allLoadedData.forEach(rate => allRateIds.add(rate.id));
-        }
-
-        allRateIds.forEach(rateId => {
-            const isInComparison = comparedRates.has(rateId);
-            updateVergleichenButtonVisibility(rateId, isInComparison);
-        });
-    }
-
-    function previewMobileImage(input, rateId, fieldId) {
-        const file = input.files[0];
-        const preview = document.getElementById(`mobilePreview_${rateId}_${fieldId}`);
-        const uploadBtn = document.getElementById(`mobileUploadBtn_${rateId}_${fieldId}`);
-
-        if (file) {
-            // Validate file type
-            if (!file.type.startsWith('image/')) {
-                showDeleteNotification('Please select a valid image file.', true);
-                input.value = '';
-                return;
-            }
-
-            // Validate file size (5MB limit)
-            if (file.size > 5 * 1024 * 1024) {
-                showDeleteNotification('File size must be less than 5MB.', true);
-                input.value = '';
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                preview.querySelector('img').src = e.target.result;
-                preview.style.display = 'block';
-                uploadBtn.disabled = false;
-            };
-            reader.readAsDataURL(file);
-        } else {
-            preview.style.display = 'none';
-            uploadBtn.disabled = true;
-        }
-    }
-
-    function uploadMobileImage(event, rateId, fieldId) {
-        event.preventDefault();
-
-        const fileInput = document.getElementById(`mobileFileInput_${rateId}_${fieldId}`);
-        const uploadBtn = document.getElementById(`mobileUploadBtn_${rateId}_${fieldId}`);
-
-        if (!fileInput || !fileInput.files[0]) {
-            showDeleteNotification('Please select an image to upload.', true);
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('image', fileInput.files[0]);
-        formData.append('rateId', rateId);
-        formData.append('fieldId', fieldId);
-
-        uploadBtn.disabled = true;
-        uploadBtn.textContent = 'Uploading...';
-
-        fetch('/api/upload-image', {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                showDeleteNotification('Image uploaded successfully!', false);
-                 setTimeout(() => {
-                window.location.reload();
-            }, 200);
-            } else {
-                throw new Error(data.message || 'Upload failed');
-            }
-        })
-        .catch(err => {
-            showDeleteNotification('Error: ' + err.message, true);
-        })
-        .finally(() => {
-            uploadBtn.disabled = false;
-            uploadBtn.textContent = 'Upload';
-        });
-    }
-
-
-    function deleteMobileImage(rateId, fieldId) {
-        if (!confirm('Are you sure you want to delete this image?')) {
-            return;
-        }
-
-        fetch('/api/delete-image', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                rateId: rateId,
-                fieldId: fieldId
-            })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Delete failed');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Update server data map
-                if (serverRateFieldValuesMap[rateId]) {
-                    serverRateFieldValuesMap[rateId][fieldId] = '';
-                }
-
-                showDeleteNotification('Image deleted successfully!', false);
-
-                // Re-render the mobile cards
-                if (isInfiniteScrollEnabled) {
-                    renderMobileCards(allLoadedData);
-                } else {
-                    renderMobileCards(currentPageData);
-                }
-            } else {
-                throw new Error(data.message || 'Delete failed');
-            }
-        })
-        .catch(error => {
-            showDeleteNotification('Error deleting image: ' + error.message, true);
-        });
-    }
-
-    function cancelMobileImageUpload(rateId, fieldId) {
-        const imageDisplay = document.querySelector(`#mobileImageUpload_${rateId}_${fieldId}`)?.previousElementSibling;
-        const uploadForm = document.getElementById(`mobileImageUpload_${rateId}_${fieldId}`);
-
-        // Reset form
-        const fileInput = uploadForm.querySelector('input[type="file"]');
-        const preview = document.getElementById(`mobilePreview_${rateId}_${fieldId}`);
-        const uploadBtn = document.getElementById(`mobileUploadBtn_${rateId}_${fieldId}`);
-
-        if (fileInput) fileInput.value = '';
-        if (preview) preview.style.display = 'none';
-        if (uploadBtn) uploadBtn.disabled = true;
-
-        // Hide form and show image
-        if (imageDisplay && uploadForm) {
-            uploadForm.style.display = 'none';
-            imageDisplay.style.display = 'block';
-        }
-    }
-
-    function updateMobileFieldValue(rateId, fieldId, value) {
-        updateFieldValueAjax(rateId, fieldId, value);
-    }
-
-    function updateMobileImageDisplay(inputElement, imagePath) {
-        const container = inputElement.closest('.mobile-image-container');
-        const img = container.querySelector('img');
-        const placeholder = container.querySelector('.no-image-placeholder');
-
-        if (imagePath && imagePath.trim()) {
-            if (img) {
-                img.src = imagePath;
-                img.style.display = 'block';
-                placeholder.style.display = 'none';
-            } else {
-                // Create new img element if it doesn't exist
-                const newImg = document.createElement('img');
-                newImg.src = imagePath;
-                newImg.alt = 'Interest Rate Logo';
-                newImg.className = 'interest-rate-logo mobile-image';
-                newImg.onerror = function() {
-                    this.style.display = 'none';
-                    placeholder.style.display = 'block';
-                };
-                container.querySelector('.image-display').insertBefore(newImg, placeholder);
-                placeholder.style.display = 'none';
-            }
-        } else {
-            if (img) {
-                img.style.display = 'none';
-            }
-            placeholder.style.display = 'block';
-            placeholder.innerHTML = `
-                <span>No Image</span>
-                <small>Tap to upload</small>
-            `;
-        }
-    }
-
-    // ============================================================================
-    // UI INDICATORS AND CONTROLS
-    // ============================================================================
-
-    function hidePaginationControls() {
-        const paginationContainers = document.querySelectorAll('.pagination-container');
-        paginationContainers.forEach(container => {
-            container.style.display = 'none';
-        });
-    }
-
-    function showPaginationControls() {
-        const paginationContainers = document.querySelectorAll('.pagination-container');
-        paginationContainers.forEach(container => {
-            container.style.display = 'flex';
-        });
-    }
-
-    function showInfiniteScrollIndicator() {
-        let indicator = document.getElementById('infiniteScrollIndicator');
-        if (!indicator) {
-            indicator = document.createElement('div');
-            indicator.id = 'infiniteScrollIndicator';
-            indicator.className = 'infinite-scroll-indicator';
-            indicator.innerHTML = `
-            <div class="text-center py-3">
-                <div class="text-muted">Scroll down to load more...</div>
-            </div>
-        `;
-
-            // Insert after the table container
-            const tableContainer = document.querySelector('.table-container');
-            if (tableContainer) {
-                tableContainer.parentNode.insertBefore(indicator, tableContainer.nextSibling);
-            }
-        }
-        indicator.style.display = 'block';
-    }
-
-    function hideInfiniteScrollIndicator() {
-        const indicator = document.getElementById('infiniteScrollIndicator');
-        if (indicator) {
-            indicator.style.display = 'none';
-        }
-    }
-
-    function showLoadingMoreIndicator() {
-        let indicator = document.getElementById('loadingMoreIndicator');
-        if (!indicator) {
-            indicator = document.createElement('div');
-            indicator.id = 'loadingMoreIndicator';
-            indicator.className = 'loading-more-indicator';
-            indicator.innerHTML = `
-            <div class="text-center py-4">
-                <div class="spinner-border spinner-border-sm me-2" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <span class="text-muted">Loading more rates...</span>
-            </div>
-        `;
-
-            const tableContainer = document.querySelector('.table-container');
-            if (tableContainer) {
-                tableContainer.parentNode.insertBefore(indicator, tableContainer.nextSibling);
-            }
-        }
-        indicator.style.display = 'block';
-    }
-
-    function hideLoadingMoreIndicator() {
-        const indicator = document.getElementById('loadingMoreIndicator');
-        if (indicator) {
-            indicator.style.display = 'none';
-        }
-    }
-
-    function showEndOfDataIndicator() {
-        let indicator = document.getElementById('endOfDataIndicator');
-        if (!indicator) {
-            indicator = document.createElement('div');
-            indicator.id = 'endOfDataIndicator';
-            indicator.className = 'end-of-data-indicator';
-            indicator.innerHTML = `
-            <div class="text-center py-3">
-                <div class="text-muted">
-                    <div>📊</div>
-                    <small>You've reached the end of the results</small>
-                </div>
-            </div>
-        `;
-
-            const tableContainer = document.querySelector('.table-container');
-            if (tableContainer) {
-                tableContainer.parentNode.insertBefore(indicator, tableContainer.nextSibling);
-            }
-        }
-        indicator.style.display = 'block';
-    }
-
-    function updateInfiniteScrollInfo() {
-        const totalLoaded = allLoadedData.length;
-        const infoText = `Showing ${totalLoaded} of ${totalRecords} results`;
-
-        // Update the results info at the top
-        const resultsInfo = document.getElementById('resultsInfo');
-        if (resultsInfo) {
-            resultsInfo.textContent = infoText;
-        }
-    }
-
-    // ============================================================================
-    // UTILITY FUNCTIONS
-    // ============================================================================
-
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-
-    // ============================================================================
-    // OVERRIDE EXISTING FUNCTIONS FOR MOBILE COMPATIBILITY
-    // ============================================================================
-
-    // Override search functions to work with infinite scroll
-    const originalPerformSearchMobile = window.performSearch;
-    window.performSearch = function () {
-        const searchInput = document.getElementById('searchInput');
-        const searchTerm = searchInput ? searchInput.value.trim() : '';
-
-        if (isInfiniteScrollEnabled) {
-            // Reset infinite scroll state
-            loadedPages.clear();
-            allLoadedData = [];
-            hasMoreData = true;
-            currentPage = 1;
-
-            // Load first page with search
-            loadPageFromServerWithInfiniteScroll(1, searchTerm);
-        } else {
-            // Use normal search
-            originalPerformSearchMobile();
-        }
-    };
-
-    const originalClearSearchMobile = window.clearSearch;
-    window.clearSearch = function () {
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.value = '';
-        }
-
-        if (isInfiniteScrollEnabled) {
-            // Reset infinite scroll state
-            loadedPages.clear();
-            allLoadedData = [];
-            hasMoreData = true;
-            currentPage = 1;
-
-            // Load first page without search
-            loadPageFromServerWithInfiniteScroll(1, '');
-        } else {
-            // Use normal clear
-            originalClearSearchMobile();
-        }
-    };
-
-    async function loadPageFromServerWithInfiniteScroll(page, searchTerm = '', sortBy = null, sortDir = null) {
-        if (isLoadingMore && page > 1) return;
-
-        showLoading();
-
-        try {
-            const data = await fetchPageData(page, searchTerm, sortBy, sortDir);
-
-            // Update pagination state
-            currentPage = page;
-            totalPages = data.totalPages;
-            totalRecords = data.totalElements;
-            currentSearchTerm = searchTerm || '';
-
-            // Update sort state if provided
-            if (sortBy) currentSortColumn = sortBy;
-            if (sortDir) currentSortDirection = sortDir;
-
-            if (page === 1) {
-                loadedPages.clear();
-                allLoadedData = [];
-            }
-
-            loadedPages.add(page);
-            allLoadedData = [...data.content];
-
-            Object.assign(serverRateFieldValuesMap, data.rateFieldValuesMap || {});
-
-            const currentRateIds = new Set(data.content.map(rate => rate.id));
-            const comparedRatesNeedingData = [];
-
-            comparedRates.forEach((rate, rateId) => {
-                if (!currentRateIds.has(rateId) && !serverRateFieldValuesMap[rateId]) {
-                    comparedRatesNeedingData.push(rateId);
-                }
-            });
-
-            if (comparedRatesNeedingData.length > 0) {
-                await fetchMissingRateData(comparedRatesNeedingData);
-                updateComparisonDisplay();
-            }
-
-            const tableContainer = document.getElementById('tableContainer');
-            const isMobileCardView = tableContainer && tableContainer.classList.contains('mobile-stack');
-
-            if (isMobileCardView) {
-                renderMobileCards(allLoadedData);
-            } else {
-                renderTableData(allLoadedData);
-            }
-
-            updateInfiniteScrollInfo();
-            hasMoreData = page < totalPages;
-
-            if (hasMoreData) {
-                showInfiniteScrollIndicator();
-            } else {
-                hideInfiniteScrollIndicator();
-                showEndOfDataIndicator();
-            }
-
-            hideLoading();
-
-            // Reset the loading flag after a short delay to prevent immediate scroll triggers
-            setTimeout(() => {
-                isLoadingMore = false;
-            }, 300);
-
-            maintainComparisonState();
-
-            console.log('Loaded page:', page, 'Total pages:', totalPages, 'Has more:', hasMoreData);
-        } catch (error) {
-            console.error('Error loading page:', error);
-            showDeleteNotification('Error loading data: ' + error.message, true);
-            hideLoading();
-            isLoadingMore = false;
-        }
-    }
-
-    document.addEventListener('click', function(e) {
-        const container = e.target.closest('.custom-checkbox-container');
-        if (container && (e.target.classList.contains('custom-checkbox') || e.target.classList.contains('checkbox-label'))) {
-            const checkbox = container.querySelector('.comparison-checkbox');
-            if (checkbox && !checkbox.disabled) {
-                checkbox.checked = !checkbox.checked;
-                checkbox.dispatchEvent(new Event('change'));
-            }
-        }
-    });
-
-    // ============================================================================
-    // INITIALIZATION
-    // ============================================================================
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const stackedViewBtn = document.getElementById('stackedView');
-        const scrollViewBtn = document.getElementById('scrollView');
-        const tableContainer = document.getElementById('tableContainer');
-
-        if (stackedViewBtn && scrollViewBtn && tableContainer) {
-            stackedViewBtn.addEventListener('click', function () {
-                enableMobileCardView();
-            });
-
-            scrollViewBtn.addEventListener('click', function () {
-                disableMobileCardView();
-            });
-        }
-    });
-
-    // Export functions for debugging
-    window.mobileScrollFunctions = {
-        enableInfiniteScroll,
-        disableInfiniteScroll,
-        loadMoreData,
-        renderMobileCards,
-        checkMobileView
-    };
 
     function alignExternalCheckboxes() {
         const table = document.getElementById('mainTable');
@@ -3495,16 +1842,14 @@ function changePageSize(newSize) {
         }
 
         const rows = table.querySelectorAll('tbody tr:not(.rate-card-row)');
-
         externalCheckboxes.innerHTML = '';
 
         if (rows.length === 0) return;
 
-        rows.forEach((row, index) => {
+        rows.forEach((row) => {
             const rateId = row.getAttribute('data-rate-id');
-            if (!rateId) return; // Skip rows without rate ID
+            if (!rateId) return;
 
-            // Create checkbox row
             const checkboxRow = document.createElement('div');
             checkboxRow.className = 'external-checkbox-row';
             checkboxRow.setAttribute('data-rate-id', rateId);
@@ -3517,23 +1862,26 @@ function changePageSize(newSize) {
             checkboxInput.className = 'comparison-checkbox external-checkbox';
             checkboxInput.id = `external-compare-${rateId}`;
 
-            // Check if this rate is already in comparison
-            const isSelected = comparedRates && comparedRates.has ? comparedRates.has(parseInt(rateId)) : false;
+            const isSelected = comparedRates.has(parseInt(rateId));
             checkboxInput.checked = isSelected;
 
             const customCheckbox = document.createElement('div');
             customCheckbox.className = 'custom-checkbox';
+
+            checkboxInput.addEventListener('change', () => {
+                toggleComparison(parseInt(rateId), checkboxInput.checked);
+            });
+
+            customCheckbox.addEventListener('click', () => {
+                checkboxInput.checked = !checkboxInput.checked;
+                checkboxInput.dispatchEvent(new Event('change'));
+            });
 
             checkboxContainer.appendChild(checkboxInput);
             checkboxContainer.appendChild(customCheckbox);
             checkboxRow.appendChild(checkboxContainer);
 
             externalCheckboxes.appendChild(checkboxRow);
-
-            // Add event listener for comparison functionality
-            checkboxInput.addEventListener('change', () => {
-                toggleComparison(parseInt(rateId), checkboxInput.checked);
-            });
         });
 
         requestAnimationFrame(() => {
@@ -3565,20 +1913,10 @@ function changePageSize(newSize) {
         });
     }
 
-
-    // Run on page load
     window.addEventListener('load', alignExternalCheckboxes);
-    // Run on window resize
     window.addEventListener('resize', alignExternalCheckboxes);
 
-    // Optional: Run whenever a row expands/collapses
-    function onRowToggle() {
-        alignExternalCheckboxes();
-    }
-
-   function renderTableRowsHTML(data) {
-        if (!data || data.length === 0) return '';
-
+    function createMobileCard(rate) {
         const headers = document.querySelectorAll('.draggable-column, .sortable');
         const currentFieldOrder = Array.from(headers)
             .map(header => ({
@@ -3587,66 +1925,65 @@ function changePageSize(newSize) {
                 label: header.querySelector('.header-text').textContent.trim()
             }));
 
-        return data.map(rate => {
-            const isSelected = comparedRates.has(rate.id);
+        const isSelected = comparedRates && comparedRates.has ? comparedRates.has(rate.id) : false;
+        const fieldValues = serverRateFieldValuesMap[rate.id] || {};
 
-            const fieldCells = currentFieldOrder.map((field) => {
-                const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
+        let logoHtml = '<span style="color: #6c757d; font-size: 12px;">logo</span>';
+        const imageField = currentFieldOrder.find(f => f.fieldKey && f.fieldKey.toLowerCase().includes('img'));
+        if (imageField && fieldValues[imageField.id]) {
+            logoHtml = `<img src="${fieldValues[imageField.id]}" alt="Logo" style="max-height: 50px; max-width: 100px; object-fit: contain;">`;
+        }
 
-                if (field.fieldKey && field.fieldKey.toLowerCase().includes('img')) {
-                    return `
-                        <td class="data-cell image-cell" data-field-id="${field.id}" data-label="${field.label}">
-                            <div class="image-container">
-                                ${fieldValue ? `<img src="${fieldValue}" alt="Interest Rate Logo" class="interest-rate-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />` : ''}
-                                <div class="no-image-placeholder" style="${fieldValue ? 'display:none' : 'display:block'}">No Image</div>
-                            </div>
-                        </td>
-                    `;
-                } else {
-                    return `
-                        <td class="data-cell" data-field-id="${field.id}" data-label="${field.label}">
-                            <div class="form-control form-control-sm text-center"
-                                 style="border: none; background: transparent; cursor: default;">
-                                ${fieldValue || '-'}
-                            </div>
-                        </td>
-                    `;
-                }
-            }).join('');
+        const displayFields = currentFieldOrder
+            .filter(field => !(field.fieldKey && field.fieldKey.toLowerCase().includes('img')))
+            .slice(1, 5);
 
-            const isExpanded = expandedRateCards.has(rate.id);
-            const actionButtons = `
-                <div class="action-buttons">
-                    <button class="mehr-info-btn"
-                            ${rate.moreInfo ? '' : 'disabled'}
-                            onclick="showMoreInfo(${rate.id})"
-                            title="${isExpanded ? 'Hide info' : (rate.moreInfo ? 'Show more info' : 'No additional info available')}">
-                        ${rate.moreInfo ?
-                            (isExpanded ?
-                                `<svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M14.9995 9L7.99951 2L0.999512 9" stroke="#00AC98" stroke-width="2"/>
-                                </svg>` :
-                                `MEHR INFO <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M1 1L8 8L15 1" stroke="#00AC98" stroke-width="2"/>
-                                </svg>`
-                            ) :
-                            'No Info'
-                        }
-                    </button>
+        const gridHtml = displayFields.map(field => {
+            const value = fieldValues[field.id] || '-';
+            return `
+                <div class="info-field">
+                    <div class="info-field-label">${field.label.toUpperCase()}</div>
+                    <div class="info-field-value">${value}</div>
                 </div>
             `;
-
-            return `
-                <tr data-rate-id="${rate.id}" ${isSelected ? 'class="table-row-selected"' : ''}>
-                    ${fieldCells}
-                    <td data-label="Actions">
-                        ${actionButtons}
-                    </td>
-                </tr>
-            `;
         }).join('');
-   }
+
+        const rateValue = fieldValues[currentFieldOrder[0]?.id] || '0,00';
+        const isExpanded = expandedRateCards.has(rate.id);
+
+        return `
+            <div class="mobile-card-row" data-rate-id="${rate.id}">
+                <div class="mobile-interest-card" data-rate-id="${rate.id}" ${isExpanded ? 'class="mobile-interest-card card-expanded"' : 'class="mobile-interest-card"'}>
+                    <div class="card-header">
+                        <h6 data-rate="${rateValue}"></h6>
+                        <div class="card-logo-area">
+                            ${logoHtml}
+                        </div>
+                        <div class="card-logo-area">
+                            <button class="mehr-info-btn"
+                                    ${rate.moreInfo ? '' : 'disabled'}
+                                    onclick="showMoreInfo(${rate.id})"
+                                    title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">
+                                ${isExpanded ?
+                                    `<svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 7L6 2L1 7" stroke="currentColor" stroke-width="2"/></svg>` :
+                                    `MEHR <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="2"/></svg>`
+                                }
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="card-info-grid">
+                            ${gridHtml}
+                        </div>
+                    </div>
+                    ${isExpanded ? createRateCard(rate).outerHTML : ''}
+                </div>
+            </div>
+        `;
+    }
 
 </script>
+<script src="/js/dark-mode.js" defer></script>
 </body>
 </html>
