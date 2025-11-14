@@ -87,6 +87,9 @@ function enableDarkMode() {
     document.body.classList.add('dark-mode');
     document.documentElement.classList.add('dark-mode');
 
+    document.getElementById('darkModeBtn')?.classList.add('active-segment');
+    document.getElementById('lightModeBtn')?.classList.remove('active-segment');
+
     let metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (!metaThemeColor) {
         metaThemeColor = document.createElement('meta');
@@ -99,6 +102,9 @@ function enableDarkMode() {
 function disableDarkMode() {
     document.body.classList.remove('dark-mode');
     document.documentElement.classList.remove('dark-mode');
+
+    document.getElementById('lightModeBtn')?.classList.add('active-segment');
+    document.getElementById('darkModeBtn')?.classList.remove('active-segment');
 
     let metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {

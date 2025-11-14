@@ -995,6 +995,7 @@ body {
 .view-toggle {
   margin-bottom: 15px;
   text-align: center;
+  display: none;
 }
 
 .view-toggle .btn-group {

@@ -33,7 +33,7 @@ public class LastUpdateService {
         }
 
         String timeAgo = getTimeAgoString(lastUpdate.get().getLastUpdated());
-        return String.format("The interest rates were last updated %s", timeAgo);
+        return String.format("Last updated: %s", timeAgo);
     }
 
     public LocalDateTime getLastUpdateTime() {

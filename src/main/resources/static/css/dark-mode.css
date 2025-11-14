@@ -120,6 +120,78 @@ body.dark-mode .text-muted {
 body.dark-mode small {
   color: var(--dark-text-secondary);
 }
+/* ============================================================================
+   GENERAL ELEMENTS (span)
+   ============================================================================ */
+
+body.dark-mode span {
+    color: var(--dark-text-secondary);
+}
+
+body.dark-mode #lastUpdatedDisplay {
+    color: var(--dark-text-muted) !important;
+}
+
+/* ============================================================================
+   NAVBAR & BUTTONS (nav-logo)
+   ============================================================================ */
+
+body.dark-mode .nav-logo {
+    background: transparent !important;
+    color: var(--dark-text-primary) !important;
+    border-color: var(--dark-border-light) !important;
+}
+
+body.dark-mode .vergleichen-section button.nav-logo {
+    background: var(--dark-bg-card) !important;
+    color: var(--dark-text-primary) !important;
+    border-color: var(--dark-border-light) !important;
+    box-shadow: 0 1px 3px var(--dark-shadow-light);
+}
+
+/* ============================================================================
+   HERO SECTION - DARK MODE
+   ============================================================================ */
+
+body.dark-mode .hero-section {
+    background: var(--dark-bg-primary) !important;
+}
+
+body.dark-mode .hero-content h1 {
+    color: var(--dark-text-primary) !important;
+}
+
+body.dark-mode .hero-content p {
+    color: var(--dark-text-secondary) !important;
+}
+
+body.dark-mode .hero-illustration-image {
+    filter: brightness(0.8) contrast(1.1);
+    opacity: 0.9;
+}
+
+/* ============================================================================
+   VERGLEICHEN SECTION - DARK MODE
+   ============================================================================ */
+
+body.dark-mode .vergleichen-section {
+    background: var(--dark-bg-secondary) !important;
+}
+
+body.dark-mode .vergleichen-section .card-body {
+    background: transparent !important;
+}
+
+body.dark-mode .vergleichen-section button.nav-logo {
+    background: var(--dark-bg-tertiary) !important;
+    color: var(--dark-text-primary) !important;
+    border-color: var(--dark-border-light) !important;
+    box-shadow: 0 1px 3px var(--dark-shadow-light);
+}
+
+body.dark-mode .vergleichen-section #lastUpdatedDisplay {
+    color: var(--dark-text-muted) !important;
+}
 
 /* ============================================================================
    FIELD MANAGEMENT PAGE - DARK MODE
@@ -1665,7 +1737,6 @@ body.dark-mode select {
   background-color: var(--dark-bg-secondary);
   border-color: var(--dark-border);
   color: var(--dark-text-primary);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3E%3C/svg%3E");
 }
 
 body.dark-mode select option {
@@ -2002,13 +2073,6 @@ body.dark-mode .draggable-section.drag-over {
 body.dark-mode .table-responsive {
   background: var(--dark-bg-primary);
   border: var(--dark-bg-card);
-}
-
-/* Apply shadow only on screens wider than 992px (desktop) */
-@media (min-width: 992px) {
-  body.dark-mode .table-responsive {
-    box-shadow: 0 4px 20px rgb(0 184 148);
-  }
 }
 
 body.dark-mode #mainTable {

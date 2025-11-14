@@ -2098,27 +2098,61 @@
     function renderFilterGrid() {
         const grid = document.getElementById('filterGrid');
 
-        grid.innerHTML = availableFilters.map(filter => `
-            <div class="filter-item" data-field-id="${filter.fieldId}">
-                <h6>
-                    ${filter.label}
-                    <span class="text-muted">(${filter.options.length})</span>
-                </h6>
-                <div class="filter-options" id="options_${filter.fieldId}">
-                    ${filter.options.map(option => `
-                        <div class="filter-option" onclick="toggleFilterOption(${filter.fieldId}, '${option.value}')">
-                            <input type="checkbox"
-                                   id="filter_${filter.fieldId}_${option.value.replace(/[^a-zA-Z0-9]/g, '_')}"
-                                   value="${option.value}">
-                            <label for="filter_${filter.fieldId}_${option.value.replace(/[^a-zA-Z0-9]/g, '_')}">
-                                ${option.label}
-                            </label>
-                        </div>
-                    `).join('')}
+        // **IMPORTANT:** Since we are showing horizontal filters, we hide the main toggle logic
+        // and rely on the filter-content being displayed via CSS overrides.
+
+        grid.innerHTML = availableFilters.map(filter => {
+            const fieldIdStr = filter.fieldId.toString();
+            const currentSelection = Array.from(activeFilters.get(fieldIdStr) || []).join('');
+
+            // Start of the select element
+            let selectHtml = `
+                <select
+                    class="filter-dropdown-pill"
+                    onchange="updateFilterFromDropdown(this, ${filter.fieldId})"
+                    data-field-id="${filter.fieldId}">
+            `;
+
+            // Default 'All' option
+            selectHtml += `<option value="">All ${filter.label}</option>`;
+
+            // Filter options
+            selectHtml += filter.options.map(option => `
+                <option
+                    value="${option.value}"
+                    ${option.value === currentSelection ? 'selected' : ''}>
+                    ${option.label}
+                </option>
+            `).join('');
+
+            selectHtml += `</select>`;
+
+            return `
+                <div class="filter-item" data-field-id="${filter.fieldId}">
+                    <h6>${filter.label}</h6>
+                    ${selectHtml}
                 </div>
-            </div>
-        `)
-            .join('');
+            `;
+        }).join('');
+    }
+
+    function updateFilterFromDropdown(selectElement, fieldId) {
+        const fieldIdStr = fieldId.toString();
+        const value = selectElement.value;
+
+        // Clear previous selection for this field
+        activeFilters.delete(fieldIdStr);
+
+        // Add new selection if it's not the default 'All' option (value == '')
+        if (value !== '') {
+            activeFilters.set(fieldIdStr, new Set([value]));
+        }
+
+        // Re-apply filters immediately
+        applyFilters();
+
+        // Update the visual summary immediately
+        updateFilterSummary();
     }
 
     function toggleFilterOption(fieldId, value) {
