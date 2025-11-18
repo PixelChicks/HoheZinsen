@@ -1216,7 +1216,7 @@ body {
 /* Mobile specific styles */
 @media (max-width: 576px) {
   .container {
-    padding: 0 10px;
+    overflow:hidden;
   }
 
   .form-control-sm {

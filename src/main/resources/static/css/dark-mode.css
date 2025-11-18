@@ -1332,10 +1332,6 @@ body,
     color: #00BFA5;
   }
 
-  body.dark-mode .mobile-comparison-container {
-    background-color: var(--dark-bg-primary);
-  }
-
   body.dark-mode .pagination-container {
     background: var(--dark-bg-card);
   }
