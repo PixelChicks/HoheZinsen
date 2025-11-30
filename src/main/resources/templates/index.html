@@ -9,13 +9,97 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/styles.css" rel="stylesheet">
     <link href="/css/index.css" rel="stylesheet">
+    <link href="/css/faq.css" rel="stylesheet">
+    <link href="/css/footer.css" rel="stylesheet">
     <link href="/css/dark-mode.css" rel="stylesheet">
     <style>
-        @import url('https://api.fonts.coollabs.io/css2?family=Mona+Sans:wght@200;300;400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Hind:wght@300;400;500;600;700&display=swap');
 
         * {
-            font-family: 'Mona Sans', sans-serif !important;
+            font-family: 'Hind', sans-serif !important;
         }
+            <style>
+        .logos-section {
+            width: 100%;
+            overflow: hidden;
+            background: transparent;
+            padding: 40px 0;
+            position: relative;
+        }
+
+        .logos-track {
+            display: flex;
+            padding-top: 40px;
+            align-items: center;
+            animation: scroll 30s linear(1.15 90.59%, 1.32 108.24%) infinite;
+            width: fit-content;
+        }
+
+        .logo-item {
+            flex-shrink: 0;
+            margin: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100px;
+        }
+
+        .logo-item img {
+            max-height: 80px;
+            max-width: 150px;
+            object-fit: contain;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+            filter: brightness(1) invert(0);
+        }
+
+        .logo-item img:hover {
+            opacity: 1;
+        }
+
+        @keyframes scroll {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .logos-track:hover {
+            animation-play-state: paused;
+        }
+
+        .dark-mode .logo-item img {
+            filter: brightness(1) invert(1);
+        }
+
+        .light-mode .logo-item img {
+            filter: brightness(1) invert(1);
+        }
+
+
+        #mainTable {
+          border-spacing: 0 3px;
+          border-collapse: separate;
+        }
+
+        #mainTable tbody td {
+          padding: 10px 10px;
+          vertical-align: middle;
+          border: none;
+        }
+
+        #mainTable tbody tr:first-child {
+          margin-top: 0;
+        }
+
+        .container {
+          max-width: 1000px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+    </style>
     </style>
 </head>
 <body th:classappend="${#authorization.expression('isAuthenticated()')} ? 'authenticated' : 'guest'">
@@ -23,27 +107,44 @@
 <nav class="top-navigation">
     <div class="container">
         <div class="nav-content">
-            <div class="nav-logo">Logo</div>
+            <div class="nav-logo">
+                <svg fill="none" height="37" viewBox="0 0 173 37" width="173" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 5C21.6569 5 23 6.34315 23 8V24H19V9.5C19 8.67157 18.3284 8 17.5 8C16.6716 8 16 8.67157 16 9.5V24H13V15.5C13 14.6716 12.3284 14 11.5 14C10.6716 14 10 14.6716 10 15.5V24H7V20.5C7 19.6716 6.32843 19 5.5 19C4.67157 19 4 19.6716 4 20.5V24H0V8C0 6.34315 1.34315 5 3 5H20Z"
+                          fill="black"/>
+                    <path d="M40.017 8.498H42.386V24H40.017V17.215H33.048V24H30.679V8.498H33.048V15.168H40.017V8.498ZM50.5568 24.207C48.8394 24.207 47.4901 23.6473 46.5088 22.528C45.5274 21.4087 45.0368 19.9903 45.0368 18.273C45.0368 16.525 45.5428 15.076 46.5548 13.926C47.5668 12.7607 48.9008 12.178 50.5568 12.178C52.3354 12.178 53.7078 12.7453 54.6738 13.88C55.6398 14.9993 56.1228 16.433 56.1228 18.181C56.1228 19.929 55.6244 21.3703 54.6278 22.505C53.6464 23.6397 52.2894 24.207 50.5568 24.207ZM50.5338 14.087C49.5371 14.087 48.7628 14.4857 48.2108 15.283C47.6588 16.065 47.3828 17.0387 47.3828 18.204C47.3828 19.354 47.6664 20.3277 48.2338 21.125C48.8011 21.907 49.5754 22.298 50.5568 22.298C51.5994 22.298 52.3891 21.9147 52.9258 21.148C53.4778 20.3813 53.7538 19.4077 53.7538 18.227C53.7538 17.0157 53.4931 16.0267 52.9718 15.26C52.4504 14.478 51.6378 14.087 50.5338 14.087ZM60.9172 7.739V14.34C61.5765 12.8987 62.7802 12.178 64.5282 12.178C65.6628 12.178 66.5752 12.5307 67.2652 13.236C67.9552 13.9413 68.3002 14.9227 68.3002 16.18V24H66.0462V16.64C66.0462 15.8427 65.8392 15.2293 65.4252 14.8C65.0265 14.3553 64.4975 14.133 63.8382 14.133C63.0715 14.133 62.3892 14.4243 61.7912 15.007C61.2085 15.5897 60.9172 16.479 60.9172 17.675V24H58.6632V7.739H60.9172ZM78.5761 17.33V16.916C78.5455 16.042 78.3078 15.352 77.8631 14.846C77.4185 14.3247 76.7821 14.064 75.9541 14.064C75.1875 14.064 74.5281 14.3477 73.9761 14.915C73.4241 15.467 73.0791 16.272 72.9411 17.33H78.5761ZM80.0251 21.355V23.379C79.1665 23.8697 78.0318 24.115 76.6211 24.115C74.8118 24.115 73.3705 23.5707 72.2971 22.482C71.2238 21.3933 70.6871 19.9673 70.6871 18.204C70.6871 16.3333 71.1778 14.869 72.1591 13.811C73.1405 12.7377 74.3901 12.201 75.9081 12.201C77.3955 12.201 78.5761 12.6687 79.4501 13.604C80.3241 14.524 80.7611 15.858 80.7611 17.606C80.7611 18.0813 80.7151 18.5797 80.6231 19.101H72.9641C73.1175 20.113 73.5468 20.8873 74.2521 21.424C74.9575 21.9607 75.8468 22.229 76.9201 22.229C78.1621 22.229 79.1971 21.9377 80.0251 21.355ZM93.6961 8.498V10.315L85.8531 22.045H94.0181V24H83.0701V22.137L90.8901 10.453H83.1851V8.498H93.6961ZM96.9388 24V12.339H99.2158V24H96.9388ZM97.0538 9.786C96.7931 9.51 96.6628 9.17267 96.6628 8.774C96.6628 8.37533 96.7931 8.038 97.0538 7.762C97.3298 7.486 97.6671 7.348 98.0658 7.348C98.4644 7.348 98.8018 7.486 99.0778 7.762C99.3538 8.038 99.4918 8.37533 99.4918 8.774C99.4918 9.15733 99.3538 9.487 99.0778 9.763C98.8018 10.039 98.4644 10.177 98.0658 10.177C97.6671 10.177 97.3298 10.0467 97.0538 9.786ZM104.738 12.339V14.34C105.428 12.8987 106.64 12.178 108.372 12.178C109.522 12.178 110.435 12.5307 111.109 13.236C111.784 13.9413 112.121 14.8997 112.121 16.111V24H109.867V16.64C109.867 15.8273 109.66 15.2063 109.246 14.777C108.848 14.3477 108.311 14.133 107.636 14.133C106.839 14.133 106.157 14.4473 105.589 15.076C105.022 15.6893 104.738 16.5557 104.738 17.675V24H102.484V12.339H104.738ZM121.799 12.73V14.777C121.048 14.3323 120.082 14.11 118.901 14.11C118.365 14.11 117.935 14.2327 117.613 14.478C117.307 14.7233 117.153 15.0453 117.153 15.444C117.153 15.5513 117.161 15.6587 117.176 15.766C117.207 15.858 117.253 15.9577 117.314 16.065C117.376 16.157 117.429 16.2413 117.475 16.318C117.537 16.3793 117.629 16.4483 117.751 16.525C117.874 16.6017 117.966 16.6707 118.027 16.732C118.104 16.778 118.219 16.8393 118.372 16.916C118.541 16.9927 118.664 17.054 118.74 17.1C118.817 17.1307 118.947 17.192 119.131 17.284C119.331 17.3607 119.469 17.4143 119.545 17.445C120.45 17.8437 121.155 18.296 121.661 18.802C122.183 19.2927 122.443 19.952 122.443 20.78C122.443 21.8227 122.075 22.643 121.339 23.241C120.603 23.8237 119.607 24.115 118.349 24.115C116.969 24.115 115.819 23.885 114.899 23.425V21.286C115.973 21.9453 117.084 22.275 118.234 22.275C118.832 22.275 119.292 22.1523 119.614 21.907C119.952 21.6617 120.12 21.3397 120.12 20.941C120.12 20.6037 119.99 20.3047 119.729 20.044C119.469 19.768 119.2 19.5687 118.924 19.446C118.664 19.308 118.211 19.101 117.567 18.825C115.743 18.0737 114.83 16.9697 114.83 15.513C114.83 14.4857 115.214 13.6807 115.98 13.098C116.747 12.5153 117.705 12.224 118.855 12.224C120.113 12.224 121.094 12.3927 121.799 12.73ZM132.033 17.33V16.916C132.003 16.042 131.765 15.352 131.32 14.846C130.876 14.3247 130.239 14.064 129.411 14.064C128.645 14.064 127.985 14.3477 127.433 14.915C126.881 15.467 126.536 16.272 126.398 17.33H132.033ZM133.482 21.355V23.379C132.624 23.8697 131.489 24.115 130.078 24.115C128.269 24.115 126.828 23.5707 125.754 22.482C124.681 21.3933 124.144 19.9673 124.144 18.204C124.144 16.3333 124.635 14.869 125.616 13.811C126.598 12.7377 127.847 12.201 129.365 12.201C130.853 12.201 132.033 12.6687 132.907 13.604C133.781 14.524 134.218 15.858 134.218 17.606C134.218 18.0813 134.172 18.5797 134.08 19.101H126.421C126.575 20.113 127.004 20.8873 127.709 21.424C128.415 21.9607 129.304 22.229 130.377 22.229C131.619 22.229 132.654 21.9377 133.482 21.355ZM139.126 12.339V14.34C139.816 12.8987 141.027 12.178 142.76 12.178C143.91 12.178 144.822 12.5307 145.497 13.236C146.172 13.9413 146.509 14.8997 146.509 16.111V24H144.255V16.64C144.255 15.8273 144.048 15.2063 143.634 14.777C143.235 14.3477 142.699 14.133 142.024 14.133C141.227 14.133 140.544 14.4473 139.977 15.076C139.41 15.6893 139.126 16.5557 139.126 17.675V24H136.872V12.339H139.126ZM149.057 23.724C148.766 23.4173 148.62 23.0493 148.62 22.62C148.62 22.1907 148.766 21.8303 149.057 21.539C149.364 21.2323 149.739 21.079 150.184 21.079C150.613 21.079 150.974 21.2323 151.265 21.539C151.572 21.8303 151.725 22.1907 151.725 22.62C151.725 23.0493 151.572 23.4173 151.265 23.724C150.974 24.0307 150.613 24.184 150.184 24.184C149.739 24.184 149.364 24.0307 149.057 23.724ZM160.128 18.802H158.38C157.522 18.802 156.87 18.9707 156.425 19.308C155.996 19.6453 155.781 20.0747 155.781 20.596C155.781 21.1327 155.95 21.5543 156.287 21.861C156.625 22.1677 157.115 22.321 157.759 22.321C158.495 22.321 159.07 22.1217 159.484 21.723C159.914 21.309 160.128 20.7723 160.128 20.113V18.802ZM154.263 15.122V12.937C155.168 12.4157 156.364 12.155 157.851 12.155C160.903 12.155 162.428 13.6347 162.428 16.594V24H160.197V22.62C159.599 23.6013 158.549 24.092 157.046 24.092C155.942 24.092 155.053 23.7777 154.378 23.149C153.719 22.505 153.389 21.6923 153.389 20.711C153.389 19.5917 153.811 18.7253 154.654 18.112C155.498 17.4833 156.678 17.169 158.196 17.169H160.128V16.502C160.128 15.7047 159.937 15.1067 159.553 14.708C159.17 14.294 158.534 14.087 157.644 14.087C156.402 14.087 155.275 14.432 154.263 15.122ZM168.386 14.087V20.504C168.386 21.6233 168.923 22.183 169.996 22.183C170.625 22.183 171.154 22.0143 171.583 21.677V23.701C171.077 23.977 170.456 24.115 169.72 24.115C167.313 24.115 166.109 22.896 166.109 20.458V14.087H164.292V12.339H166.109V9.487H168.386V12.339H171.445V14.087H168.386Z"
+                          fill="#030303"/>
+                </svg>
+
+                <svg fill="none" height="37" viewBox="0 0 173 37" width="173" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 5C21.6569 5 23 6.34315 23 8V24H19V9.5C19 8.67157 18.3284 8 17.5 8C16.6716 8 16 8.67157 16 9.5V24H13V15.5C13 14.6716 12.3284 14 11.5 14C10.6716 14 10 14.6716 10 15.5V24H7V20.5C7 19.6716 6.32843 19 5.5 19C4.67157 19 4 19.6716 4 20.5V24H0V8C0 6.34315 1.34315 5 3 5H20Z"
+                          fill="white"/>
+                    <path d="M40.017 8.498H42.386V24H40.017V17.215H33.048V24H30.679V8.498H33.048V15.168H40.017V8.498ZM50.5568 24.207C48.8394 24.207 47.4901 23.6473 46.5088 22.528C45.5274 21.4087 45.0368 19.9903 45.0368 18.273C45.0368 16.525 45.5428 15.076 46.5548 13.926C47.5668 12.7607 48.9008 12.178 50.5568 12.178C52.3354 12.178 53.7078 12.7453 54.6738 13.88C55.6398 14.9993 56.1228 16.433 56.1228 18.181C56.1228 19.929 55.6244 21.3703 54.6278 22.505C53.6464 23.6397 52.2894 24.207 50.5568 24.207ZM50.5338 14.087C49.5371 14.087 48.7628 14.4857 48.2108 15.283C47.6588 16.065 47.3828 17.0387 47.3828 18.204C47.3828 19.354 47.6664 20.3277 48.2338 21.125C48.8011 21.907 49.5754 22.298 50.5568 22.298C51.5994 22.298 52.3891 21.9147 52.9258 21.148C53.4778 20.3813 53.7538 19.4077 53.7538 18.227C53.7538 17.0157 53.4931 16.0267 52.9718 15.26C52.4504 14.478 51.6378 14.087 50.5338 14.087ZM60.9172 7.739V14.34C61.5765 12.8987 62.7802 12.178 64.5282 12.178C65.6628 12.178 66.5752 12.5307 67.2652 13.236C67.9552 13.9413 68.3002 14.9227 68.3002 16.18V24H66.0462V16.64C66.0462 15.8427 65.8392 15.2293 65.4252 14.8C65.0265 14.3553 64.4975 14.133 63.8382 14.133C63.0715 14.133 62.3892 14.4243 61.7912 15.007C61.2085 15.5897 60.9172 16.479 60.9172 17.675V24H58.6632V7.739H60.9172ZM78.5761 17.33V16.916C78.5455 16.042 78.3078 15.352 77.8631 14.846C77.4185 14.3247 76.7821 14.064 75.9541 14.064C75.1875 14.064 74.5281 14.3477 73.9761 14.915C73.4241 15.467 73.0791 16.272 72.9411 17.33H78.5761ZM80.0251 21.355V23.379C79.1665 23.8697 78.0318 24.115 76.6211 24.115C74.8118 24.115 73.3705 23.5707 72.2971 22.482C71.2238 21.3933 70.6871 19.9673 70.6871 18.204C70.6871 16.3333 71.1778 14.869 72.1591 13.811C73.1405 12.7377 74.3901 12.201 75.9081 12.201C77.3955 12.201 78.5761 12.6687 79.4501 13.604C80.3241 14.524 80.7611 15.858 80.7611 17.606C80.7611 18.0813 80.7151 18.5797 80.6231 19.101H72.9641C73.1175 20.113 73.5468 20.8873 74.2521 21.424C74.9575 21.9607 75.8468 22.229 76.9201 22.229C78.1621 22.229 79.1971 21.9377 80.0251 21.355ZM93.6961 8.498V10.315L85.8531 22.045H94.0181V24H83.0701V22.137L90.8901 10.453H83.1851V8.498H93.6961ZM96.9388 24V12.339H99.2158V24H96.9388ZM97.0538 9.786C96.7931 9.51 96.6628 9.17267 96.6628 8.774C96.6628 8.37533 96.7931 8.038 97.0538 7.762C97.3298 7.486 97.6671 7.348 98.0658 7.348C98.4644 7.348 98.8018 7.486 99.0778 7.762C99.3538 8.038 99.4918 8.37533 99.4918 8.774C99.4918 9.15733 99.3538 9.487 99.0778 9.763C98.8018 10.039 98.4644 10.177 98.0658 10.177C97.6671 10.177 97.3298 10.0467 97.0538 9.786ZM104.738 12.339V14.34C105.428 12.8987 106.64 12.178 108.372 12.178C109.522 12.178 110.435 12.5307 111.109 13.236C111.784 13.9413 112.121 14.8997 112.121 16.111V24H109.867V16.64C109.867 15.8273 109.66 15.2063 109.246 14.777C108.848 14.3477 108.311 14.133 107.636 14.133C106.839 14.133 106.157 14.4473 105.589 15.076C105.022 15.6893 104.738 16.5557 104.738 17.675V24H102.484V12.339H104.738ZM121.799 12.73V14.777C121.048 14.3323 120.082 14.11 118.901 14.11C118.365 14.11 117.935 14.2327 117.613 14.478C117.307 14.7233 117.153 15.0453 117.153 15.444C117.153 15.5513 117.161 15.6587 117.176 15.766C117.207 15.858 117.253 15.9577 117.314 16.065C117.376 16.157 117.429 16.2413 117.475 16.318C117.537 16.3793 117.629 16.4483 117.751 16.525C117.874 16.6017 117.966 16.6707 118.027 16.732C118.104 16.778 118.219 16.8393 118.372 16.916C118.541 16.9927 118.664 17.054 118.74 17.1C118.817 17.1307 118.947 17.192 119.131 17.284C119.331 17.3607 119.469 17.4143 119.545 17.445C120.45 17.8437 121.155 18.296 121.661 18.802C122.183 19.2927 122.443 19.952 122.443 20.78C122.443 21.8227 122.075 22.643 121.339 23.241C120.603 23.8237 119.607 24.115 118.349 24.115C116.969 24.115 115.819 23.885 114.899 23.425V21.286C115.973 21.9453 117.084 22.275 118.234 22.275C118.832 22.275 119.292 22.1523 119.614 21.907C119.952 21.6617 120.12 21.3397 120.12 20.941C120.12 20.6037 119.99 20.3047 119.729 20.044C119.469 19.768 119.2 19.5687 118.924 19.446C118.664 19.308 118.211 19.101 117.567 18.825C115.743 18.0737 114.83 16.9697 114.83 15.513C114.83 14.4857 115.214 13.6807 115.98 13.098C116.747 12.5153 117.705 12.224 118.855 12.224C120.113 12.224 121.094 12.3927 121.799 12.73ZM132.033 17.33V16.916C132.003 16.042 131.765 15.352 131.32 14.846C130.876 14.3247 130.239 14.064 129.411 14.064C128.645 14.064 127.985 14.3477 127.433 14.915C126.881 15.467 126.536 16.272 126.398 17.33H132.033ZM133.482 21.355V23.379C132.624 23.8697 131.489 24.115 130.078 24.115C128.269 24.115 126.828 23.5707 125.754 22.482C124.681 21.3933 124.144 19.9673 124.144 18.204C124.144 16.3333 124.635 14.869 125.616 13.811C126.598 12.7377 127.847 12.201 129.365 12.201C130.853 12.201 132.033 12.6687 132.907 13.604C133.781 14.524 134.218 15.858 134.218 17.606C134.218 18.0813 134.172 18.5797 134.08 19.101H126.421C126.575 20.113 127.004 20.8873 127.709 21.424C128.415 21.9607 129.304 22.229 130.377 22.229C131.619 22.229 132.654 21.9377 133.482 21.355ZM139.126 12.339V14.34C139.816 12.8987 141.027 12.178 142.76 12.178C143.91 12.178 144.822 12.5307 145.497 13.236C146.172 13.9413 146.509 14.8997 146.509 16.111V24H144.255V16.64C144.255 15.8273 144.048 15.2063 143.634 14.777C143.235 14.3477 142.699 14.133 142.024 14.133C141.227 14.133 140.544 14.4473 139.977 15.076C139.41 15.6893 139.126 16.5557 139.126 17.675V24H136.872V12.339H139.126ZM149.057 23.724C148.766 23.4173 148.62 23.0493 148.62 22.62C148.62 22.1907 148.766 21.8303 149.057 21.539C149.364 21.2323 149.739 21.079 150.184 21.079C150.613 21.079 150.974 21.2323 151.265 21.539C151.572 21.8303 151.725 22.1907 151.725 22.62C151.725 23.0493 151.572 23.4173 151.265 23.724C150.974 24.0307 150.613 24.184 150.184 24.184C149.739 24.184 149.364 24.0307 149.057 23.724ZM160.128 18.802H158.38C157.522 18.802 156.87 18.9707 156.425 19.308C155.996 19.6453 155.781 20.0747 155.781 20.596C155.781 21.1327 155.95 21.5543 156.287 21.861C156.625 22.1677 157.115 22.321 157.759 22.321C158.495 22.321 159.07 22.1217 159.484 21.723C159.914 21.309 160.128 20.7723 160.128 20.113V18.802ZM154.263 15.122V12.937C155.168 12.4157 156.364 12.155 157.851 12.155C160.903 12.155 162.428 13.6347 162.428 16.594V24H160.197V22.62C159.599 23.6013 158.549 24.092 157.046 24.092C155.942 24.092 155.053 23.7777 154.378 23.149C153.719 22.505 153.389 21.6923 153.389 20.711C153.389 19.5917 153.811 18.7253 154.654 18.112C155.498 17.4833 156.678 17.169 158.196 17.169H160.128V16.502C160.128 15.7047 159.937 15.1067 159.553 14.708C159.17 14.294 158.534 14.087 157.644 14.087C156.402 14.087 155.275 14.432 154.263 15.122ZM168.386 14.087V20.504C168.386 21.6233 168.923 22.183 169.996 22.183C170.625 22.183 171.154 22.0143 171.583 21.677V23.701C171.077 23.977 170.456 24.115 169.72 24.115C167.313 24.115 166.109 22.896 166.109 20.458V14.087H164.292V12.339H166.109V9.487H168.386V12.339H171.445V14.087H168.386Z"
+                          fill="white"/>
+                </svg>
+
+            </div>
             <div class="nav-links">
                 <a class="nav-link" href="#">Compare</a>
                 <a class="nav-link" href="#">FAQs</a>
-                <div id="darkModeToggleContainer" class="theme-segmented-switch">
+                <div class="theme-segmented-switch" id="darkModeToggleContainer">
 
-                    <button id="lightModeBtn"
+                    <button aria-label="Activate light mode"
                             class="switch-segment active-segment"
-                            aria-label="Activate light mode"
+                            id="lightModeBtn"
                             onclick="window.darkModeControls.disable()">
-                        <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="100" height="100" viewBox="0 0 30 30">
+                        <svg height="100" viewBox="0 0 30 30" width="100" x="0px" xmlns="http://www.w3.org/2000/svg"
+                             y="0px">
                             <path d="M 14.984375 0.98632812 A 1.0001 1.0001 0 0 0 14 2 L 14 5 A 1.0001 1.0001 0 1 0 16 5 L 16 2 A 1.0001 1.0001 0 0 0 14.984375 0.98632812 z M 5.796875 4.7988281 A 1.0001 1.0001 0 0 0 5.1015625 6.515625 L 7.2226562 8.6367188 A 1.0001 1.0001 0 1 0 8.6367188 7.2226562 L 6.515625 5.1015625 A 1.0001 1.0001 0 0 0 5.796875 4.7988281 z M 24.171875 4.7988281 A 1.0001 1.0001 0 0 0 23.484375 5.1015625 L 21.363281 7.2226562 A 1.0001 1.0001 0 1 0 22.777344 8.6367188 L 24.898438 6.515625 A 1.0001 1.0001 0 0 0 24.171875 4.7988281 z M 15 8 A 7 7 0 0 0 8 15 A 7 7 0 0 0 15 22 A 7 7 0 0 0 22 15 A 7 7 0 0 0 15 8 z M 2 14 A 1.0001 1.0001 0 1 0 2 16 L 5 16 A 1.0001 1.0001 0 1 0 5 14 L 2 14 z M 25 14 A 1.0001 1.0001 0 1 0 25 16 L 28 16 A 1.0001 1.0001 0 1 0 28 14 L 25 14 z M 7.9101562 21.060547 A 1.0001 1.0001 0 0 0 7.2226562 21.363281 L 5.1015625 23.484375 A 1.0001 1.0001 0 1 0 6.515625 24.898438 L 8.6367188 22.777344 A 1.0001 1.0001 0 0 0 7.9101562 21.060547 z M 22.060547 21.060547 A 1.0001 1.0001 0 0 0 21.363281 22.777344 L 23.484375 24.898438 A 1.0001 1.0001 0 1 0 24.898438 23.484375 L 22.777344 21.363281 A 1.0001 1.0001 0 0 0 22.060547 21.060547 z M 14.984375 23.986328 A 1.0001 1.0001 0 0 0 14 25 L 14 28 A 1.0001 1.0001 0 1 0 16 28 L 16 25 A 1.0001 1.0001 0 0 0 14.984375 23.986328 z"></path>
                         </svg>
                     </button>
 
-                    <button id="darkModeBtn"
+                    <button aria-label="Activate dark mode"
                             class="switch-segment"
-                            aria-label="Activate dark mode"
+                            id="darkModeBtn"
                             onclick="window.darkModeControls.enable()">
-                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M42 25.58C41.6854 28.9844 40.4078 32.2288 38.3165 34.9336C36.2253 37.6383 33.407 39.6916 30.1915 40.8531C26.9759 42.0146 23.496 42.2362 20.159 41.4922C16.8221 40.7481 13.766 39.0691 11.3485 36.6516C8.93096 34.234 7.25193 31.178 6.50786 27.841C5.7638 24.504 5.98548 21.0242 7.14697 17.8086C8.30845 14.593 10.3617 11.7747 13.0665 9.68351C15.7712 7.59228 19.0156 6.31461 22.42 6C20.4269 8.69653 19.4677 12.0189 19.7171 15.3628C19.9665 18.7068 21.4078 21.8501 23.7789 24.2212C26.1499 26.5923 29.2933 28.0336 32.6372 28.2829C35.9811 28.5323 39.3035 27.5732 42 25.58Z" stroke="#1E1E1E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                        <svg fill="none" height="48" viewBox="0 0 48 48" width="48" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M42 25.58C41.6854 28.9844 40.4078 32.2288 38.3165 34.9336C36.2253 37.6383 33.407 39.6916 30.1915 40.8531C26.9759 42.0146 23.496 42.2362 20.159 41.4922C16.8221 40.7481 13.766 39.0691 11.3485 36.6516C8.93096 34.234 7.25193 31.178 6.50786 27.841C5.7638 24.504 5.98548 21.0242 7.14697 17.8086C8.30845 14.593 10.3617 11.7747 13.0665 9.68351C15.7712 7.59228 19.0156 6.31461 22.42 6C20.4269 8.69653 19.4677 12.0189 19.7171 15.3628C19.9665 18.7068 21.4078 21.8501 23.7789 24.2212C26.1499 26.5923 29.2933 28.0336 32.6372 28.2829C35.9811 28.5323 39.3035 27.5732 42 25.58Z"
+                                  stroke="#1E1E1E" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
                         </svg>
                     </button>
                 </div>
@@ -53,20 +154,114 @@
 </nav>
 
 <!-- Hero Section -->
-<div class="hero-section">
+<div class="hero-section" style="padding-top: 40px; padding-bottom: 20px;">
     <div class="container">
         <div class="row align-items-center">
-            <div class="col-lg-7 col-md-6">
+            <div class="col-lg-7 col-md-6" style="padding-left: 40px;">
                 <div class="hero-content">
                     <h1>Top-Zinsen sichern:<br>Jetzt mehr aus Ihrem Geld machen</h1>
+                </div>
+                <div class="hero-content" style="max-width: 400px;">
                     <p>Die aktuell höchsten Zinsangebote für Ihr Erspartes – transparent und objektiv.</p>
                 </div>
             </div>
             <div class="col-lg-5 col-md-6 d-flex justify-content-center">
-                <img alt="Illustration showing financial growth and percentages"
-                     class="hero-illustration-image"
-                     src="https://i.ibb.co/6cYSQPBW/hero-illustration.png"
-                     style="max-width: 90%; height: auto;">
+                <img alt="Illustration showing financial growth and percentages" class="hero-illustration-image"
+                     src="https://i.ibb.co/6cYSQPBW/hero-illustration.png" style="max-width: 70%; height: auto;
+                     padding-right: 20px; padding-bottom: 10px;">
+            </div>
+        </div>
+    </div>
+    <div class="logos-section" style="overflow-x: hidden;">
+        <div class="logos-track">
+            <!-- First set of logos -->
+            <div class="logo-item">
+                <img alt="Armeec" src="/images/Armeec.png">
+            </div>
+            <div class="logo-item">
+                <img alt="Bulins" src="/images/Bulins.png">
+            </div>
+            <div class="logo-item">
+                <img alt="Bulstrad" src="/images/Bulstrad.png">
+            </div>
+            <div class="logo-item">
+                <img alt="DZI" src="/images/DZI.png">
+            </div>
+            <div class="logo-item">
+                <img alt="Euroins" src="/images/Euroins.png">
+            </div>
+            <div class="logo-item">
+                <img alt="Generali" src="/images/Generali.png">
+            </div>
+            <div class="logo-item">
+                <img alt="Uniqa" src="/images/Uniqa.png">
+            </div>
+
+            <!-- Duplicate set for seamless loop -->
+            <div class="logo-item">
+                <img alt="Armeec" src="/images/Armeec.png">
+            </div>
+            <div class="logo-item">
+                <img alt="Bulins" src="/images/Bulins.png">
+            </div>
+            <div class="logo-item">
+                <img alt="Bulstrad" src="/images/Bulstrad.png">
+            </div>
+            <div class="logo-item">
+                <img alt="DZI" src="/images/DZI.png">
+            </div>
+            <div class="logo-item">
+                <img alt="Euroins" src="/images/Euroins.png">
+            </div>
+            <div class="logo-item">
+                <img alt="Generali" src="/images/Generali.png">
+            </div>
+            <div class="logo-item">
+                <img alt="Uniqa" src="/images/Uniqa.png">
+            </div>
+
+            <!-- Duplicate set for seamless loop -->
+            <div class="logo-item">
+                <img alt="Armeec" src="/images/Armeec.png">
+            </div>
+            <div class="logo-item">
+                <img alt="Bulins" src="/images/Bulins.png">
+            </div>
+            <div class="logo-item">
+                <img alt="Bulstrad" src="/images/Bulstrad.png">
+            </div>
+            <div class="logo-item">
+                <img alt="DZI" src="/images/DZI.png">
+            </div>
+            <div class="logo-item">
+                <img alt="Euroins" src="/images/Euroins.png">
+            </div>
+            <div class="logo-item">
+                <img alt="Generali" src="/images/Generali.png">
+            </div>
+            <div class="logo-item">
+                <img alt="Uniqa" src="/images/Uniqa.png">
+            </div>
+            <div class="logo-item">
+                <img alt="Armeec" src="/images/Armeec.png">
+            </div>
+            <div class="logo-item">
+                <img alt="Bulins" src="/images/Bulins.png">
+            </div>
+            <div class="logo-item">
+                <img alt="Bulstrad" src="/images/Bulstrad.png">
+            </div>
+            <div class="logo-item">
+                <img alt="DZI" src="/images/DZI.png">
+            </div>
+            <div class="logo-item">
+                <img alt="Euroins" src="/images/Euroins.png">
+            </div>
+            <div class="logo-item">
+                <img alt="Generali" src="/images/Generali.png">
+            </div>
+            <div class="logo-item">
+                <img alt="Uniqa" src="/images/Uniqa.png">
             </div>
         </div>
     </div>
@@ -74,14 +269,14 @@
 <div class="vergleichen-section">
     <div class="card-body py-2">
         <small>
-            <button class="nav-logo" id="quickCompareBtn" onclick="quickStartComparison()">
+            <button class="vergleichen-header" id="quickCompareBtn" onclick="quickStartComparison()">
                 Vergleichen
             </button>
         </small>
-        <span th:text="${lastUpdateMessage}">Last updated 20 hours ago</span>
+        <span style="padding-top: 20px;" th:text="${lastUpdateMessage}">Last updated 20 hours ago</span>
     </div>
 </div>
-<div class="vergleichen-section">
+<div class="vergleichen-section" style="border-bottom: 1px solid rgba(54, 64, 80, 1)">
     <div class="card-body py-2">
         <div class="comparison-section" id="comparisonSection" style="display: none;">
             <div class="comparison-header">
@@ -187,18 +382,251 @@
             Load More Rates
         </button>
 
-        <div class="end-of-data-indicator mt-3" id="endOfDataIndicator" style="display: none;">
-            <div class="text-muted">
-                <small>You've reached the end of the results</small>
-            </div>
-        </div>
-
         <div class="results-info-footer mt-2" id="resultsInfoFooter">
         </div>
     </div>
-
-    <div class="comparison-status" id="comparisonStatus"></div>
 </div>
+<div class="mission-section">
+    <div class="faq-container">
+        <h1 class="faq-title" style="padding-top: 60px; padding-bottom: 30px;">FAQs</h1>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="faq-icon">+</div>
+                <div class="faq-question-text">Ist diese Vergleichsplattform ein Anlageberater?</div>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-text">
+                    <b>Nein</b>. Wir sind eine unabhängige Vergleichsplattform. Wir sammeln Daten zu öffentlich
+                    verfügbaren
+                    Investmentangeboten auf dem österreichischen Markt und präsentieren sie Ihnen. Wir bieten
+                    <b>keine</b>
+                    persönliche Finanzberatung, Anlageempfehlungen oder Steuerberatung an. Sie sind für
+                    Ihre Anlageentscheidungen selbst verantwortlich und sollten einen zertifizierten Finanz-
+                    oder Steuerberater konsultieren.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="faq-icon">+</div>
+                <div class="faq-question-text">Wie stellen Sie sicher, dass die Angebote von seriösen Anbietern
+                    stammen?
+                </div>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-text">
+                    Für jeden auf unserer Plattform gelisteten Anbieter führen wir die spezifische Entschädigungs- oder
+                    Garantiesicherung detailliert auf, sodass Sie das Schutzniveau eingehend prüfen können.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="faq-icon">+</div>
+                <div class="faq-question-text">Wie kann ich das Risiko einer Anlage einschätzen?</div>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-text">
+                    <p>Sie sollten auf Folgendes achten:</p>
+                    <ul>
+                        <li>
+                            <b>Die Art der Anlage:</b> Verschiedene Produkte (Anleihen, P2P, Immobilien-Anleihen) weisen
+                            unterschiedliche Risikoprofile auf.
+                        </li>
+                        <li>
+                            <b>Die Sicherheiten/Deckung:</b> Ist der Kredit oder die Anlage durch Vermögenswerte (z. B.
+                            Immobilien) abgesichert? Wenn ja, wie leicht können diese Sicherheiten verwertet werden?
+                        </li>
+                        <li>
+                            <b>Diversifikation:</b> Setzen Sie niemals Ihr gesamtes Kapital auf eine einzige
+                            Hochrisikoanlage. Die Streuung Ihrer Anlage auf mehrere Produkte, Sektoren und Emittenten
+                            hilft, das Gesamtrisiko zu mindern.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="faq-icon">+</div>
+                <div class="faq-question-text">Wie werden Zinseinnahmen in Österreich steuerlich behandelt?</div>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-text">
+                    Für in Österreich ansässige Steuerpflichtige unterliegen Zinseinkünfte aus den meisten Wertpapieren
+                    und Einlagen, die bei einer österreichischen Bank gehalten werden, in der Regel der <b>Kapitalertragsteuer
+                    (KESt)</b> in Höhe von <b>27,5%</b>. Diese wird üblicherweise von der Bank einbehalten, sodass Sie
+                    sie nicht in Ihrer
+                    jährlichen Steuererklärung angeben müssen.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="faq-icon">+</div>
+                <div class="faq-question-text">Was passiert, wenn die Anlage über eine ausländische Plattform oder einen
+                    ausländischen Emittenten erfolgt?
+                </div>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-text">
+                    Wenn Sie über eine ausländische Plattform oder in ein ausländisches Wertpapier investieren, wird die
+                    KESt
+                    möglicherweise <b>nicht</b> automatisch abgezogen. In diesem Fall sind Sie selbst dafür
+                    verantwortlich, die
+                    Einkünfte in Ihrer österreichischen Steuererklärung anzugeben und die 27,5% KESt zu entrichten.
+
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="faq-icon">+</div>
+                <div class="faq-question-text">Ich wohne nicht in Österreich. Wie werde ich besteuert?</div>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-text">
+                    Als <b>nicht ansässige</b> natürliche Person unterliegen Sie in der Regel einer beschränkten
+                    Steuerpflicht
+                    (Quellensteuer) auf österreichische Zinseinkünfte, typischerweise in Höhe von <b>27,5%</b>.
+                    Österreich hat
+                    jedoch mit vielen Ländern <b>Doppelbesteuerungsabkommen (DBA) </b> abgeschlossen, die diese
+                    Quellensteuer mindern
+                    oder eliminieren können. Möglicherweise müssen Sie dem Zahlstellen Nachweise
+                    (z. B. eine Ansässigkeitsbescheinigung) vorlegen, um von einem DBA zu profitieren. Es ist
+                    unerlässlich,
+                    einen Steuerberater in Ihrem Wohnsitzland und in Österreich zu konsultieren.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="faq-icon">+</div>
+                <div class="faq-question-text">Was ist der Hauptunterschied bei der Liquidität zwischen Einlagen und
+                    Hochzinsanlagen?
+                </div>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-text">
+                    <ul>
+                        <li>
+                            <b>Einlagen (Spar-/Festgeld):</b> Die Liquidität ist in der Regel hoch oder vorhersehbar.
+                            Auf Sparkonten kann in der Regel täglich zugegriffen werden, oder Festgelder sind zu einem
+                            bestimmten Fälligkeitsdatum verfügbar. Eine vorzeitige Abhebung ist oft mit einem
+                            vorhersehbaren Zinsverlust verbunden.
+                        </li>
+                        <li>
+                            <b>Hochzinsanlagen (z. B. Anleihen, P2P):</b> Die Liquidität ist oft gering oder ungewiss.
+                            <ul>
+                                <li>
+                                    <b>Anleihen:</b> Um vorzeitig zu verkaufen, müssen Sie einen Käufer am Sekundärmarkt
+                                    finden, was zu einem Verlust führen kann, wenn die Marktzinsen gestiegen sind (der
+                                    Kurs der Anleihe sinkt).
+                                </li>
+                                <li>
+                                    <b>P2P/Crowdfunding:</b> Ein vorzeitiger Verkauf hängt oft von einem Sekundärmarkt
+                                    ab, der von der Plattform betrieben wird; das Handelsvolumen kann gering sein, was
+                                    einen schnellen Ausstieg schwierig oder unmöglich macht.
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="faq-icon">+</div>
+                <div class="faq-question-text">Warum haben Hochzinsanlagen typischerweise längere Bindungsfristen?</div>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-text">
+                    Hohe Renditen resultieren oft daraus, dass der Emittent Kapital für ein langfristiges Projekt (z. B.
+                    Immobilienentwicklung, langfristige Geschäftserweiterung) benötigt. Investoren werden durch einen
+                    höheren Zinssatz dazu angeregt, das Kapital für die gesamte Laufzeit (z. B. 3-5 Jahre) zu binden.
+                    Je länger die Laufzeit, desto geringer ist das Risiko für den Emittenten, frühzeitig refinanzieren
+                    zu müssen, was sich in einer höheren Rendite für den Investor niederschlägt.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mission-section">
+    <div class="faq-container">
+        <h1 class="faq-title" style="padding-top: 60px; padding-bottom: 30px;">Warum haben wir diese Vergleichsplattform ins Leben
+            gerufen?</h1>
+
+        <div class="faq-answer-text">
+            Diese Vergleichsplattform entstand aus der grundlegenden Herausforderung, vor der jeder Anleger in Österreich steht: <br>
+            <b>der Suche nach Rendite ohne Einbußen bei der Transparenz.</b><br><br>
+
+            Angesichts der vernachlässigbaren Erträge traditioneller Banksparprodukte wenden sich immer mehr Österreicher Hochzins-Investmentprodukten wie Unternehmensanleihen, P2P-Krediten und Immobilien-Anleihen zu. Diese Anlagen sind jedoch oft mit komplexen Dokumentationen, nicht standardisierten Risikoprofilen und anderen steuerlichen (KESt-)Auswirkungen verbunden als einfache Bankeinlagen.<br><br>
+
+            Wir haben diese unabhängige Plattform ins Leben gerufen, um diese Komplexität zu durchbrechen. Unsere Mission ist es, Informationen zu zentralisieren und zu standardisieren – von Zinssätzen und Mindestanlagebeträgen bis hin zu den entscheidenden Details der Seriosität des Emittenten und den anwendbaren Entschädigungssystemen. So erhalten Sie einen transparenten, direkten Vergleich.<br><br>
+
+            Wir ermöglichen es Ihnen, eine breite Palette von Angeboten einfach zu vergleichen und fundierte, sichere Entscheidungen zu treffen, die Ihrer persönlichen Risikobereitschaft entsprechen, ohne sich auf eine einzige Bank oder einen einzigen Broker verlassen zu müssen.
+        </div>
+    </div>
+</div>
+<footer class="footer">
+    <div class="footer-container">
+        <!-- Brand Section -->
+        <div class="footer-brand">
+            <div class="nav-logo">
+                <svg fill="none" height="37" viewBox="0 0 173 37" width="173" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 5C21.6569 5 23 6.34315 23 8V24H19V9.5C19 8.67157 18.3284 8 17.5 8C16.6716 8 16 8.67157 16 9.5V24H13V15.5C13 14.6716 12.3284 14 11.5 14C10.6716 14 10 14.6716 10 15.5V24H7V20.5C7 19.6716 6.32843 19 5.5 19C4.67157 19 4 19.6716 4 20.5V24H0V8C0 6.34315 1.34315 5 3 5H20Z"
+                          fill="black"/>
+                    <path d="M40.017 8.498H42.386V24H40.017V17.215H33.048V24H30.679V8.498H33.048V15.168H40.017V8.498ZM50.5568 24.207C48.8394 24.207 47.4901 23.6473 46.5088 22.528C45.5274 21.4087 45.0368 19.9903 45.0368 18.273C45.0368 16.525 45.5428 15.076 46.5548 13.926C47.5668 12.7607 48.9008 12.178 50.5568 12.178C52.3354 12.178 53.7078 12.7453 54.6738 13.88C55.6398 14.9993 56.1228 16.433 56.1228 18.181C56.1228 19.929 55.6244 21.3703 54.6278 22.505C53.6464 23.6397 52.2894 24.207 50.5568 24.207ZM50.5338 14.087C49.5371 14.087 48.7628 14.4857 48.2108 15.283C47.6588 16.065 47.3828 17.0387 47.3828 18.204C47.3828 19.354 47.6664 20.3277 48.2338 21.125C48.8011 21.907 49.5754 22.298 50.5568 22.298C51.5994 22.298 52.3891 21.9147 52.9258 21.148C53.4778 20.3813 53.7538 19.4077 53.7538 18.227C53.7538 17.0157 53.4931 16.0267 52.9718 15.26C52.4504 14.478 51.6378 14.087 50.5338 14.087ZM60.9172 7.739V14.34C61.5765 12.8987 62.7802 12.178 64.5282 12.178C65.6628 12.178 66.5752 12.5307 67.2652 13.236C67.9552 13.9413 68.3002 14.9227 68.3002 16.18V24H66.0462V16.64C66.0462 15.8427 65.8392 15.2293 65.4252 14.8C65.0265 14.3553 64.4975 14.133 63.8382 14.133C63.0715 14.133 62.3892 14.4243 61.7912 15.007C61.2085 15.5897 60.9172 16.479 60.9172 17.675V24H58.6632V7.739H60.9172ZM78.5761 17.33V16.916C78.5455 16.042 78.3078 15.352 77.8631 14.846C77.4185 14.3247 76.7821 14.064 75.9541 14.064C75.1875 14.064 74.5281 14.3477 73.9761 14.915C73.4241 15.467 73.0791 16.272 72.9411 17.33H78.5761ZM80.0251 21.355V23.379C79.1665 23.8697 78.0318 24.115 76.6211 24.115C74.8118 24.115 73.3705 23.5707 72.2971 22.482C71.2238 21.3933 70.6871 19.9673 70.6871 18.204C70.6871 16.3333 71.1778 14.869 72.1591 13.811C73.1405 12.7377 74.3901 12.201 75.9081 12.201C77.3955 12.201 78.5761 12.6687 79.4501 13.604C80.3241 14.524 80.7611 15.858 80.7611 17.606C80.7611 18.0813 80.7151 18.5797 80.6231 19.101H72.9641C73.1175 20.113 73.5468 20.8873 74.2521 21.424C74.9575 21.9607 75.8468 22.229 76.9201 22.229C78.1621 22.229 79.1971 21.9377 80.0251 21.355ZM93.6961 8.498V10.315L85.8531 22.045H94.0181V24H83.0701V22.137L90.8901 10.453H83.1851V8.498H93.6961ZM96.9388 24V12.339H99.2158V24H96.9388ZM97.0538 9.786C96.7931 9.51 96.6628 9.17267 96.6628 8.774C96.6628 8.37533 96.7931 8.038 97.0538 7.762C97.3298 7.486 97.6671 7.348 98.0658 7.348C98.4644 7.348 98.8018 7.486 99.0778 7.762C99.3538 8.038 99.4918 8.37533 99.4918 8.774C99.4918 9.15733 99.3538 9.487 99.0778 9.763C98.8018 10.039 98.4644 10.177 98.0658 10.177C97.6671 10.177 97.3298 10.0467 97.0538 9.786ZM104.738 12.339V14.34C105.428 12.8987 106.64 12.178 108.372 12.178C109.522 12.178 110.435 12.5307 111.109 13.236C111.784 13.9413 112.121 14.8997 112.121 16.111V24H109.867V16.64C109.867 15.8273 109.66 15.2063 109.246 14.777C108.848 14.3477 108.311 14.133 107.636 14.133C106.839 14.133 106.157 14.4473 105.589 15.076C105.022 15.6893 104.738 16.5557 104.738 17.675V24H102.484V12.339H104.738ZM121.799 12.73V14.777C121.048 14.3323 120.082 14.11 118.901 14.11C118.365 14.11 117.935 14.2327 117.613 14.478C117.307 14.7233 117.153 15.0453 117.153 15.444C117.153 15.5513 117.161 15.6587 117.176 15.766C117.207 15.858 117.253 15.9577 117.314 16.065C117.376 16.157 117.429 16.2413 117.475 16.318C117.537 16.3793 117.629 16.4483 117.751 16.525C117.874 16.6017 117.966 16.6707 118.027 16.732C118.104 16.778 118.219 16.8393 118.372 16.916C118.541 16.9927 118.664 17.054 118.74 17.1C118.817 17.1307 118.947 17.192 119.131 17.284C119.331 17.3607 119.469 17.4143 119.545 17.445C120.45 17.8437 121.155 18.296 121.661 18.802C122.183 19.2927 122.443 19.952 122.443 20.78C122.443 21.8227 122.075 22.643 121.339 23.241C120.603 23.8237 119.607 24.115 118.349 24.115C116.969 24.115 115.819 23.885 114.899 23.425V21.286C115.973 21.9453 117.084 22.275 118.234 22.275C118.832 22.275 119.292 22.1523 119.614 21.907C119.952 21.6617 120.12 21.3397 120.12 20.941C120.12 20.6037 119.99 20.3047 119.729 20.044C119.469 19.768 119.2 19.5687 118.924 19.446C118.664 19.308 118.211 19.101 117.567 18.825C115.743 18.0737 114.83 16.9697 114.83 15.513C114.83 14.4857 115.214 13.6807 115.98 13.098C116.747 12.5153 117.705 12.224 118.855 12.224C120.113 12.224 121.094 12.3927 121.799 12.73ZM132.033 17.33V16.916C132.003 16.042 131.765 15.352 131.32 14.846C130.876 14.3247 130.239 14.064 129.411 14.064C128.645 14.064 127.985 14.3477 127.433 14.915C126.881 15.467 126.536 16.272 126.398 17.33H132.033ZM133.482 21.355V23.379C132.624 23.8697 131.489 24.115 130.078 24.115C128.269 24.115 126.828 23.5707 125.754 22.482C124.681 21.3933 124.144 19.9673 124.144 18.204C124.144 16.3333 124.635 14.869 125.616 13.811C126.598 12.7377 127.847 12.201 129.365 12.201C130.853 12.201 132.033 12.6687 132.907 13.604C133.781 14.524 134.218 15.858 134.218 17.606C134.218 18.0813 134.172 18.5797 134.08 19.101H126.421C126.575 20.113 127.004 20.8873 127.709 21.424C128.415 21.9607 129.304 22.229 130.377 22.229C131.619 22.229 132.654 21.9377 133.482 21.355ZM139.126 12.339V14.34C139.816 12.8987 141.027 12.178 142.76 12.178C143.91 12.178 144.822 12.5307 145.497 13.236C146.172 13.9413 146.509 14.8997 146.509 16.111V24H144.255V16.64C144.255 15.8273 144.048 15.2063 143.634 14.777C143.235 14.3477 142.699 14.133 142.024 14.133C141.227 14.133 140.544 14.4473 139.977 15.076C139.41 15.6893 139.126 16.5557 139.126 17.675V24H136.872V12.339H139.126ZM149.057 23.724C148.766 23.4173 148.62 23.0493 148.62 22.62C148.62 22.1907 148.766 21.8303 149.057 21.539C149.364 21.2323 149.739 21.079 150.184 21.079C150.613 21.079 150.974 21.2323 151.265 21.539C151.572 21.8303 151.725 22.1907 151.725 22.62C151.725 23.0493 151.572 23.4173 151.265 23.724C150.974 24.0307 150.613 24.184 150.184 24.184C149.739 24.184 149.364 24.0307 149.057 23.724ZM160.128 18.802H158.38C157.522 18.802 156.87 18.9707 156.425 19.308C155.996 19.6453 155.781 20.0747 155.781 20.596C155.781 21.1327 155.95 21.5543 156.287 21.861C156.625 22.1677 157.115 22.321 157.759 22.321C158.495 22.321 159.07 22.1217 159.484 21.723C159.914 21.309 160.128 20.7723 160.128 20.113V18.802ZM154.263 15.122V12.937C155.168 12.4157 156.364 12.155 157.851 12.155C160.903 12.155 162.428 13.6347 162.428 16.594V24H160.197V22.62C159.599 23.6013 158.549 24.092 157.046 24.092C155.942 24.092 155.053 23.7777 154.378 23.149C153.719 22.505 153.389 21.6923 153.389 20.711C153.389 19.5917 153.811 18.7253 154.654 18.112C155.498 17.4833 156.678 17.169 158.196 17.169H160.128V16.502C160.128 15.7047 159.937 15.1067 159.553 14.708C159.17 14.294 158.534 14.087 157.644 14.087C156.402 14.087 155.275 14.432 154.263 15.122ZM168.386 14.087V20.504C168.386 21.6233 168.923 22.183 169.996 22.183C170.625 22.183 171.154 22.0143 171.583 21.677V23.701C171.077 23.977 170.456 24.115 169.72 24.115C167.313 24.115 166.109 22.896 166.109 20.458V14.087H164.292V12.339H166.109V9.487H168.386V12.339H171.445V14.087H168.386Z"
+                          fill="#030303"/>
+                </svg>
+
+                <svg fill="none" height="37" viewBox="0 0 173 37" width="173" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 5C21.6569 5 23 6.34315 23 8V24H19V9.5C19 8.67157 18.3284 8 17.5 8C16.6716 8 16 8.67157 16 9.5V24H13V15.5C13 14.6716 12.3284 14 11.5 14C10.6716 14 10 14.6716 10 15.5V24H7V20.5C7 19.6716 6.32843 19 5.5 19C4.67157 19 4 19.6716 4 20.5V24H0V8C0 6.34315 1.34315 5 3 5H20Z"
+                          fill="white"/>
+                    <path d="M40.017 8.498H42.386V24H40.017V17.215H33.048V24H30.679V8.498H33.048V15.168H40.017V8.498ZM50.5568 24.207C48.8394 24.207 47.4901 23.6473 46.5088 22.528C45.5274 21.4087 45.0368 19.9903 45.0368 18.273C45.0368 16.525 45.5428 15.076 46.5548 13.926C47.5668 12.7607 48.9008 12.178 50.5568 12.178C52.3354 12.178 53.7078 12.7453 54.6738 13.88C55.6398 14.9993 56.1228 16.433 56.1228 18.181C56.1228 19.929 55.6244 21.3703 54.6278 22.505C53.6464 23.6397 52.2894 24.207 50.5568 24.207ZM50.5338 14.087C49.5371 14.087 48.7628 14.4857 48.2108 15.283C47.6588 16.065 47.3828 17.0387 47.3828 18.204C47.3828 19.354 47.6664 20.3277 48.2338 21.125C48.8011 21.907 49.5754 22.298 50.5568 22.298C51.5994 22.298 52.3891 21.9147 52.9258 21.148C53.4778 20.3813 53.7538 19.4077 53.7538 18.227C53.7538 17.0157 53.4931 16.0267 52.9718 15.26C52.4504 14.478 51.6378 14.087 50.5338 14.087ZM60.9172 7.739V14.34C61.5765 12.8987 62.7802 12.178 64.5282 12.178C65.6628 12.178 66.5752 12.5307 67.2652 13.236C67.9552 13.9413 68.3002 14.9227 68.3002 16.18V24H66.0462V16.64C66.0462 15.8427 65.8392 15.2293 65.4252 14.8C65.0265 14.3553 64.4975 14.133 63.8382 14.133C63.0715 14.133 62.3892 14.4243 61.7912 15.007C61.2085 15.5897 60.9172 16.479 60.9172 17.675V24H58.6632V7.739H60.9172ZM78.5761 17.33V16.916C78.5455 16.042 78.3078 15.352 77.8631 14.846C77.4185 14.3247 76.7821 14.064 75.9541 14.064C75.1875 14.064 74.5281 14.3477 73.9761 14.915C73.4241 15.467 73.0791 16.272 72.9411 17.33H78.5761ZM80.0251 21.355V23.379C79.1665 23.8697 78.0318 24.115 76.6211 24.115C74.8118 24.115 73.3705 23.5707 72.2971 22.482C71.2238 21.3933 70.6871 19.9673 70.6871 18.204C70.6871 16.3333 71.1778 14.869 72.1591 13.811C73.1405 12.7377 74.3901 12.201 75.9081 12.201C77.3955 12.201 78.5761 12.6687 79.4501 13.604C80.3241 14.524 80.7611 15.858 80.7611 17.606C80.7611 18.0813 80.7151 18.5797 80.6231 19.101H72.9641C73.1175 20.113 73.5468 20.8873 74.2521 21.424C74.9575 21.9607 75.8468 22.229 76.9201 22.229C78.1621 22.229 79.1971 21.9377 80.0251 21.355ZM93.6961 8.498V10.315L85.8531 22.045H94.0181V24H83.0701V22.137L90.8901 10.453H83.1851V8.498H93.6961ZM96.9388 24V12.339H99.2158V24H96.9388ZM97.0538 9.786C96.7931 9.51 96.6628 9.17267 96.6628 8.774C96.6628 8.37533 96.7931 8.038 97.0538 7.762C97.3298 7.486 97.6671 7.348 98.0658 7.348C98.4644 7.348 98.8018 7.486 99.0778 7.762C99.3538 8.038 99.4918 8.37533 99.4918 8.774C99.4918 9.15733 99.3538 9.487 99.0778 9.763C98.8018 10.039 98.4644 10.177 98.0658 10.177C97.6671 10.177 97.3298 10.0467 97.0538 9.786ZM104.738 12.339V14.34C105.428 12.8987 106.64 12.178 108.372 12.178C109.522 12.178 110.435 12.5307 111.109 13.236C111.784 13.9413 112.121 14.8997 112.121 16.111V24H109.867V16.64C109.867 15.8273 109.66 15.2063 109.246 14.777C108.848 14.3477 108.311 14.133 107.636 14.133C106.839 14.133 106.157 14.4473 105.589 15.076C105.022 15.6893 104.738 16.5557 104.738 17.675V24H102.484V12.339H104.738ZM121.799 12.73V14.777C121.048 14.3323 120.082 14.11 118.901 14.11C118.365 14.11 117.935 14.2327 117.613 14.478C117.307 14.7233 117.153 15.0453 117.153 15.444C117.153 15.5513 117.161 15.6587 117.176 15.766C117.207 15.858 117.253 15.9577 117.314 16.065C117.376 16.157 117.429 16.2413 117.475 16.318C117.537 16.3793 117.629 16.4483 117.751 16.525C117.874 16.6017 117.966 16.6707 118.027 16.732C118.104 16.778 118.219 16.8393 118.372 16.916C118.541 16.9927 118.664 17.054 118.74 17.1C118.817 17.1307 118.947 17.192 119.131 17.284C119.331 17.3607 119.469 17.4143 119.545 17.445C120.45 17.8437 121.155 18.296 121.661 18.802C122.183 19.2927 122.443 19.952 122.443 20.78C122.443 21.8227 122.075 22.643 121.339 23.241C120.603 23.8237 119.607 24.115 118.349 24.115C116.969 24.115 115.819 23.885 114.899 23.425V21.286C115.973 21.9453 117.084 22.275 118.234 22.275C118.832 22.275 119.292 22.1523 119.614 21.907C119.952 21.6617 120.12 21.3397 120.12 20.941C120.12 20.6037 119.99 20.3047 119.729 20.044C119.469 19.768 119.2 19.5687 118.924 19.446C118.664 19.308 118.211 19.101 117.567 18.825C115.743 18.0737 114.83 16.9697 114.83 15.513C114.83 14.4857 115.214 13.6807 115.98 13.098C116.747 12.5153 117.705 12.224 118.855 12.224C120.113 12.224 121.094 12.3927 121.799 12.73ZM132.033 17.33V16.916C132.003 16.042 131.765 15.352 131.32 14.846C130.876 14.3247 130.239 14.064 129.411 14.064C128.645 14.064 127.985 14.3477 127.433 14.915C126.881 15.467 126.536 16.272 126.398 17.33H132.033ZM133.482 21.355V23.379C132.624 23.8697 131.489 24.115 130.078 24.115C128.269 24.115 126.828 23.5707 125.754 22.482C124.681 21.3933 124.144 19.9673 124.144 18.204C124.144 16.3333 124.635 14.869 125.616 13.811C126.598 12.7377 127.847 12.201 129.365 12.201C130.853 12.201 132.033 12.6687 132.907 13.604C133.781 14.524 134.218 15.858 134.218 17.606C134.218 18.0813 134.172 18.5797 134.08 19.101H126.421C126.575 20.113 127.004 20.8873 127.709 21.424C128.415 21.9607 129.304 22.229 130.377 22.229C131.619 22.229 132.654 21.9377 133.482 21.355ZM139.126 12.339V14.34C139.816 12.8987 141.027 12.178 142.76 12.178C143.91 12.178 144.822 12.5307 145.497 13.236C146.172 13.9413 146.509 14.8997 146.509 16.111V24H144.255V16.64C144.255 15.8273 144.048 15.2063 143.634 14.777C143.235 14.3477 142.699 14.133 142.024 14.133C141.227 14.133 140.544 14.4473 139.977 15.076C139.41 15.6893 139.126 16.5557 139.126 17.675V24H136.872V12.339H139.126ZM149.057 23.724C148.766 23.4173 148.62 23.0493 148.62 22.62C148.62 22.1907 148.766 21.8303 149.057 21.539C149.364 21.2323 149.739 21.079 150.184 21.079C150.613 21.079 150.974 21.2323 151.265 21.539C151.572 21.8303 151.725 22.1907 151.725 22.62C151.725 23.0493 151.572 23.4173 151.265 23.724C150.974 24.0307 150.613 24.184 150.184 24.184C149.739 24.184 149.364 24.0307 149.057 23.724ZM160.128 18.802H158.38C157.522 18.802 156.87 18.9707 156.425 19.308C155.996 19.6453 155.781 20.0747 155.781 20.596C155.781 21.1327 155.95 21.5543 156.287 21.861C156.625 22.1677 157.115 22.321 157.759 22.321C158.495 22.321 159.07 22.1217 159.484 21.723C159.914 21.309 160.128 20.7723 160.128 20.113V18.802ZM154.263 15.122V12.937C155.168 12.4157 156.364 12.155 157.851 12.155C160.903 12.155 162.428 13.6347 162.428 16.594V24H160.197V22.62C159.599 23.6013 158.549 24.092 157.046 24.092C155.942 24.092 155.053 23.7777 154.378 23.149C153.719 22.505 153.389 21.6923 153.389 20.711C153.389 19.5917 153.811 18.7253 154.654 18.112C155.498 17.4833 156.678 17.169 158.196 17.169H160.128V16.502C160.128 15.7047 159.937 15.1067 159.553 14.708C159.17 14.294 158.534 14.087 157.644 14.087C156.402 14.087 155.275 14.432 154.263 15.122ZM168.386 14.087V20.504C168.386 21.6233 168.923 22.183 169.996 22.183C170.625 22.183 171.154 22.0143 171.583 21.677V23.701C171.077 23.977 170.456 24.115 169.72 24.115C167.313 24.115 166.109 22.896 166.109 20.458V14.087H164.292V12.339H166.109V9.487H168.386V12.339H171.445V14.087H168.386Z"
+                          fill="white"/>
+                </svg>
+
+            </div>
+            <p class="footer-tagline">
+                Die aktuell höchsten Zinsangebote für Ihr Erspartes – transparent und objektiv.
+            </p>
+        </div>
+
+        <!-- Sitemap Column -->
+        <div class="footer-column">
+            <h4>Sitemap</h4>
+            <ul class="footer-links">
+                <li><a href="#compare">Compare</a></li>
+                <li><a href="#faqs">FAQs</a></li>
+                <li><a href="#about">About</a></li>
+            </ul>
+        </div>
+
+        <!-- Legal Column -->
+        <div class="footer-column">
+            <h4>Legal</h4>
+            <ul class="footer-links">
+                <li><a href="#terms">Terms and Conditions</a></li>
+                <li><a href="#privacy">Privacy Policy</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Copyright -->
+    <div class="footer-copyright">
+        © 2025 HoheZinsen.at | All rights reserved.
+    </div>
+</footer>
+<div class="comparison-status" id="comparisonStatus"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script th:inline="javascript">
@@ -239,6 +667,23 @@
     let availableFilters = [];
     let activeFilters = new Map();
     let filterExpanded = false;
+
+    // ============================================================================
+    // FAQ TOGGLE
+    // ============================================================================
+
+    function toggleFaq(element) {
+        const faqItem = element.closest('.faq-item');
+        const isActive = faqItem.classList.contains('active');
+
+        document.querySelectorAll('.faq-item').forEach(item => {
+            item.classList.remove('active');
+        });
+
+        if (!isActive) {
+            faqItem.classList.add('active');
+        }
+    }
 
     // ============================================================================
     // UTILITY FUNCTIONS (Loading, Comparisons, etc.)
@@ -1949,6 +2394,59 @@
         `;
     }
 
+</script>
+<script>
+    function updateLogoForTheme() {
+        const navLogo = document.querySelector('.nav-logo');
+        if (!navLogo) return;
+
+        const svgs = navLogo.querySelectorAll('svg');
+        if (svgs.length !== 2) return;
+
+        const darkSvg = svgs[1];
+        const lightSvg = svgs[0];
+
+        const isDarkMode = document.documentElement.classList.contains('dark-mode');
+
+        if (isDarkMode) {
+            darkSvg.style.display = 'block';
+            lightSvg.style.display = 'none';
+        } else {
+            darkSvg.style.display = 'none';
+            lightSvg.style.display = 'block';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', updateLogoForTheme);
+
+    window.addEventListener('storage', updateLogoForTheme);
+
+    const observer = new MutationObserver(updateLogoForTheme);
+    observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class']
+    });
+
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('#darkModeBtn') || e.target.closest('#lightModeBtn')) {
+            setTimeout(updateLogoForTheme, 50);
+        }
+    });
+
+    if (window.darkModeControls) {
+        const originalEnable = window.darkModeControls.enable;
+        const originalDisable = window.darkModeControls.disable;
+
+        window.darkModeControls.enable = function() {
+            originalEnable.call(this);
+            updateLogoForTheme();
+        };
+
+        window.darkModeControls.disable = function() {
+            originalDisable.call(this);
+            updateLogoForTheme();
+        };
+    }
 </script>
 <script defer src="/js/dark-mode.js"></script>
 </body>

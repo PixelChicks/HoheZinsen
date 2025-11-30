@@ -71,7 +71,7 @@
   align-items: center;
   margin-bottom: 5px;
   position: relative;
-  min-height: 100px;
+  min-height: 70px;
   border-radius: 4px;
   transition: all 0.2s ease;
   justify-content: space-around;
@@ -2253,6 +2253,15 @@ color: #00b894;
     color: #333;
 }
 
+.vergleichen-header {
+    font-weight: bold;
+    font-size: 14px;
+    padding: 8px 12px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    color: #333;
+}
+
 .nav-links {
     display: flex;
     gap: 30px;
@@ -2295,9 +2304,13 @@ color: #00b894;
    HERO SECTION STYLES
    ======================================== */
 
+.top-navigation{
+    background: #ffffff;
+}
+
 .hero-section {
     background: #ffffff;
-    padding: 50px 0;
+    padding: 50px 0 0 0;
     margin: 0;
     width: 100%;
 }
@@ -2307,19 +2320,16 @@ color: #00b894;
 }
 
 .hero-content h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    line-height: 1.2;
-    margin-bottom: 20px;
-    color: var(--design-dark-text);
+     font-weight: 600;
+     font-size: 33px;
+     line-height: 42px;
+     color: var(--design-dark-text);
 }
 
 .hero-content p {
-    font-size: 1.25rem;
-    color: var(--design-medium-text);
-    line-height: 1.5;
-    font-weight: 600;
-    margin-bottom: 0;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 22px;
 }
 
 .hero-illustration-image {
@@ -2373,6 +2383,7 @@ color: #00b894;
     align-items: center;
     width: auto;
     font-size: 0;
+    padding-top: 20px;
     float: none !important;
 }
 
@@ -2385,8 +2396,7 @@ color: #00b894;
 }
 
 .nav-logo {
-    border: 1px solid #c1c1c1 !important;
-    background: white !important;
+    border: transparent;
     color: #333 !important;
     padding: 8px 20px !important;
     border-radius: 4px !important;
@@ -2547,7 +2557,6 @@ color: #00b894;
 .theme-segmented-switch {
     /* Main container styling */
     display: flex;
-    border: 1px solid var(--switch-border);
     border-radius: 8px; /* Rounded box around the segments */
     overflow: hidden; /* Clips the segments neatly */
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);

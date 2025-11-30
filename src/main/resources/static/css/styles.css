@@ -784,11 +784,15 @@ body {
 }
 
 #mainTable tbody td {
-  padding: 20px 10px;
+  padding: 10px 10px;
   vertical-align: middle;
   border: none;
 }
-
+#mainTable tbody tr {
+  border-bottom: 2px solid white;
+  transition: all 0.3s ease;
+  background: white;
+}
 .data-cell {
   text-align: center;
 }
@@ -811,7 +815,7 @@ body {
 
 .data-cell:first-child .form-control {
   font-size: 1.5rem;
-  font-weight: 500;
+  font-weight: 700;
   color: #00b894;
   border: none;
   background: transparent;

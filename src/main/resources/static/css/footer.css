@@ -1,0 +1,138 @@
+.footer {
+    background: #fff;
+    padding: 40px 20px 30px;
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .footer {
+    background: #1e2a3a;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 60px;
+    padding-bottom: 30px;
+}
+
+/* Brand Section */
+.footer-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.footer-logo {
+    font-size: 18px;
+    font-weight: 700;
+    color: #000;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+body.dark-mode .footer-logo {
+    color: #fff;
+}
+
+.footer-logo::before {
+    content: "🏦";
+    font-size: 20px;
+}
+
+.footer-tagline {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #666;
+    max-width: 350px;
+}
+
+body.dark-mode .footer-tagline {
+    color: #b0b8c4;
+}
+
+/* Footer Columns */
+.footer-column h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #000;
+}
+
+body.dark-mode .footer-column h4 {
+    color: #fff;
+}
+
+.footer-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer-links a {
+    font-size: 14px;
+    color: #666;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-links a:hover {
+    color: #00b894;
+}
+
+body.dark-mode .footer-links a {
+    color: #b0b8c4;
+}
+
+body.dark-mode .footer-links a:hover {
+    color: #00d4a8;
+}
+
+/* Copyright */
+.footer-copyright {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-top: 24px;
+    font-size: 13px;
+    color: #999;
+}
+
+body.dark-mode .footer-copyright {
+    color: #6b7785;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .footer-container {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .footer-tagline {
+        max-width: 100%;
+    }
+}
+
+/* Toggle button for demo */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Hind', sans-serif;
+    font-size: 14px;
+    z-index: 1000;
+}
+
+body.dark-mode .theme-toggle {
+    background: #fff;
+    color: #333;
+}
