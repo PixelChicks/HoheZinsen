@@ -999,8 +999,8 @@ body.dark-mode .comparison-title {
 }
 
 body.dark-mode .comparison-labels {
-  background-color: var(--dark-bg-secondary);
-  border-color: var(--dark-border);
+  background-color: transparent;
+  border-color: transparent;
 }
 
 body.dark-mode .comparison-label-row {
@@ -4875,13 +4875,13 @@ body.dark-mode .faq-question:hover {
 }
 
 .faq-icon {
-    width: 24px;
-    height: 24px;
+    width: 25px;
+    height: 25px;
     min-width: 24px;
     border: 2px solid #333;
     border-radius: 50%;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     margin-right: 16px;
     font-size: 18px;

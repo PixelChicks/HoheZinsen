@@ -69,6 +69,9 @@ body.dark-mode .footer-column h4 {
     list-style: none;
     display: flex;
     flex-direction: column;
+    list-style: none;
+    padding: 0;
+    margin: 0;
     gap: 10px;
 }
 
