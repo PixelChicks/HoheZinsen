@@ -54,3 +54,9 @@ body.dark-mode .footer .nav-logo svg:first-child {
 body.dark-mode .footer .nav-logo svg:last-child {
     display: block;
 }
+
+@media (max-width: 768px) {
+    .faq-container {
+        padding: 0 16px;
+    }
+}
