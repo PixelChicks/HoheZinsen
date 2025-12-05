@@ -2363,13 +2363,14 @@ color: #00b894;
      font-weight: 600;
      font-size: 33px;
      line-height: 42px;
-     color: var(--design-dark-text);
+     color: rgba(55, 46, 80, 1);
 }
 
 .hero-content p {
     font-weight: 400;
     font-size: 16px;
     line-height: 22px;
+    color: rgba(55, 46, 80, 1);
 }
 
 .hero-illustration-image {
