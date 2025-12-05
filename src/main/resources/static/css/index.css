@@ -71,7 +71,7 @@
   align-items: center;
   margin-bottom: 5px;
   position: relative;
-  min-height: 100px;
+  min-height: 70px;
   border-radius: 4px;
   transition: all 0.2s ease;
   justify-content: space-around;
@@ -1007,13 +1007,45 @@ body.guest .data-cell .form-control:focus {
   margin-bottom: 8px;
 }
 
+.rate-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #00b894;
+    font-family: 'Hind', sans-serif;
+}
+
+.rate-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.rate-suffix {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    margin-left: 6px;
+    line-height: 0.9;
+}
+
+.rate-suffix .symbol {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.rate-suffix .pa-text {
+    font-size: 0.8rem;
+    font-weight: 500;
+}
 
 /* ============================================
    COMPARISON FEATURE
    ============================================ */
 
 .comparison-section {
-  background: #EFEFEF;
+  background: #f8f9fa;
   margin-bottom: 2rem;
   padding-bottom: 2px;
 }
@@ -1043,7 +1075,7 @@ body.guest .data-cell .form-control:focus {
   display: flex;
   flex-direction: column;
   gap: 0;
-  margin-top: 135px;
+  margin-top: 80px;
   min-width: 120px;
   flex-shrink: 0;
 }
@@ -1072,7 +1104,7 @@ body.guest .data-cell .form-control:focus {
 .comparison-card {
   background: white;
   border: 2px solid #0fcab5;
-  min-width: 350px;
+  min-width: 270px;
   flex-shrink: 0;
   position: relative;
   display: flex;
@@ -1138,8 +1170,8 @@ body.guest .data-cell .form-control:focus {
   padding: 12px 16px;
   border-bottom: 1px solid #f0f0f0;
   font-size: 14px;
-  line-height: 1.4;
-  min-height: 44px;
+  line-height: 1;
+  min-height: 4px;
   display: flex;
   align-items: center;
   word-break: break-word;
@@ -1159,7 +1191,7 @@ body.guest .data-cell .form-control:focus {
 
 .comparison-logo,
 .text-muted {
-  height: 100px;
+  height: 60px;
   width: auto;
   display: flex;
   align-items: center;
@@ -1170,7 +1202,7 @@ body.guest .data-cell .form-control:focus {
 
 .empty-comparison-card {
   border: 1px solid #ddd;
-  min-width: 350px;
+  min-width: 270px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -1564,10 +1596,16 @@ tr.rate-card-row.show {
 
 @media (max-width: 768px) {
   /* Table stacking */
+  .table>:not(caption)>*>* {
+      box-shadow: none !important;
+      background-color: #ffffff !important;
+  }
+
   .table-responsive.mobile-stack {
     overflow-x: visible;
     border: none;
     box-shadow: none;
+    background: #fff;
   }
 
   .table-responsive.mobile-stack #mainTable {
@@ -1647,6 +1685,7 @@ tr.rate-card-row.show {
     display: flex;
     align-items: baseline;
     gap: 8px;
+    padding: 10px 0px 1px 10px;
     margin: 0;
   }
 
@@ -2222,7 +2261,7 @@ color: #00b894;
 .filter-item select,
 .filter-item .dropdown-toggle {
     background-color: white;
-    border: 1px solid #c1c1c1;
+    border: 1px solid #434343;
     border-radius: 8px;
     padding: 8px 12px;
     font-weight: 500;
@@ -2247,10 +2286,20 @@ color: #00b894;
 .nav-logo {
     font-weight: bold;
     font-size: 14px;
-    padding: 8px 12px;
+    padding: 8px 0px;
     border: 1px solid #333;
     border-radius: 4px;
     color: #333;
+}
+
+.vergleichen-header {
+    font-weight: bold;
+    font-size: 14px;
+    padding: 8px 12px;
+    border: 1px solid #33333300;
+    border-radius: 4px;
+    color: #ffffff;
+    background: rgba(0, 172, 152, 1);
 }
 
 .nav-links {
@@ -2295,11 +2344,15 @@ color: #00b894;
    HERO SECTION STYLES
    ======================================== */
 
-.hero-section {
+.top-navigation{
     background: #ffffff;
-    padding: 50px 0;
-    margin: 0;
-    width: 100%;
+}
+
+.hero-section {
+  background: radial-gradient(100.85% 100.94% at 0% 100%, #98D9D2 20%, #FFFFFF 100%);
+  padding: 50px 0 0 0;
+  margin: 0;
+  width: 100%;
 }
 
 .hero-content {
@@ -2307,19 +2360,16 @@ color: #00b894;
 }
 
 .hero-content h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    line-height: 1.2;
-    margin-bottom: 20px;
-    color: var(--design-dark-text);
+     font-weight: 600;
+     font-size: 33px;
+     line-height: 42px;
+     color: var(--design-dark-text);
 }
 
 .hero-content p {
-    font-size: 1.25rem;
-    color: var(--design-medium-text);
-    line-height: 1.5;
-    font-weight: 600;
-    margin-bottom: 0;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 22px;
 }
 
 .hero-illustration-image {
@@ -2343,7 +2393,7 @@ color: #00b894;
     padding: 0 15px;
 }
 .vergleichen-section {
-    background: #f0f0f0;
+    background: #f8f9fa;
     padding: 0;
     margin: 0;
     width: 100%;
@@ -2353,7 +2403,7 @@ color: #00b894;
 }
 
 .vergleichen-section .card-body {
-    max-width: 1300px;
+    max-width: 970px;
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -2373,6 +2423,7 @@ color: #00b894;
     align-items: center;
     width: auto;
     font-size: 0;
+    padding-top: 20px;
     float: none !important;
 }
 
@@ -2385,10 +2436,8 @@ color: #00b894;
 }
 
 .nav-logo {
-    border: 1px solid #c1c1c1 !important;
-    background: white !important;
-    color: #333 !important;
-    padding: 8px 20px !important;
+    border: transparent;
+    padding: 7px 20px !important;
     border-radius: 4px !important;
     font-size: 1rem !important;
     text-transform: capitalize !important;
@@ -2547,7 +2596,6 @@ color: #00b894;
 .theme-segmented-switch {
     /* Main container styling */
     display: flex;
-    border: 1px solid var(--switch-border);
     border-radius: 8px; /* Rounded box around the segments */
     overflow: hidden; /* Clips the segments neatly */
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);

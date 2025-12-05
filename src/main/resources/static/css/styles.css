@@ -35,6 +35,7 @@
 
 .rate-expanded-content.show {
   opacity: 1;
+  background: #fff;
   transform: translateY(0);
 }
 
@@ -84,7 +85,7 @@
 }
 
 .text-content {
-  background: #f8f9fa;
+  background: #fff;
   border-radius: 6px;
   padding: 20px 10px;
   line-height: 1.6;
@@ -661,7 +662,6 @@
 }
 
 .expanded-section {
-  background: white;
   margin-bottom: 25px;
   position: relative;
   transition: all 0.3s ease;
@@ -712,7 +712,7 @@ body {
 }
 
 #mainTable thead th {
-  background: #f8f9fa;
+  background: #fff !important;
   border: none;
   padding: 15px 10px;
   font-weight: 600;
@@ -784,11 +784,15 @@ body {
 }
 
 #mainTable tbody td {
-  padding: 20px 10px;
+  padding: 10px 10px;
   vertical-align: middle;
   border: none;
 }
-
+#mainTable tbody tr {
+  border-bottom: 2px solid white;
+  transition: all 0.3s ease;
+  background: white;
+}
 .data-cell {
   text-align: center;
 }
@@ -811,7 +815,7 @@ body {
 
 .data-cell:first-child .form-control {
   font-size: 1.5rem;
-  font-weight: 500;
+  font-weight: 700;
   color: #00b894;
   border: none;
   background: transparent;
@@ -1034,6 +1038,7 @@ body {
   font-weight: 600;
   margin-bottom: 20px;
   padding-left: 20px;
+  background: #fff;
   border-bottom: 2px solid #f8f9fa;
   padding-bottom: 10px;
 }

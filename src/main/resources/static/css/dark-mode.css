@@ -14,6 +14,7 @@
   --dark-border: #374151;            /* gray-700 */
   --dark-border-light: #4b5563;      /* gray-600 */
   --dark-accent: #00b894;
+  --dark-green: #00AC98;
   --dark-accent-hover: #00d9a8;
   --dark-error: #ef4444;             /* red-500 */
   --dark-warning: #f59e0b;           /* amber-500 */
@@ -65,7 +66,14 @@
   display: block;
   color: #e9e4e4;
 }
+.dark-mode .top-navigation {
+    background: #1f2936;
+}
 
+.dark-mode .vergleichen-header{
+    border: 2px solid rgba(0, 172, 152, 1);
+    color: rgba(0, 172, 152, 1);
+}
 body.dark-mode .dark-mode-toggle {
   background: #3a3a3a;
   border-color: #4a4a4a;
@@ -124,10 +132,6 @@ body.dark-mode small {
    GENERAL ELEMENTS (span)
    ============================================================================ */
 
-body.dark-mode span {
-    color: var(--dark-text-secondary);
-}
-
 body.dark-mode #lastUpdatedDisplay {
     color: var(--dark-text-muted) !important;
 }
@@ -137,9 +141,8 @@ body.dark-mode #lastUpdatedDisplay {
    ============================================================================ */
 
 body.dark-mode .nav-logo {
-    background: transparent !important;
     color: var(--dark-text-primary) !important;
-    border-color: var(--dark-border-light) !important;
+    border-color: transparent !important;
 }
 
 body.dark-mode .vergleichen-section button.nav-logo {
@@ -154,11 +157,11 @@ body.dark-mode .vergleichen-section button.nav-logo {
    ============================================================================ */
 
 body.dark-mode .hero-section {
-    background: var(--dark-bg-primary) !important;
+    background: radial-gradient(61.14% 124.74% at 28.66% 134.96%, #2F4F5D 0%, #1F2936 67.87%);
 }
 
 body.dark-mode .hero-content h1 {
-    color: var(--dark-text-primary) !important;
+    color: var(--dark-green) !important;
 }
 
 body.dark-mode .hero-content p {
@@ -175,7 +178,7 @@ body.dark-mode .hero-illustration-image {
    ============================================================================ */
 
 body.dark-mode .vergleichen-section {
-    background: var(--dark-bg-secondary) !important;
+    background: var(--dark-bg-primary) !important;
 }
 
 body.dark-mode .vergleichen-section .card-body {
@@ -680,7 +683,7 @@ body.dark-mode .empty-state i {
 
 body.dark-mode .filter-section {
   background: var(--dark-bg-card);
-  border-color: var(--dark-border);
+  border-color: transparent;
   box-shadow: 0 2px 4px var(--dark-shadow);
 }
 
@@ -983,7 +986,7 @@ body.dark-mode .end-of-data-indicator {
    ============================================================================ */
 
 body.dark-mode .comparison-section {
-  background-color: var(--dark-bg-card);
+  background-color: transparent;
   border-color: var(--dark-border);
 }
 
@@ -992,8 +995,8 @@ body.dark-mode .comparison-title {
 }
 
 body.dark-mode .comparison-labels {
-  background-color: var(--dark-bg-secondary);
-  border-color: var(--dark-border);
+  background-color: transparent;
+  border-color: transparent;
 }
 
 body.dark-mode .comparison-label-row {
@@ -1030,7 +1033,7 @@ body.dark-mode .comparison-value-row {
 }
 
 body.dark-mode .comparison-value-row.row-even {
-  background-color: var(--dark-bg-card);
+  background-color: var(--dark-bg-primary);
 }
 
 body.dark-mode .comparison-value-row.row-odd {
@@ -1892,7 +1895,7 @@ body.dark-mode .header-container {
 }
 
 body.dark-mode .header-text {
-  color: #9ca3af;
+  color: #ffffff;
 }
 
 body.dark-mode .edit-header-btn {
@@ -2076,7 +2079,7 @@ body.dark-mode #mainTable {
 }
 
 body.dark-mode #mainTable thead th {
-  background: var(--dark-bg-secondary);
+  background: var(--dark-bg-secondary) !important;
   border-bottom-color: var(--dark-border);
   color: var(--dark-text-primary);
 }
@@ -2199,6 +2202,7 @@ body.dark-mode .rate-card {
 
 body.dark-mode .section-title {
   color: var(--dark-text-primary);
+  background: #1f2937;
   border-bottom-color: var(--dark-border);
 }
 
@@ -4844,6 +4848,124 @@ body.dark-mode .form-info svg {
   margin-right: 0.5rem;
 }
 
+body.dark-mode .mission-section {
+    background: radial-gradient(50.89% 50.42% at 18.72% -15.42%, #324358 0%, #111926 100%);
+}
+
+body.dark-mode .faq-question:hover {
+    background: #323d4d;
+}
+
+body.dark-mode .footer .nav-logo svg:first-child {
+    display: none;
+}
+
+body.dark-mode .footer .nav-logo svg:last-child {
+    display: block;
+}
+
+body.dark-mode .faq-item {
+    background: #2a3441;
+}
+
+body.dark-mode .faq-title {
+    color: #fff;
+}
+
+body.dark-mode .faq-icon {
+    border-color: #fff;
+    color: #fff;
+}
+
+.faq-item.active .faq-icon {
+    transform: rotate(45deg);
+}
+
+.faq-question-text {
+    flex: 1;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #333;
+}
+
+body.dark-mode .faq-question-text {
+    color: #e8e8e8;
+}
+
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.faq-item.active .faq-answer {
+    max-height: 500px;
+    padding: 0 24px 20px 64px;
+}
+
+.faq-answer-text {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #555;
+}
+
+body.dark-mode .faq-answer-text {
+    color: #b8b8b8;
+}
+
+/* Toggle button for demo */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Hind', sans-serif;
+    font-size: 14px;
+}
+
+body.dark-mode .theme-toggle {
+    background: #fff;
+    color: #333;
+}
+
+.dark-mode.rate-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #00b894;
+    font-family: 'Hind', sans-serif;
+}
+
+.dark-mode.rate-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.dark-mode.rate-suffix {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    margin-left: 6px;
+    line-height: 0.9;
+}
+
+.dark-mode.rate-suffix .symbol {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.dark-mode.rate-suffix .pa-text {
+    font-size: 0.8rem;
+    font-weight: 500;
+}
 /* ============================================================================
    CUSTOM SCROLLBAR FOR FORM CONTAINERS
    ============================================================================ */
@@ -4878,6 +5000,7 @@ body.dark-mode .ql-editor::-webkit-scrollbar-thumb:hover,
 body.dark-mode .simple-editor::-webkit-scrollbar-thumb:hover {
   background: var(--dark-border-light);
 }
+
 
 /* ============================================================================
    END OF DARK MODE STYLES
