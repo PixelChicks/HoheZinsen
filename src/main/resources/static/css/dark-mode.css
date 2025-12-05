@@ -132,10 +132,6 @@ body.dark-mode small {
    GENERAL ELEMENTS (span)
    ============================================================================ */
 
-body.dark-mode span {
-    color: rgb(110 120 137);
-}
-
 body.dark-mode #lastUpdatedDisplay {
     color: var(--dark-text-muted) !important;
 }
@@ -2083,7 +2079,7 @@ body.dark-mode #mainTable {
 }
 
 body.dark-mode #mainTable thead th {
-  background: var(--dark-bg-secondary);
+  background: var(--dark-bg-secondary) !important;
   border-bottom-color: var(--dark-border);
   color: var(--dark-text-primary);
 }
@@ -2206,6 +2202,7 @@ body.dark-mode .rate-card {
 
 body.dark-mode .section-title {
   color: var(--dark-text-primary);
+  background: #1f2937;
   border-bottom-color: var(--dark-border);
 }
 
@@ -4851,43 +4848,28 @@ body.dark-mode .form-info svg {
   margin-right: 0.5rem;
 }
 
-.mission-section {
-    padding-bottom: 100px;
-    background: #fff; /* Light mode background */
-    transition: background 0.3s ease;
-}
-
 body.dark-mode .mission-section {
     background: radial-gradient(50.89% 50.42% at 18.72% -15.42%, #324358 0%, #111926 100%);
-}
-
-.mission-section .faq-container {
-    /* existing styles */
-}
-
-.mission-section .faq-title {
-    padding-top: 60px;
-    padding-bottom: 30px;
 }
 
 body.dark-mode .faq-question:hover {
     background: #323d4d;
 }
 
-.faq-icon {
-    width: 25px;
-    height: 25px;
-    min-width: 24px;
-    border: 2px solid #333;
-    border-radius: 50%;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    margin-right: 16px;
-    font-size: 18px;
-    font-weight: 300;
-    color: #333;
-    transition: all 0.3s ease;
+body.dark-mode .footer .nav-logo svg:first-child {
+    display: none;
+}
+
+body.dark-mode .footer .nav-logo svg:last-child {
+    display: block;
+}
+
+body.dark-mode .faq-item {
+    background: #2a3441;
+}
+
+body.dark-mode .faq-title {
+    color: #fff;
 }
 
 body.dark-mode .faq-icon {
@@ -4950,6 +4932,39 @@ body.dark-mode .faq-answer-text {
 body.dark-mode .theme-toggle {
     background: #fff;
     color: #333;
+}
+
+.dark-mode.rate-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #00b894;
+    font-family: 'Hind', sans-serif;
+}
+
+.dark-mode.rate-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.dark-mode.rate-suffix {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    margin-left: 6px;
+    line-height: 0.9;
+}
+
+.dark-mode.rate-suffix .symbol {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.dark-mode.rate-suffix .pa-text {
+    font-size: 0.8rem;
+    font-weight: 500;
 }
 /* ============================================================================
    CUSTOM SCROLLBAR FOR FORM CONTAINERS

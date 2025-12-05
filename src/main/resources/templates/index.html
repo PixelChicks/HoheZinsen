@@ -82,6 +82,7 @@
         #mainTable {
           border-spacing: 0 3px;
           border-collapse: separate;
+          background: #f8f9fa;
         }
 
         #mainTable tbody td {
@@ -99,7 +100,10 @@
           margin-left: auto;
           margin-right: auto;
         }
-    </style>
+
+        .body {
+         background-color: #f0f0f0 !important;
+        }
     </style>
 </head>
 <body th:classappend="${#authorization.expression('isAuthenticated()')} ? 'authenticated' : 'guest'">
@@ -124,8 +128,8 @@
 
             </div>
             <div class="nav-links">
-                <a class="nav-link" href="#">Compare</a>
-                <a class="nav-link" href="#">FAQs</a>
+                <a class="nav-link" href="#compare-section" onclick="handleCompareNav(event)">Compare</a>
+                <a class="nav-link" href="#faq-section">FAQs</a>
                 <div class="theme-segmented-switch" id="darkModeToggleContainer">
 
                     <button aria-label="Activate light mode"
@@ -144,7 +148,7 @@
                             onclick="window.darkModeControls.enable()">
                         <svg fill="none" height="48" viewBox="0 0 48 48" width="48" xmlns="http://www.w3.org/2000/svg">
                             <path d="M42 25.58C41.6854 28.9844 40.4078 32.2288 38.3165 34.9336C36.2253 37.6383 33.407 39.6916 30.1915 40.8531C26.9759 42.0146 23.496 42.2362 20.159 41.4922C16.8221 40.7481 13.766 39.0691 11.3485 36.6516C8.93096 34.234 7.25193 31.178 6.50786 27.841C5.7638 24.504 5.98548 21.0242 7.14697 17.8086C8.30845 14.593 10.3617 11.7747 13.0665 9.68351C15.7712 7.59228 19.0156 6.31461 22.42 6C20.4269 8.69653 19.4677 12.0189 19.7171 15.3628C19.9665 18.7068 21.4078 21.8501 23.7789 24.2212C26.1499 26.5923 29.2933 28.0336 32.6372 28.2829C35.9811 28.5323 39.3035 27.5732 42 25.58Z"
-                                  stroke="#1E1E1E" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+                                  stroke="#999999" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
                         </svg>
                     </button>
                 </div>
@@ -266,17 +270,17 @@
         </div>
     </div>
 </div>
-<div class="vergleichen-section">
+<div class="vergleichen-section" id="compare-section" style="scroll-margin-top: 100px;">
     <div class="card-body py-2">
         <small>
             <button class="vergleichen-header" id="quickCompareBtn" onclick="quickStartComparison()">
                 Vergleichen
             </button>
         </small>
-        <span style="padding-top: 20px;" th:text="${lastUpdateMessage}">Last updated 20 hours ago</span>
+        <span style="padding-top: 20px;color: rgb(100 107 119);" th:text="${lastUpdateMessage}">Last updated 20 hours ago</span>
     </div>
 </div>
-<div class="vergleichen-section" style="border-bottom: 1px solid rgba(54, 64, 80, 1)">
+<div class="vergleichen-section" style="border-bottom: 1px solid rgb(206 206 206);">
     <div class="card-body py-2">
         <div class="comparison-section" id="comparisonSection" style="display: none;">
             <div class="comparison-header">
@@ -378,15 +382,15 @@
             </div>
         </div>
 
-        <button class="nav-logo" id="loadMoreBtn" onclick="loadMoreData()">
-            Load More Rates
+        <button class="nav-logo" id="loadMoreBtn" style="background: rgba(75, 84, 99, 1); color: #fff;" onclick="loadMoreData()">
+            Load More
         </button>
 
         <div class="results-info-footer mt-2" id="resultsInfoFooter">
         </div>
     </div>
 </div>
-<div class="mission-section">
+<div class="mission-section" id="faq-section" style="scroll-margin-top: 100px;">
     <div class="faq-container">
         <h1 class="faq-title" style="padding-top: 60px; padding-bottom: 30px;">FAQs</h1>
 
@@ -559,7 +563,7 @@
         </div>
     </div>
 </div>
-<div class="mission-section">
+<div class="mission-section" id="about-section" style="scroll-margin-top: 100px;">
     <div class="faq-container">
         <h1 class="faq-title" style="padding-top: 60px; padding-bottom: 30px;">Warum haben wir diese Vergleichsplattform ins Leben
             gerufen?</h1>
@@ -605,9 +609,9 @@
         <div class="footer-column">
             <h4>Sitemap</h4>
             <ul class="footer-links">
-                <li><a href="#compare">Compare</a></li>
-                <li><a href="#faqs">FAQs</a></li>
-                <li><a href="#about">About</a></li>
+                <li><a href="#compare-section" onclick="handleCompareNav(event)">Compare</a></li>
+                <li><a href="#faq-section">FAQs</a></li>
+                <li><a href="#about-section">About</a></li>
             </ul>
         </div>
 
@@ -763,6 +767,23 @@
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 3000);
+        }
+    }
+
+    function handleCompareNav(event) {
+        if(event) event.preventDefault();
+
+        const section = document.getElementById('compare-section');
+        const btn = document.getElementById('quickCompareBtn');
+
+        if (section) {
+            section.scrollIntoView({ behavior: 'smooth' });
+
+            if (btn && btn.offsetParent !== null && btn.style.display !== 'none') {
+                setTimeout(() => {
+                    quickStartComparison();
+                }, 600);
+            }
         }
     }
 
@@ -1102,7 +1123,7 @@
         return data.map(rate => createMobileCard(rate)).join('');
     }
 
-    function renderTableRowsHTML(data) {
+function renderTableRowsHTML(data) {
         if (!data || data.length === 0) return '';
 
         const headers = document.querySelectorAll('.draggable-column, .sortable');
@@ -1116,7 +1137,7 @@
         return data.map(rate => {
             const isSelected = comparedRates.has(rate.id);
 
-            const fieldCells = currentFieldOrder.map((field) => {
+            const fieldCells = currentFieldOrder.map((field, index) => {
                 const fieldValue = serverRateFieldValuesMap[rate.id]?.[field.id] || '';
 
                 if (field.fieldKey && field.fieldKey.toLowerCase().includes('img')) {
@@ -1128,7 +1149,21 @@
                             </div>
                         </td>
                     `;
-                } else {
+                }
+                else if (index === 0) {
+                    return `
+                        <td class="data-cell" data-field-id="${field.id}" data-label="${field.label}">
+                            <div class="rate-wrapper">
+                                <span class="rate-number">${fieldValue || '0,00'}</span>
+                                <div class="rate-suffix">
+                                    <span class="symbol">%</span>
+                                    <span class="pa-text">p.a.</span>
+                                </div>
+                            </div>
+                        </td>
+                    `;
+                }
+                else {
                     return `
                         <td class="data-cell" data-field-id="${field.id}" data-label="${field.label}">
                             <div class="form-control form-control-sm text-center"
@@ -1990,8 +2025,6 @@
         </style>
 
         <div class="rate-expanded-content show">
-            <hr class="mobile-hr"
-                style="border: none; border-top: 3px dotted #000; margin: 1px 0; padding-bottom: 2px;">
             ${sectionsHTML}
             ${compareButton}
         </div>

@@ -1007,13 +1007,45 @@ body.guest .data-cell .form-control:focus {
   margin-bottom: 8px;
 }
 
+.rate-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #00b894;
+    font-family: 'Hind', sans-serif;
+}
+
+.rate-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.rate-suffix {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    margin-left: 6px;
+    line-height: 0.9;
+}
+
+.rate-suffix .symbol {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.rate-suffix .pa-text {
+    font-size: 0.8rem;
+    font-weight: 500;
+}
 
 /* ============================================
    COMPARISON FEATURE
    ============================================ */
 
 .comparison-section {
-  background: #EFEFEF;
+  background: #f8f9fa;
   margin-bottom: 2rem;
   padding-bottom: 2px;
 }
@@ -1564,10 +1596,16 @@ tr.rate-card-row.show {
 
 @media (max-width: 768px) {
   /* Table stacking */
+  .table>:not(caption)>*>* {
+      box-shadow: none !important;
+      background-color: #ffffff !important;
+  }
+
   .table-responsive.mobile-stack {
     overflow-x: visible;
     border: none;
     box-shadow: none;
+    background: #fff;
   }
 
   .table-responsive.mobile-stack #mainTable {
@@ -1647,6 +1685,7 @@ tr.rate-card-row.show {
     display: flex;
     align-items: baseline;
     gap: 8px;
+    padding: 10px 0px 1px 10px;
     margin: 0;
   }
 
@@ -2222,7 +2261,7 @@ color: #00b894;
 .filter-item select,
 .filter-item .dropdown-toggle {
     background-color: white;
-    border: 1px solid #c1c1c1;
+    border: 1px solid #434343;
     border-radius: 8px;
     padding: 8px 12px;
     font-weight: 500;
@@ -2257,9 +2296,10 @@ color: #00b894;
     font-weight: bold;
     font-size: 14px;
     padding: 8px 12px;
-    border: 1px solid #333;
+    border: 1px solid #33333300;
     border-radius: 4px;
-    color: #333;
+    color: #ffffff;
+    background: rgba(0, 172, 152, 1);
 }
 
 .nav-links {
@@ -2309,10 +2349,10 @@ color: #00b894;
 }
 
 .hero-section {
-    background: #ffffff;
-    padding: 50px 0 0 0;
-    margin: 0;
-    width: 100%;
+  background: radial-gradient(100.85% 100.94% at 0% 100%, #98D9D2 20%, #FFFFFF 100%);
+  padding: 50px 0 0 0;
+  margin: 0;
+  width: 100%;
 }
 
 .hero-content {
@@ -2353,7 +2393,7 @@ color: #00b894;
     padding: 0 15px;
 }
 .vergleichen-section {
-    background: #f0f0f0;
+    background: #f8f9fa;
     padding: 0;
     margin: 0;
     width: 100%;
@@ -2397,8 +2437,7 @@ color: #00b894;
 
 .nav-logo {
     border: transparent;
-    color: #333 !important;
-    padding: 8px 0px !important;
+    padding: 7px 20px !important;
     border-radius: 4px !important;
     font-size: 1rem !important;
     text-transform: capitalize !important;

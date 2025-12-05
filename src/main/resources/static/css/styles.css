@@ -35,6 +35,7 @@
 
 .rate-expanded-content.show {
   opacity: 1;
+  background: #fff;
   transform: translateY(0);
 }
 
@@ -84,7 +85,7 @@
 }
 
 .text-content {
-  background: #f8f9fa;
+  background: #fff;
   border-radius: 6px;
   padding: 20px 10px;
   line-height: 1.6;
@@ -661,7 +662,6 @@
 }
 
 .expanded-section {
-  background: white;
   margin-bottom: 25px;
   position: relative;
   transition: all 0.3s ease;
@@ -712,7 +712,7 @@ body {
 }
 
 #mainTable thead th {
-  background: #f8f9fa;
+  background: #fff !important;
   border: none;
   padding: 15px 10px;
   font-weight: 600;
@@ -1038,6 +1038,7 @@ body {
   font-weight: 600;
   margin-bottom: 20px;
   padding-left: 20px;
+  background: #fff;
   border-bottom: 2px solid #f8f9fa;
   padding-bottom: 10px;
 }
