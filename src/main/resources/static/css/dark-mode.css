@@ -2,7 +2,6 @@
    DARK MODE STYLES - COMPREHENSIVE COVERAGE
    ============================================================================ */
 
-/* Dark mode color variables - Tailwind-inspired palette */
 :root {
   --dark-bg-primary: #111827;        /* gray-900 */
   --dark-bg-secondary: #1f2937;      /* gray-800 */
@@ -1119,23 +1118,39 @@ body.dark-mode .mobile-logo-section {
 /* ============================================================================
    COMPARISON CHECKBOXES
    ============================================================================ */
+:root {
+ --checkmark-bg: #F4F4F4;
+ --checkmark-stroke: #01AC99;
+}
+
+body.dark-mode {
+ --checkmark-bg: #00b894;
+ --checkmark-stroke: #1E2937;
+}
+
+.comparison-card svg[style*="position: absolute"] rect {
+ fill: var(--checkmark-bg);
+}
+
+.comparison-card svg[style*="position: absolute"] path {
+ stroke: var(--checkmark-stroke);
+}
 
 body.dark-mode .custom-checkbox {
-  background-color: var(--dark-bg-secondary);
-  border-color: var(--dark-border);
+  background-color: #4a4a4a7d;
+  border-color: transparent;
 }
 
 body.dark-mode .custom-checkbox:hover {
-  border-color: var(--dark-accent);
-  background-color: var(--dark-bg-tertiary);
+  background-color: #1f5d59;
 }
 
 body.dark-mode .comparison-checkbox:checked + .custom-checkbox {
-  background-color: var(--dark-bg-secondary);
+  background-color: #00b894;
 }
 
 body.dark-mode .custom-checkbox::after {
-  color: var(--dark-accent);
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="12" viewBox="0 0 18 12" fill="none"><path d="M2 5.86364L6.82857 10L16 2" stroke="%231E2937" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>');
 }
 
 body.dark-mode .comparison-checkbox:focus + .custom-checkbox {
@@ -1163,8 +1178,8 @@ body.dark-mode .table-row-selected .comparison-checkbox:checked + .custom-checkb
 }
 
 body.dark-mode .table-row-selected:hover {
-  box-shadow: 0 0 0 3px var(--dark-accent),
-              0 6px 16px rgba(0, 184, 148, 0.4);
+  box-shadow: 0 0 0 0px var(--dark-accent),
+              0 0px 0px rgba(0, 184, 148, 0.4);
 }
 
 /* ============================================================================
