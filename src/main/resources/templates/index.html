@@ -2241,10 +2241,11 @@ function renderTableRowsHTML(data) {
                 const firstCheckbox = document.getElementById(`external-compare-${firstRateId}`);
                 if (firstCheckbox) {
                     firstCheckbox.checked = true;
-                    firstCheckbox.dispatchEvent(new Event('change'));
-                } else {
-                    updateTableRowHighlight(firstRateId, true);
                 }
+
+                updateTableRowHighlight(firstRateId, true);
+
+                updateVergleichenButtonVisibility(firstRateId, true);
             }
         }
 
