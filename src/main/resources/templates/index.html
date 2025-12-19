@@ -1351,24 +1351,20 @@ function renderTableRowsHTML(data) {
     function renderFilterGrid() {
         const grid = document.getElementById('filterGrid');
 
-        // **IMPORTANT:** Since we are showing horizontal filters, we hide the main toggle logic
-        // and rely on the filter-content being displayed via CSS overrides.
-
         grid.innerHTML = availableFilters.map(filter => {
             const fieldIdStr = filter.fieldId.toString();
             const currentSelection = Array.from(activeFilters.get(fieldIdStr) || []).join('');
 
-            // Start of the select element
             let selectHtml = `
-                <select
-                    class="filter-dropdown-pill"
-                    onchange="updateFilterFromDropdown(this, ${filter.fieldId})"
-                    data-field-id="${filter.fieldId}">
+                <div style="position: relative; display: inline-block;">
+                    <select
+                        class="filter-dropdown-pill"
+                        onchange="updateFilterFromDropdown(this, ${filter.fieldId})"
+                        data-field-id="${filter.fieldId}"
+                        style="padding-right: 30px; appearance: none; -webkit-appearance: none; -moz-appearance: none; background: transparent;">
+                    <option value="">Alle</option>
             `;
 
-            selectHtml += `<option value="">${filter.label} ▼</option>`;
-
-            // Filter options
             selectHtml += filter.options.map(option => `
                 <option
                     value="${option.value}"
@@ -1377,7 +1373,14 @@ function renderTableRowsHTML(data) {
                 </option>
             `).join('');
 
-            selectHtml += `</select>`;
+            selectHtml += `
+                    </select>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="6" viewBox="0 0 12 6" fill="none"
+                         style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none;">
+                        <path d="M6 6L0 0H12L6 6Z" fill="currentColor"/>
+                    </svg>
+                </div>
+            `;
 
             return `
                 <div class="filter-item" data-field-id="${filter.fieldId}">
@@ -1543,6 +1546,18 @@ function renderTableRowsHTML(data) {
             if (externalCheckbox) {
                 externalCheckbox.checked = false;
             }
+
+            if (comparedRates.size === 0) {
+                document.body.classList.remove('comparison-mode');
+                const externalCheckboxes = document.getElementById('externalCheckboxes');
+                if (externalCheckboxes) {
+                    externalCheckboxes.innerHTML = '';
+                }
+                const quickCompareBtn = document.getElementById('quickCompareBtn');
+                if (quickCompareBtn) {
+                    quickCompareBtn.style.display = "inline-block";
+                }
+            }
         }
     }
 
@@ -1560,6 +1575,14 @@ function renderTableRowsHTML(data) {
         updateComparisonDisplay();
         showStatus('All comparisons cleared', 'info');
         document.body.classList.remove('comparison-mode');
+
+        // Hide the external checkboxes
+        const externalCheckboxes = document.getElementById('externalCheckboxes');
+        if (externalCheckboxes) {
+            externalCheckboxes.innerHTML = '';
+            externalCheckboxes.style.display = 'none';
+        }
+
         const quickCompareBtn = document.getElementById('quickCompareBtn');
         if (quickCompareBtn) {
             quickCompareBtn.style.display = "inline-block";
