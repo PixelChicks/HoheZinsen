@@ -3,11 +3,7 @@ package com.InterestRatesAustria.InterestRatesAustria.controller;
 import com.InterestRatesAustria.InterestRatesAustria.model.dto.InterestRateDTO;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.GlobalField;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.InterestRate;
-import com.InterestRatesAustria.InterestRatesAustria.service.FieldValueService;
-import com.InterestRatesAustria.InterestRatesAustria.service.FilterService;
-import com.InterestRatesAustria.InterestRatesAustria.service.GlobalFieldService;
-import com.InterestRatesAustria.InterestRatesAustria.service.InterestRateService;
-import com.InterestRatesAustria.InterestRatesAustria.service.LastUpdateService;
+import com.InterestRatesAustria.InterestRatesAustria.service.*;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -30,17 +26,21 @@ public class HomeController {
     private final FieldValueService fieldValueService;
     private final FilterService filterService;
     private final LastUpdateService lastUpdateService;
+    private final FAQService faqService;
+    private final AboutService aboutService;
 
     public HomeController(InterestRateService interestRateService,
                           GlobalFieldService globalFieldService,
                           FieldValueService fieldValueService,
                           FilterService filterService,
-                          LastUpdateService lastUpdateService) {
+                          LastUpdateService lastUpdateService, FAQService faqService, AboutService aboutService) {
         this.interestRateService = interestRateService;
         this.globalFieldService = globalFieldService;
         this.fieldValueService = fieldValueService;
         this.filterService = filterService;
         this.lastUpdateService = lastUpdateService;
+        this.faqService = faqService;
+        this.aboutService = aboutService;
     }
 
     @GetMapping("/")
@@ -76,7 +76,8 @@ public class HomeController {
         model.addAttribute("globalFieldsCompare", globalFieldsCompare);
         model.addAttribute("rateFieldValuesMap", rateFieldValuesMap);
         model.addAttribute("newField", new GlobalField());
-
+        model.addAttribute("faqs", faqService.getActiveFAQs());
+        model.addAttribute("aboutSection", aboutService.getActiveAboutSection());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", interestRatesPage.getTotalPages());
         model.addAttribute("totalElements", interestRatesPage.getTotalElements());
@@ -124,7 +125,8 @@ public class HomeController {
         model.addAttribute("globalFields", globalFields);
         model.addAttribute("rateFieldValuesMap", rateFieldValuesMap);
         model.addAttribute("newField", new GlobalField());
-
+        model.addAttribute("faqs", faqService.getAllFAQs());
+        model.addAttribute("aboutSection", aboutService.getActiveAboutSection());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", interestRatesPage.getTotalPages());
         model.addAttribute("totalElements", interestRatesPage.getTotalElements());
