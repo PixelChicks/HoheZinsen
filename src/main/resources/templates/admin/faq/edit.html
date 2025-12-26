@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit FAQ</title>
+    <script src="/js/theme-persistence.js" defer></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.ckeditor.com/ckeditor5/40.0.0/classic/ckeditor.js"></script>
+    <style>
+        @import url('https://api.fonts.coollabs.io/css2?family=Mona+Sans:wght@200;300;400;500;600;700;800;900&display=swap');
+
+        * {
+            font-family: 'Mona Sans', sans-serif !important;
+        }
+
+        .page-header {
+            background: #00b894;
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 40px;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .form-card-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 25px 30px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .form-card-body {
+            padding: 30px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .form-section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            padding: 12px 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+        }
+
+        .form-check-input {
+            width: 1.2rem;
+            height: 1.2rem;
+            border: 2px solid #dee2e6;
+            cursor: pointer;
+        }
+
+        .form-check-input:checked {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px 40px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .preview-section {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 25px;
+        }
+
+        .preview-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #6c757d;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .preview-question {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 15px;
+        }
+
+        .preview-answer {
+            color: #495057;
+            line-height: 1.6;
+        }
+
+        .character-count {
+            font-size: 0.85rem;
+            color: #6c757d;
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        .ck-editor__editable {
+            min-height: 250px;
+        }
+
+        .help-text {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .required-indicator {
+            color: #dc3545;
+            margin-left: 3px;
+        }
+
+        .metadata-badge {
+            background: #e9ecef;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+    </style>
+</head>
+<body class="bg-light">
+<div class="page-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="mb-2">
+                    Edit FAQ
+                </h1>
+                <p class="mb-0 opacity-75">Modify FAQ details</p>
+            </div>
+            <a href="/admin" class="btn btn-light">
+                Back to admin dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <!-- Metadata Info -->
+            <div class="d-flex gap-3 mb-3 flex-wrap">
+                <div class="metadata-badge">
+                    ID: <strong th:text="${faqId}"></strong>
+                </div>
+            </div>
+
+            <form th:action="@{/admin/faqs/edit/{id}(id=${faqId})}"
+                  th:object="${faq}"
+                  method="post"
+                  onsubmit="return validateForm()">
+
+                <div class="form-card">
+                    <div class="form-card-header">
+                        <h3 class="mb-0">
+                            FAQ Details
+                        </h3>
+                    </div>
+
+                    <div class="form-card-body">
+                        <!-- Question Section -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                Question
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="question" class="form-label">
+                                    FAQ Question
+                                    <span class="required-indicator">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="question"
+                                       th:field="*{question}"
+                                       maxlength="500"
+                                       required
+                                       oninput="updatePreview(); updateCharCount('question', 500)">
+                                <div class="character-count">
+                                    <span id="questionCount">0</span> / 500 characters
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Answer Section -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                Answer
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="answer" class="form-label">
+                                    FAQ Answer
+                                    <span class="required-indicator">*</span>
+                                </label>
+                                <textarea class="form-control"
+                                          id="answer"
+                                          th:field="*{answer}"
+                                          rows="8"
+                                          required
+                                          style="display: none;"></textarea>
+                                <div id="answerEditor"></div>
+                            </div>
+                        </div>
+
+                        <!-- Settings Section -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                Display Settings
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="displayOrder" class="form-label">
+                                        Display Order
+                                    </label>
+                                    <input type="number"
+                                           class="form-control"
+                                           id="displayOrder"
+                                           th:field="*{displayOrder}"
+                                           min="1">
+                                    <div class="help-text">
+                                        Lower numbers appear first
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label d-block">Status</label>
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               id="isActive"
+                                               th:field="*{isActive}">
+                                        <label class="form-check-label" for="isActive">
+                                            Active (visible to users)
+                                        </label>
+                                    </div>
+                                    <div class="help-text">
+                                        Inactive FAQs are hidden from users
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                            <a href="/admin" class="btn btn-cancel btn-lg">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-submit btn-lg text-white">
+                                Update FAQ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let editorInstance;
+
+    ClassicEditor
+        .create(document.querySelector('#answerEditor'), {
+            toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'undo', 'redo']
+        })
+        .then(editor => {
+            editorInstance = editor;
+
+            const existingContent = document.querySelector('#answer').value;
+            if (existingContent) {
+                editor.setData(existingContent);
+            }
+
+            editor.model.document.on('change:data', () => {
+                const data = editor.getData();
+                document.querySelector('#answer').value = data;
+                updatePreview();
+            });
+
+            updatePreview();
+        })
+        .catch(error => {
+            console.error('CKEditor initialization error:', error);
+        });
+
+    function updatePreview() {
+        const question = document.getElementById('question').value;
+        const answer = document.getElementById('answer').value;
+
+        document.getElementById('previewQuestion').textContent =
+            question || 'Your question will appear here...';
+        document.getElementById('previewAnswer').innerHTML =
+            answer || 'Your answer will appear here...';
+    }
+
+    function updateCharCount(fieldId, maxLength) {
+        const field = document.getElementById(fieldId);
+        const count = document.getElementById(fieldId + 'Count');
+        count.textContent = field.value.length;
+
+        if (field.value.length >= maxLength * 0.9) {
+            count.style.color = '#dc3545';
+        } else if (field.value.length >= maxLength * 0.7) {
+            count.style.color = '#ffc107';
+        } else {
+            count.style.color = '#6c757d';
+        }
+    }
+
+    function validateForm() {
+        const question = document.getElementById('question').value.trim();
+        const answer = document.getElementById('answer').value.trim();
+
+        if (!question) {
+            alert('Please enter a question');
+            return false;
+        }
+
+        if (!answer) {
+            alert('Please enter an answer');
+            return false;
+        }
+
+        return true;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCharCount('question', 500);
+    });
+</script>
+</body>
+</html>

@@ -401,192 +401,35 @@
     <div class="faq-container">
         <h1 class="faq-title" style="padding-top: 60px; padding-bottom: 30px;">FAQs</h1>
 
-        <div class="faq-item">
-            <div class="faq-question" onclick="toggleFaq(this)">
-                <div class="faq-icon">+</div>
-                <div class="faq-question-text">Ist diese Vergleichsplattform ein Anlageberater?</div>
-            </div>
-            <div class="faq-answer">
-                <div class="faq-answer-text">
-                    <b>Nein</b>. Wir sind eine unabhängige Vergleichsplattform. Wir sammeln Daten zu öffentlich
-                    verfügbaren
-                    Investmentangeboten auf dem österreichischen Markt und präsentieren sie Ihnen. Wir bieten
-                    <b>keine</b>
-                    persönliche Finanzberatung, Anlageempfehlungen oder Steuerberatung an. Sie sind für
-                    Ihre Anlageentscheidungen selbst verantwortlich und sollten einen zertifizierten Finanz-
-                    oder Steuerberater konsultieren.
-                </div>
-            </div>
+        <div th:if="${faqs == null || faqs.isEmpty()}" class="text-center py-5">
+            <p class="text-muted">No FAQs available at the moment.</p>
         </div>
 
-        <div class="faq-item">
+        <div th:each="faq : ${faqs}" class="faq-item">
             <div class="faq-question" onclick="toggleFaq(this)">
                 <div class="faq-icon">+</div>
-                <div class="faq-question-text">Wie stellen Sie sicher, dass die Angebote von seriösen Anbietern
-                    stammen?
-                </div>
+                <div class="faq-question-text" th:text="${faq.question}"></div>
             </div>
             <div class="faq-answer">
-                <div class="faq-answer-text">
-                    Für jeden auf unserer Plattform gelisteten Anbieter führen wir die spezifische Entschädigungs- oder
-                    Garantiesicherung detailliert auf, sodass Sie das Schutzniveau eingehend prüfen können.
-                </div>
-            </div>
-        </div>
-
-        <div class="faq-item">
-            <div class="faq-question" onclick="toggleFaq(this)">
-                <div class="faq-icon">+</div>
-                <div class="faq-question-text">Wie kann ich das Risiko einer Anlage einschätzen?</div>
-            </div>
-            <div class="faq-answer">
-                <div class="faq-answer-text">
-                    <p>Sie sollten auf Folgendes achten:</p>
-                    <ul>
-                        <li>
-                            <b>Die Art der Anlage:</b> Verschiedene Produkte (Anleihen, P2P, Immobilien-Anleihen) weisen
-                            unterschiedliche Risikoprofile auf.
-                        </li>
-                        <li>
-                            <b>Die Sicherheiten/Deckung:</b> Ist der Kredit oder die Anlage durch Vermögenswerte (z. B.
-                            Immobilien) abgesichert? Wenn ja, wie leicht können diese Sicherheiten verwertet werden?
-                        </li>
-                        <li>
-                            <b>Diversifikation:</b> Setzen Sie niemals Ihr gesamtes Kapital auf eine einzige
-                            Hochrisikoanlage. Die Streuung Ihrer Anlage auf mehrere Produkte, Sektoren und Emittenten
-                            hilft, das Gesamtrisiko zu mindern.
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="faq-item">
-            <div class="faq-question" onclick="toggleFaq(this)">
-                <div class="faq-icon">+</div>
-                <div class="faq-question-text">Wie werden Zinseinnahmen in Österreich steuerlich behandelt?</div>
-            </div>
-            <div class="faq-answer">
-                <div class="faq-answer-text">
-                    Für in Österreich ansässige Steuerpflichtige unterliegen Zinseinkünfte aus den meisten Wertpapieren
-                    und Einlagen, die bei einer österreichischen Bank gehalten werden, in der Regel der <b>Kapitalertragsteuer
-                    (KESt)</b> in Höhe von <b>27,5%</b>. Diese wird üblicherweise von der Bank einbehalten, sodass Sie
-                    sie nicht in Ihrer
-                    jährlichen Steuererklärung angeben müssen.
-                </div>
-            </div>
-        </div>
-
-        <div class="faq-item">
-            <div class="faq-question" onclick="toggleFaq(this)">
-                <div class="faq-icon">+</div>
-                <div class="faq-question-text">Was passiert, wenn die Anlage über eine ausländische Plattform oder einen
-                    ausländischen Emittenten erfolgt?
-                </div>
-            </div>
-            <div class="faq-answer">
-                <div class="faq-answer-text">
-                    Wenn Sie über eine ausländische Plattform oder in ein ausländisches Wertpapier investieren, wird die
-                    KESt
-                    möglicherweise <b>nicht</b> automatisch abgezogen. In diesem Fall sind Sie selbst dafür
-                    verantwortlich, die
-                    Einkünfte in Ihrer österreichischen Steuererklärung anzugeben und die 27,5% KESt zu entrichten.
-
-                </div>
-            </div>
-        </div>
-
-        <div class="faq-item">
-            <div class="faq-question" onclick="toggleFaq(this)">
-                <div class="faq-icon">+</div>
-                <div class="faq-question-text">Ich wohne nicht in Österreich. Wie werde ich besteuert?</div>
-            </div>
-            <div class="faq-answer">
-                <div class="faq-answer-text">
-                    Als <b>nicht ansässige</b> natürliche Person unterliegen Sie in der Regel einer beschränkten
-                    Steuerpflicht
-                    (Quellensteuer) auf österreichische Zinseinkünfte, typischerweise in Höhe von <b>27,5%</b>.
-                    Österreich hat
-                    jedoch mit vielen Ländern <b>Doppelbesteuerungsabkommen (DBA) </b> abgeschlossen, die diese
-                    Quellensteuer mindern
-                    oder eliminieren können. Möglicherweise müssen Sie dem Zahlstellen Nachweise
-                    (z. B. eine Ansässigkeitsbescheinigung) vorlegen, um von einem DBA zu profitieren. Es ist
-                    unerlässlich,
-                    einen Steuerberater in Ihrem Wohnsitzland und in Österreich zu konsultieren.
-                </div>
-            </div>
-        </div>
-
-        <div class="faq-item">
-            <div class="faq-question" onclick="toggleFaq(this)">
-                <div class="faq-icon">+</div>
-                <div class="faq-question-text">Was ist der Hauptunterschied bei der Liquidität zwischen Einlagen und
-                    Hochzinsanlagen?
-                </div>
-            </div>
-            <div class="faq-answer">
-                <div class="faq-answer-text">
-                    <ul>
-                        <li>
-                            <b>Einlagen (Spar-/Festgeld):</b> Die Liquidität ist in der Regel hoch oder vorhersehbar.
-                            Auf Sparkonten kann in der Regel täglich zugegriffen werden, oder Festgelder sind zu einem
-                            bestimmten Fälligkeitsdatum verfügbar. Eine vorzeitige Abhebung ist oft mit einem
-                            vorhersehbaren Zinsverlust verbunden.
-                        </li>
-                        <li>
-                            <b>Hochzinsanlagen (z. B. Anleihen, P2P):</b> Die Liquidität ist oft gering oder ungewiss.
-                            <ul>
-                                <li>
-                                    <b>Anleihen:</b> Um vorzeitig zu verkaufen, müssen Sie einen Käufer am Sekundärmarkt
-                                    finden, was zu einem Verlust führen kann, wenn die Marktzinsen gestiegen sind (der
-                                    Kurs der Anleihe sinkt).
-                                </li>
-                                <li>
-                                    <b>P2P/Crowdfunding:</b> Ein vorzeitiger Verkauf hängt oft von einem Sekundärmarkt
-                                    ab, der von der Plattform betrieben wird; das Handelsvolumen kann gering sein, was
-                                    einen schnellen Ausstieg schwierig oder unmöglich macht.
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="faq-item">
-            <div class="faq-question" onclick="toggleFaq(this)">
-                <div class="faq-icon">+</div>
-                <div class="faq-question-text">Warum haben Hochzinsanlagen typischerweise längere Bindungsfristen?</div>
-            </div>
-            <div class="faq-answer">
-                <div class="faq-answer-text">
-                    Hohe Renditen resultieren oft daraus, dass der Emittent Kapital für ein langfristiges Projekt (z. B.
-                    Immobilienentwicklung, langfristige Geschäftserweiterung) benötigt. Investoren werden durch einen
-                    höheren Zinssatz dazu angeregt, das Kapital für die gesamte Laufzeit (z. B. 3-5 Jahre) zu binden.
-                    Je länger die Laufzeit, desto geringer ist das Risiko für den Emittenten, frühzeitig refinanzieren
-                    zu müssen, was sich in einer höheren Rendite für den Investor niederschlägt.
-                </div>
+                <div class="faq-answer-text" th:utext="${faq.answer}"></div>
             </div>
         </div>
     </div>
 </div>
 <div class="mission-section" id="about-section" style="scroll-margin-top: 100px;">
     <div class="faq-container">
-        <h1 class="faq-title" style="padding-top: 60px; padding-bottom: 30px;">Warum haben wir diese Vergleichsplattform ins Leben
-            gerufen?</h1>
+        <h1 class="faq-title"
+            style="padding-top: 60px; padding-bottom: 30px;"
+            th:text="${aboutSection != null ? aboutSection.title : 'No title'}">
+        </h1>
 
-        <div class="faq-answer-text">
-            Diese Vergleichsplattform entstand aus der grundlegenden Herausforderung, vor der jeder Anleger in Österreich steht: <br>
-            <b>der Suche nach Rendite ohne Einbußen bei der Transparenz.</b><br><br>
-
-            Angesichts der vernachlässigbaren Erträge traditioneller Banksparprodukte wenden sich immer mehr Österreicher Hochzins-Investmentprodukten wie Unternehmensanleihen, P2P-Krediten und Immobilien-Anleihen zu. Diese Anlagen sind jedoch oft mit komplexen Dokumentationen, nicht standardisierten Risikoprofilen und anderen steuerlichen (KESt-)Auswirkungen verbunden als einfache Bankeinlagen.<br><br>
-
-            Wir haben diese unabhängige Plattform ins Leben gerufen, um <b>diese Komplexität zu durchbrechen</b>. Unsere Mission ist es, Informationen zu zentralisieren und zu standardisieren – von Zinssätzen und Mindestanlagebeträgen bis hin zu den entscheidenden Details der Seriosität des Emittenten und den anwendbaren Entschädigungssystemen. So erhalten Sie einen transparenten, direkten Vergleich.<br><br>
-
-            Wir ermöglichen es Ihnen, eine breite Palette von Angeboten einfach zu vergleichen und fundierte, sichere Entscheidungen zu treffen, die Ihrer persönlichen Risikobereitschaft entsprechen, ohne sich auf eine einzige Bank oder einen einzigen Broker verlassen zu müssen.
+        <div class="faq-answer-text"
+             th:utext="${aboutSection != null ? aboutSection.content : 'No about us section for now...'}"><br>
+            <b></b><br><br>
         </div>
     </div>
 </div>
+
 <footer class="footer">
     <div class="footer-container">
         <!-- Brand Section -->
