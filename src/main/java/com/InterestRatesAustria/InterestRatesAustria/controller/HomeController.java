@@ -1,7 +1,9 @@
 package com.InterestRatesAustria.InterestRatesAustria.controller;
 
 import com.InterestRatesAustria.InterestRatesAustria.model.dto.InterestRateDTO;
+import com.InterestRatesAustria.InterestRatesAustria.model.entity.CarouselImage;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.GlobalField;
+import com.InterestRatesAustria.InterestRatesAustria.model.entity.HeroSection;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.InterestRate;
 import com.InterestRatesAustria.InterestRatesAustria.service.*;
 import org.springframework.data.domain.Page;
@@ -27,20 +29,24 @@ public class HomeController {
     private final FilterService filterService;
     private final LastUpdateService lastUpdateService;
     private final FAQService faqService;
+    private final HeroSectionService heroSectionService;
     private final AboutService aboutService;
+    private final CarouselImageService carouselImageService;
 
     public HomeController(InterestRateService interestRateService,
                           GlobalFieldService globalFieldService,
                           FieldValueService fieldValueService,
                           FilterService filterService,
-                          LastUpdateService lastUpdateService, FAQService faqService, AboutService aboutService) {
+                          LastUpdateService lastUpdateService, FAQService faqService, HeroSectionService heroSectionService, AboutService aboutService, CarouselImageService carouselImageService) {
         this.interestRateService = interestRateService;
         this.globalFieldService = globalFieldService;
         this.fieldValueService = fieldValueService;
         this.filterService = filterService;
         this.lastUpdateService = lastUpdateService;
         this.faqService = faqService;
+        this.heroSectionService = heroSectionService;
         this.aboutService = aboutService;
+        this.carouselImageService = carouselImageService;
     }
 
     @GetMapping("/")
@@ -78,6 +84,8 @@ public class HomeController {
         model.addAttribute("newField", new GlobalField());
         model.addAttribute("faqs", faqService.getActiveFAQs());
         model.addAttribute("aboutSection", aboutService.getActiveAboutSection());
+        model.addAttribute("heroSection", heroSectionService.getActiveHeroSection());
+        model.addAttribute("carouselImages", carouselImageService.getActiveCarouselImages());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", interestRatesPage.getTotalPages());
         model.addAttribute("totalElements", interestRatesPage.getTotalElements());
@@ -128,6 +136,8 @@ public class HomeController {
         model.addAttribute("faqs", faqService.getAllFAQs());
         model.addAttribute("aboutSection", aboutService.getActiveAboutSection());
         model.addAttribute("currentPage", page);
+        model.addAttribute("heroSection", heroSectionService.getActiveHeroSection());
+        model.addAttribute("carouselImages", carouselImageService.getActiveCarouselImages());
         model.addAttribute("totalPages", interestRatesPage.getTotalPages());
         model.addAttribute("totalElements", interestRatesPage.getTotalElements());
         model.addAttribute("pageSize", size);
@@ -137,7 +147,10 @@ public class HomeController {
 
         model.addAttribute("activeFilters", filters);
         model.addAttribute("availableFilters", filterService.getAvailableFilters());
-
+        List<CarouselImage> carouselImages = carouselImageService.getAllCarouselImages();
+        model.addAttribute("carouselImages", carouselImages);
+        List<HeroSection> heroSections = heroSectionService.getAllHeroSections();
+        model.addAttribute("heroSections", heroSections);
         model.addAttribute("lastUpdateMessage", lastUpdateService.getFormattedLastUpdateMessage());
 
         return "admin/indexAdmin";
