@@ -165,116 +165,38 @@
 </nav>
 
 <!-- Hero Section -->
-<div class="hero-section" style="padding-top: 40px; padding-bottom: 20px;">
+<div class="hero-section" th:if="${heroSection != null}">
     <div class="container">
         <div class="row align-items-center">
-            <div class="col-lg-7 col-md-6" style="padding-left: 40px;">
+            <div class="col-lg-7 col-md-6">
                 <div class="hero-content">
-                    <h1>Top-Zinsen sichern:<br>Jetzt mehr aus Ihrem Geld machen</h1>
+                    <h1 th:text="${heroSection.mainTitle}">Default Title</h1>
                 </div>
-                <div class="hero-content" style="max-width: 400px;">
-                    <p>Die aktuell höchsten Zinsangebote für Ihr Erspartes – transparent und objektiv.</p>
+                <div class="hero-content">
+                    <p th:text="${heroSection.subtitle}">Default subtitle</p>
                 </div>
             </div>
-            <div class="col-lg-5 col-md-6 d-flex justify-content-center">
-                <img alt="Illustration showing financial growth and percentages" class="hero-illustration-image"
-                     src="https://i.ibb.co/6cYSQPBW/hero-illustration.png" style="max-width: 70%; height: auto;
-                     padding-right: 20px; padding-bottom: 10px;">
+            <div class="col-lg-5 col-md-6">
+                <img th:src="${heroSection.heroImageUrl}"
+                     alt="Hero Image"
+                     class="hero-illustration-image"/>
             </div>
         </div>
     </div>
-    <div class="logos-section" style="overflow-x: hidden;">
-        <div class="logos-track">
-            <!-- First set of logos -->
+    <div class="logos-track">
+        <th:block th:each="image : ${carouselImages}">
             <div class="logo-item">
-                <img alt="Armeec" src="static/images/Armeec.png">
+                <img th:src="${image.imageUrl}"
+                     th:alt="${image.altText}" />
             </div>
+        </th:block>
+        <!-- Duplicate for seamless loop -->
+        <th:block th:each="image : ${carouselImages}">
             <div class="logo-item">
-                <img alt="Bulins" src="static/images/Bulins.png">
+                <img th:src="${image.imageUrl}"
+                     th:alt="${image.altText}" />
             </div>
-            <div class="logo-item">
-                <img alt="Bulstrad" src="static/images/Bulstrad.png">
-            </div>
-            <div class="logo-item">
-                <img alt="DZI" src="static/images/DZI.png">
-            </div>
-            <div class="logo-item">
-                <img alt="Euroins" src="static/images/Euroins.png">
-            </div>
-            <div class="logo-item">
-                <img alt="Generali" src="static/images/Generali.png">
-            </div>
-            <div class="logo-item">
-                <img alt="Uniqa" src="static/images/Uniqa.png">
-            </div>
-
-            <!-- Duplicate set for seamless loop -->
-            <div class="logo-item">
-                <img alt="Armeec" src="static/images/Armeec.png">
-            </div>
-            <div class="logo-item">
-                <img alt="Bulins" src="static/images/Bulins.png">
-            </div>
-            <div class="logo-item">
-                <img alt="Bulstrad" src="static/images/Bulstrad.png">
-            </div>
-            <div class="logo-item">
-                <img alt="DZI" src="static/images/DZI.png">
-            </div>
-            <div class="logo-item">
-                <img alt="Euroins" src="static/images/Euroins.png">
-            </div>
-            <div class="logo-item">
-                <img alt="Generali" src="static/images/Generali.png">
-            </div>
-            <div class="logo-item">
-                <img alt="Uniqa" src="static/images/Uniqa.png">
-            </div>
-
-            <!-- Duplicate set for seamless loop -->
-            <div class="logo-item">
-                <img alt="Armeec" src="static/images/Armeec.png">
-            </div>
-            <div class="logo-item">
-                <img alt="Bulins" src="static/images/Bulins.png">
-            </div>
-            <div class="logo-item">
-                <img alt="Bulstrad" src="static/images/Bulstrad.png">
-            </div>
-            <div class="logo-item">
-                <img alt="DZI" src="static/images/DZI.png">
-            </div>
-            <div class="logo-item">
-                <img alt="Euroins" src="static/images/Euroins.png">
-            </div>
-            <div class="logo-item">
-                <img alt="Generali" src="static/images/Generali.png">
-            </div>
-            <div class="logo-item">
-                <img alt="Uniqa" src="static/images/Uniqa.png">
-            </div>
-            <div class="logo-item">
-                <img alt="Armeec" src="static/images/Armeec.png">
-            </div>
-            <div class="logo-item">
-                <img alt="Bulins" src="static/images/Bulins.png">
-            </div>
-            <div class="logo-item">
-                <img alt="Bulstrad" src="static/images/Bulstrad.png">
-            </div>
-            <div class="logo-item">
-                <img alt="DZI" src="static/images/DZI.png">
-            </div>
-            <div class="logo-item">
-                <img alt="Euroins" src="static/images/Euroins.png">
-            </div>
-            <div class="logo-item">
-                <img alt="Generali" src="static/images/Generali.png">
-            </div>
-            <div class="logo-item">
-                <img alt="Uniqa" src="static/images/Uniqa.png">
-            </div>
-        </div>
+        </th:block>
     </div>
 </div>
 <div class="vergleichen-section" id="compare-section" style="scroll-margin-top: 100px;">

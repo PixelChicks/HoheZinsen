@@ -134,7 +134,12 @@
             </div>
         </div>
     </div>
-
+    <a class="btn btn-success" href="/admin/hero/create">
+        <i class="fas fa-plus"></i> Add Hero Section
+    </a>
+    <a class="btn btn-success" href="/admin/carousel/create">
+        <i class="fas fa-plus"></i> Add Carousel Image
+    </a>
     <!-- Pagination Controls - Top -->
     <div class="pagination-container">
         <div class="pagination-info">
@@ -301,7 +306,6 @@
         <div class="text-center text-muted py-5" th:if="${faqs == null or faqs.isEmpty()}">
             <i class="fas fa-question-circle fa-4x mb-3"></i>
             <h3>No FAQs yet</h3>
-            <a class="btn btn-primary mt-3" href="/admin/faqs/create"><i class="fas fa-plus"></i> Add one</a>
         </div>
         <div>
             <a class="btn btn-success" href="/admin/faqs/create"><i class="fas fa-plus"></i> Add FAQ</a>
