@@ -143,8 +143,10 @@
 
             </div>
             <div class="nav-links">
-                <a class="nav-link" href="#compare-section" onclick="handleCompareNav(event)">Compare</a>
-                <a class="nav-link" href="#faq-section">FAQs</a>
+                <a class="nav-link" href="#compare-section" onclick="handleCompareNav(event)"
+                   th:text="${siteSettings.navCompareText}">Compare</a>
+                <a class="nav-link" href="#faq-section"
+                   th:text="${siteSettings.navFaqsText}">FAQs</a>
                 <div class="theme-segmented-switch" id="darkModeToggleContainer">
 
                     <button aria-label="Activate light mode"
@@ -216,11 +218,13 @@
 <div class="vergleichen-section" id="compare-section" style="scroll-margin-top: 100px;">
     <div class="card-body py-2">
         <small>
-            <button class="vergleichen-header" id="quickCompareBtn" onclick="quickStartComparison()">
+            <button class="vergleichen-header" id="quickCompareBtn" onclick="quickStartComparison()"
+                    th:text="${siteSettings.compareButtonText}">
                 Vergleichen
             </button>
         </small>
-        <span style="padding-top: 20px;color: rgb(100 107 119);" th:text="${lastUpdateMessage}">Last updated 20 hours ago</span>
+        <span style="padding-top: 20px;color: rgb(100 107 119);"
+              th:text="${lastUpdateMessage}">Last updated 20 hours ago</span>
     </div>
 </div>
 <div class="vergleichen-section" style="border-bottom: 1px solid rgb(206 206 206);">
@@ -229,9 +233,9 @@
             <div class="comparison-header">
             </div>
 
-            <div class="comparison-limit-warning" id="comparisonWarning">
-                Sie können maximal 3 Zinssätze gleichzeitig vergleichen. Entfernen Sie einen Vergleich, um einen neuen
-                hinzuzufügen.
+            <div class="comparison-limit-warning" id="comparisonWarning"
+                 th:text="${siteSettings.comparisonWarningText}">
+                Sie können maximal 3 Zinssätze gleichzeitig vergleichen...
             </div>
 
             <div class="comparison-container" id="comparisonContainer">
@@ -239,7 +243,9 @@
             </div>
 
             <div class="empty-comparison-state" id="emptyComparisonState">
-                <p>click a provider from the table below to add to compare</p>
+                <p th:utext="${siteSettings.emptyComparisonText}">
+                    click a provider from the table below to add to compare
+                </p>
             </div>
         </div>
     </div>
@@ -248,10 +254,12 @@
     <!-- View Toggle for Mobile -->
     <div class="view-toggle d-md-none">
         <div aria-label="View toggle" class="btn-group" role="group">
-            <button class="btn btn-outline-primary active" id="stackedView" type="button">
+            <button class="btn btn-outline-primary active" id="stackedView" type="button"
+                    th:text="${siteSettings.cardViewText}">
                 📱 Card View
             </button>
-            <button class="btn btn-outline-primary" id="scrollView" type="button">
+            <button class="btn btn-outline-primary" id="scrollView" type="button"
+                    th:text="${siteSettings.tableViewText}">
                 📊 Table View
             </button>
         </div>
@@ -275,7 +283,10 @@
             <div class="loading-spinner"></div>
         </div>
 
-        <div class="scroll-indicator" id="scrollIndicator">← Scroll horizontally to see more →</div>
+        <div class="scroll-indicator" id="scrollIndicator"
+             th:text="${siteSettings.scrollIndicatorText}">
+            ← Scroll horizontally to see more →
+        </div>
 
         <div class="table-responsive" id="tableContainer">
             <table class="table table-sm" id="mainTable">
@@ -309,8 +320,10 @@
             <!-- Empty state -->
             <div class="empty-state" id="emptyState" style="display: none;">
                 <div>📊</div>
-                <h5>No interest rates found</h5>
-                <p>Try adjusting your search criteria or add a new interest rate.</p>
+                <h5 th:text="${siteSettings.emptyStateTitle}">No interest rates found</h5>
+                <p th:text="${siteSettings.emptyStateDescription}">
+                    Try adjusting your search criteria or add a new interest rate.
+                </p>
             </div>
         </div>
     </div>
@@ -325,7 +338,10 @@
             </div>
         </div>
 
-        <button class="nav-logo" id="loadMoreBtn" style="background: rgba(75, 84, 99, 1); color: #fff;" onclick="loadMoreData()">
+        <button class="nav-logo" id="loadMoreBtn"
+                style="background: rgba(75, 84, 99, 1); color: #fff;"
+                onclick="loadMoreData()"
+                th:text="${siteSettings.loadMoreButtonText}">
             Load More
         </button>
 
@@ -335,10 +351,13 @@
 </div>
 <div class="mission-section" id="faq-section" style="scroll-margin-top: 100px;">
     <div class="faq-container">
-        <h1 class="faq-title" style="padding-top: 60px; padding-bottom: 30px;">FAQs</h1>
+        <h1 class="faq-title" style="padding-top: 60px; padding-bottom: 30px;"
+            th:text="${siteSettings.faqTitle}">FAQs</h1>
 
         <div th:if="${faqs == null || faqs.isEmpty()}" class="text-center py-5">
-            <p class="text-muted">No FAQs available at the moment.</p>
+            <p class="text-muted" th:text="${siteSettings.faqEmptyText}">
+                No FAQs available at the moment.
+            </p>
         </div>
 
         <div th:each="faq : ${faqs}" class="faq-item">
@@ -368,7 +387,6 @@
 
 <footer class="footer">
     <div class="footer-container">
-        <!-- Brand Section -->
         <div class="footer-brand">
             <div class="nav-logo">
                 <svg fill="none" height="37" viewBox="0 0 173 37" width="173" xmlns="http://www.w3.org/2000/svg">
@@ -386,33 +404,34 @@
                 </svg>
 
             </div>
-            <p class="footer-tagline">
+            <p class="footer-tagline" th:text="${siteSettings.footerTagline}">
                 Die aktuell höchsten Zinsangebote für Ihr Erspartes – transparent und objektiv.
             </p>
         </div>
 
-        <!-- Sitemap Column -->
         <div class="footer-column">
-            <h4>Sitemap</h4>
+            <h4 th:text="${siteSettings.footerSitemapTitle}">Sitemap</h4>
             <ul class="footer-links">
-                <li><a href="#compare-section" onclick="handleCompareNav(event)">Compare</a></li>
-                <li><a href="#faq-section">FAQs</a></li>
+                <li><a href="#compare-section" onclick="handleCompareNav(event)"
+                       th:text="${siteSettings.navCompareText}">Compare</a></li>
+                <li><a href="#faq-section"
+                       th:text="${siteSettings.navFaqsText}">FAQs</a></li>
                 <li><a href="#about-section">About</a></li>
             </ul>
         </div>
 
-        <!-- Legal Column -->
         <div class="footer-column">
-            <h4>Legal</h4>
+            <h4 th:text="${siteSettings.footerLegalTitle}">Legal</h4>
             <ul class="footer-links">
-                <li><a href="#terms">Terms and Conditions</a></li>
-                <li><a href="#privacy">Privacy Policy</a></li>
+                <li><a href="#terms" th:text="${siteSettings.footerTermsText}">
+                    Terms and Conditions</a></li>
+                <li><a href="#privacy" th:text="${siteSettings.footerPrivacyText}">
+                    Privacy Policy</a></li>
             </ul>
         </div>
     </div>
     <hr>
-    <!-- Copyright -->
-    <div class="footer-copyright">
+    <div class="footer-copyright" th:text="${siteSettings.footerCopyright}">
         © 2025 HoheZinsen.at | All rights reserved.
     </div>
 </footer>
@@ -457,6 +476,23 @@
     let availableFilters = [];
     let activeFilters = new Map();
     let filterExpanded = false;
+
+    const siteSettings = {
+        mehrInfoButtonText: /*[[${siteSettings.mehrInfoButtonText}]]*/ 'MEHR INFO',
+        noInfoButtonText: /*[[${siteSettings.noInfoButtonText}]]*/ 'No Info',
+        zumAngebotButtonText: /*[[${siteSettings.zumAngebotButtonText}]]*/ 'ZUM ANGEBOT',
+        vergleichenButtonText: /*[[${siteSettings.vergleichenButtonText}]]*/ 'VERGLEICHEN',
+        filterAllText: /*[[${siteSettings.filterAllText}]]*/ 'Alle',
+        mobileComparisonEmptyText: /*[[${siteSettings.mobileComparisonEmptyText}]]*/ 'Click a provider<br>to compare',
+
+        // Status messages
+        statusRateAdded: /*[[${siteSettings.statusRateAdded}]]*/ 'added to comparison',
+        statusRateRemoved: /*[[${siteSettings.statusRateRemoved}]]*/ 'Aus dem Vergleich entfernt',
+        statusMaxComparisons: /*[[${siteSettings.statusMaxComparisons}]]*/ 'Maximum number of comparisons reached',
+        statusComparisonCleared: /*[[${siteSettings.statusComparisonCleared}]]*/ 'All comparisons cleared',
+        statusLoadingRateDetails: /*[[${siteSettings.statusLoadingRateDetails}]]*/ 'Rate data not found locally, fetching details...',
+        statusNoAdditionalInfo: /*[[${siteSettings.statusNoAdditionalInfo}]]*/ 'No additional information available for this rate.'
+    };
 
     // ============================================================================
     // FAQ TOGGLE
@@ -1141,7 +1177,7 @@ function renderTableRowsHTML(data) {
                         onchange="updateFilterFromDropdown(this, ${filter.fieldId})"
                         data-field-id="${filter.fieldId}"
                         style="padding-right: 30px; appearance: none; -webkit-appearance: none; -moz-appearance: none; background: transparent;">
-                    <option value="">Alle</option>
+                    <option value="">${siteSettings.filterAllText}</option>
             `;
 
             selectHtml += filter.options.map(option => `
@@ -1279,12 +1315,12 @@ function renderTableRowsHTML(data) {
         }
     }
 
-    function addToComparison(rateId) {
+function addToComparison(rateId) {
         updateMaxComparisons();
 
         if (comparedRates.size >= maxComparisons) {
             const maxText = maxComparisons === 2 ? '2' : '3';
-            showStatus(`Maximum number of comparisons reached (${maxText})`, 'warning');
+            showStatus(`${siteSettings.statusMaxComparisons} (${maxText})`, 'warning');
             const checkbox = document.getElementById(`external-compare-${rateId}`);
             if (checkbox) checkbox.checked = false;
             return;
@@ -1307,19 +1343,17 @@ function renderTableRowsHTML(data) {
             updateVergleichenButtonVisibility(rateId, true);
 
             const providerName = serverRateFieldValuesMap[rateId]?.[1] || `Rate #${rateId}`;
-            showStatus(`${providerName} added to comparison`, 'success');
+            showStatus(`${providerName} ${siteSettings.statusRateAdded}`, 'success');
         }
     }
 
-    function removeFromComparison(rateId) {
+   function removeFromComparison(rateId) {
         if (comparedRates.has(rateId)) {
             comparedRates.delete(rateId);
             updateComparisonDisplay();
             updateTableRowHighlight(rateId, false);
-
             updateVergleichenButtonVisibility(rateId, false);
-
-            showStatus(`Aus dem Vergleich entfernt`, 'info');
+            showStatus(siteSettings.statusRateRemoved, 'info');
 
             const externalCheckbox = document.getElementById(`external-compare-${rateId}`);
             if (externalCheckbox) {
@@ -1352,7 +1386,7 @@ function renderTableRowsHTML(data) {
 
         comparedRates.clear();
         updateComparisonDisplay();
-        showStatus('All comparisons cleared', 'info');
+        showStatus(siteSettings.statusComparisonCleared, 'info');
         document.body.classList.remove('comparison-mode');
 
         // Hide the external checkboxes
@@ -1450,7 +1484,7 @@ function renderTableRowsHTML(data) {
                 `;
             }).join('');
 
-        return `
+         return `
             <div class="mobile-comparison-card">
                 <div class="mobile-comparison-header">
                     <button class="mobile-remove-btn" onclick="removeFromComparison(${rate.id})" title="Remove">✕</button>
@@ -1466,7 +1500,7 @@ function renderTableRowsHTML(data) {
                        class="${rate.moreInfo ? 'mobile-mehr-link' : 'mobile-mehr-link disabled'}"
                        onclick="${rate.moreInfo ? `showMoreInfo(${rate.id})` : 'return false;'}"
                        style="${rate.moreInfo ? 'color: #00b894;' : 'color: #ccc; pointer-events: none;'}">
-                        ${rate.moreInfo ? 'MEHR INFO' : 'No Info'}
+                        ${rate.moreInfo ? siteSettings.mehrInfoButtonText : siteSettings.noInfoButtonText}
                     </a>
                 </div>
             </div>
@@ -1478,7 +1512,7 @@ function renderTableRowsHTML(data) {
             <div class="mobile-comparison-card empty">
                 <div class="empty-card-content">
                     <p style="font-size: 13px; color: #666; text-align: center; margin: 0;">
-                        Click a provider<br>to compare
+                        ${siteSettings.mobileComparisonEmptyText}
                     </p>
                 </div>
             </div>
@@ -1513,7 +1547,7 @@ function renderTableRowsHTML(data) {
         for (let i = 0; i < count; i++) {
             cards += `
                 <div class="empty-comparison-card">
-                    click a provider from the table<br>below to add to compare
+                    ${siteSettings.emptyComparisonText}
                 </div>
             `;
         }
@@ -1616,7 +1650,7 @@ function renderTableRowsHTML(data) {
         }
 
         if (!rate) {
-            showStatus('Rate data not found locally, fetching details...', 'info');
+            showStatus(siteSettings.statusLoadingRateDetails, 'info');
             fetchRateDetails(rateId).then(rateData => {
                 if (rateData && rateData.moreInfo) {
                     if (rateData.fieldValues) {
@@ -1627,7 +1661,7 @@ function renderTableRowsHTML(data) {
                     }
                     displayRateCard(rateData);
                 } else {
-                    showStatus('No additional information available for this rate.', 'warning');
+                    showStatus(siteSettings.statusNoAdditionalInfo, 'warning');
                 }
             });
             return;
@@ -1811,14 +1845,14 @@ function renderTableRowsHTML(data) {
                    href="${rate.webLink || '#'}"
                    target="_blank"
                    title="Open Link">
-                    ZUM ANGEBOT
+                    ${siteSettings.zumAngebotButtonText}
                 </a>
 
                 <button type="button"
                         class="mehr-info-btn"
                         onclick="startComparisonFromCard(${rate.id})"
                         style="${buttonDisplay}">
-                    VERGLEICHEN
+                    ${siteSettings.vergleichenButtonText}
                 </button>
             </div>
         `;
@@ -1990,7 +2024,7 @@ function renderTableRowsHTML(data) {
                     </svg>`;
                     button.title = "Hide info";
                 } else {
-                    const buttonText = isMobileButton ? 'MEHR' : 'MEHR INFO';
+                    const buttonText = isMobileButton ? 'MEHR' : siteSettings.mehrInfoButtonText;
                     button.innerHTML = `${buttonText} <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M1 1L8 8L15 1" stroke="#00AC98" stroke-width="2"/>
                     </svg>`;

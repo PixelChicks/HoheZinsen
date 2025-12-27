@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Site Settings</title>
+    <script src="/js/theme-persistence.js" defer></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://api.fonts.coollabs.io/css2?family=Mona+Sans:wght@200;300;400;500;600;700;800;900&display=swap');
+        * { font-family: 'Mona Sans', sans-serif !important; }
+
+        .page-header {
+            background: #00b894;
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 40px;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .form-card-header {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px 30px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .form-card-body { padding: 30px; }
+
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .form-section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dee2e6;
+            color: #495057;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            padding: 12px 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            padding: 12px 40px;
+            font-weight: 600;
+            border-radius: 8px;
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+            border-radius: 8px;
+        }
+
+        .character-count {
+            font-size: 0.85rem;
+            color: #6c757d;
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        .help-text {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<div class="page-header">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div>
+            <h1> Site Settings</h1>
+            <p class="mb-0 opacity-75">Edit all website text content</p>
+        </div>
+        <a href="/admin" class="btn btn-light">Back to Dashboard</a>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <!-- Alert Messages -->
+            <div class="alert alert-success alert-dismissible fade show" th:if="${successMessage}">
+                <span th:text="${successMessage}"></span>
+                <button class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div class="alert alert-danger alert-dismissible fade show" th:if="${errorMessage}">
+                <span th:text="${errorMessage}"></span>
+                <button class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <form th:action="@{/admin/site-settings}"
+                  th:object="${siteSettings}"
+                  method="post">
+
+                <!-- Navigation Texts -->
+                <div class="form-card">
+                    <div class="form-card-header">
+                        <h3 class="mb-0">Navigation</h3>
+                    </div>
+                    <div class="form-card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Compare Link Text</label>
+                                <input type="text" class="form-control" th:field="*{navCompareText}" maxlength="100">
+                                <div class="help-text">Text for the "Compare" navigation link</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">FAQs Link Text</label>
+                                <input type="text" class="form-control" th:field="*{navFaqsText}" maxlength="100">
+                                <div class="help-text">Text for the "FAQs" navigation link</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comparison Section -->
+                <div class="form-card">
+                    <div class="form-card-header">
+                        <h3 class="mb-0">Comparison Section</h3>
+                    </div>
+                    <div class="form-card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Compare Button Text</label>
+                            <input type="text" class="form-control" th:field="*{compareButtonText}" maxlength="200">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Comparison Warning Text</label>
+                            <textarea class="form-control" th:field="*{comparisonWarningText}" rows="2" maxlength="200"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Empty Comparison Text</label>
+                            <input type="text" class="form-control" th:field="*{emptyComparisonText}" maxlength="200">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mobile Comparison Empty Text</label>
+                            <input type="text" class="form-control" th:field="*{mobileComparisonEmptyText}" maxlength="200">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table/View Section -->
+                <div class="form-card">
+                    <div class="form-card-header">
+                        <h3 class="mb-0">Table & View Controls</h3>
+                    </div>
+                    <div class="form-card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Card View Button Text</label>
+                                <input type="text" class="form-control" th:field="*{cardViewText}" maxlength="100">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Table View Button Text</label>
+                                <input type="text" class="form-control" th:field="*{tableViewText}" maxlength="100">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Load More Button Text</label>
+                            <input type="text" class="form-control" th:field="*{loadMoreButtonText}" maxlength="100">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Scroll Indicator Text</label>
+                            <input type="text" class="form-control" th:field="*{scrollIndicatorText}" maxlength="200">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Empty State Title</label>
+                            <input type="text" class="form-control" th:field="*{emptyStateTitle}" maxlength="200">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Empty State Description</label>
+                            <textarea class="form-control" th:field="*{emptyStateDescription}" rows="2" maxlength="300"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Button Texts -->
+                <div class="form-card">
+                    <div class="form-card-header">
+                        <h3 class="mb-0">Button Texts</h3>
+                    </div>
+                    <div class="form-card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">"More Info" Button Text</label>
+                                <input type="text" class="form-control" th:field="*{mehrInfoButtonText}" maxlength="100">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">"No Info" Button Text</label>
+                                <input type="text" class="form-control" th:field="*{noInfoButtonText}" maxlength="100">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">"Go to Offer" Button Text</label>
+                                <input type="text" class="form-control" th:field="*{zumAngebotButtonText}" maxlength="100">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">"Compare" Button Text</label>
+                                <input type="text" class="form-control" th:field="*{vergleichenButtonText}" maxlength="100">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="form-card">
+                    <div class="form-card-header">
+                        <h3 class="mb-0">Filter Section</h3>
+                    </div>
+                    <div class="form-card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Filter "All" Text</label>
+                            <input type="text" class="form-control" th:field="*{filterAllText}" maxlength="100">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Section -->
+                <div class="form-card">
+                    <div class="form-card-header">
+                        <h3 class="mb-0">FAQ Section</h3>
+                    </div>
+                    <div class="form-card-body">
+                        <div class="mb-3">
+                            <label class="form-label">FAQ Section Title</label>
+                            <input type="text" class="form-control" th:field="*{faqTitle}" maxlength="200">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">FAQ Empty State Text</label>
+                            <input type="text" class="form-control" th:field="*{faqEmptyText}" maxlength="200">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="form-card">
+                    <div class="form-card-header">
+                        <h3 class="mb-0">Footer</h3>
+                    </div>
+                    <div class="form-card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Footer Tagline</label>
+                            <textarea class="form-control" th:field="*{footerTagline}" rows="2" maxlength="500"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Sitemap Title</label>
+                                <input type="text" class="form-control" th:field="*{footerSitemapTitle}" maxlength="100">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Legal Title</label>
+                                <input type="text" class="form-control" th:field="*{footerLegalTitle}" maxlength="100">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Terms Link Text</label>
+                                <input type="text" class="form-control" th:field="*{footerTermsText}" maxlength="100">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Privacy Link Text</label>
+                                <input type="text" class="form-control" th:field="*{footerPrivacyText}" maxlength="100">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Copyright Text</label>
+                            <input type="text" class="form-control" th:field="*{footerCopyright}" maxlength="200">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Messages -->
+                <div class="form-card">
+                    <div class="form-card-header">
+                        <h3 class="mb-0">Status Messages</h3>
+                    </div>
+                    <div class="form-card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Rate Added Message</label>
+                            <input type="text" class="form-control" th:field="*{statusRateAdded}" maxlength="200">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Rate Removed Message</label>
+                            <input type="text" class="form-control" th:field="*{statusRateRemoved}" maxlength="200">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Max Comparisons Message</label>
+                            <input type="text" class="form-control" th:field="*{statusMaxComparisons}" maxlength="200">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Comparison Cleared Message</label>
+                            <input type="text" class="form-control" th:field="*{statusComparisonCleared}" maxlength="200">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Loading Rate Details Message</label>
+                            <input type="text" class="form-control" th:field="*{statusLoadingRateDetails}" maxlength="200">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">No Additional Info Message</label>
+                            <input type="text" class="form-control" th:field="*{statusNoAdditionalInfo}" maxlength="200">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="/admin" class="btn btn-cancel btn-lg">Cancel</a>
+                    <button type="submit" class="btn btn-submit btn-lg text-white">
+                        Save Settings
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

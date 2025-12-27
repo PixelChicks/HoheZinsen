@@ -27,6 +27,7 @@ public class HomeController {
     private final GlobalFieldService globalFieldService;
     private final FieldValueService fieldValueService;
     private final FilterService filterService;
+    private final SiteSettingsService siteSettingsService;
     private final LastUpdateService lastUpdateService;
     private final FAQService faqService;
     private final HeroSectionService heroSectionService;
@@ -36,12 +37,13 @@ public class HomeController {
     public HomeController(InterestRateService interestRateService,
                           GlobalFieldService globalFieldService,
                           FieldValueService fieldValueService,
-                          FilterService filterService,
+                          FilterService filterService, SiteSettingsService siteSettingsService,
                           LastUpdateService lastUpdateService, FAQService faqService, HeroSectionService heroSectionService, AboutService aboutService, CarouselImageService carouselImageService) {
         this.interestRateService = interestRateService;
         this.globalFieldService = globalFieldService;
         this.fieldValueService = fieldValueService;
         this.filterService = filterService;
+        this.siteSettingsService = siteSettingsService;
         this.lastUpdateService = lastUpdateService;
         this.faqService = faqService;
         this.heroSectionService = heroSectionService;
@@ -93,7 +95,7 @@ public class HomeController {
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortDir", sortDir);
         model.addAttribute("search", search);
-
+        model.addAttribute("siteSettings", siteSettingsService.getSiteSettings());
         model.addAttribute("activeFilters", filters);
         model.addAttribute("availableFilters", filterService.getAvailableFilters());
 

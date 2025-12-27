@@ -96,11 +96,15 @@
         <i class="fas fa-times-circle"></i> <span th:text="${errorMessage}"></span>
         <button class="btn-close" data-bs-dismiss="alert"></button>
     </div>
+
+    <a href="/admin/site-settings" class="btn btn-primary">
+        <i class="fas fa-cog"></i> Edit Site Settings
+    </a><br>
     <div class="container pb-5 mt-4">
         <h3 class="mb-3">Hero Sections</h3>
         <a class="btn btn-success" href="/admin/hero/create">
             <i class="fas fa-plus"></i> Add Hero Section
-        </a>
+        </a><br>
         <div class="alert alert-info" th:if="${heroSections == null or heroSections.isEmpty()}">
             <i class="fas fa-info-circle"></i> No hero sections yet. Click the button above to add one.
         </div>
@@ -167,7 +171,7 @@
         <h3 class="mb-3">Carousel Images</h3>
         <a class="btn btn-success" href="/admin/carousel/create">
             <i class="fas fa-plus"></i> Add Carousel Image
-        </a>
+        </a><br>
         <div class="alert alert-info" th:if="${carouselImages == null or carouselImages.isEmpty()}">
             <i class="fas fa-info-circle"></i> No carousel images yet. Click the button above to add one.
         </div>
