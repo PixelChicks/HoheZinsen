@@ -88,36 +88,134 @@
             Add New Interest Rate</a>
     </div>
 
-    <!-- Filter Section HTML -->
-    <div class="filter-section" id="filterSection">
-        <div class="filter-toggle" id="filterToggle" onclick="toggleFilters()">
-            <h5>
-                🔍 Filters
-                <span class="filter-summary" id="filterSummary">Click to add filters</span>
-            </h5>
-            <span class="chevron">▼</span>
+    <div class="alert alert-success alert-dismissible fade show" th:if="${successMessage}">
+        <i class="fas fa-check-circle"></i> <span th:text="${successMessage}"></span>
+        <button class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div class="alert alert-danger alert-dismissible fade show" th:if="${errorMessage}">
+        <i class="fas fa-times-circle"></i> <span th:text="${errorMessage}"></span>
+        <button class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div class="container pb-5 mt-4">
+        <h3 class="mb-3">Hero Sections</h3>
+        <a class="btn btn-success" href="/admin/hero/create">
+            <i class="fas fa-plus"></i> Add Hero Section
+        </a>
+        <div class="alert alert-info" th:if="${heroSections == null or heroSections.isEmpty()}">
+            <i class="fas fa-info-circle"></i> No hero sections yet. Click the button above to add one.
         </div>
 
-        <div class="filter-content" id="filterContent">
-            <!-- Active Filters Tags -->
-            <div class="active-filters" id="activeFilters">
-                <!-- Active filter tags will be populated here -->
-            </div>
+        <div class="row g-3" th:if="${heroSections != null and !heroSections.isEmpty()}">
+            <div class="col-12" th:each="hero : ${heroSections}">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Hero Image Preview -->
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <img th:src="${hero.heroImageUrl}"
+                                         alt="Hero Image"
+                                         class="img-fluid rounded"
+                                         style="max-height: 150px; object-fit: contain;"
+                                         th:if="${hero.heroImageUrl != null and !#strings.isEmpty(hero.heroImageUrl)}">
+                                    <div class="text-muted"
+                                         th:if="${hero.heroImageUrl == null or #strings.isEmpty(hero.heroImageUrl)}">
+                                        <i class="fas fa-image fa-3x"></i>
+                                        <p class="small mt-2">No Image</p>
+                                    </div>
+                                </div>
+                            </div>
 
-            <!-- Filter Grid -->
-            <div class="filter-grid" id="filterGrid">
-                <!-- Filter items will be populated here -->
-            </div>
+                            <!-- Hero Content -->
+                            <div class="col-md-7">
+                                <h5 class="card-title" th:text="${hero.mainTitle}">Main Title</h5>
+                                <p class="card-text text-muted" th:text="${hero.subtitle}">Subtitle</p>
 
-            <!-- Filter Actions -->
-            <div class="filter-actions">
-                <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
-                <button class="btn btn-secondary" onclick="clearAllFilters()">Clear All</button>
-                <button class="btn btn-outline-secondary" onclick="toggleFilters()">Close</button>
+                                <!-- Status Badge -->
+                                <span class="badge"
+                                      th:classappend="${hero.isActive} ? 'badge-active' : 'badge-inactive'"
+                                      th:text="${hero.isActive} ? 'Active' : 'Inactive'">
+                            </span>
+
+                                <div class="small text-muted mt-2">
+                                    <i class="fas fa-calendar"></i> Created:
+                                    <span th:text="${#temporals.format(hero.createdAt, 'dd MMM yyyy')}">Date</span>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="col-md-2 d-flex flex-column gap-2 justify-content-center">
+                                <a class="btn btn-outline-primary btn-sm"
+                                   th:href="@{/admin/hero/edit/{id}(id=${hero.id})}">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <form th:action="@{/admin/hero/delete/{id}(id=${hero.id})}"
+                                      method="post"
+                                      onsubmit="return confirm('Are you sure you want to delete this hero section?');">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+    <div class="container pb-5 mt-4">
+        <h3 class="mb-3">Carousel Images</h3>
+        <a class="btn btn-success" href="/admin/carousel/create">
+            <i class="fas fa-plus"></i> Add Carousel Image
+        </a>
+        <div class="alert alert-info" th:if="${carouselImages == null or carouselImages.isEmpty()}">
+            <i class="fas fa-info-circle"></i> No carousel images yet. Click the button above to add one.
+        </div>
 
+        <div class="row g-3" th:if="${carouselImages != null and !carouselImages.isEmpty()}">
+            <div class="col-md-6 col-lg-4" th:each="image : ${carouselImages}">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <!-- Image Preview -->
+                        <div class="text-center mb-3">
+                            <img th:src="${image.imageUrl}"
+                                 th:alt="${image.altText}"
+                                 class="img-fluid rounded"
+                                 style="max-height: 120px; object-fit: contain;">
+                        </div>
+
+                        <!-- Image Details -->
+                        <h6 class="card-title" th:text="${image.altText}">Alt Text</h6>
+                        <div class="small text-muted mb-2">
+                            <i class="fas fa-sort"></i> Order: <strong th:text="${image.displayOrder}">1</strong>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <span class="badge ms-2 mb-3"
+                              th:classappend="${image.isActive} ? 'badge-active' : 'badge-inactive'"
+                              th:text="${image.isActive} ? 'Active' : 'Inactive'">
+                    </span>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-outline-primary btn-sm flex-fill"
+                               th:href="@{/admin/carousel/edit/{id}(id=${image.id})}">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <form th:action="@{/admin/carousel/delete/{id}(id=${image.id})}"
+                                  method="post"
+                                  style="display: inline;"
+                                  onsubmit="return confirm('Are you sure you want to delete this carousel image?');">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row g-2">
         <div class="col-md-6 col-lg-4">
             <div class="mb-4 admin-only">
@@ -134,12 +232,29 @@
             </div>
         </div>
     </div>
-    <a class="btn btn-success" href="/admin/hero/create">
-        <i class="fas fa-plus"></i> Add Hero Section
-    </a>
-    <a class="btn btn-success" href="/admin/carousel/create">
-        <i class="fas fa-plus"></i> Add Carousel Image
-    </a>
+    <div class="filter-section" id="filterSection">
+        <div class="filter-toggle" id="filterToggle" onclick="toggleFilters()">
+            <h5>
+                🔍 Filters
+                <span class="filter-summary" id="filterSummary">Click to add filters</span>
+            </h5>
+            <span class="chevron">▼</span>
+        </div>
+
+        <div class="filter-content" id="filterContent">
+            <div class="active-filters" id="activeFilters">
+            </div>
+
+            <div class="filter-grid" id="filterGrid">
+            </div>
+
+            <div class="filter-actions">
+                <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+                <button class="btn btn-secondary" onclick="clearAllFilters()">Clear All</button>
+                <button class="btn btn-outline-secondary" onclick="toggleFilters()">Close</button>
+            </div>
+        </div>
+    </div>
     <!-- Pagination Controls - Top -->
     <div class="pagination-container">
         <div class="pagination-info">
@@ -292,15 +407,6 @@
     </div>
 </div>
 <div class="container pb-5">
-    <div class="alert alert-success alert-dismissible fade show" th:if="${successMessage}">
-        <i class="fas fa-check-circle"></i> <span th:text="${successMessage}"></span>
-        <button class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-    <div class="alert alert-danger alert-dismissible fade show" th:if="${errorMessage}">
-        <i class="fas fa-times-circle"></i> <span th:text="${errorMessage}"></span>
-        <button class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-
     <div id="faqList">
 
         <div class="text-center text-muted py-5" th:if="${faqs == null or faqs.isEmpty()}">

@@ -29,6 +29,7 @@
 
         .logos-track {
             display: flex;
+            overflow: hidden;
             padding-top: 40px;
             align-items: center;
             animation: scroll 30s linear(1.15 90.59%, 1.32 108.24%) infinite;
@@ -111,6 +112,13 @@
         .body {
          background-color: #f0f0f0 !important;
         }
+        body {
+            overflow-x: hidden;
+        }
+
+        .container {
+            overflow-x: hidden;
+        }
     </style>
 </head>
 <body th:classappend="${#authorization.expression('isAuthenticated()')} ? 'authenticated' : 'guest'">
@@ -191,6 +199,12 @@
             </div>
         </th:block>
         <!-- Duplicate for seamless loop -->
+        <th:block th:each="image : ${carouselImages}">
+            <div class="logo-item">
+                <img th:src="${image.imageUrl}"
+                     th:alt="${image.altText}" />
+            </div>
+        </th:block>
         <th:block th:each="image : ${carouselImages}">
             <div class="logo-item">
                 <img th:src="${image.imageUrl}"

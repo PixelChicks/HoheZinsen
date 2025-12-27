@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Hero Section</title>
+    <title>Create Carousel Image</title>
     <script src="/js/theme-persistence.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -126,7 +126,6 @@
             margin-left: 3px;
         }
 
-        /* Image Upload Styles */
         .upload-zone {
             border: 2px dashed #dee2e6;
             border-radius: 8px;
@@ -183,10 +182,11 @@
     <div class="container">
         <div class="d-flex justify-content-between align-items-center">
             <div>
-                <h1 class="mb-2">Create Hero Section</h1>
-                <p class="mb-0 opacity-75">Add a new hero section for your homepage</p>
+                <h1 class="mb-2">Create Carousel Image</h1>
+                <p class="mb-0 opacity-75">Add a new logo to the carousel</p>
             </div>
-            <a href="/admin" class="btn btn-light">Back to Dashboard
+            <a href="/admin" class="btn btn-light">
+                Back to Dashboard
             </a>
         </div>
     </div>
@@ -195,82 +195,32 @@
 <div class="container pb-5">
     <div class="row justify-content-center">
         <div class="col-12 col-lg-10">
-            <form th:action="@{/admin/hero/create}"
-                  th:object="${heroSection}"
+            <form th:action="@{/admin/carousel/create}"
+                  th:object="${carouselImage}"
                   method="post"
                   onsubmit="return validateForm()">
 
                 <div class="form-card">
                     <div class="form-card-header">
-                        <h3 class="mb-0"> Hero Section Details</h3>
+                        <h3 class="mb-0"> Carousel Image Details</h3>
                     </div>
 
                     <div class="form-card-body">
-                        <!-- Main Title Section -->
+                        <!-- Image Upload Section -->
                         <div class="form-section">
-                            <div class="form-section-title">Main Title
+                            <div class="form-section-title">
+                                Logo Image
                             </div>
 
                             <div class="mb-3">
-                                <label for="mainTitle" class="form-label">
-                                    Main Title
+                                <label class="form-label">
+                                    Upload Logo Image
                                     <span class="required-indicator">*</span>
                                 </label>
-                                <input type="text"
-                                       class="form-control"
-                                       id="mainTitle"
-                                       th:field="*{mainTitle}"
-                                       placeholder="e.g., Top-Zinsen sichern: Jetzt mehr aus Ihrem Geld machen"
-                                       maxlength="500"
-                                       required
-                                       oninput="updateCharCount('mainTitle', 500)">
-                                <div class="character-count">
-                                    <span id="mainTitleCount">0</span> / 500 characters
-                                </div>
-                                <div class="help-text">
-                                    This will be the main headline displayed on your homepage
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Subtitle Section -->
-                        <div class="form-section">
-                            <div class="form-section-title">Subtitle
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="subtitle" class="form-label">
-                                    Subtitle Text
-                                    <span class="required-indicator">*</span>
-                                </label>
-                                <textarea class="form-control"
-                                          id="subtitle"
-                                          th:field="*{subtitle}"
-                                          rows="3"
-                                          placeholder="e.g., Die aktuell höchsten Zinsangebote für Ihr Erspartes – transparent und objektiv."
-                                          maxlength="1000"
-                                          required
-                                          oninput="updateCharCount('subtitle', 1000)"></textarea>
-                                <div class="character-count">
-                                    <span id="subtitleCount">0</span> / 1000 characters
-                                </div>
-                                <div class="help-text">
-                                    Supporting text that appears below the main title
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Hero Image Section -->
-                        <div class="form-section">
-                            <div class="form-section-title">Hero Image
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Upload Hero Image</label>
-                                <div class="upload-zone" onclick="document.getElementById('heroImageFile').click()">
+                                <div class="upload-zone" onclick="document.getElementById('carouselImageFile').click()">
                                     <div class="upload-placeholder">
-                                        <p class="mb-1">Click to upload hero image</p>
-                                        <small class="text-muted">PNG, JPG, GIF up to 5MB</small>
+                                        <p class="mb-1">Click to upload logo image</p>
+                                        <small class="text-muted">PNG, JPG, SVG up to 5MB</small>
                                     </div>
                                     <div class="image-preview" id="imagePreview">
                                         <img src="" alt="Preview" class="preview-image" id="previewImg">
@@ -279,22 +229,72 @@
                                     </div>
                                 </div>
                                 <input type="file"
-                                       id="heroImageFile"
+                                       id="carouselImageFile"
                                        accept="image/*"
                                        style="display: none;"
                                        onchange="handleImageUpload(event)">
                                 <input type="hidden"
-                                       id="heroImageUrl"
-                                       th:field="*{heroImageUrl}">
+                                       id="imageUrl"
+                                       th:field="*{imageUrl}"
+                                       required>
                                 <div class="help-text">
-                                    Recommended size: 500x500px or larger. This image will appear on the right side of the hero section.
+                                    Recommended size: 150x80px or similar aspect ratio. This will appear in the scrolling carousel.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Alt Text Section -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                Alt Text
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="altText" class="form-label">
+                                    Alt Text
+                                    <span class="required-indicator">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="altText"
+                                       th:field="*{altText}"
+                                       placeholder="e.g., Company Logo"
+                                       maxlength="200"
+                                       required
+                                       oninput="updateCharCount('altText', 200)">
+                                <div class="character-count">
+                                    <span id="altTextCount">0</span> / 200 characters
+                                </div>
+                                <div class="help-text">
+                                    Brief description of the logo for accessibility
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Display Order Section -->
+                        <div class="form-section">
+                            <div class="form-section-title"> Display Order
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="displayOrder" class="form-label">
+                                    Display Order
+                                </label>
+                                <input type="number"
+                                       class="form-control"
+                                       id="displayOrder"
+                                       th:field="*{displayOrder}"
+                                       placeholder="Leave empty for automatic ordering"
+                                       min="0">
+                                <div class="help-text">
+                                    Lower numbers appear first. Leave empty to add at the end.
                                 </div>
                             </div>
                         </div>
 
                         <!-- Status Section -->
                         <div class="form-section">
-                            <div class="form-section-title">Status
+                            <div class="form-section-title"> Status
                             </div>
 
                             <div class="mb-3">
@@ -302,21 +302,24 @@
                                     <input class="form-check-input"
                                            type="checkbox"
                                            id="isActive"
-                                           th:field="*{isActive}">
+                                           th:field="*{isActive}"
+                                           checked>
                                     <label class="form-check-label" for="isActive">
-                                        Set as Active Hero Section
+                                        Active (Visible in Carousel)
                                     </label>
                                 </div>
                                 <div class="help-text">
-                                    Only one hero section can be active at a time. Setting this as active will deactivate all other hero sections.
+                                    Only active images will be displayed in the carousel
                                 </div>
                             </div>
                         </div>
 
                         <div class="d-flex justify-content-between mt-4 pt-3 border-top">
-                            <a href="/admin" class="btn btn-cancel btn-lg"> Cancel
+                            <a href="/admin" class="btn btn-cancel btn-lg">
+                                Cancel
                             </a>
-                            <button type="submit" class="btn btn-submit btn-lg text-white">Create Hero Section
+                            <button type="submit" class="btn btn-submit btn-lg text-white">
+                                Create Carousel Image
                             </button>
                         </div>
                     </div>
@@ -371,7 +374,7 @@
 
             if (result.success) {
                 // Update hidden input
-                document.getElementById('heroImageUrl').value = result.path;
+                document.getElementById('imageUrl').value = result.path;
 
                 // Show preview
                 document.getElementById('previewImg').src = result.path;
@@ -388,23 +391,23 @@
 
     function removeImage(event) {
         event.stopPropagation();
-        document.getElementById('heroImageUrl').value = '';
-        document.getElementById('heroImageFile').value = '';
+        document.getElementById('imageUrl').value = '';
+        document.getElementById('carouselImageFile').value = '';
         document.querySelector('.upload-placeholder').style.display = 'block';
         document.getElementById('imagePreview').style.display = 'none';
     }
 
     function validateForm() {
-        const mainTitle = document.getElementById('mainTitle').value.trim();
-        const subtitle = document.getElementById('subtitle').value.trim();
+        const imageUrl = document.getElementById('imageUrl').value.trim();
+        const altText = document.getElementById('altText').value.trim();
 
-        if (!mainTitle) {
-            alert('Please enter a main title');
+        if (!imageUrl) {
+            alert('Please upload an image');
             return false;
         }
 
-        if (!subtitle) {
-            alert('Please enter a subtitle');
+        if (!altText) {
+            alert('Please enter alt text');
             return false;
         }
 
@@ -412,8 +415,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        updateCharCount('mainTitle', 500);
-        updateCharCount('subtitle', 1000);
+        updateCharCount('altText', 200);
     });
 </script>
 </body>

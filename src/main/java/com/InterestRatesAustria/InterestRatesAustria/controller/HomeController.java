@@ -1,7 +1,9 @@
 package com.InterestRatesAustria.InterestRatesAustria.controller;
 
 import com.InterestRatesAustria.InterestRatesAustria.model.dto.InterestRateDTO;
+import com.InterestRatesAustria.InterestRatesAustria.model.entity.CarouselImage;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.GlobalField;
+import com.InterestRatesAustria.InterestRatesAustria.model.entity.HeroSection;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.InterestRate;
 import com.InterestRatesAustria.InterestRatesAustria.service.*;
 import org.springframework.data.domain.Page;
@@ -145,7 +147,10 @@ public class HomeController {
 
         model.addAttribute("activeFilters", filters);
         model.addAttribute("availableFilters", filterService.getAvailableFilters());
-
+        List<CarouselImage> carouselImages = carouselImageService.getAllCarouselImages();
+        model.addAttribute("carouselImages", carouselImages);
+        List<HeroSection> heroSections = heroSectionService.getAllHeroSections();
+        model.addAttribute("heroSections", heroSections);
         model.addAttribute("lastUpdateMessage", lastUpdateService.getFormattedLastUpdateMessage());
 
         return "admin/indexAdmin";
