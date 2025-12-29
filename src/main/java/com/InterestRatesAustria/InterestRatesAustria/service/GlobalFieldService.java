@@ -87,6 +87,32 @@ public class GlobalFieldService {
         Map<Integer, GlobalField> fieldsMap = parseFieldsFromParams(allParams, false);
         saveMultipleFieldsWithSortOrder(fieldsMap);
     }
+// Add this to the setFieldProperty method in GlobalFieldService.java
+
+    private void setFieldProperty(GlobalField field, String property, String value, boolean isUpdate) {
+        switch (property) {
+            case "id":
+                if (value != null && !value.isEmpty()) {
+                    field.setId(Long.parseLong(value));
+                }
+                break;
+            case "label":
+                field.setLabel(value);
+                if (!isUpdate) {
+                    field.setFieldKey(generateFieldKey(value));
+                }
+                break;
+            case "atTable":
+                field.setAtTable("true".equalsIgnoreCase(value));
+                break;
+            case "atCompare":
+                field.setAtCompare("true".equalsIgnoreCase(value));
+                break;
+            case "asFilter":  // NEW: Handle the asFilter property
+                field.setAsFilter("true".equalsIgnoreCase(value));
+                break;
+        }
+    }
 
     public void updateMultipleGlobalFields(Map<String, String> allParams) {
         Map<Integer, GlobalField> fieldsMap = parseFieldsFromParams(allParams, true);
@@ -99,6 +125,7 @@ public class GlobalFieldService {
                 existing.setLabel(updatedField.getLabel());
                 existing.setAtTable(updatedField.isAtTable());
                 existing.setAtCompare(updatedField.isAtCompare());
+                existing.setAsFilter(updatedField.isAsFilter()); // NEW: Update asFilter
 
                 globalFieldRepository.save(existing);
             } else {
@@ -215,27 +242,5 @@ public class GlobalFieldService {
                     .build();
             fieldValueRepository.save(fieldValue);
         });
-    }
-
-    private void setFieldProperty(GlobalField field, String property, String value, boolean isUpdate) {
-        switch (property) {
-            case "id":
-                if (value != null && !value.isEmpty()) {
-                    field.setId(Long.parseLong(value));
-                }
-                break;
-            case "label":
-                field.setLabel(value);
-                if (!isUpdate) {
-                    field.setFieldKey(generateFieldKey(value));
-                }
-                break;
-            case "atTable":
-                field.setAtTable("true".equalsIgnoreCase(value));
-                break;
-            case "atCompare":
-                field.setAtCompare("true".equalsIgnoreCase(value));
-                break;
-        }
     }
 }

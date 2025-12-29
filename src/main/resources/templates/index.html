@@ -119,6 +119,15 @@
         .container {
             overflow-x: hidden;
         }
+        .dark-mode .faq-answer-text,
+        .dark-mode .ql-editor {
+            color: #f1f1f1;
+        }
+
+        .dark-mode .faq-answer-text *,
+        .dark-mode .ql-editor * {
+            color: inherit !important;
+        }
     </style>
 </head>
 <body th:classappend="${#authorization.expression('isAuthenticated()')} ? 'authenticated' : 'guest'">
@@ -1099,7 +1108,6 @@ function renderTableRowsHTML(data) {
         }
 
         reloadDataFromServer(currentSearchTerm, currentSortColumn, currentSortDirection);
-
         updateBrowserUrlWithFilters();
     }
 
@@ -1116,20 +1124,40 @@ function renderTableRowsHTML(data) {
     }
 
 
-    function initializeFilters() {
-        fetch('/filters/available')
-            .then(response => {
-                if (response.ok) return response.json();
-                throw new Error('Failed to load filters');
-            })
-            .then(data => {
-                availableFilters = data;
-                renderFilterGrid();
-                initializeFromUrlParams();
-            })
-            .catch(error => {
-                console.error('Error loading filters:', error);
-            });
+    async function initializeFilters() {
+        try {
+            // Load available filters from server (now filtered by asFilter flag)
+            const response = await fetch('/filters/available');
+            if (response.ok) {
+                availableFilters = await response.json();
+
+                // Only render if there are filters available
+                if (availableFilters && availableFilters.length > 0) {
+                    renderFilterGrid();
+                    initializeFromUrlParams();
+
+                    // Show filter section
+                    const filterSection = document.getElementById('filterSection');
+                    if (filterSection) {
+                        filterSection.style.display = 'block';
+                    }
+                } else {
+                    // Hide filter section if no filters available
+                    const filterSection = document.getElementById('filterSection');
+                    if (filterSection) {
+                        filterSection.style.display = 'none';
+                    }
+                    console.log('No filters are configured as available');
+                }
+            }
+        } catch (error) {
+            console.error('Error loading filters:', error);
+            // Hide filter section on error
+            const filterSection = document.getElementById('filterSection');
+            if (filterSection) {
+                filterSection.style.display = 'none';
+            }
+        }
     }
 
     function initializeFromUrlParams() {
@@ -1156,15 +1184,26 @@ function renderTableRowsHTML(data) {
         filterExpanded = !filterExpanded;
         if (filterExpanded) {
             content.classList.add('show');
-            toggle.classList.add('expanded');
+            if (toggle) toggle.classList.add('expanded');
         } else {
             content.classList.remove('show');
-            toggle.classList.remove('expanded');
+            if (toggle) toggle.classList.remove('expanded');
         }
     }
 
     function renderFilterGrid() {
         const grid = document.getElementById('filterGrid');
+
+        if (!grid) {
+            console.warn('Filter grid element not found');
+            return;
+        }
+
+        // Check if we have any filters to display
+        if (!availableFilters || availableFilters.length === 0) {
+            grid.innerHTML = '<div class="text-muted text-center p-3">No filters available</div>';
+            return;
+        }
 
         grid.innerHTML = availableFilters.map(filter => {
             const fieldIdStr = filter.fieldId.toString();
@@ -1177,7 +1216,7 @@ function renderTableRowsHTML(data) {
                         onchange="updateFilterFromDropdown(this, ${filter.fieldId})"
                         data-field-id="${filter.fieldId}"
                         style="padding-right: 30px; appearance: none; -webkit-appearance: none; -moz-appearance: none; background: transparent;">
-                    <option value="">${siteSettings.filterAllText}</option>
+                    <option value="">Alle</option>
             `;
 
             selectHtml += filter.options.map(option => `
@@ -1206,6 +1245,7 @@ function renderTableRowsHTML(data) {
         }).join('');
     }
 
+
     function updateFilterFromDropdown(selectElement, fieldId) {
         const fieldIdStr = fieldId.toString();
         const value = selectElement.value;
@@ -1213,7 +1253,7 @@ function renderTableRowsHTML(data) {
         // Clear previous selection for this field
         activeFilters.delete(fieldIdStr);
 
-        // Add new selection if it's not the default 'All' option (value == '')
+        // Add new selection if it's not the default 'All' option
         if (value !== '') {
             activeFilters.set(fieldIdStr, new Set([value]));
         }
@@ -1260,6 +1300,8 @@ function renderTableRowsHTML(data) {
 
     function updateActiveFiltersDisplay() {
         const container = document.getElementById('activeFilters');
+        if (!container) return;
+
         const tags = [];
 
         activeFilters.forEach((values, fieldId) => {
@@ -1302,7 +1344,9 @@ function renderTableRowsHTML(data) {
         url.search = params.toString();
         window.history.replaceState({}, '', url);
     }
-
+    function hasAvailableFilters() {
+        return availableFilters && availableFilters.length > 0;
+    }
     // ============================================================================
     // COMPARISON & MORE INFO
     // ============================================================================

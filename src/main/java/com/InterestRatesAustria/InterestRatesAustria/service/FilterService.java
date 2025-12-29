@@ -8,9 +8,7 @@ import com.InterestRatesAustria.InterestRatesAustria.model.entity.InterestRateFi
 import com.InterestRatesAustria.InterestRatesAustria.repository.GlobalFieldRepository;
 import com.InterestRatesAustria.InterestRatesAustria.repository.InterestRateRepository;
 import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.SetJoin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -45,17 +43,41 @@ public class FilterService {
     public List<FilterDTO> getAvailableFilters() {
         List<GlobalField> fields = globalFieldRepository.findAllActiveTableFieldsOrdered();
 
-        return fields.stream()
-                .filter(field -> !isImageField(field.getFieldKey()))
+        logger.debug("Found {} total active table fields", fields.size());
+
+        List<FilterDTO> availableFilters = fields.stream()
+                .filter(field -> {
+                    // Check if field is marked as filter
+                    boolean isFilter = field.isAsFilter();
+                    boolean isImage = isImageField(field.getFieldKey());
+
+                    if (isImage) {
+                        logger.debug("Excluding image field: {} ({})", field.getLabel(), field.getFieldKey());
+                    }
+                    if (!isFilter) {
+                        logger.debug("Field not marked as filter: {} (asFilter={})", field.getLabel(), isFilter);
+                    }
+
+                    return isFilter && !isImage;
+                })
                 .map(field -> {
                     FilterDTO filter = new FilterDTO();
                     filter.setFieldId(field.getId());
                     filter.setLabel(field.getLabel());
                     filter.setFieldKey(field.getFieldKey());
                     filter.setOptions(getFilterOptionsForField(field.getId()));
+
+                    logger.debug("Added filter: {} with {} options",
+                            field.getLabel(), filter.getOptions().size());
+
                     return filter;
                 })
                 .collect(Collectors.toList());
+
+        logger.info("Returning {} available filters out of {} total fields",
+                availableFilters.size(), fields.size());
+
+        return availableFilters;
     }
 
     public List<FilterOptionDTO> getFilterOptionsForField(Long fieldId) {
@@ -296,7 +318,6 @@ public class FilterService {
         return new PageImpl<>(pageContent, PageRequest.of(page, size), results.size());
     }
 
-
     private Specification<InterestRate> createFilterSpecification(Map<Long, List<String>> filters, String search) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -341,21 +362,20 @@ public class FilterService {
         };
     }
 
-
-    private boolean isImageField(String fieldLabel) {
-        if (fieldLabel == null) {
+    private boolean isImageField(String fieldKey) {
+        if (fieldKey == null) {
             return false;
         }
 
-        String label = fieldLabel.toLowerCase();
-        return label.contains("image") ||
-                label.contains("img") ||
-                label.contains("photo") ||
-                label.contains("picture") ||
-                label.contains("logo") ||
-                label.contains("icon") ||
-                label.contains("avatar") ||
-                label.contains("thumbnail") ||
-                label.contains("banner");
+        String key = fieldKey.toLowerCase();
+        return key.contains("image") ||
+                key.contains("img") ||
+                key.contains("photo") ||
+                key.contains("picture") ||
+                key.contains("logo") ||
+                key.contains("icon") ||
+                key.contains("avatar") ||
+                key.contains("thumbnail") ||
+                key.contains("banner");
     }
 }

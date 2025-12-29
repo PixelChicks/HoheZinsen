@@ -27,7 +27,12 @@
             border-color: #198754;
             background: rgba(25, 135, 84, 0.05);
         }
-        .checkbox-group { display: flex; gap: 20px; align-items: center; }
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
         .form-check { margin: 0; }
         .submit-section {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
@@ -95,6 +100,17 @@
                                                     <i class="fas fa-balance-scale me-1"></i> Show in Compare
                                                 </label>
                                             </div>
+                                            <div class="form-check">
+                                                <input type="checkbox"
+                                                       class="form-check-input"
+                                                       th:name="|fields[${iterStat.index}].asFilter|"
+                                                       th:id="|asFilter_${iterStat.index}|"
+                                                       value="true"
+                                                       th:checked="${field.asFilter}">
+                                                <label class="form-check-label" th:for="|asFilter_${iterStat.index}|">
+                                                    <i class="fas fa-filter me-1"></i> Available as Filter
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -140,7 +156,6 @@
 <script>
     let fieldIndex = /*[[${fields.size()}]]*/ 0; // Thymeleaf will replace with actual size
 
-
     function removeField(button) {
         const row = button.closest('.field-row');
         const fieldIdInput = row.querySelector('input[name*=".id"]');
@@ -148,7 +163,7 @@
 
         if (fieldId) {
             fetch(`/fields/delete/${fieldId}`, {
-                method: "POST" // or "DELETE" if you want
+                method: "POST"
             })
             .then(response => {
                 if (response.ok) {
@@ -159,7 +174,6 @@
                 }
             });
         } else {
-            // New unsaved field → just remove from DOM
             row.remove();
             updateFieldCount();
         }
