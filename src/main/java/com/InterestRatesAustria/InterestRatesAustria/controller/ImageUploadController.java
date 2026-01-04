@@ -1,30 +1,21 @@
 package com.InterestRatesAustria.InterestRatesAustria.controller;
 
+import com.InterestRatesAustria.InterestRatesAustria.service.CloudinaryService;
 import com.InterestRatesAustria.InterestRatesAustria.service.FieldValueService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
 public class ImageUploadController {
 
-    @Value("${app.upload.dir:uploads}")
-    private String uploadDir;
-
-    @Value("${app.upload.max-file-size:5242880}")
-    private long maxFileSize;
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
     @Autowired
     private FieldValueService fieldValueService;
@@ -38,65 +29,42 @@ public class ImageUploadController {
         Map<String, Object> response = new HashMap<>();
         
         try {
-            if (file.isEmpty()) {
-                response.put("success", false);
-                response.put("message", "Please select a file to upload");
-                return ResponseEntity.badRequest().body(response);
+            // Get existing image URL if any
+            String oldImageUrl = null;
+            if (fieldValueService.existsFieldValue(rateId, fieldId)) {
+                Map<Long, String> fieldValues = fieldValueService.getFieldValuesForRate(rateId);
+                oldImageUrl = fieldValues.get(fieldId);
             }
 
-            if (file.getSize() > maxFileSize) {
-                response.put("success", false);
-                response.put("message", "File size exceeds maximum allowed size (5MB)");
-                return ResponseEntity.badRequest().body(response);
+            // Upload new image to Cloudinary
+            String imageUrl = cloudinaryService.uploadImage(file, "interest_rates");
+
+            // Delete old image if it exists
+            if (oldImageUrl != null && !oldImageUrl.isEmpty()) {
+                try {
+                    cloudinaryService.deleteImage(oldImageUrl);
+                } catch (Exception e) {
+                    // Log but don't fail if old image deletion fails
+                    System.err.println("Failed to delete old image: " + e.getMessage());
+                }
             }
 
-            String contentType = file.getContentType();
-            if (contentType == null || !contentType.startsWith("image/")) {
-                response.put("success", false);
-                response.put("message", "Please upload a valid image file");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-            Path uploadPath = Paths.get(uploadDir);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-
-            String originalFilename = file.getOriginalFilename();
-            String fileExtension = "";
-            if (originalFilename != null && originalFilename.contains(".")) {
-                fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            }
-            
-            String filename = "rate_" + rateId + "_field_" + fieldId + "_" + 
-                            UUID.randomUUID().toString() + fileExtension;
-
-            Path filePath = uploadPath.resolve(filename);
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-            String webPath = "/images/" + filename;
-
-            boolean exists = fieldValueService.existsFieldValue(rateId, fieldId);
-
-            if (exists) {
-                fieldValueService.updateFieldValue(rateId, fieldId, webPath);
+            // Update database with new image URL
+            if (fieldValueService.existsFieldValue(rateId, fieldId)) {
+                fieldValueService.updateFieldValue(rateId, fieldId, imageUrl);
             } else {
-                fieldValueService.createFieldValue(rateId, fieldId, webPath);
+                fieldValueService.createFieldValue(rateId, fieldId, imageUrl);
             }
 
             response.put("success", true);
-            response.put("imagePath", webPath);
+            response.put("imagePath", imageUrl);
             response.put("message", "Image uploaded successfully");
             
             return ResponseEntity.ok(response);
             
-        } catch (IOException e) {
-            response.put("success", false);
-            response.put("message", "Error uploading file: " + e.getMessage());
-            return ResponseEntity.internalServerError().body(response);
         } catch (Exception e) {
             response.put("success", false);
-            response.put("message", "Unexpected error: " + e.getMessage());
+            response.put("message", "Error uploading file: " + e.getMessage());
             return ResponseEntity.internalServerError().body(response);
         }
     }
@@ -111,6 +79,16 @@ public class ImageUploadController {
             Long rateId = Long.valueOf(requestBody.get("rateId").toString());
             Long fieldId = Long.valueOf(requestBody.get("fieldId").toString());
 
+            // Get current image URL
+            Map<Long, String> fieldValues = fieldValueService.getFieldValuesForRate(rateId);
+            String imageUrl = fieldValues.get(fieldId);
+
+            // Delete from Cloudinary
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                cloudinaryService.deleteImage(imageUrl);
+            }
+
+            // Clear from database
             fieldValueService.updateFieldValue(rateId, fieldId, "");
             
             response.put("success", true);
