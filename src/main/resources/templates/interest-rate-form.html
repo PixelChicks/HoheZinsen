@@ -59,6 +59,14 @@
     margin-bottom: 10px;
 }
 
+.btn-submit {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    padding: 12px 40px;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
 .upload-placeholder p {
     margin: 8px 0 4px 0;
     font-weight: 500;
@@ -609,15 +617,15 @@
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="action-buttons">
-                    <button class="btn btn-success btn-lg" type="submit">
-                        <i class="bi bi-check-circle"></i>
-                        Create Interest Rate
-                    </button>
+                <div class="d-flex justify-content-between mt-4 pt-3 border-top">
                     <a class="btn btn-secondary btn-lg ms-2" th:href="@{/}">
                         <i class="bi bi-x-circle"></i>
                         Cancel
                     </a>
+                    <button class="btn btn-submit btn-lg text-white" type="submit">
+                        <i class="bi bi-check-circle"></i>
+                        Create Interest Rate
+                    </button>
                 </div>
             </form>
         </div>
