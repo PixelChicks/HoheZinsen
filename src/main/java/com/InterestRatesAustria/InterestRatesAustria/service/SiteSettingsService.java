@@ -34,6 +34,7 @@ public class SiteSettingsService {
         existing.setLoadMoreButtonText(settings.getLoadMoreButtonText());
         existing.setScrollIndicatorText(settings.getScrollIndicatorText());
         existing.setEmptyStateTitle(settings.getEmptyStateTitle());
+        existing.setTooltip(settings.getTooltip());
         existing.setEmptyStateDescription(settings.getEmptyStateDescription());
         existing.setMehrInfoButtonText(settings.getMehrInfoButtonText());
         existing.setNoInfoButtonText(settings.getNoInfoButtonText());

@@ -43,7 +43,7 @@ body.dark-mode .footer-logo {
 }
 
 .footer-tagline {
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.6;
     color: #666;
     max-width: 350px;
@@ -55,7 +55,7 @@ body.dark-mode .footer-tagline {
 
 /* Footer Columns */
 .footer-column h4 {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     margin-bottom: 16px;
     color: #000;
@@ -76,7 +76,7 @@ body.dark-mode .footer-column h4 {
 }
 
 .footer-links a {
-    font-size: 14px;
+    font-size: 16px;
     color: #666;
     text-decoration: none;
     transition: color 0.2s ease;
