@@ -1023,7 +1023,26 @@
         return data.map(rate => createMobileCard(rate)).join('');
     }
 
-function renderTableRowsHTML(data) {
+    function handleRowClick(event, rateId) {
+        if (event.target.closest('button') ||
+            event.target.closest('a') ||
+            event.target.closest('input[type="checkbox"]') ||
+            event.target.classList.contains('custom-checkbox')) {
+            return;
+        }
+
+        if (!document.body.classList.contains('comparison-mode')) {
+            return;
+        }
+
+        const checkbox = document.getElementById(`external-compare-${rateId}`);
+        if (checkbox) {
+            checkbox.checked = !checkbox.checked;
+            toggleComparison(rateId, checkbox.checked);
+        }
+    }
+
+    function renderTableRowsHTML(data) {
         if (!data || data.length === 0) return '';
 
         const headers = document.querySelectorAll('.draggable-column, .sortable');
@@ -1098,7 +1117,10 @@ function renderTableRowsHTML(data) {
             `;
 
             return `
-                <tr data-rate-id="${rate.id}" ${isSelected ? 'class="table-row-selected"' : ''}>
+                <tr data-rate-id="${rate.id}"
+                    ${isSelected ? 'class="table-row-selected"' : ''}
+                    onclick="handleRowClick(event, ${rate.id})"
+                    style="cursor: ${document.body.classList.contains('comparison-mode') ? 'pointer' : 'default'};">
                     ${fieldCells}
                     <td data-label="Actions">
                         ${actionButtons}
@@ -1107,6 +1129,24 @@ function renderTableRowsHTML(data) {
             `;
         }).join('');
     }
+
+    const style = document.createElement('style');
+    style.textContent = `
+        body.comparison-mode tr[data-rate-id]:not(.table-row-selected):hover {
+            background-color: rgba(0, 172, 152, 0.05);
+            cursor: pointer;
+        }
+
+        body.comparison-mode tr[data-rate-id].table-row-selected {
+            cursor: pointer;
+        }
+
+        body.comparison-mode tr[data-rate-id] button,
+        body.comparison-mode tr[data-rate-id] a {
+            cursor: pointer !important;
+        }
+    `;
+    document.head.appendChild(style);
 
     // ============================================================================
     // SEARCH, SORT, AND FILTER
