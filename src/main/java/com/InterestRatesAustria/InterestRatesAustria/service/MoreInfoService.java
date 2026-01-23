@@ -5,6 +5,7 @@ import com.InterestRatesAustria.InterestRatesAustria.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -14,20 +15,24 @@ public class MoreInfoService {
     private final TableSectionRepository tableSectionRepository;
     private final TextSectionRepository textSectionRepository;
     private final MiniTableRowRepository miniTableRowRepository;
+    private final InterestRateRepository interestRateRepository;
 
     public MoreInfoService(MoreInfoRepository moreInfoRepository,
                            TableSectionRepository tableSectionRepository,
                            TextSectionRepository textSectionRepository,
-                           MiniTableRowRepository miniTableRowRepository) {
+                           MiniTableRowRepository miniTableRowRepository, InterestRateRepository interestRateRepository) {
         this.moreInfoRepository = moreInfoRepository;
         this.tableSectionRepository = tableSectionRepository;
         this.textSectionRepository = textSectionRepository;
         this.miniTableRowRepository = miniTableRowRepository;
+        this.interestRateRepository = interestRateRepository;
     }
 
     public void updateSectionOrder(Long rateId, List<String> sectionOrder, InterestRate rate) {
         if (rate.getMoreInfo() != null) {
             rate.getMoreInfo().setSectionOrderList(sectionOrder);
+            rate.setLastUpdated(LocalDateTime.now());
+            interestRateRepository.save(rate);
             moreInfoRepository.save(rate.getMoreInfo());
         } else {
             throw new RuntimeException("No more info found for this rate");

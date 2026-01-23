@@ -5,6 +5,7 @@ import com.InterestRatesAustria.InterestRatesAustria.model.entity.CarouselImage;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.GlobalField;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.HeroSection;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.InterestRate;
+import com.InterestRatesAustria.InterestRatesAustria.repository.SiteSettingsRepository;
 import com.InterestRatesAustria.InterestRatesAustria.service.*;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -96,6 +97,8 @@ public class HomeController {
         model.addAttribute("sortDir", sortDir);
         model.addAttribute("search", search);
         model.addAttribute("siteSettings", siteSettingsService.getSiteSettings());
+        model.addAttribute("emptyComparisonText", siteSettingsService.getSiteSettings().getEmptyComparisonText());
+        System.out.println(siteSettingsService.getSiteSettings().getEmptyComparisonText());
         model.addAttribute("activeFilters", filters);
         model.addAttribute("availableFilters", filterService.getAvailableFilters());
 

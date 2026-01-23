@@ -27,13 +27,18 @@
             position: relative;
         }
 
+        .logos-wrapper {
+            overflow: hidden;
+            width: 100%;
+            position: relative;
+        }
+
         .logos-track {
             display: flex;
-            overflow: hidden;
             padding-top: 40px;
             align-items: center;
-            animation: scroll 30s linear(1.15 90.59%, 1.32 108.24%) infinite;
-            width: fit-content;
+            animation: scroll 30s linear infinite;
+            width: max-content; /* important */
         }
 
         .logo-item {
@@ -196,32 +201,34 @@
                 </div>
             </div>
             <div class="col-lg-5 col-md-6">
-                <img th:src="${heroSection.heroImageUrl}"
-                     alt="Hero Image"
-                     class="hero-illustration-image"/>
+                <img alt="Hero Image"
+                     class="hero-illustration-image"
+                     th:src="${heroSection.heroImageUrl}"/>
             </div>
         </div>
     </div>
-    <div class="logos-track">
-        <th:block th:each="image : ${carouselImages}">
-            <div class="logo-item">
-                <img th:src="${image.imageUrl}"
-                     th:alt="${image.altText}" />
-            </div>
-        </th:block>
-        <!-- Duplicate for seamless loop -->
-        <th:block th:each="image : ${carouselImages}">
-            <div class="logo-item">
-                <img th:src="${image.imageUrl}"
-                     th:alt="${image.altText}" />
-            </div>
-        </th:block>
-        <th:block th:each="image : ${carouselImages}">
-            <div class="logo-item">
-                <img th:src="${image.imageUrl}"
-                     th:alt="${image.altText}" />
-            </div>
-        </th:block>
+    <div class="logos-wrapper">
+        <div class="logos-track">
+            <th:block th:each="image : ${carouselImages}">
+                <div class="logo-item">
+                    <img th:alt="${image.altText}"
+                         th:src="${image.imageUrl}"/>
+                </div>
+            </th:block>
+            <!-- Duplicate for seamless loop -->
+            <th:block th:each="image : ${carouselImages}">
+                <div class="logo-item">
+                    <img th:alt="${image.altText}"
+                         th:src="${image.imageUrl}"/>
+                </div>
+            </th:block>
+            <th:block th:each="image : ${carouselImages}">
+                <div class="logo-item">
+                    <img th:alt="${image.altText}"
+                         th:src="${image.imageUrl}"/>
+                </div>
+            </th:block>
+        </div>
     </div>
 </div>
 <div class="vergleichen-section" id="compare-section" style="scroll-margin-top: 100px;">
@@ -263,12 +270,12 @@
     <!-- View Toggle for Mobile -->
     <div class="view-toggle d-md-none">
         <div aria-label="View toggle" class="btn-group" role="group">
-            <button class="btn btn-outline-primary active" id="stackedView" type="button"
-                    th:text="${siteSettings.cardViewText}">
+            <button class="btn btn-outline-primary active" id="stackedView" th:text="${siteSettings.cardViewText}"
+                    type="button">
                 📱 Card View
             </button>
-            <button class="btn btn-outline-primary" id="scrollView" type="button"
-                    th:text="${siteSettings.tableViewText}">
+            <button class="btn btn-outline-primary" id="scrollView" th:text="${siteSettings.tableViewText}"
+                    type="button">
                 📊 Table View
             </button>
         </div>
@@ -348,8 +355,8 @@
         </div>
 
         <button class="nav-logo" id="loadMoreBtn"
-                style="background: rgba(75, 84, 99, 1); color: #fff;"
                 onclick="loadMoreData()"
+                style="background: rgba(75, 84, 99, 1); color: #fff;"
                 th:text="${siteSettings.loadMoreButtonText}">
             Load More
         </button>
@@ -363,13 +370,13 @@
         <h1 class="faq-title" style="padding-top: 60px; padding-bottom: 30px;"
             th:text="${siteSettings.faqTitle}">FAQs</h1>
 
-        <div th:if="${faqs == null || faqs.isEmpty()}" class="text-center py-5">
+        <div class="text-center py-5" th:if="${faqs == null || faqs.isEmpty()}">
             <p class="text-muted" th:text="${siteSettings.faqEmptyText}">
                 No FAQs available at the moment.
             </p>
         </div>
 
-        <div th:each="faq : ${faqs}" class="faq-item">
+        <div class="faq-item" th:each="faq : ${faqs}">
             <div class="faq-question" onclick="toggleFaq(this)">
                 <div class="faq-icon">+</div>
                 <div class="faq-question-text" th:text="${faq.question}"></div>
