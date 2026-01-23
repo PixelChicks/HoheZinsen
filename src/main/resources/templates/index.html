@@ -567,6 +567,32 @@
     // UTILITY FUNCTIONS (Loading, Comparisons, etc.)
     // ============================================================================
 
+    document.addEventListener('mousemove', (e) => {
+        if (!comparisonModeActive || !tooltip) return;
+
+        // Check if hovering over a table row
+        const row = e.target.closest('tr[data-rate-id]');
+
+        if (row) {
+            const rateId = parseInt(row.getAttribute('data-rate-id'));
+            const isSelected = comparedRates.has(rateId);
+
+            // Only show tooltip for unselected rows
+            if (!isSelected) {
+                tooltip.classList.add('active');
+                const offsetX = 15;
+                const offsetY = 15;
+                tooltip.style.left = (e.clientX + offsetX) + 'px';
+                tooltip.style.top = (e.clientY + offsetY) + 'px';
+            } else {
+                tooltip.classList.remove('active');
+            }
+        } else {
+            tooltip.classList.remove('active');
+        }
+    });
+
+
     function debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
@@ -1835,120 +1861,163 @@ function addToComparison(rateId) {
         currentExpandedCard = rate.id;
     }
 
-    function createRateCard(rate) {
-        const card = document.createElement('div');
-        card.className = 'rate-card';
-        card.id = `rateCard_${rate.id}`;
+function createRateCard(rate) {
+    const card = document.createElement('div');
+    card.className = 'rate-card';
+    card.id = `rateCard_${rate.id}`;
 
-        const moreInfo = rate.moreInfo;
-        if (!moreInfo) return card;
+    const moreInfo = rate.moreInfo;
+    if (!moreInfo) return card;
 
-        const sectionOrder = moreInfo.sectionOrder || [];
-        const tableSectionsMap = new Map();
-        const textSectionsMap = new Map();
+    const sectionOrder = moreInfo.sectionOrder || [];
+    const tableSectionsMap = new Map();
+    const textSectionsMap = new Map();
 
-        if (moreInfo.tableSections) {
-            moreInfo.tableSections.forEach(tableSection => {
-                tableSectionsMap.set(tableSection.sectionIdentifier, tableSection);
-            });
+    if (moreInfo.tableSections) {
+        moreInfo.tableSections.forEach(tableSection => {
+            tableSectionsMap.set(tableSection.sectionIdentifier, tableSection);
+        });
+    }
+
+    if (moreInfo.textSections) {
+        moreInfo.textSections.forEach(textSection => {
+            textSectionsMap.set(textSection.sectionIdentifier, textSection);
+        });
+    }
+
+    const createTableSection = (tableSection) => {
+        if (!tableSection || !tableSection.title || !tableSection.miniTableRows || tableSection.miniTableRows.length === 0) {
+            return '';
         }
-
-        if (moreInfo.textSections) {
-            moreInfo.textSections.forEach(textSection => {
-                textSectionsMap.set(textSection.sectionIdentifier, textSection);
-            });
-        }
-
-        const createTableSection = (tableSection) => {
-            if (!tableSection || !tableSection.title || !tableSection.miniTableRows || tableSection.miniTableRows.length === 0) {
-                return '';
-            }
-            return `
-                <div class="expanded-section ${isAuthenticated ? 'draggable-section' : ''} table-section"
-                     data-section-type="table"
-                     data-section-id="${tableSection.sectionIdentifier}">
-                    <h5 class="section-title">${tableSection.title}</h5>
-                    <div class="info-table">
-                        ${tableSection.miniTableRows.map(row => `
-                            <div class="info-table-row">
-                                <div class="info-table-label">${row.label || ''}</div>
-                                <div class="info-table-value">${row.description || ''}</div>
-                            </div>
-                        `).join('')}
-                    </div>
+        return `
+            <div class="expanded-section ${isAuthenticated ? 'draggable-section' : ''} table-section"
+                 data-section-type="table"
+                 data-section-id="${tableSection.sectionIdentifier}">
+                <h5 class="section-title">${tableSection.title}</h5>
+                <div class="info-table">
+                    ${tableSection.miniTableRows.map(row => `
+                        <div class="info-table-row">
+                            <div class="info-table-label">${row.label || ''}</div>
+                            <div class="info-table-value">${row.description || ''}</div>
+                        </div>
+                    `).join('')}
                 </div>
-            `;
-        };
-
-        const createTextSection = (textSection) => {
-            if (!textSection || (!textSection.title && !textSection.content)) {
-                return '';
-            }
-
-            return `
-                <div class="expanded-section ${isAuthenticated ? 'draggable-section' : ''} text-section"
-                     data-section-type="text"
-                     data-section-id="${textSection.sectionIdentifier}">
-                    ${textSection.title ? `<h5 class="section-title">${textSection.title}</h5>` : ''}
-                    <div class="text-content" style="text-align: left;">${textSection.content || ''}</div>
-                </div>
-            `;
-        };
-
-        let sectionsHTML = '';
-        sectionOrder.forEach(sectionIdentifier => {
-            if (sectionIdentifier.startsWith('table-')) {
-                const tableSection = tableSectionsMap.get(sectionIdentifier);
-                if (tableSection) {
-                    sectionsHTML += createTableSection(tableSection);
-                }
-            } else if (sectionIdentifier.startsWith('text-')) {
-                const textSection = textSectionsMap.get(sectionIdentifier);
-                if (textSection) {
-                    sectionsHTML += createTextSection(textSection);
-                }
-            }
-        });
-
-        tableSectionsMap.forEach((tableSection, identifier) => {
-            if (!sectionOrder.includes(identifier)) {
-                sectionsHTML += createTableSection(tableSection);
-            }
-        });
-
-        textSectionsMap.forEach((textSection, identifier) => {
-            if (!sectionOrder.includes(identifier)) {
-                sectionsHTML += createTextSection(textSection);
-            }
-        });
-
-        const isInComparison = comparedRates.has(rate.id);
-        const buttonDisplay = isInComparison ? 'display: none;' : '';
-
-        const compareButton = `
-            <div class="rate-card-actions"
-                 style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom:16px; margin-right: 25px;">
-
-                <a class="angebot-btn"
-                   href="${rate.webLink || '#'}"
-                   target="_blank"
-                   title="Open Link">
-                    ${siteSettings.zumAngebotButtonText}
-                </a>
-
-                <button type="button"
-                        class="mehr-info-btn"
-                        onclick="startComparisonFromCard(${rate.id})"
-                        style="${buttonDisplay}">
-                    ${siteSettings.vergleichenButtonText}
-                </button>
             </div>
         `;
+    };
+
+    const createTextSection = (textSection) => {
+        if (!textSection || (!textSection.title && !textSection.content)) {
+            return '';
+        }
+
+        return `
+            <div class="expanded-section ${isAuthenticated ? 'draggable-section' : ''} text-section"
+                 data-section-type="text"
+                 data-section-id="${textSection.sectionIdentifier}">
+                ${textSection.title ? `<h5 class="section-title">${textSection.title}</h5>` : ''}
+                <div class="text-content" style="text-align: left;">${textSection.content || ''}</div>
+            </div>
+        `;
+    };
+
+    let sectionsHTML = '';
+    sectionOrder.forEach(sectionIdentifier => {
+        if (sectionIdentifier.startsWith('table-')) {
+            const tableSection = tableSectionsMap.get(sectionIdentifier);
+            if (tableSection) {
+                sectionsHTML += createTableSection(tableSection);
+            }
+        } else if (sectionIdentifier.startsWith('text-')) {
+            const textSection = textSectionsMap.get(sectionIdentifier);
+            if (textSection) {
+                sectionsHTML += createTextSection(textSection);
+            }
+        }
+    });
+
+    tableSectionsMap.forEach((tableSection, identifier) => {
+        if (!sectionOrder.includes(identifier)) {
+            sectionsHTML += createTableSection(tableSection);
+        }
+    });
+
+    textSectionsMap.forEach((textSection, identifier) => {
+        if (!sectionOrder.includes(identifier)) {
+            sectionsHTML += createTextSection(textSection);
+        }
+    });
+
+    const isInComparison = comparedRates.has(rate.id);
+    const buttonDisplay = isInComparison ? 'display: none;' : '';
+
+    // Format the last updated date if available
+    let lastUpdatedHtml = '';
+    if (rate.lastUpdated) {
+        // Handle both ISO string and array format from LocalDateTime
+        let lastUpdatedDate;
+        if (Array.isArray(rate.lastUpdated)) {
+            // LocalDateTime comes as [year, month, day, hour, minute, second, nano]
+            lastUpdatedDate = new Date(
+                rate.lastUpdated[0],
+                rate.lastUpdated[1] - 1, // months are 0-indexed in JS
+                rate.lastUpdated[2]
+            );
+        } else {
+            lastUpdatedDate = new Date(rate.lastUpdated);
+        }
+
+        const formattedDate = lastUpdatedDate.toLocaleDateString('de-DE', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
+        lastUpdatedHtml = `
+            <div style="display: flex; align-items: center; color: #6c757d; font-size: 13px;">
+                <span>Zuletzt aktualisiert: ${formattedDate}</span>
+            </div>
+        `;
+    }
+
+    const compareButton = `
+    <div class="rate-card-actions"
+         style="display:flex; justify-content:space-between; align-items:center; margin:16px 25px;">
+
+        <div>
+            ${lastUpdatedHtml}
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <a class="angebot-btn"
+               href="${rate.webLink || '#'}"
+               target="_blank"
+               title="Open Link">
+                ${siteSettings.zumAngebotButtonText}
+            </a>
+
+            <button type="button"
+                    class="mehr-info-btn"
+                    onclick="startComparisonFromCard(${rate.id})"
+                    style="${buttonDisplay}">
+                ${siteSettings.vergleichenButtonText}
+            </button>
+        </div>
+
+    </div>
+    `;
 
     card.innerHTML = `
         <style>
           @media (max-width: 768px) {
             .mobile-hr { display: block; }
+            .rate-card-actions {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+            }
+            .rate-card-actions > div:last-child {
+                width: 100%;
+                justify-content: flex-end;
+            }
           }
           @media (min-width: 769px) {
             .mobile-hr { display: none; }
@@ -1961,9 +2030,8 @@ function addToComparison(rateId) {
         </div>
     `;
 
-        return card;
-    }
-
+    return card;
+}
     function startComparisonFromCard(currentRateId) {
         if (comparedRates.size >= maxComparisons) {
             showStatus('Maximum number of comparisons reached (3)', 'warning');
