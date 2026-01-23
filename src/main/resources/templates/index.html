@@ -452,6 +452,34 @@
     </div>
 </footer>
 <div class="comparison-status" id="comparisonStatus"></div>
+<!-- Add this tooltip element to your HTML (can be placed near the end of body) -->
+<div id="comparisonTooltip"
+     class="comparison-tooltip"
+     th:text="${tooltipText}">
+</div>
+
+<style>
+    .comparison-tooltip {
+        position: fixed;
+        background-color: rgba(255, 255, 255, 0.9);
+        color: #111;
+        padding: 8px 14px;
+        border-radius: 6px;
+        font-size: 14px;
+        pointer-events: none;
+        z-index: 10000;
+        display: none;
+        white-space: nowrap;
+        box-shadow: 0 4px 12px rgba(120, 120, 120, 0.25);
+        transition: opacity 0.2s ease, transform 0.15s ease;
+        backdrop-filter: blur(4px);
+    }
+
+
+        .comparison-tooltip.active {
+            display: block;
+        }
+</style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script th:inline="javascript">
@@ -492,6 +520,8 @@
     let availableFilters = [];
     let activeFilters = new Map();
     let filterExpanded = false;
+    let comparisonModeActive = false;
+    const tooltip = document.getElementById('comparisonTooltip');
 
     const siteSettings = {
         mehrInfoButtonText: /*[[${siteSettings.mehrInfoButtonText}]]*/ 'MEHR INFO',
@@ -500,7 +530,8 @@
         vergleichenButtonText: /*[[${siteSettings.vergleichenButtonText}]]*/ 'VERGLEICHEN',
         filterAllText: /*[[${siteSettings.filterAllText}]]*/ 'Alle',
         mobileComparisonEmptyText: /*[[${siteSettings.mobileComparisonEmptyText}]]*/ 'Click a provider<br>to compare',
-
+        emptyComparisonText: /*[[${siteSettings.emptyComparisonText}]]*/ 'Click a provider<br>to compare',
+        tooltip: /*[[${siteSettings.tooltip}]]*/ 'Click a provider<br>to compare',
         // Status messages
         statusRateAdded: /*[[${siteSettings.statusRateAdded}]]*/ 'added to comparison',
         statusRateRemoved: /*[[${siteSettings.statusRateRemoved}]]*/ 'Aus dem Vergleich entfernt',
@@ -509,6 +540,11 @@
         statusLoadingRateDetails: /*[[${siteSettings.statusLoadingRateDetails}]]*/ 'Rate data not found locally, fetching details...',
         statusNoAdditionalInfo: /*[[${siteSettings.statusNoAdditionalInfo}]]*/ 'No additional information available for this rate.'
     };
+
+    function deactivateComparisonMode() {
+        comparisonModeActive = false;
+        tooltip.classList.remove('active');
+    }
 
     // ============================================================================
     // FAQ TOGGLE
@@ -1413,6 +1449,7 @@ function addToComparison(rateId) {
 
             if (comparedRates.size === 0) {
                 document.body.classList.remove('comparison-mode');
+                tooltip.classList.remove('active');
                 const externalCheckboxes = document.getElementById('externalCheckboxes');
                 if (externalCheckboxes) {
                     externalCheckboxes.innerHTML = '';
@@ -1439,7 +1476,7 @@ function addToComparison(rateId) {
         updateComparisonDisplay();
         showStatus(siteSettings.statusComparisonCleared, 'info');
         document.body.classList.remove('comparison-mode');
-
+        tooltip.classList.remove('active');
         // Hide the external checkboxes
         const externalCheckboxes = document.getElementById('externalCheckboxes');
         if (externalCheckboxes) {
@@ -1932,6 +1969,8 @@ function addToComparison(rateId) {
             showStatus('Maximum number of comparisons reached (3)', 'warning');
             return;
         }
+        tooltip.classList.add('active');
+
 
         // 1. Activate Comparison Mode
         document.body.classList.add('comparison-mode');
@@ -2101,10 +2140,12 @@ function addToComparison(rateId) {
     }
 
     function quickStartComparison() {
+        tooltip.classList.add('active');
         if (!allLoadedData || allLoadedData.length === 0) {
             showStatus('No rates available to compare.', 'warning');
             return;
         }
+        comparisonModeActive = !comparisonModeActive;
 
         const firstRate = allLoadedData[0];
         const firstRateId = firstRate.id;
@@ -2227,7 +2268,16 @@ function addToComparison(rateId) {
             positionCheckboxes();
         });
     }
+    document.addEventListener('mousemove', (e) => {
+        if (comparisonModeActive && tooltip) {
+            // Offset the tooltip slightly from the cursor
+            const offsetX = 15;
+            const offsetY = 15;
 
+            tooltip.style.left = (e.clientX + offsetX) + 'px';
+            tooltip.style.top = (e.clientY + offsetY) + 'px';
+        }
+    });
     function positionCheckboxes() {
         const table = document.getElementById('mainTable');
         const externalCheckboxes = document.getElementById('externalCheckboxes');

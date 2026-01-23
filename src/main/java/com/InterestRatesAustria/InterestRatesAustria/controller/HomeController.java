@@ -97,7 +97,7 @@ public class HomeController {
         model.addAttribute("sortDir", sortDir);
         model.addAttribute("search", search);
         model.addAttribute("siteSettings", siteSettingsService.getSiteSettings());
-        model.addAttribute("emptyComparisonText", siteSettingsService.getSiteSettings().getEmptyComparisonText());
+        model.addAttribute("tooltipText", siteSettingsService.getSiteSettings().getTooltip());
         System.out.println(siteSettingsService.getSiteSettings().getEmptyComparisonText());
         model.addAttribute("activeFilters", filters);
         model.addAttribute("availableFilters", filterService.getAvailableFilters());

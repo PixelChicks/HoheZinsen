@@ -35,6 +35,9 @@ public class SiteSettings {
     @Column(length = 200)
     private String emptyComparisonText = "click a provider from the table below to add to compare";
 
+    @Column(length = 200)
+    private String tooltip = "Zum Vergleich hinzufügen";
+
     // Table Section
     @Column(length = 100)
     private String cardViewText = "Card View";
