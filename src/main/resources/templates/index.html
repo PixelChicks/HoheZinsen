@@ -1500,7 +1500,7 @@ function addToComparison(rateId) {
         }
     }
 
-   function removeFromComparison(rateId) {
+    function removeFromComparison(rateId) {
         if (comparedRates.has(rateId)) {
             comparedRates.delete(rateId);
             updateComparisonDisplay();
@@ -1515,10 +1515,13 @@ function addToComparison(rateId) {
 
             if (comparedRates.size === 0) {
                 document.body.classList.remove('comparison-mode');
-                tooltip.classList.remove('active');
+                comparisonModeActive = false; // ADD THIS
+                deactivateComparisonMode(); // ADD THIS
+
                 const externalCheckboxes = document.getElementById('externalCheckboxes');
                 if (externalCheckboxes) {
                     externalCheckboxes.innerHTML = '';
+                    externalCheckboxes.style.display = 'none'; // ADD THIS
                 }
                 const quickCompareBtn = document.getElementById('quickCompareBtn');
                 if (quickCompareBtn) {
@@ -1541,8 +1544,12 @@ function addToComparison(rateId) {
         comparedRates.clear();
         updateComparisonDisplay();
         showStatus(siteSettings.statusComparisonCleared, 'info');
+
+        // Deactivate comparison mode and hide tooltip
         document.body.classList.remove('comparison-mode');
-        tooltip.classList.remove('active');
+        comparisonModeActive = false; // ADD THIS
+        deactivateComparisonMode(); // ADD THIS
+
         // Hide the external checkboxes
         const externalCheckboxes = document.getElementById('externalCheckboxes');
         if (externalCheckboxes) {
@@ -1799,7 +1806,12 @@ function addToComparison(rateId) {
             closeExpandedCard(rateId);
             expandedRateCards.delete(rateId);
             updateMehrInfoButton(rateId, false);
-            alignExternalCheckboxes();
+            // Realign after closing
+            if (document.body.classList.contains('comparison-mode')) {
+                setTimeout(() => {
+                    alignExternalCheckboxes();
+                }, 50);
+            }
             return;
         }
 
@@ -1835,7 +1847,13 @@ function addToComparison(rateId) {
         displayRateCard(rate);
         expandedRateCards.add(rateId);
         updateMehrInfoButton(rateId, true);
-        alignExternalCheckboxes();
+
+        // Realign after opening
+        if (document.body.classList.contains('comparison-mode')) {
+            setTimeout(() => {
+                alignExternalCheckboxes();
+            }, 50);
+        }
     }
 
     function displayRateCard(rate) {
@@ -2077,14 +2095,10 @@ function createRateCard(rate) {
             showStatus('Maximum number of comparisons reached (3)', 'warning');
             return;
         }
-        tooltip.classList.add('active');
-
 
         // 1. Activate Comparison Mode
         document.body.classList.add('comparison-mode');
-
-        // **CRITICAL FIX: Align checkboxes immediately**
-        alignExternalCheckboxes();
+        comparisonModeActive = true; // ADD THIS LINE - it was missing!
 
         const comparisonSection = document.getElementById('comparisonSection');
         if (comparisonSection) {
@@ -2135,6 +2149,10 @@ function createRateCard(rate) {
                         serverRateFieldValuesMap[currentRateId] = fetchedRate.fieldValues;
                     }
                     updateComparisonDisplay();
+                    // Delay checkbox alignment to ensure DOM is ready
+                    setTimeout(() => {
+                        alignExternalCheckboxes();
+                    }, 100);
                     scrollToComparison();
                 }
             });
@@ -2146,6 +2164,12 @@ function createRateCard(rate) {
         }
 
         updateComparisonDisplay();
+
+        // Delay checkbox alignment to ensure the comparison display is rendered
+        setTimeout(() => {
+            alignExternalCheckboxes();
+        }, 100);
+
         scrollToComparison();
 
         const rateCount = comparedRates.size;
@@ -2193,6 +2217,12 @@ function createRateCard(rate) {
                 requestAnimationFrame(() => {
                     if (cardRow.parentNode) {
                         cardRow.parentNode.removeChild(cardRow);
+                    }
+                    // Realign checkboxes after card is removed
+                    if (document.body.classList.contains('comparison-mode')) {
+                        setTimeout(() => {
+                            alignExternalCheckboxes();
+                        }, 50);
                     }
                 });
             }
@@ -2248,20 +2278,19 @@ function createRateCard(rate) {
     }
 
     function quickStartComparison() {
-        tooltip.classList.add('active');
         if (!allLoadedData || allLoadedData.length === 0) {
             showStatus('No rates available to compare.', 'warning');
             return;
         }
-        comparisonModeActive = !comparisonModeActive;
+
+        // Set comparison mode active FIRST
+        comparisonModeActive = true;
 
         const firstRate = allLoadedData[0];
         const firstRateId = firstRate.id;
 
         document.getElementById("quickCompareBtn").style.display = "none";
         document.body.classList.add('comparison-mode');
-
-        alignExternalCheckboxes();
 
         const comparisonSection = document.getElementById('comparisonSection');
         if (comparisonSection) {
@@ -2280,12 +2309,17 @@ function createRateCard(rate) {
                 }
 
                 updateTableRowHighlight(firstRateId, true);
-
                 updateVergleichenButtonVisibility(firstRateId, true);
             }
         }
 
         updateComparisonDisplay();
+
+        // Delay checkbox alignment to ensure DOM is ready
+        setTimeout(() => {
+            alignExternalCheckboxes();
+        }, 100);
+
         scrollToComparison();
 
         const rateCount = comparedRates.size;
@@ -2326,8 +2360,12 @@ function createRateCard(rate) {
 
         if (!document.body.classList.contains('comparison-mode')) {
             externalCheckboxes.innerHTML = '';
+            externalCheckboxes.style.display = 'none';
             return;
         }
+
+        // Show the checkbox column
+        externalCheckboxes.style.display = 'block';
 
         const rows = table.querySelectorAll('tbody tr:not(.rate-card-row)');
         externalCheckboxes.innerHTML = '';
