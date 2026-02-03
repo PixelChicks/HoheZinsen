@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create About Section</title>
+
+    <script src="/js/theme-persistence.js" defer></script>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Quill -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
+
+    <style>
+        @import url('https://api.fonts.coollabs.io/css2?family=Mona+Sans:wght@200;300;400;500;600;700;800;900&display=swap');
+        * { font-family: 'Mona Sans', sans-serif !important; }
+
+        .page-header {
+            background: #00b894;
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 40px;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .form-card-header {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 25px 30px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .form-card-body { padding: 30px; }
+
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .form-section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .rich-text-container {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            background: white;
+            overflow: hidden;
+        }
+
+        .ql-editor {
+            min-height: 350px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            padding: 12px 40px;
+            font-weight: 600;
+            border-radius: 8px;
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+            border-radius: 8px;
+        }
+
+        .character-count {
+            font-size: 0.85rem;
+            color: #6c757d;
+            text-align: right;
+        }
+
+        .required-indicator {
+            color: #dc3545;
+            margin-left: 3px;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+<!-- HEADER -->
+<div class="page-header">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div>
+            <h1>Create About Section</h1>
+            <p class="mb-0 opacity-75">Add a new about / mission section</p>
+        </div>
+        <a href="/admin" class="btn btn-light">Back to Dashboard</a>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <form th:action="@{/admin/aboutS/create}"
+                  th:object="${about}"
+                  method="post"
+                  id="aboutForm">
+
+                <div class="form-card">
+
+                    <div class="form-card-header">
+                        <h3 class="mb-0">About Section Details</h3>
+                    </div>
+
+                    <div class="form-card-body">
+
+                        <!-- TITLE -->
+                        <div class="form-section">
+                            <div class="form-section-title">Section Title</div>
+
+                            <label class="form-label">
+                                Title <span class="required-indicator">*</span>
+                            </label>
+
+                            <input type="text"
+                                   id="title"
+                                   th:field="*{title}"
+                                   class="form-control"
+                                   maxlength="500"
+                                   required
+                                   oninput="updateCharCount('title',500)">
+
+                            <div class="character-count">
+                                <span id="titleCount">0</span> / 500 characters
+                            </div>
+                        </div>
+
+                        <!-- CONTENT -->
+                        <div class="form-section">
+                            <div class="form-section-title">Content</div>
+
+                            <label class="form-label">
+                                Section Content <span class="required-indicator">*</span>
+                            </label>
+
+                            <div class="rich-text-container">
+                                <div id="aboutContentEditor"></div>
+                            </div>
+
+                            <!-- Hidden field -->
+                            <textarea th:field="*{content}" id="content" style="display:none;"></textarea>
+                        </div>
+
+                        <!-- ACTIONS -->
+                        <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                            <a class="btn btn-secondary btn-lg ms-2" th:href="@{/admin}">
+                                <i class="bi bi-x-circle"></i>
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-submit btn-lg text-white">
+                                <i class="bi bi-check-circle"></i>
+                                Create About Section
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
+
+<script>
+    const quill = new Quill('#aboutContentEditor', {
+        theme: 'snow',
+        placeholder: 'Write the about section content here...',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline'],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                ['link'],
+                ['clean']
+            ]
+        }
+    });
+
+    const hiddenContent = document.getElementById('content');
+
+    // Load existing content (edit reuse safe)
+    if (hiddenContent.value) {
+        quill.root.innerHTML = hiddenContent.value;
+    }
+
+    // Sync editor → textarea
+    quill.on('text-change', () => {
+        hiddenContent.value = quill.root.innerHTML;
+    });
+
+    function updateCharCount(id, max) {
+        const el = document.getElementById(id);
+        document.getElementById(id + 'Count').textContent = el.value.length;
+    }
+
+    document.getElementById('aboutForm').addEventListener('submit', function (e) {
+        hiddenContent.value = quill.root.innerHTML;
+
+        if (!document.getElementById('title').value.trim()) {
+            alert('Please enter a title');
+            e.preventDefault();
+        }
+
+        if (quill.getText().trim().length === 0) {
+            alert('Please enter content');
+            e.preventDefault();
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        updateCharCount('title', 500);
+    });
+</script>
+
+</body>
+</html>

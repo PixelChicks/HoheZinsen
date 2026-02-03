@@ -84,9 +84,6 @@
                 Save Order
             </button>
         </div>
-        <!-- Admin-only add button -->
-        <a class="btn btn-primary mt-2 mt-md-0 admin-only" href="/interest-rate/new" sec:authorize="isAuthenticated()">+
-            Add New Interest Rate</a>
     </div>
 
     <div class="alert alert-success alert-dismissible fade show" th:if="${successMessage}">
@@ -98,7 +95,7 @@
         <button class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
-    <a href="/admin/site-settings" class="btn btn-primary">
+    <a class="btn btn-primary" href="/admin/site-settings">
         <i class="fas fa-cog"></i> Edit Site Settings
     </a><br>
     <div class="container pb-5 mt-4">
@@ -118,11 +115,11 @@
                             <!-- Hero Image Preview -->
                             <div class="col-md-3">
                                 <div class="text-center">
-                                    <img th:src="${hero.heroImageUrl}"
-                                         alt="Hero Image"
+                                    <img alt="Hero Image"
                                          class="img-fluid rounded"
                                          style="max-height: 150px; object-fit: contain;"
-                                         th:if="${hero.heroImageUrl != null and !#strings.isEmpty(hero.heroImageUrl)}">
+                                         th:if="${hero.heroImageUrl != null and !#strings.isEmpty(hero.heroImageUrl)}"
+                                         th:src="${hero.heroImageUrl}">
                                     <div class="text-muted"
                                          th:if="${hero.heroImageUrl == null or #strings.isEmpty(hero.heroImageUrl)}">
                                         <i class="fas fa-image fa-3x"></i>
@@ -154,10 +151,10 @@
                                    th:href="@{/admin/hero/edit/{id}(id=${hero.id})}">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
-                                <form th:action="@{/admin/hero/delete/{id}(id=${hero.id})}"
-                                      method="post"
-                                      onsubmit="return confirm('Are you sure you want to delete this hero section?');">
-                                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                <form method="post"
+                                      onsubmit="return confirm('Are you sure you want to delete this hero section?');"
+                                      th:action="@{/admin/hero/delete/{id}(id=${hero.id})}">
+                                    <button class="btn btn-outline-danger btn-sm w-100" type="submit">
                                         <i class="fas fa-trash"></i> Delete
                                     </button>
                                 </form>
@@ -183,10 +180,10 @@
                     <div class="card-body">
                         <!-- Image Preview -->
                         <div class="text-center mb-3">
-                            <img th:src="${image.imageUrl}"
+                            <img class="img-fluid rounded"
+                                 style="max-height: 120px; object-fit: contain;"
                                  th:alt="${image.altText}"
-                                 class="img-fluid rounded"
-                                 style="max-height: 120px; object-fit: contain;">
+                                 th:src="${image.imageUrl}">
                         </div>
 
                         <!-- Image Details -->
@@ -207,11 +204,11 @@
                                th:href="@{/admin/carousel/edit/{id}(id=${image.id})}">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
-                            <form th:action="@{/admin/carousel/delete/{id}(id=${image.id})}"
-                                  method="post"
+                            <form method="post"
+                                  onsubmit="return confirm('Are you sure you want to delete this carousel image?');"
                                   style="display: inline;"
-                                  onsubmit="return confirm('Are you sure you want to delete this carousel image?');">
-                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                  th:action="@{/admin/carousel/delete/{id}(id=${image.id})}">
+                                <button class="btn btn-outline-danger btn-sm" type="submit">
                                     <i class="fas fa-trash"></i> Delete
                                 </button>
                             </form>
@@ -301,7 +298,12 @@
             </div>
         </div>
     </div>
-
+    <!-- Admin-only add button -->
+    <div class="row g-2" style="width: 40%;">
+        <a class="btn btn-success mt-2 mt-md-0 admin-only" href="/interest-rate/new" sec:authorize="isAuthenticated()">+
+            Add New Interest Rate</a>
+    </div>
+    <br>
     <div class="table-container">
         <div class="loading-overlay" id="loadingOverlay">
             <div class="loading-spinner"></div>
@@ -466,19 +468,42 @@
         </div>
 
         <a class="btn btn-outline-primary btn-sm"
-           th:if="${aboutSection != null}"
-           th:href="@{/admin/about/edit/{id}(id=${aboutSection.id})}">
+           th:href="@{/admin/about/edit/{id}(id=${aboutSection.id})}"
+           th:if="${aboutSection != null}">
             <i class="fas fa-edit"></i> Edit
         </a>
 
         <a class="btn btn-success btn-sm"
-           th:if="${aboutSection == null}"
-           th:href="@{/admin/about/create}">
+           th:href="@{/admin/about/create}"
+           th:if="${aboutSection == null}">
             <i class="fas fa-plus"></i> Create About Section
         </a>
     </div>
 </div>
+<div class="mission-section" id="about-section2" style="scroll-margin-top: 100px;">
+    <div class="faq-container">
+        <h1 class="faq-title"
+            style="padding-top: 60px; padding-bottom: 30px;"
+            th:text="${aboutSection2 != null ? aboutSection2.title : 'No About Us section yet'}">
+        </h1>
 
+        <div class="faq-answer-text"
+             th:utext="${aboutSection2 != null ? aboutSection2.content : 'No about us section for now...'}">
+        </div>
+
+        <a class="btn btn-outline-primary btn-sm"
+           th:href="@{/admin/aboutS/edit/{id}(id=${aboutSection2.id})}"
+           th:if="${aboutSection2 != null}">
+            <i class="fas fa-edit"></i> Edit
+        </a>
+
+        <a class="btn btn-success btn-sm"
+           th:href="@{/admin/aboutS/create}"
+           th:if="${aboutSection2 == null}">
+            <i class="fas fa-plus"></i> Create About Section
+        </a>
+    </div>
+</div>
 
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog">
@@ -942,18 +967,18 @@
         if (isAuthenticated) {
             actionButtons = `
                 <div class="action-buttons">
-                    <button class="mehr-info-btn"
-                            ${rate.moreInfo ? '' : 'disabled'}
-                            onclick="showMoreInfo(${rate.id})"
-                            title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">
-                        ${rate.moreInfo ? 'MEHR INFO' : 'No Info'}
-                    </button>
-                    <a class="angebot-btn"
-                       href="${rate.webLink || '#'}"
-                       target="_blank"
-                       title="Open Link">
-                        ZUM ANGEBOT
-                    </a>
+<!--                    <button class="mehr-info-btn"-->
+<!--                            ${rate.moreInfo ? '' : 'disabled'}-->
+<!--                            onclick="showMoreInfo(${rate.id})"-->
+<!--                            title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">-->
+<!--                        ${rate.moreInfo ? 'MEHR INFO' : 'No Info'}-->
+<!--                    </button>-->
+<!--                    <a class="angebot-btn"-->
+<!--                       href="${rate.webLink || '#'}"-->
+<!--                       target="_blank"-->
+<!--                       title="Open Link">-->
+<!--                        ZUM ANGEBOT-->
+<!--                    </a>-->
                     <a class="btn btn-outline-primary btn-sm flex-fill" href="/interest-rate/edit/${rate.id}" title="Edit Interest Rate">
                         ✎ Edit
                     </a>
@@ -967,18 +992,18 @@
         } else {
             actionButtons = `
                 <div class="action-buttons">
-                    <button class="mehr-info-btn"
-                            ${rate.moreInfo ? '' : 'disabled'}
-                            onclick="showMoreInfo(${rate.id})"
-                            title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">
-                        ${rate.moreInfo ? 'MEHR INFO' : 'No Info'}
-                    </button>
-                    <a class="angebot-btn"
-                       href="${rate.webLink || '#'}"
-                       target="_blank"
-                       title="Open Link">
-                        ZUM ANGEBOT
-                    </a>
+<!--                    <button class="mehr-info-btn"-->
+<!--                            ${rate.moreInfo ? '' : 'disabled'}-->
+<!--                            onclick="showMoreInfo(${rate.id})"-->
+<!--                            title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">-->
+<!--                        ${rate.moreInfo ? 'MEHR INFO' : 'No Info'}-->
+<!--                    </button>-->
+<!--                    <a class="angebot-btn"-->
+<!--                       href="${rate.webLink || '#'}"-->
+<!--                       target="_blank"-->
+<!--                       title="Open Link">-->
+<!--                        ZUM ANGEBOT-->
+<!--                    </a>-->
                 </div>
             `;
         }
@@ -3133,18 +3158,18 @@
         if (isAuthenticated) {
             actionButtons = `
                 <div class="card-actions">
-                    <button class="btn btn-info btn-sm mehr-info-btn-card"
-                            ${rate.moreInfo ? '' : 'disabled'}
-                            onclick="showMoreInfo(${rate.id})"
-                            title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">
-                        ${rate.moreInfo ? 'MEHR INFO' : 'No Info'}
-                    </button>
-                    <a class="btn btn-primary btn-sm angebot-btn-card"
-                       href="${rate.webLink || '#'}"
-                       target="_blank"
-                       title="Open Link">
-                        ZUM ANGEBOT
-                    </a>
+<!--                    <button class="btn btn-info btn-sm mehr-info-btn-card"-->
+<!--                            ${rate.moreInfo ? '' : 'disabled'}-->
+<!--                            onclick="showMoreInfo(${rate.id})"-->
+<!--                            title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">-->
+<!--                        ${rate.moreInfo ? 'MEHR INFO' : 'No Info'}-->
+<!--                    </button>-->
+<!--                    <a class="btn btn-primary btn-sm angebot-btn-card"-->
+<!--                       href="${rate.webLink || '#'}"-->
+<!--                       target="_blank"-->
+<!--                       title="Open Link">-->
+<!--                        ZUM ANGEBOT-->
+<!--                    </a>-->
                     <div class="card-admin-actions">
                         <a class="btn btn-outline-primary btn-sm flex-fill" href="/interest-rate/edit/${rate.id}" title="Edit">
                             ✎ Edit
@@ -3160,18 +3185,18 @@
         } else {
             actionButtons = `
                 <div class="card-actions">
-                    <button class="btn btn-info btn-sm mehr-info-btn-card"
-                            ${rate.moreInfo ? '' : 'disabled'}
-                            onclick="showMoreInfo(${rate.id})"
-                            title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">
-                        ${rate.moreInfo ? 'MEHR INFO' : 'No Info'}
-                    </button>
-                    <a class="btn btn-primary btn-sm angebot-btn-card"
-                       href="${rate.webLink || '#'}"
-                       target="_blank"
-                       title="Open Link">
-                        ZUM ANGEBOT
-                    </a>
+<!--                    <button class="btn btn-info btn-sm mehr-info-btn-card"-->
+<!--                            ${rate.moreInfo ? '' : 'disabled'}-->
+<!--                            onclick="showMoreInfo(${rate.id})"-->
+<!--                            title="${rate.moreInfo ? 'Show more info' : 'No additional info available'}">-->
+<!--                        ${rate.moreInfo ? 'MEHR INFO' : 'No Info'}-->
+<!--                    </button>-->
+<!--                    <a class="btn btn-primary btn-sm angebot-btn-card"-->
+<!--                       href="${rate.webLink || '#'}"-->
+<!--                       target="_blank"-->
+<!--                       title="Open Link">-->
+<!--                        ZUM ANGEBOT-->
+<!--                    </a>-->
                 </div>
             `;
         }

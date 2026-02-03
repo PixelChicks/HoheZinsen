@@ -33,13 +33,14 @@ public class HomeController {
     private final FAQService faqService;
     private final HeroSectionService heroSectionService;
     private final AboutService aboutService;
+    private final SectionAboutService sectionAboutService;
     private final CarouselImageService carouselImageService;
 
     public HomeController(InterestRateService interestRateService,
                           GlobalFieldService globalFieldService,
                           FieldValueService fieldValueService,
                           FilterService filterService, SiteSettingsService siteSettingsService,
-                          LastUpdateService lastUpdateService, FAQService faqService, HeroSectionService heroSectionService, AboutService aboutService, CarouselImageService carouselImageService) {
+                          LastUpdateService lastUpdateService, FAQService faqService, HeroSectionService heroSectionService, AboutService aboutService, SectionAboutService sectionAboutService, CarouselImageService carouselImageService) {
         this.interestRateService = interestRateService;
         this.globalFieldService = globalFieldService;
         this.fieldValueService = fieldValueService;
@@ -49,6 +50,7 @@ public class HomeController {
         this.faqService = faqService;
         this.heroSectionService = heroSectionService;
         this.aboutService = aboutService;
+        this.sectionAboutService = sectionAboutService;
         this.carouselImageService = carouselImageService;
     }
 
@@ -87,6 +89,7 @@ public class HomeController {
         model.addAttribute("newField", new GlobalField());
         model.addAttribute("faqs", faqService.getActiveFAQs());
         model.addAttribute("aboutSection", aboutService.getActiveAboutSection());
+        model.addAttribute("aboutSection2", sectionAboutService.getActiveSectionAboutSection());
         model.addAttribute("heroSection", heroSectionService.getActiveHeroSection());
         model.addAttribute("carouselImages", carouselImageService.getActiveCarouselImages());
         model.addAttribute("currentPage", page);
@@ -140,6 +143,7 @@ public class HomeController {
         model.addAttribute("newField", new GlobalField());
         model.addAttribute("faqs", faqService.getAllFAQs());
         model.addAttribute("aboutSection", aboutService.getActiveAboutSection());
+        model.addAttribute("aboutSection2", sectionAboutService.getActiveSectionAboutSection());
         model.addAttribute("currentPage", page);
         model.addAttribute("heroSection", heroSectionService.getActiveHeroSection());
         model.addAttribute("carouselImages", carouselImageService.getActiveCarouselImages());

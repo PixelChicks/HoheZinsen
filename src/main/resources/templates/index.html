@@ -400,7 +400,19 @@
         </div>
     </div>
 </div>
+<div class="mission-section" id="about-section2" style="scroll-margin-top: 100px;">
+    <div class="faq-container">
+        <h1 class="faq-title"
+            style="padding-top: 60px; padding-bottom: 30px;"
+            th:text="${aboutSection2 != null ? aboutSection2.title : 'No title'}">
+        </h1>
 
+        <div class="faq-answer-text"
+             th:utext="${aboutSection2 != null ? aboutSection2.content : 'No about us section for now...'}"><br>
+            <b></b><br><br>
+        </div>
+    </div>
+</div>
 <footer class="footer">
     <div class="footer-container">
         <div class="footer-brand">
