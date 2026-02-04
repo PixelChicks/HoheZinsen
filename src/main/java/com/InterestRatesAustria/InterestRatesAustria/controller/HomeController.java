@@ -57,7 +57,7 @@ public class HomeController {
     @GetMapping("/")
     public String showRates(Model model,
                             @RequestParam(defaultValue = "0") int page,
-                            @RequestParam(defaultValue = "6") int size,
+                            @RequestParam(defaultValue = "10") int size,
                             @RequestParam(defaultValue = "field_1") String sortBy,
                             @RequestParam(defaultValue = "desc") String sortDir,
                             @RequestParam(required = false) String search,
