@@ -717,16 +717,28 @@
     }
 
     function updateTableRowHighlight(rateId, highlight) {
+        // Desktop Row Highlight
         const row = document.querySelector(`tr[data-rate-id="${rateId}"]`);
         if (row) {
             if (highlight) {
                 row.classList.add('table-row-selected');
                 row.classList.add('just-selected');
-                setTimeout(() => {
-                    row.classList.remove('just-selected');
-                }, 600);
+                setTimeout(() => row.classList.remove('just-selected'), 600);
             } else {
                 row.classList.remove('table-row-selected', 'just-selected');
+            }
+        }
+
+        // Mobile Card Highlight
+        const mobileCard = document.querySelector(`.mobile-interest-card[data-rate-id="${rateId}"]`);
+        if (mobileCard) {
+            if (highlight) {
+                mobileCard.classList.add('selected-for-compare');
+                mobileCard.style.cursor = 'pointer';
+            } else {
+                mobileCard.classList.remove('selected-for-compare');
+                // If mode is still active, keep pointer, otherwise default
+                mobileCard.style.cursor = comparisonModeActive ? 'pointer' : 'default';
             }
         }
     }

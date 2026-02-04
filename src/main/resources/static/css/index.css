@@ -1998,7 +1998,43 @@ tr.rate-card-row.show {
     border: 2px solid #000;
   }
 }
+.mobile-interest-card.selected-for-compare {
+    border: 2px solid #00AC98 !important;
+    background-color: rgba(0, 172, 152, 0.08) !important;
+    box-shadow: 0 4px 15px rgba(0, 172, 152, 0.2);
+    transition: all 0.2s ease;
+}
 
+body.dark-mode .mobile-interest-card.selected-for-compare {
+    border: 2px solid #00AC98 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    background-color: #242d38 !important;
+}
+
+body.dark-mode .mobile-interest-card.selected-for-compare .card-header,
+body.dark-mode .mobile-interest-card.selected-for-compare .card-body {
+    background-color: rgb(0 172 152 / 9%) !important;
+    border-color: rgba(0, 172, 152, 0.3) !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .mobile-interest-card.selected-for-compare .info-field-label {
+    color: #00ceb6 !important;
+}
+
+body.dark-mode .mobile-interest-card.selected-for-compare .info-field-value {
+    color: #ffffff !important;
+}
+
+body.dark-mode .mobile-interest-card.selected-for-compare .rate-card {
+    background-color: rgba(0, 172, 152, 0.1) !important;
+    border-top: 1px solid rgba(0, 172, 152, 0.4) !important;
+}
+
+.mobile-interest-card:active {
+    transform: scale(0.98);
+    opacity: 0.85;
+}
 @media (prefers-reduced-motion: reduce) {
   .mobile-interest-card,
   .infinite-scroll-indicator {
