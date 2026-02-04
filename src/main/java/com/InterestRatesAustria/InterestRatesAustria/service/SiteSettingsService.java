@@ -26,6 +26,7 @@ public class SiteSettingsService {
         SiteSettings existing = getSiteSettings();
         existing.setNavCompareText(settings.getNavCompareText());
         existing.setNavFaqsText(settings.getNavFaqsText());
+        existing.setNavAboutText(settings.getNavAboutText());
         existing.setCompareButtonText(settings.getCompareButtonText());
         existing.setComparisonWarningText(settings.getComparisonWarningText());
         existing.setEmptyComparisonText(settings.getEmptyComparisonText());

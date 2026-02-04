@@ -431,9 +431,9 @@
                 </svg>
 
             </div>
-            <p class="footer-tagline" th:text="${siteSettings.footerTagline}">
+            <div class="footer-tagline" th:utext="${siteSettings.footerTagline}">
                 Die aktuell höchsten Zinsangebote für Ihr Erspartes – transparent und objektiv.
-            </p>
+            </div>
         </div>
 
         <div class="footer-column">
@@ -443,7 +443,8 @@
                        th:text="${siteSettings.navCompareText}">Compare</a></li>
                 <li><a href="#faq-section"
                        th:text="${siteSettings.navFaqsText}">FAQs</a></li>
-                <li><a href="#about-section">About</a></li>
+                <li><a href="#about-section"
+                       th:text="${siteSettings.navAboutText}">About</a></li>
             </ul>
         </div>
 

@@ -25,6 +25,9 @@ public class SiteSettings {
     @Column(length = 100)
     private String navFaqsText = "FAQs";
 
+    @Column(length = 100)
+    private String navAboutText = "About";
+
     // Comparison Section
     @Column(length = 200)
     private String compareButtonText = "Vergleichen";
