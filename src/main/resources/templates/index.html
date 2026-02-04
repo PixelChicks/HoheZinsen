@@ -2463,6 +2463,22 @@ function createRateCard(rate) {
         });
     }
 
+    function handleMobileCardClick(event, rateId) {
+        // Only intercept clicks if comparison mode is active
+        if (!comparisonModeActive) return;
+
+        // Ignore clicks if the user is hitting a button or link (Mehr Info / Zum Angebot)
+        if (event.target.closest('button') || event.target.closest('a')) {
+            return;
+        }
+
+        // Toggle the comparison state
+        if (comparedRates.has(rateId)) {
+            removeFromComparison(rateId);
+        } else {
+            addToComparison(rateId);
+        }
+    }
     window.addEventListener('load', alignExternalCheckboxes);
     window.addEventListener('resize', alignExternalCheckboxes);
 
@@ -2475,7 +2491,7 @@ function createRateCard(rate) {
                 label: header.querySelector('.header-text').textContent.trim()
             }));
 
-        const isSelected = comparedRates && comparedRates.has ? comparedRates.has(rate.id) : false;
+        const isSelected = comparedRates.has(rate.id);
         const fieldValues = serverRateFieldValuesMap[rate.id] || {};
 
         let logoHtml = '<span style="color: #6c757d; font-size: 12px;">logo</span>';
@@ -2501,9 +2517,14 @@ function createRateCard(rate) {
         const rateValue = fieldValues[currentFieldOrder[0]?.id] || '0,00';
         const isExpanded = expandedRateCards.has(rate.id);
 
+        // ADDED: onclick="handleMobileCardClick(event, ${rate.id})"
+        // ADDED: dynamic class 'selected-for-compare'
         return `
             <div class="mobile-card-row" data-rate-id="${rate.id}">
-                <div class="mobile-interest-card" data-rate-id="${rate.id}" ${isExpanded ? 'class="mobile-interest-card card-expanded"' : 'class="mobile-interest-card"'}>
+                <div class="mobile-interest-card ${isExpanded ? 'card-expanded' : ''} ${isSelected ? 'selected-for-compare' : ''}"
+                     data-rate-id="${rate.id}"
+                     onclick="handleMobileCardClick(event, ${rate.id})"
+                     style="cursor: ${comparisonModeActive ? 'pointer' : 'default'}">
                     <div class="card-header">
                         <h6 data-rate="${rateValue}"></h6>
                         <div class="card-logo-area">
