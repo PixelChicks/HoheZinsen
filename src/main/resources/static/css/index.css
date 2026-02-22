@@ -1719,6 +1719,7 @@ tr.rate-card-row.show {
     height: 50px;
     border-radius: 4px;
     display: flex;
+    margin: 0 10px;
     align-items: center;
     justify-content: center;
   }

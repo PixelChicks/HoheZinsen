@@ -1344,7 +1344,6 @@
             return;
         }
 
-        // Check if we have any filters to display
         if (!availableFilters || availableFilters.length === 0) {
             grid.innerHTML = '<div class="text-muted text-center p-3">No filters available</div>';
             return;
@@ -1355,12 +1354,12 @@
             const currentSelection = Array.from(activeFilters.get(fieldIdStr) || []).join('');
 
             let selectHtml = `
-                <div style="position: relative; display: inline-block;">
+                <div style="position: relative; display: block;">
                     <select
                         class="filter-dropdown-pill"
                         onchange="updateFilterFromDropdown(this, ${filter.fieldId})"
                         data-field-id="${filter.fieldId}"
-                        style="padding-right: 30px; appearance: none; -webkit-appearance: none; -moz-appearance: none; background: transparent;">
+                        style="width: 100%; padding-right: 30px; appearance: none; -webkit-appearance: none; -moz-appearance: none; background: transparent;">
                     <option value="">Alle</option>
             `;
 
@@ -2548,7 +2547,7 @@ function createRateCard(rate) {
                      style="cursor: ${comparisonModeActive ? 'pointer' : 'default'}">
                     <div class="card-header">
                         <h6 data-rate="${rateValue}"></h6>
-                        <div class="card-logo-area">
+                        <div class="card-logo-area" style="margin: 0 10px;">
                             ${logoHtml}
                         </div>
                         <div class="card-logo-area">

@@ -4915,7 +4915,7 @@ body.dark-mode .faq-question-text {
 }
 
 .faq-item.active .faq-answer {
-    max-height: 500px;
+    max-height: 900px;
     padding: 0 24px 20px 64px;
 }
 
