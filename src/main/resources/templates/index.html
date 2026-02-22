@@ -2541,7 +2541,7 @@ function createRateCard(rate) {
         let logoHtml = '<span style="color: #6c757d; font-size: 12px;">logo</span>';
         const imageField = currentFieldOrder.find(f => f.fieldKey && f.fieldKey.toLowerCase().includes('img'));
         if (imageField && fieldValues[imageField.id]) {
-            logoHtml = `<img src="${fieldValues[imageField.id]}" alt="Logo" style="max-height: 50px; max-width: 100px; object-fit: contain;">`;
+            logoHtml = `<img src="${fieldValues[imageField.id]}" alt="Logo" style="max-height: 50px; max-width: 90px; object-fit: contain;">`;
         }
 
         const displayFields = currentFieldOrder
