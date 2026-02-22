@@ -2589,7 +2589,6 @@ color: #00b894;
 
 .mobile-interest-card .card-header .card-logo-area:nth-child(2) {
     justify-content: center;
-    margin: 0 !important;
     overflow: hidden;
 }
 
