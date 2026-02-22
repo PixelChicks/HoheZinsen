@@ -1693,7 +1693,7 @@ tr.rate-card-row.show {
     display: flex;
     align-items: baseline;
     gap: 8px;
-    padding: 10px 0px 1px 10px;
+    padding: 1px 10px 1px 5px;
     margin: 0;
   }
 
