@@ -2580,6 +2580,7 @@ color: #00b894;
     flex: 1;
     display: flex;
     align-items: center;
+    min-width: 0;
 }
 
 .mobile-interest-card .card-header h6 {
@@ -2589,6 +2590,12 @@ color: #00b894;
 .mobile-interest-card .card-header .card-logo-area:nth-child(2) {
     justify-content: center;
     margin: 0 !important;
+    overflow: hidden;
+}
+
+.mobile-interest-card .card-header .card-logo-area:nth-child(2) img {
+    max-width: 100%;
+    object-fit: contain;
 }
 
 .mobile-interest-card .card-header .card-logo-area:nth-child(3) {
