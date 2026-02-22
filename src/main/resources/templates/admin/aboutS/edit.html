@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create About Section</title>
+    <title>Edit About Section</title>
 
     <script src="/js/theme-persistence.js" defer></script>
 
@@ -98,6 +98,13 @@
             color: #dc3545;
             margin-left: 3px;
         }
+
+        .metadata-badge {
+            background: #e9ecef;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 
@@ -107,8 +114,8 @@
 <div class="page-header">
     <div class="container d-flex justify-content-between align-items-center">
         <div>
-            <h1>Create About Section</h1>
-            <p class="mb-0 opacity-75">Add a new about / mission section</p>
+            <h1>Edit About Section</h1>
+            <p class="mb-0 opacity-75">Modify about / mission section content</p>
         </div>
         <a href="/admin" class="btn btn-light">Back to Dashboard</a>
     </div>
@@ -118,7 +125,14 @@
     <div class="row justify-content-center">
         <div class="col-lg-10">
 
-            <form th:action="@{/admin/about/create}"
+            <!-- Metadata -->
+            <div class="d-flex gap-3 mb-3">
+                <div class="metadata-badge">
+                    ID: <strong th:text="${aboutId}"></strong>
+                </div>
+            </div>
+
+            <form th:action="@{/admin/aboutS/edit/{id}(id=${aboutId})}"
                   th:object="${about}"
                   method="post"
                   id="aboutForm">
@@ -176,7 +190,7 @@
                             </a>
                             <button type="submit" class="btn btn-submit btn-lg text-white">
                                 <i class="bi bi-check-circle"></i>
-                                Create About Section
+                                Update About Section
                             </button>
                         </div>
 
@@ -195,7 +209,7 @@
 <script>
     const quill = new Quill('#aboutContentEditor', {
         theme: 'snow',
-        placeholder: 'Write the about section content here...',
+        placeholder: 'Update the about section content...',
         modules: {
             toolbar: [
                 ['bold', 'italic', 'underline'],
@@ -208,7 +222,7 @@
 
     const hiddenContent = document.getElementById('content');
 
-    // Load existing content (edit reuse safe)
+    // Load existing content
     if (hiddenContent.value) {
         quill.root.innerHTML = hiddenContent.value;
     }
@@ -223,6 +237,7 @@
         document.getElementById(id + 'Count').textContent = el.value.length;
     }
 
+    // Validation
     document.getElementById('aboutForm').addEventListener('submit', function (e) {
         hiddenContent.value = quill.root.innerHTML;
 

@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -219,6 +220,8 @@ public class InterestRateService {
 
     public void updateSectionOrder(Long rateId, List<String> sectionOrder) {
         InterestRate rate = getInterestRateById(rateId);
+        rate.setLastUpdated(LocalDateTime.now());
+        interestRateRepository.save(rate);
         moreInfoService.updateSectionOrder(rateId, sectionOrder, rate);
     }
 
@@ -229,6 +232,7 @@ public class InterestRateService {
         MoreInfo moreInfo = moreInfoService.createMoreInfoWithSections(requestParams);
         if (moreInfo != null) {
             saved.setMoreInfo(moreInfo);
+            saved.setLastUpdated(LocalDateTime.now());
             interestRateRepository.save(saved);
         }
     }
@@ -240,6 +244,7 @@ public class InterestRateService {
         fieldValueService.updateFieldValuesForRate(existingRate, requestParams);
         MoreInfo updatedMoreInfo = moreInfoService.updateMoreInfoWithSections(existingRate.getMoreInfo(), requestParams);
         existingRate.setMoreInfo(updatedMoreInfo);
+        existingRate.setLastUpdated(LocalDateTime.now());
         interestRateRepository.save(existingRate);
     }
 

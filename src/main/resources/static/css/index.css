@@ -801,6 +801,7 @@ body.guest .data-cell .form-control {
   box-shadow: none !important;
   cursor: default;
   padding: 8px 12px;
+  font-size: 17px;
 }
 
 body.guest .data-cell .form-control:focus {
@@ -829,8 +830,11 @@ body.guest .data-cell .form-control:focus {
 }
 
 .mobile-interest-card .card-header {
-  border-bottom: 1px solid #e0e0e0;
-  padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    border-bottom: 1px solid #e9ecef;
 }
 
 .mobile-interest-card .card-title {
@@ -1689,7 +1693,7 @@ tr.rate-card-row.show {
     display: flex;
     align-items: baseline;
     gap: 8px;
-    padding: 10px 0px 1px 10px;
+    padding: 1px 10px 1px 5px;
     margin: 0;
   }
 
@@ -1714,10 +1718,11 @@ tr.rate-card-row.show {
   }
 
   .mobile-interest-card .card-header .card-logo-area {
-    width: 100px;
+    width: 90px;
     height: 50px;
     border-radius: 4px;
     display: flex;
+    margin: 0 10px;
     align-items: center;
     justify-content: center;
   }
@@ -1997,7 +2002,43 @@ tr.rate-card-row.show {
     border: 2px solid #000;
   }
 }
+.mobile-interest-card.selected-for-compare {
+    border: 2px solid #00AC98 !important;
+    background-color: rgba(0, 172, 152, 0.08) !important;
+    box-shadow: 0 4px 15px rgba(0, 172, 152, 0.2);
+    transition: all 0.2s ease;
+}
 
+body.dark-mode .mobile-interest-card.selected-for-compare {
+    border: 2px solid #00AC98 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    background-color: #242d38 !important;
+}
+
+body.dark-mode .mobile-interest-card.selected-for-compare .card-header,
+body.dark-mode .mobile-interest-card.selected-for-compare .card-body {
+    background-color: rgb(0 172 152 / 9%) !important;
+    border-color: rgba(0, 172, 152, 0.3) !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .mobile-interest-card.selected-for-compare .info-field-label {
+    color: #00ceb6 !important;
+}
+
+body.dark-mode .mobile-interest-card.selected-for-compare .info-field-value {
+    color: #ffffff !important;
+}
+
+body.dark-mode .mobile-interest-card.selected-for-compare .rate-card {
+    background-color: rgba(0, 172, 152, 0.1) !important;
+    border-top: 1px solid rgba(0, 172, 152, 0.4) !important;
+}
+
+.mobile-interest-card:active {
+    transform: scale(0.98);
+    opacity: 0.85;
+}
 @media (prefers-reduced-motion: reduce) {
   .mobile-interest-card,
   .infinite-scroll-indicator {
@@ -2316,7 +2357,7 @@ color: #00b894;
 .nav-link {
     text-decoration: none;
     color: #333;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 500;
     transition: color 0.2s;
 }
@@ -2365,8 +2406,8 @@ color: #00b894;
 }
 
 .hero-content h1 {
-     font-weight: 600;
-     font-size: 33px;
+     font-weight: 700;
+     font-size: 50px;
      line-height: 42px;
      color: rgba(55, 46, 80, 1);
 }
@@ -2532,6 +2573,32 @@ color: #00b894;
         text-align: left;
         font-size: 0.8rem;
     }
+}
+
+.mobile-interest-card .card-header h6,
+.mobile-interest-card .card-header .card-logo-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.mobile-interest-card .card-header h6 {
+    justify-content: flex-start;
+}
+
+.mobile-interest-card .card-header .card-logo-area:nth-child(2) {
+    justify-content: center;
+    overflow: hidden;
+}
+
+.mobile-interest-card .card-header .card-logo-area:nth-child(2) img {
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.mobile-interest-card .card-header .card-logo-area:nth-child(3) {
+    margin: 0 !important;
 }
 
 @media (max-width: 992px) {

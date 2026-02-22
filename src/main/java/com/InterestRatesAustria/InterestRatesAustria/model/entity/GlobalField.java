@@ -24,6 +24,7 @@ public class GlobalField {
 
     private boolean atTable; //where the global field is being displayed
     private boolean atCompare;
+    private boolean asFilter; // Whether this field should be available as a filter
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;

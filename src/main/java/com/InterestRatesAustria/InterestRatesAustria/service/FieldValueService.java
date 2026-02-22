@@ -8,9 +8,11 @@ import com.InterestRatesAustria.InterestRatesAustria.repository.InterestRateFiel
 import com.InterestRatesAustria.InterestRatesAustria.repository.InterestRateRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -78,6 +80,10 @@ public class FieldValueService {
                 .findByInterestRateIdAndGlobalFieldId(rateId, fieldId)
                 .orElseThrow(() -> new RuntimeException("Field value not found for rate: " + rateId + " and field: " + fieldId));
 
+        InterestRate rate = interestRateRepository.findById(rateId).orElseThrow(NoSuchElementException::new);
+        rate.setLastUpdated(LocalDateTime.now());
+        interestRateRepository.save(rate);
+
         fieldValue.setValue(value);
         fieldValueRepository.save(fieldValue);
     }
@@ -102,6 +108,9 @@ public class FieldValueService {
         newFieldValue.setInterestRate(rate);
         newFieldValue.setGlobalField(field);
         newFieldValue.setValue(value);
+
+        rate.setLastUpdated(LocalDateTime.now());
+        interestRateRepository.save(rate);
 
         fieldValueRepository.save(newFieldValue);
     }

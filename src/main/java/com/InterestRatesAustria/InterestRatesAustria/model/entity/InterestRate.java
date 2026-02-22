@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +26,9 @@ public class InterestRate {
     private MoreInfo moreInfo;
 
     private String webLink;
+
+    @Column(name = "last_updated")
+    private LocalDateTime lastUpdated;
 
     @OneToMany(mappedBy = "interestRate", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<InterestRateFieldValue> fieldValues = new ArrayList<>();

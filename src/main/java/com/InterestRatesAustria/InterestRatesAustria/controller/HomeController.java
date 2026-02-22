@@ -5,6 +5,7 @@ import com.InterestRatesAustria.InterestRatesAustria.model.entity.CarouselImage;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.GlobalField;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.HeroSection;
 import com.InterestRatesAustria.InterestRatesAustria.model.entity.InterestRate;
+import com.InterestRatesAustria.InterestRatesAustria.repository.SiteSettingsRepository;
 import com.InterestRatesAustria.InterestRatesAustria.service.*;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -27,32 +28,36 @@ public class HomeController {
     private final GlobalFieldService globalFieldService;
     private final FieldValueService fieldValueService;
     private final FilterService filterService;
+    private final SiteSettingsService siteSettingsService;
     private final LastUpdateService lastUpdateService;
     private final FAQService faqService;
     private final HeroSectionService heroSectionService;
     private final AboutService aboutService;
+    private final SectionAboutService sectionAboutService;
     private final CarouselImageService carouselImageService;
 
     public HomeController(InterestRateService interestRateService,
                           GlobalFieldService globalFieldService,
                           FieldValueService fieldValueService,
-                          FilterService filterService,
-                          LastUpdateService lastUpdateService, FAQService faqService, HeroSectionService heroSectionService, AboutService aboutService, CarouselImageService carouselImageService) {
+                          FilterService filterService, SiteSettingsService siteSettingsService,
+                          LastUpdateService lastUpdateService, FAQService faqService, HeroSectionService heroSectionService, AboutService aboutService, SectionAboutService sectionAboutService, CarouselImageService carouselImageService) {
         this.interestRateService = interestRateService;
         this.globalFieldService = globalFieldService;
         this.fieldValueService = fieldValueService;
         this.filterService = filterService;
+        this.siteSettingsService = siteSettingsService;
         this.lastUpdateService = lastUpdateService;
         this.faqService = faqService;
         this.heroSectionService = heroSectionService;
         this.aboutService = aboutService;
+        this.sectionAboutService = sectionAboutService;
         this.carouselImageService = carouselImageService;
     }
 
     @GetMapping("/")
     public String showRates(Model model,
                             @RequestParam(defaultValue = "0") int page,
-                            @RequestParam(defaultValue = "6") int size,
+                            @RequestParam(defaultValue = "10") int size,
                             @RequestParam(defaultValue = "field_1") String sortBy,
                             @RequestParam(defaultValue = "desc") String sortDir,
                             @RequestParam(required = false) String search,
@@ -84,6 +89,7 @@ public class HomeController {
         model.addAttribute("newField", new GlobalField());
         model.addAttribute("faqs", faqService.getActiveFAQs());
         model.addAttribute("aboutSection", aboutService.getActiveAboutSection());
+        model.addAttribute("aboutSection2", sectionAboutService.getActiveSectionAboutSection());
         model.addAttribute("heroSection", heroSectionService.getActiveHeroSection());
         model.addAttribute("carouselImages", carouselImageService.getActiveCarouselImages());
         model.addAttribute("currentPage", page);
@@ -93,7 +99,9 @@ public class HomeController {
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortDir", sortDir);
         model.addAttribute("search", search);
-
+        model.addAttribute("siteSettings", siteSettingsService.getSiteSettings());
+        model.addAttribute("tooltipText", siteSettingsService.getSiteSettings().getTooltip());
+        System.out.println(siteSettingsService.getSiteSettings().getEmptyComparisonText());
         model.addAttribute("activeFilters", filters);
         model.addAttribute("availableFilters", filterService.getAvailableFilters());
 
@@ -135,6 +143,7 @@ public class HomeController {
         model.addAttribute("newField", new GlobalField());
         model.addAttribute("faqs", faqService.getAllFAQs());
         model.addAttribute("aboutSection", aboutService.getActiveAboutSection());
+        model.addAttribute("aboutSection2", sectionAboutService.getActiveSectionAboutSection());
         model.addAttribute("currentPage", page);
         model.addAttribute("heroSection", heroSectionService.getActiveHeroSection());
         model.addAttribute("carouselImages", carouselImageService.getActiveCarouselImages());

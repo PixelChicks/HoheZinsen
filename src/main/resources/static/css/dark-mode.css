@@ -4898,7 +4898,7 @@ body.dark-mode .faq-icon {
 
 .faq-question-text {
     flex: 1;
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 400;
     line-height: 1.5;
     color: #333;
@@ -4915,12 +4915,12 @@ body.dark-mode .faq-question-text {
 }
 
 .faq-item.active .faq-answer {
-    max-height: 500px;
+    max-height: 900px;
     padding: 0 24px 20px 64px;
 }
 
 .faq-answer-text {
-    font-size: 15px;
+    font-size: 17px;
     line-height: 1.6;
     color: #555;
 }

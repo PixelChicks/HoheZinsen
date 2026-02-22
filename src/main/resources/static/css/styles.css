@@ -13,7 +13,7 @@
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
-  font-size: 0.85rem;
+  font-size: 0.995rem;
   font-weight: 600;
   text-transform: uppercase;
   cursor: pointer;
@@ -69,6 +69,7 @@
 .info-table-label {
   padding: 12px 15px;
   font-weight: 700;
+  font-size: 17px;
   color: #495057;
   border-right: 1px solid #dee2e6;
   min-width: auto;
@@ -79,6 +80,7 @@
   padding: 12px 15px;
   flex: 1;
   color: #6c757d;
+  font-size: 17px;
   white-space: normal;
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -90,7 +92,7 @@
   padding: 20px 10px;
   line-height: 1.6;
   color: #495057;
-  font-size: 0.9rem;
+  font-size: 17px;
 
   white-space: normal;
   overflow-wrap: break-word;
@@ -101,7 +103,7 @@
   background: none;
   border: none;
   color: #6c757d;
-  font-size: 20px;
+  font-size: 22px;
   cursor: pointer;
   padding: 5px;
   border-radius: 4px;
@@ -118,7 +120,7 @@
   border: 2px solid #00b894;
   padding: 6px 12px;
   border-radius: 10px;
-  font-size: 0.75em;
+  font-size: 0.875em;
   cursor: pointer;
   transition: all 0.2s ease;
   font-weight: 600;
@@ -137,7 +139,7 @@
   border: 2px solid #00b894;
   padding: 6px 12px;
   border-radius: 10px;
-  font-size: 0.75em;
+  font-size: 16px;
   cursor: pointer;
   transition: all 0.2s ease;
   font-weight: 600;
@@ -151,7 +153,7 @@
     cursor: not-allowed;
     opacity: 0.6;
     padding: 7px 33px;
-    font-size: 0.8rem;
+    font-size: 16px;
     border-radius: 8px;
     border: none;
 }
@@ -170,6 +172,7 @@
   color: #495057;
   flex-grow: 1;
   margin-right: 10px;
+  font-size: 18px;
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 4px;
@@ -1033,7 +1036,7 @@ body {
 
 .section-title {
   color: #495057;
-  font-size: 1.3rem;
+  font-size: 20px;
   font-weight: 600;
   margin-bottom: 20px;
   padding-left: 20px;
